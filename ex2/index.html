@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบจองห้องอัจฉริยะ MFU</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="yam.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">
+  <span class="mfu">MFU</span>
+  <span class="title">Property Management</span>
+</div>
+    <div class="nav-links">
+      <a href="#">หน้าหลัก</a>
+      <a href="#rooms">ห้องทั้งหมด</a>
+      <a href="#">ประวัติการจอง</a>
+      <button class="login-btn">เข้าสู่ระบบ</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>ระบบจองห้องอัจฉริยะ</h1>
+      <p>มหาวิทยาลัยแม่ฟ้าหลวง</p>
+
+      <div class="search-card">
+        <div class="field">
+          <label>เลือกวันที่</label>
+          <input type="date" v-model="search.date">
+        </div>
+
+        <div class="field">
+          <label>เลือกเวลา</label>
+          <input type="time" v-model="search.time">
+        </div>
+
+        <div class="field">
+          <label>จำนวนคน</label>
+          <input type="number" placeholder="เช่น 30" v-model="search.capacity">
+        </div>
+
+        <button @click="filterRooms">ค้นหาห้อง</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROOM SECTION -->
+  <section class="room-section" id="rooms">
+    <h2>ห้องที่เปิดให้จอง</h2>
+
+    <div class="room-grid">
+      <div class="room-card" v-for="room in filteredRooms" :key="room.id">
+        <div class="room-image">
+          <img :src="room.image">
+          <div class="room-capacity">{{ room.capacity }} ที่นั่ง</div>
+        </div>
+
+        <div class="room-info">
+          <h3>{{ room.name }}</h3>
+          <p>{{ room.building }}</p>
+          <button @click="openModal(room)">จองห้อง</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL -->
+  <div class="modal" v-if="selectedRoom">
+    <div class="modal-box">
+      <h3>ยืนยันการจอง</h3>
+      <p><strong>{{ selectedRoom.name }}</strong></p>
+      <p>{{ selectedRoom.building }}</p>
+
+      <button class="confirm" @click="confirmBooking">ยืนยัน</button>
+      <button class="cancel" @click="selectedRoom=null">ยกเลิก</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+  data() {
+    return {
+      search: { date:'', time:'', capacity:'' },
+      rooms: [
+        {
+          id:1,
+          name:"E3A-101",
+          building:"อาคารวิศวกรรมศาสตร์",
+          capacity:40,
+          image:"https://images.unsplash.com/photo-1497366216548-37526070297c"
+        },
+        {
+          id:2,
+          name:"E3A-202",
+          building:"อาคารวิศวกรรมศาสตร์",
+          capacity:60,
+          image:"https://images.unsplash.com/photo-1504384308090-c894fdcc538d"
+        },
+        {
+          id:3,
+          name:"ห้องประชุมห้องสมุด",
+          building:"หอสมุดมหาวิทยาลัย",
+          capacity:12,
+          image:"https://images.unsplash.com/photo-1524758631624-e2822e304c36"
+        }
+      ],
+      filteredRooms: [],
+      selectedRoom:null
+    }
+  },
+  mounted(){
+    this.filteredRooms = this.rooms;
+  },
+  methods:{
+    filterRooms(){
+      this.filteredRooms = this.rooms.filter(r =>
+        !this.search.capacity || r.capacity >= this.search.capacity
+      )
+      document.getElementById("rooms").scrollIntoView({ behavior: "smooth" });
+    },
+    openModal(room){
+      this.selectedRoom = room;
+    },
+    confirmBooking(){
+      alert("จองห้องสำเร็จ 🎉");
+      this.selectedRoom=null;
+    }
+  }
+}).mount('#app')
+</script>
+
+</body>
+</html>
