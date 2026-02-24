@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจองห้อง - ส่วนจัดการทรัพย์สิน มฟล.</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Niramit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Niramit', sans-serif;
+            background-color: #f8f9fa;
+        }
+        /* ธีมสีแดง มฟล. */
+        .bg-mfu-red {
+            background-color: #ba0b2f !important; 
+        }
+        /* ธีมสีทอง มฟล. */
+        .text-mfu-gold {
+            color: #d4af37 !important;
+        }
+        .btn-mfu {
+            background-color: #ba0b2f;
+            color: white;
+            border: none;
+            transition: 0.3s;
+        }
+        .btn-mfu:hover {
+            background-color: #8c0823;
+            color: white;
+        }
+        .hero-section {
+            background: linear-gradient(rgba(186, 11, 47, 0.8), rgba(186, 11, 47, 0.8)), url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80') center/cover;
+            color: white;
+            padding: 80px 0;
+        }
+        .room-card {
+            transition: transform 0.2s;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .room-card:hover {
+            transform: translateY(-5px);
+        }
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="app">
+        
+        <nav class="navbar navbar-expand-lg navbar-dark bg-mfu-red shadow-sm">
+            <div class="container">
+                <a class="navbar-brand fw-bold" href="#">
+                    <span class="text-mfu-gold">MFU</span> Property Management
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item"><a class="nav-link active" href="#">หน้าแรก</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">ห้องทั้งหมด</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">ประวัติการจอง</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">เข้าสู่ระบบ</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <header class="hero-section text-center">
+            <div class="container">
+                <h1 class="display-5 fw-bold text-mfu-gold mb-3">ระบบบริหารจัดการและจองห้อง</h1>
+                <p class="lead">ส่วนจัดการทรัพย์สิน มหาวิทยาลัยแม่ฟ้าหลวง (MFU Property Management)</p>
+                
+                <div class="row justify-content-center mt-4">
+                    <div class="col-md-6">
+                        <input type="text" class="form-control form-control-lg" placeholder="ค้นหาชื่อห้อง หรือประเภทห้อง..." v-model="searchQuery">
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container my-5">
+            <h2 class="fw-bold mb-4 border-bottom pb-2">ห้องที่เปิดให้บริการ</h2>
+            
+            <div class="row g-4">
+                <div class="col-md-4 col-sm-6" v-for="room in filteredRooms" :key="room.id">
+                    <div class="card h-100 room-card position-relative">
+                        <span class="badge status-badge" 
+                              :class="room.isAvailable ? 'bg-success' : 'bg-secondary'">
+                            {{ room.isAvailable ? 'ว่าง' : 'ไม่ว่าง' }}
+                        </span>
+                        
+                        <img :src="room.image" class="card-img-top" alt="Room Image" style="height: 200px; object-fit: cover;">
+                        
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ room.name }}</h5>
+                            <p class="card-text text-muted small mb-1">
+                                <strong>ประเภท:</strong> {{ room.type }} <br>
+                                <strong>ความจุ:</strong> {{ room.capacity }} ท่าน
+                            </p>
+                            <p class="card-text">{{ room.description }}</p>
+                            
+                            <button class="btn btn-mfu mt-auto" 
+                                    :disabled="!room.isAvailable" 
+                                    @click="bookRoom(room.name)">
+                                {{ room.isAvailable ? 'ทำรายการจอง' : 'เต็มแล้ว' }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div v-if="filteredRooms.length === 0" class="col-12 text-center text-muted py-5">
+                    <h4>ไม่พบห้องที่ค้นหา</h4>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bg-dark text-white text-center py-4 mt-auto">
+            <div class="container">
+                <p class="mb-0">© 2026 MFU Property Management. All Rights Reserved.</p>
+                <small class="text-muted">จัดทำเพื่อโปรเจคจบการศึกษา</small>
+            </div>
+        </footer>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <script>
+        const { createApp, ref, computed } = Vue;
+
+        createApp({
+            setup() {
+                // 1. ตัวแปรเก็บคำค้นหา
+                const searchQuery = ref('');
+
+                // 2. ข้อมูลห้องจำลอง (Mockup Data)
+                const rooms = ref([
+                    {
+                        id: 1,
+                        name: 'ห้องประชุม E4-101',
+                        type: 'ห้องประชุม',
+                        capacity: 50,
+                        description: 'ห้องประชุมพร้อมโปรเจคเตอร์และระบบเสียง เหมาะสำหรับการประชุมย่อย',
+                        image: 'https://images.unsplash.com/photo-1517502884422-41eaead166d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                        isAvailable: true
+                    },
+                    {
+                        id: 2,
+                        name: 'ห้องจัดเลี้ยง อาคาร M-Square',
+                        type: 'ห้องจัดเลี้ยง',
+                        capacity: 200,
+                        description: 'พื้นที่กว้างขวาง เหมาะสำหรับจัดงานเลี้ยง หรือสัมมนาขนาดใหญ่',
+                        image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                        isAvailable: true
+                    },
+                    {
+                        id: 3,
+                        name: 'ห้องพักรับรอง V1',
+                        type: 'ห้องพัก',
+                        capacity: 2,
+                        description: 'ห้องพักรับรองสำหรับวิทยากรหรือแขก VIP ตกแต่งหรูหรา',
+                        image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                        isAvailable: false
+                    },
+                    {
+                        id: 4,
+                        name: 'ลานกิจกรรมดาว',
+                        type: 'ลานอเนกประสงค์',
+                        capacity: 500,
+                        description: 'ลานเปิดโล่ง เหมาะสำหรับจัดกิจกรรมนักศึกษาหรือตลาดนัด',
+                        image: 'https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                        isAvailable: true
+                    },
+                    {
+                        id: 5,
+                        name: 'ห้องปฏิบัติการคอมพิวเตอร์ S1-201',
+                        type: 'ห้องปฏิบัติการ',
+                        capacity: 60,
+                        description: 'ห้องคอมพิวเตอร์สเปคสูง พร้อมซอฟต์แวร์เฉพาะทาง เหมาะสำหรับจัดอบรม',
+                        image: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                        isAvailable: true
+                    },
+                    {
+                        id: 6,
+                        name: 'Co-working Space M-Square',
+                        type: 'พื้นที่ทำงานร่วม',
+                        capacity: 30,
+                        description: 'พื้นที่นั่งทำงานกลุ่มแบบสบายๆ พร้อมกระดานไวท์บอร์ดและปลั๊กไฟทุกโต๊ะ',
+                        image: 'https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60',
+                        isAvailable: false // ลองตั้งเป็นไม่ว่างดู เพื่อให้เห็นป้ายสถานะเปลี่ยนสี
+                    }
+                ]);
+
+                // 3. ฟังก์ชันกรองห้องตามคำค้นหา (ค้นหาจากชื่อ หรือ ประเภท)
+                const filteredRooms = computed(() => {
+                    const query = searchQuery.value.toLowerCase();
+                    return rooms.value.filter(room => 
+                        room.name.toLowerCase().includes(query) || 
+                        room.type.toLowerCase().includes(query)
+                    );
+                });
+
+                // 4. ฟังก์ชันเมื่อกดปุ่มจอง
+                const bookRoom = (roomName) => {
+                    // ในโปรเจคจริง ตรงนี้จะเชื่อมกับ API Backend (เช่น Axios ส่งข้อมูลไปที่ Node.js/PHP)
+                    alert(`คุณกำลังจะทำรายการจอง: ${roomName}\n(ระบบนี้เป็นเพียงตัวอย่างสำหรับ Frontend)`);
+                };
+
+                return {
+                    searchQuery,
+                    filteredRooms,
+                    bookRoom
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>
