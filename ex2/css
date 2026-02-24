@@ -1,0 +1,252 @@
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+  scroll-behavior:smooth;
+}
+
+body{
+  background:#f4f6f9;
+}
+
+/* NAVBAR */
+.navbar{
+  position:fixed;
+  width:100%;
+  padding:18px 60px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(0,0,0,0.7);
+  backdrop-filter:blur(8px);
+  z-index:1000;
+}
+
+.logo{
+  color:#ffd700;
+  font-weight:700;
+  font-size:22px;
+  letter-spacing:1px;
+}
+
+.logo .mfu{
+  background:linear-gradient(45deg,#00ff88,#00c851);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  font-size:24px;
+  margin-right:8px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.logo .title{
+  color:white;
+  font-weight:500;
+  opacity:0.85;
+}
+
+.nav-links a{
+  color:white;
+  text-decoration:none;
+  margin-right:20px;
+  transition:.3s;
+}
+
+.nav-links a:hover{
+  color:#00ff88;
+}
+
+.login-btn{
+  padding:8px 18px;
+  border:none;
+  border-radius:20px;
+  background:#00ff88;
+  cursor:pointer;
+  font-weight:600;
+}
+
+/* HERO (เตี้ยลงแล้ว) */
+.hero{
+  height:70vh;
+  background:
+    linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.6)),
+    url("https://images.unsplash.com/photo-1497493292307-31c376b6e479");
+  background-size:cover;
+  background-position:center;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  color:white;
+  padding-top:80px;
+}
+
+.hero-content h1{
+  font-size:44px;
+  margin-bottom:10px;
+}
+
+.hero-content p{
+  margin-bottom:35px;
+  font-size:18px;
+}
+
+/* SEARCH CARD */
+.search-card{
+  background:white;
+  padding:25px;
+  border-radius:20px;
+  display:flex;
+  gap:20px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+  box-shadow:0 15px 40px rgba(0,0,0,0.2);
+}
+
+.field{
+  display:flex;
+  flex-direction:column;
+  text-align:left;
+}
+
+.field label{
+  font-size:13px;
+  margin-bottom:6px;
+  font-weight:600;
+  color:#333;
+}
+
+.field input{
+  padding:10px 14px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  min-width:160px;
+}
+
+.search-card button{
+  padding:12px 25px;
+  border:none;
+  border-radius:10px;
+  background:#00c851;
+  color:white;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+
+.search-card button:hover{
+  background:#009944;
+  transform:translateY(-3px);
+}
+
+/* ROOM SECTION */
+.room-section{
+  padding:100px 80px;
+}
+
+.room-section h2{
+  text-align:left;
+  margin-bottom:40px;
+  font-size:32px;
+}
+
+.room-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:30px;
+}
+
+.room-card{
+  background:white;
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 10px 30px rgba(0,0,0,0.15);
+  transition:.3s;
+}
+
+.room-card:hover{
+  transform:translateY(-10px);
+}
+
+.room-image img{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+}
+
+.room-capacity{
+  position:absolute;
+  top:10px;
+  right:10px;
+  background:#00c851;
+  color:white;
+  padding:5px 10px;
+  border-radius:10px;
+  font-size:12px;
+}
+
+.room-info{
+  padding:20px;
+}
+
+.room-info h3{
+  margin-bottom:5px;
+}
+
+.room-info p{
+  margin-bottom:15px;
+  color:gray;
+}
+
+.room-info button{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#00c851;
+  color:white;
+  cursor:pointer;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.7);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-box{
+  background:white;
+  color:black;
+  padding:40px;
+  border-radius:20px;
+  text-align:center;
+  width:300px;
+}
+
+.modal-box button{
+  margin-top:15px;
+  padding:8px 15px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.confirm{
+  background:#00c851;
+  color:white;
+  margin-right:10px;
+}
+
+.cancel{
+  background:#999;
+  color:white;
+}
+
+.room-image{
+  position:relative;
+}
