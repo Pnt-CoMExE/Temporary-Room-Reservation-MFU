@@ -73,7 +73,7 @@ const saveProfile = () => {
         <div class="hidden md:block">
           <RouterLink
             to="/rooms"
-            class="bg-white/11 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl font-bold hover:bg-white hover:text-[#ba0b2f] transition-all duration-300 shadow-lg inline-flex items-center gap-2"
+            class="bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl font-bold hover:bg-white hover:text-[#ba0b2f] transition-all duration-300 shadow-lg inline-flex items-center gap-2"
           >
             <i class="fas fa-plus"></i> จองพื้นที่ใหม่
           </RouterLink>
