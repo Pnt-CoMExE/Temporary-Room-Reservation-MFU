@@ -64,6 +64,7 @@ const formatDate = (dateString) => {
     day: "numeric",
   });
 };
+
 </script>
 
 <template>

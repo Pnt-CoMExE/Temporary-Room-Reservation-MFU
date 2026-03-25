@@ -5,14 +5,12 @@ import RoomCard from "../components/RoomCard.vue";
 
 const router = useRouter();
 
-// ตัวแปรสำหรับฟอร์มค้นหา
 const searchParams = ref({
   query: "",
   date: "",
   location: "",
 });
 
-// ฟังก์ชันเมื่อกดปุ่มค้นหา (จะพาไปหน้า Room List พร้อมแนบคำค้นหาไปที่ URL)
 const handleSearch = () => {
   router.push({
     name: "room-list",
@@ -24,7 +22,6 @@ const handleSearch = () => {
   });
 };
 
-// ข้อมูลห้องจำลองสำหรับแสดงในหน้าแรก (ห้องแนะนำ 3 ห้อง)
 const featuredRooms = ref([
   {
     id: 1,
@@ -63,109 +60,106 @@ const featuredRooms = ref([
 </script>
 
 <template>
-  <div>
-    <header
-      class="relative py-28 text-center bg-cover bg-center"
-      style="
-        background-image:
-          linear-gradient(rgba(186, 11, 47, 0.85), rgba(186, 11, 47, 0.85)),
-          url(&quot;https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80&quot;);
-      "
-    >
-      <div class="max-w-4xl mx-auto px-4 relative z-10">
-        <h1
-          class="text-4xl md:text-5xl font-extrabold text-[#d4af37] mb-4 drop-shadow-md"
-        >
-          ระบบบริหารจัดการและจองห้อง
+  <div class="min-h-screen bg-gray-50">
+    <div class="relative pt-32 pb-40 lg:pt-40 lg:pb-48 flex items-center justify-center overflow-hidden">
+      <div class="absolute inset-0 z-0">
+        <img 
+          src="https://static.thairath.co.th/media/dFQROr7oWzulq5Fa5KTT15OVLSTQhWtkEWq8KGIaO0aDoI1BaMC9XRYanYRgyuBbONE.webp" 
+          alt="MFU Background" 
+          class="w-full h-full object-cover object-center filter brightness-50"
+        />
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#5c0517]/95"></div>
+      </div>
+
+      <div class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto">
+        <span class="inline-block py-1 px-3 rounded-full bg-red-500/20 text-[#d4af37] border border-[#d4af37]/30 text-sm font-bold tracking-wider mb-4 backdrop-blur-sm">
+          MFU PROPERTY RESERVATION
+        </span>
+        <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-lg">
+          ค้นหาและจองพื้นที่ <br class="hidden md:block" />
+          <span class="text-[#d4af37]">มหาวิทยาลัยแม่ฟ้าหลวง</span>
         </h1>
-        <p class="text-lg md:text-xl text-white opacity-90 mb-8">
-          ค้นหาและจองพื้นที่ภายในมหาวิทยาลัยแม่ฟ้าหลวงได้ง่ายๆ ตลอด 24 ชั่วโมง
+        <p class="text-lg md:text-xl text-gray-200 mb-12 font-medium max-w-2xl mx-auto drop-shadow">
+          ระบบจองห้องประชุม ลานกิจกรรม และพื้นที่ส่วนกลาง สะดวก รวดเร็ว เช็คคิวว่างได้ตลอด 24 ชั่วโมง
         </p>
+
+        <div class="bg-white p-2 md:rounded-full rounded-3xl shadow-2xl flex flex-col md:flex-row items-center w-full max-w-4xl mx-auto border border-gray-100 transform translate-y-8">
+          <form @submit.prevent="handleSearch" class="w-full flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-200">
+            
+            <div class="flex-1 px-6 py-3 md:py-2 flex items-center hover:bg-gray-50 rounded-t-3xl md:rounded-l-full md:rounded-tr-none cursor-text transition-colors">
+              <div class="text-red-700 mr-3 text-lg"><i class="fas fa-search"></i></div>
+              <div class="w-full text-left">
+                <label class="block text-xs font-bold text-gray-800 uppercase tracking-wide">ค้นหา</label>
+                <input 
+                  type="text" 
+                  v-model="searchParams.query" 
+                  placeholder="ชื่อห้อง หรือ อาคาร..." 
+                  class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-gray-600 placeholder-gray-400 outline-none" 
+                />
+              </div>
+            </div>
+
+            <div class="flex-1 px-6 py-3 md:py-2 flex items-center hover:bg-gray-50 cursor-text transition-colors">
+              <div class="text-red-700 mr-3 text-lg"><i class="far fa-calendar-alt"></i></div>
+              <div class="w-full text-left">
+                <label class="block text-xs font-bold text-gray-800 uppercase tracking-wide">วันที่ใช้งาน</label>
+                <input 
+                  type="date" 
+                  v-model="searchParams.date" 
+                  class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-gray-600 outline-none" 
+                />
+              </div>
+            </div>
+
+            <div class="flex-1 px-6 py-3 md:py-2 flex items-center hover:bg-gray-50 cursor-pointer transition-colors">
+              <div class="text-red-700 mr-3 text-lg"><i class="fas fa-layer-group"></i></div>
+              <div class="w-full text-left">
+                <label class="block text-xs font-bold text-gray-800 uppercase tracking-wide">ประเภทพื้นที่</label>
+                <select 
+                  v-model="searchParams.location" 
+                  class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm text-gray-600 outline-none cursor-pointer appearance-none"
+                >
+                  <option value="">ทั้งหมด</option>
+                  <option value="ห้องประชุม">ห้องประชุม</option>
+                  <option value="ห้องบรรยาย">ห้องบรรยาย</option>
+                  <option value="ลานกิจกรรม">ลานกิจกรรมกลางแจ้ง</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="px-2 py-2 w-full md:w-auto mt-2 md:mt-0">
+              <button 
+                type="submit" 
+                class="w-full md:w-auto bg-[#ba0b2f] hover:bg-[#8c0823] text-white text-base font-bold py-4 md:py-3 px-8 rounded-2xl md:rounded-full transition-all duration-300 shadow-md hover:shadow-lg flex justify-center items-center gap-2 transform hover:scale-105"
+              >
+                <i class="fas fa-search"></i> <span>ค้นหา</span>
+              </button>
+            </div>
+
+          </form>
+        </div>
       </div>
-    </header>
+    </div>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-      <div
-        class="bg-white rounded-xl p-6 shadow-xl -mt-16 relative z-20 mb-16 border border-gray-100"
-      >
-        <form
-          @submit.prevent="handleSearch"
-          class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
-        >
-          <div class="md:col-span-1">
-            <label class="block text-sm font-semibold text-gray-700 mb-2"
-              >ค้นหา</label
-            >
-            <input
-              type="text"
-              v-model="searchParams.query"
-              placeholder="ชื่อห้อง หรือ อาคาร"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-[#ba0b2f] focus:border-[#ba0b2f] outline-none transition-all"
-            />
-          </div>
-
-          <div class="md:col-span-1">
-            <label class="block text-sm font-semibold text-gray-700 mb-2"
-              >วันที่ต้องการใช้งาน</label
-            >
-            <input
-              type="date"
-              v-model="searchParams.date"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-[#ba0b2f] focus:border-[#ba0b2f] outline-none transition-all"
-            />
-          </div>
-
-          <div class="md:col-span-1">
-            <label class="block text-sm font-semibold text-gray-700 mb-2"
-              >สถานที่ / ประเภทห้อง</label
-            >
-            <select
-              v-model="searchParams.location"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-300 text-gray-900 text-base rounded-lg focus:ring-[#ba0b2f] focus:border-[#ba0b2f] outline-none transition-all"
-            >
-              <option value="">ทั้งหมด</option>
-              <option value="ห้องประชุม">ห้องประชุม</option>
-              <option value="ห้องบรรยาย">ห้องบรรยาย</option>
-              <option value="ลานกิจกรรม">ลานกิจกรรมกลางแจ้ง</option>
-            </select>
-          </div>
-
-          <div class="md:col-span-1">
-            <button
-              type="submit"
-              class="w-full bg-[#ba0b2f] hover:bg-[#8c0823] text-white text-lg font-bold py-3 px-4 rounded-lg transition-colors shadow-md flex justify-center items-center"
-            >
-              <span class="mr-2">🔍</span> ค้นหาห้องว่าง
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <div class="mb-8 flex justify-between items-end">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 mt-10">
+      <div class="mb-10 flex flex-col sm:flex-row justify-between items-end gap-4 border-b border-gray-200 pb-4">
         <div>
-          <h2 class="text-3xl font-bold text-gray-900">พื้นที่แนะนำ</h2>
-          <p class="text-gray-500 mt-2">ห้องยอดนิยมที่ถูกจองบ่อยที่สุด</p>
+          <h2 class="text-3xl font-extrabold text-gray-900 flex items-center gap-3">
+            <span class="text-[#ba0b2f]"><i class="fas fa-star"></i></span> พื้นที่แนะนำ
+          </h2>
+          <p class="text-gray-500 mt-2 text-lg">ห้องยอดนิยมที่ถูกจองบ่อยที่สุดในมหาวิทยาลัย</p>
         </div>
         <router-link
           to="/rooms"
-          class="text-[#ba0b2f] font-semibold hover:underline hidden sm:block"
+          class="text-[#ba0b2f] font-bold hover:text-[#8c0823] hover:bg-red-50 px-5 py-2.5 rounded-full transition-all flex items-center gap-2"
         >
-          ดูห้องทั้งหมด &rarr;
+          ดูห้องทั้งหมด <i class="fas fa-arrow-right"></i>
         </router-link>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <RoomCard v-for="room in featuredRooms" :key="room.id" :room="room" />
       </div>
-
-      <div class="mt-8 text-center sm:hidden">
-        <router-link
-          to="/rooms"
-          class="text-[#ba0b2f] font-semibold hover:underline"
-        >
-          ดูห้องทั้งหมด &rarr;
-        </router-link>
-      </div>
-    </main>
+    </div>
   </div>
 </template>
