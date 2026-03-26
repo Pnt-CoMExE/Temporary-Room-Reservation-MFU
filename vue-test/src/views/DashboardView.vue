@@ -20,6 +20,14 @@ const myBookings = ref([
     totalPrice: 4500,
     status: "approved",
   },
+  {
+    id: "BK-202602088",
+    roomName: "ห้องประชุม ท่าสุด",
+    bookingDate: "2026-02-14",
+    durationText: "เต็มวัน",
+    totalPrice: 4500,
+    status: "disapproved",
+  },
 ]);
 
 const userProfile = ref({
@@ -62,7 +70,7 @@ const saveProfile = () => {
 
 <template>
   <div class="bg-gray-50 min-h-screen pb-20">
-    <div class="bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] py-12 mb-8 relative overflow-hidden shadow-md">
+    <div class="bg-linear-to-r from-[#ba0b2f] to-[#8c0823] py-12 mb-8 relative overflow-hidden shadow-md">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex justify-between items-center">
         <div>
           <h1 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight">Dashboard</h1>
