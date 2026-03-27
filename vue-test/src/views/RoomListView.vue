@@ -29,7 +29,7 @@ const rooms = ref([
     capacity: 15,
     location: "อาคารบริหาร (AD)",
     image:
-      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room1.jpg",
     isAvailable: true,
     priceHalfDayInternal: 2400,
   },
@@ -40,7 +40,7 @@ const rooms = ref([
     capacity: 200,
     location: "อาคาร M-Square",
     image:
-      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room2.jpg",
     isAvailable: true,
     priceHalfDayInternal: 6000,
   },
@@ -51,7 +51,7 @@ const rooms = ref([
     capacity: 100,
     location: "ลานกิจกรรมกลางแจ้ง",
     image:
-      "https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room3.jpg",
     isAvailable: true,
     priceHalfDayInternal: 3000,
   },
@@ -62,7 +62,7 @@ const rooms = ref([
     capacity: 400,
     location: "อาคารพลเอก สำเภา ชูศรี",
     image:
-      "https://images.unsplash.com/photo-1576085898323-218337e3e43c?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room4.jpg",
     isAvailable: true,
     priceHalfDayInternal: 8200,
   },
@@ -73,7 +73,7 @@ const rooms = ref([
     capacity: 60,
     location: "อาคาร S1",
     image:
-      "https://images.unsplash.com/photo-1531482615713-2afd69097998?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room5.jpg",
     isAvailable: false,
     priceHalfDayInternal: 4000,
   },
@@ -84,7 +84,7 @@ const rooms = ref([
     capacity: 60,
     location: "อาคาร I-Park ชั้น 3",
     image:
-      "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room6.jpg",
     isAvailable: true,
     priceHalfDayInternal: 3030,
   },
