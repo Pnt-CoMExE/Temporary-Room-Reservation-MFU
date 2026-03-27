@@ -30,7 +30,7 @@ const featuredRooms = ref([
     capacity: 15,
     location: "อาคารบริหาร (AD)",
     image:
-      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room1.jpg",
     isAvailable: true,
     priceHalfDayInternal: 2400,
   },
@@ -41,7 +41,7 @@ const featuredRooms = ref([
     capacity: 200,
     location: "อาคาร M-Square",
     image:
-      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room2.jpg",
     isAvailable: true,
     priceHalfDayInternal: 6000,
   },
@@ -52,7 +52,7 @@ const featuredRooms = ref([
     capacity: 100,
     location: "ลานกิจกรรมกลางแจ้ง",
     image:
-      "https://images.unsplash.com/photo-1506869640319-fe1a24fd76dc?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      "/images/room3.jpg",
     isAvailable: true,
     priceHalfDayInternal: 3000,
   },
@@ -68,7 +68,7 @@ const featuredRooms = ref([
           alt="MFU Background" 
           class="w-full h-full object-cover object-center filter brightness-50"
         />
-        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#5c0517]/95"></div>
+        <div class="absolute inset-0 bg-linear-to-b from-black/20 via-black/40 to-[#5c0517]/95"></div>
       </div>
 
       <div class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto">
