@@ -3,37 +3,135 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const activeTab = ref("bookings"); // 'bookings' หรือ 'profile'
+const activeTab = ref("bookings"); // ค่าเริ่มต้นให้โชว์หน้า 'bookings' ก่อน
 
-// --- แก้ไข: ลบข้อมูล Hardcode ออก ปล่อยให้ว่างๆ ไว้ก่อน ---
+// ตัวแปรเก็บข้อมูลโปรไฟล์
 const userProfile = ref({
   fullName: "กำลังโหลด...",
   email: "กำลังโหลด...",
-  phone: "0812345678", // เบอร์โทรอาจจะต้องรอเชื่อม Backend วันหลัง
-  password: "",
+  phone: "",
+  oldPassword: "",
+  newPassword: "",
+  profileImage: null, // เก็บ path ของรูปภาพ
 });
 
-// --- เพิ่ม: ฟังก์ชันดึงข้อมูลเมื่อเปิดหน้านี้ ---
-onMounted(() => {
-  const storedName = localStorage.getItem("userName");
-  const storedEmail = localStorage.getItem("userEmail");
+// ตัวแปรอ้างอิงถึงช่อง input type="file" ที่ถูกซ่อนไว้
+const fileInput = ref(null);
 
-  if (storedName) {
-    userProfile.value.fullName = storedName;
-  }
+// ==========================================
+// 1. ดึงข้อมูลทันทีที่เปิดหน้าเว็บ
+// ==========================================
+onMounted(async () => {
+  const storedEmail = localStorage.getItem("userEmail");
+  const storedName = localStorage.getItem("userName");
+
   if (storedEmail) {
     userProfile.value.email = storedEmail;
+
+    try {
+      // ยิง API ไปดึงข้อมูลล่าสุดจาก Database
+      const response = await fetch(
+        `http://localhost:3000/api/user/profile?email=${storedEmail}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        userProfile.value.fullName = `${data.first_name} ${data.last_name}`;
+        userProfile.value.phone = data.phone_number || "";
+        userProfile.value.profileImage = data.profile_image || null; // ดึงรูปมาโชว์
+      } else if (storedName) {
+        userProfile.value.fullName = storedName; // สำรองกรณีดึง API ไม่สำเร็จ
+      }
+    } catch (error) {
+      console.error("ดึงข้อมูลจาก Server ไม่สำเร็จ:", error);
+      if (storedName) userProfile.value.fullName = storedName;
+    }
   }
 });
 
-// --- เพิ่ม: ฟังก์ชันออกจากระบบ ---
-const handleLogout = () => {
-  if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-    localStorage.clear(); // ล้างข้อมูลการ Login ทั้งหมด
-    router.push("/"); // เด้งกลับไปหน้าหลัก (หรือหน้า Login)
+// ==========================================
+// 2. ฟังก์ชันอัปโหลดรูปโปรไฟล์
+// ==========================================
+const handleFileUpload = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append("profileImage", file);
+  formData.append("email", userProfile.value.email);
+
+  try {
+    const response = await fetch(
+      "http://localhost:3000/api/user/upload-profile",
+      {
+        method: "POST",
+        body: formData, // ส่งแบบ FormData
+      },
+    );
+
+    const data = await response.json();
+    if (response.ok) {
+      userProfile.value.profileImage = data.imageUrl; // อัปเดตรูปหน้าเว็บทันที
+      alert("✅ " + data.message);
+    } else {
+      alert("❌ " + data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("เกิดข้อผิดพลาดในการอัปโหลดรูป");
   }
 };
 
+// ==========================================
+// 3. ฟังก์ชันแก้ไขข้อมูลและเปลี่ยนรหัสผ่าน
+// ==========================================
+const saveProfile = async () => {
+  const nameParts = userProfile.value.fullName.split(" ");
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.slice(1).join(" ") || "";
+
+  try {
+    const response = await fetch("http://localhost:3000/api/user/profile", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: userProfile.value.email,
+        firstName: firstName,
+        lastName: lastName,
+        phone: userProfile.value.phone,
+        oldPassword: userProfile.value.oldPassword,
+        newPassword: userProfile.value.newPassword,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("✅ " + data.message);
+      localStorage.setItem("userName", userProfile.value.fullName);
+      userProfile.value.oldPassword = "";
+      userProfile.value.newPassword = "";
+    } else {
+      alert("❌ " + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
+  }
+};
+
+// ==========================================
+// 4. ฟังก์ชันออกจากระบบ
+// ==========================================
+const handleLogout = () => {
+  if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+    localStorage.clear();
+    router.push("/");
+  }
+};
+
+// ==========================================
+// 5. ข้อมูลและฟังก์ชันสำหรับการจอง (History)
+// ==========================================
 const myBookings = ref([
   {
     id: "BK-202603001",
@@ -44,22 +142,63 @@ const myBookings = ref([
     status: "pending",
   },
   {
+    id: "BK-202602090",
+    roomName: "ห้องบรรยาย C1",
+    bookingDate: "2026-02-20",
+    durationText: "เต็มวัน",
+    totalPrice: 3150,
+    status: "approved_pending_payment",
+  },
+  {
     id: "BK-202602089",
     roomName: "ลานกิจกรรม ลานประดู่แดง",
     bookingDate: "2026-02-14",
     durationText: "เต็มวัน",
     totalPrice: 4500,
-    status: "approved",
+    status: "approved_paid",
   },
   {
     id: "BK-202602088",
-    roomName: "ห้องประชุม ท่าสุด",
+    roomName: "ห้องประชุม แม่สาย(AD)",
     bookingDate: "2026-02-14",
     durationText: "เต็มวัน",
-    totalPrice: 4500,
-    status: "disapproved",
+    totalPrice: 3900,
+    status: "cancelled",
   },
 ]);
+
+const getStatusText = (status) => {
+  switch (status) {
+    case "pending":
+      return "⏳ รออนุมัติ";
+    case "approved_pending_payment":
+      return "💳 อนุมัติ (รอชำระเงิน)";
+    case "approved_paid":
+      return "✅ อนุมัติ (ชำระเงินแล้ว)";
+    case "cancelled":
+      return "❌ ยกเลิกแล้ว";
+    case "disapproved":
+      return "❌ ไม่อนุมัติ";
+    default:
+      return "ไม่ทราบสถานะ";
+  }
+};
+
+const getStatusClass = (status) => {
+  switch (status) {
+    case "pending":
+      return "bg-yellow-100 text-yellow-700 border border-yellow-200";
+    case "approved_pending_payment":
+      return "bg-blue-100 text-blue-700 border border-blue-200";
+    case "approved_paid":
+      return "bg-green-100 text-green-700 border border-green-200";
+    case "cancelled":
+    case "disapproved":
+      return "bg-red-100 text-red-700 border border-red-200";
+    default:
+      return "bg-gray-100 text-gray-700 border border-gray-200";
+  }
+};
 
 const formatDate = (dateString) =>
   new Date(dateString).toLocaleDateString("th-TH", {
@@ -84,13 +223,6 @@ const cancelBooking = (bookingId, bookingDate) => {
     const index = myBookings.value.findIndex((b) => b.id === bookingId);
     if (index !== -1) myBookings.value[index].status = "cancelled";
   }
-};
-
-const saveProfile = () => {
-  alert("บันทึกข้อมูลส่วนตัวเรียบร้อยแล้ว!");
-  userProfile.value.password = "";
-  // (ถ้ามี Backend ก็จะยิง API อัปเดตชื่อที่ตรงนี้ครับ)
-  localStorage.setItem("userName", userProfile.value.fullName);
 };
 </script>
 
@@ -138,9 +270,25 @@ const saveProfile = () => {
               <div
                 class="w-28 h-28 bg-gray-100 rounded-full border-4 border-white shadow-md flex items-center justify-center text-gray-400 text-5xl overflow-hidden"
               >
-                <i class="fas fa-user"></i>
+                <img
+                  v-if="userProfile.profileImage"
+                  :src="`http://localhost:3000${userProfile.profileImage}`"
+                  class="w-full h-full object-cover"
+                  alt="Profile"
+                />
+                <i v-else class="fas fa-user"></i>
               </div>
+
+              <input
+                type="file"
+                ref="fileInput"
+                class="hidden"
+                accept="image/*"
+                @change="handleFileUpload"
+              />
+
               <button
+                @click="$refs.fileInput.click()"
                 class="absolute bottom-0 right-0 bg-[#d4af37] text-white w-9 h-9 rounded-full flex items-center justify-center border-2 border-white shadow-md hover:bg-yellow-500 hover:scale-110 transition-all cursor-pointer"
               >
                 <i class="fas fa-camera text-sm"></i>
@@ -171,7 +319,6 @@ const saveProfile = () => {
               >
                 <i class="fas fa-ticket-alt w-5 text-center"></i> ประวัติการจอง
               </button>
-
               <button
                 @click="activeTab = 'profile'"
                 :class="
@@ -183,9 +330,7 @@ const saveProfile = () => {
               >
                 <i class="fas fa-user-cog w-5 text-center"></i> ข้อมูลส่วนตัว
               </button>
-
               <div class="pt-4 mt-4 border-t border-gray-100">
-                <!-- แก้ไข: เพิ่มเหตุการณ์ @click เพื่อเรียกใช้งานฟังก์ชันออกจากระบบ -->
                 <button
                   @click="handleLogout"
                   class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-red-600 transition-all font-semibold text-left"
@@ -220,26 +365,13 @@ const saveProfile = () => {
                   <span class="text-gray-900">{{ booking.id }}</span>
                 </span>
                 <span
-                  :class="{
-                    'bg-yellow-100 text-yellow-700 border border-yellow-200':
-                      booking.status === 'pending',
-                    'bg-green-100 text-green-700 border border-green-200':
-                      booking.status === 'approved',
-                    'bg-red-100 text-red-700 border border-red-200':
-                      booking.status === 'cancelled' ||
-                      booking.status === 'disapproved',
-                  }"
+                  :class="getStatusClass(booking.status)"
                   class="px-3 py-1 rounded-full text-xs font-bold uppercase shadow-sm"
                 >
-                  {{
-                    booking.status === "pending"
-                      ? "⏳ รออนุมัติ"
-                      : booking.status === "approved"
-                        ? "✅ อนุมัติแล้ว"
-                        : "❌ ยกเลิกแล้ว"
-                  }}
+                  {{ getStatusText(booking.status) }}
                 </span>
               </div>
+
               <div class="p-6 md:flex justify-between items-center">
                 <div class="flex gap-5 items-center">
                   <div
@@ -273,7 +405,10 @@ const saveProfile = () => {
                     ฿{{ booking.totalPrice.toLocaleString() }}
                   </p>
                   <button
-                    v-if="booking.status === 'pending'"
+                    v-if="
+                      booking.status === 'pending' ||
+                      booking.status === 'approved_pending_payment'
+                    "
                     @click="cancelBooking(booking.id, booking.bookingDate)"
                     class="mt-2 text-sm font-bold text-red-500 hover:text-red-700 underline underline-offset-4 decoration-red-200 hover:decoration-red-500 transition-all"
                   >
@@ -374,29 +509,42 @@ const saveProfile = () => {
                 />
               </div>
 
-              <div class="space-y-2 md:col-span-2 mt-2">
+              <div
+                class="space-y-2 md:col-span-2 mt-4 pt-4 border-t border-gray-100"
+              >
                 <label class="block text-sm font-bold text-gray-700"
                   >เปลี่ยนรหัสผ่านใหม่
                   <span class="text-xs text-gray-400 font-normal"
                     >(เว้นว่างไว้หากไม่ต้องการเปลี่ยน)</span
                   ></label
                 >
-                <div class="relative">
-                  <input
-                    type="password"
-                    v-model="userProfile.password"
-                    placeholder="••••••••"
-                    class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
-                  />
-                  <i
-                    class="fas fa-lock absolute right-4 top-3.5 text-gray-300"
-                  ></i>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div class="relative">
+                    <input
+                      type="password"
+                      v-model="userProfile.oldPassword"
+                      placeholder="รหัสผ่านเดิม"
+                      class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
+                    />
+                    <i
+                      class="fas fa-lock absolute right-4 top-3.5 text-gray-300"
+                    ></i>
+                  </div>
+                  <div class="relative">
+                    <input
+                      type="password"
+                      v-model="userProfile.newPassword"
+                      placeholder="รหัสผ่านใหม่"
+                      class="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
+                    />
+                    <i
+                      class="fas fa-key absolute right-4 top-3.5 text-gray-300"
+                    ></i>
+                  </div>
                 </div>
               </div>
 
-              <div
-                class="md:col-span-2 pt-6 border-t border-gray-100 mt-2 flex justify-end"
-              >
+              <div class="md:col-span-2 pt-6 mt-2 flex justify-end">
                 <button
                   type="submit"
                   class="w-full md:w-auto px-8 py-3.5 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transform hover:-translate-y-0.5 transition-all shadow-lg shadow-red-200 flex items-center justify-center gap-2"

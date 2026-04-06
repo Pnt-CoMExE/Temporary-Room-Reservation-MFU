@@ -14,11 +14,12 @@ const toggleForm = () => {
 // ฟอร์มเข้าสู่ระบบ
 const signInForm = ref({ username: "", password: "" });
 
-// ฟอร์มสมัครสมาชิก
+// ฟอร์มสมัครสมาชิก (เพิ่ม phone แล้ว)
 const signUpForm = ref({
   firstName: "",
   lastName: "",
   username: "",
+  phone: "",
   email: "",
   password: "",
   confirmPassword: "",
@@ -44,7 +45,6 @@ const handleSignIn = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      // เซฟข้อมูลลง LocalStorage ไว้ใช้ข้ามหน้า
       localStorage.setItem("user_token", data.token);
       localStorage.setItem("userEmail", data.user.email);
       localStorage.setItem("isLoggedIn", "true");
@@ -79,6 +79,7 @@ const handleSignUp = async () => {
         firstName: signUpForm.value.firstName,
         lastName: signUpForm.value.lastName,
         username: signUpForm.value.username,
+        phone: signUpForm.value.phone, // ส่งเบอร์โทรไปให้ Backend
         email: signUpForm.value.email,
         password: signUpForm.value.password,
       }),
@@ -95,6 +96,7 @@ const handleSignUp = async () => {
         firstName: "",
         lastName: "",
         username: "",
+        phone: "",
         email: "",
         password: "",
         confirmPassword: "",
@@ -122,7 +124,7 @@ const handleSignUp = async () => {
       </RouterLink>
 
       <div
-        class="bg-white rounded-[35px] shadow-2xl border border-gray-100 overflow-hidden relative min-h-150 max-w-5xl mx-auto"
+        class="bg-white rounded-[35px] shadow-2xl border border-gray-100 overflow-hidden relative min-h-162.5 max-w-5xl mx-auto"
       >
         <!-- แผง Sign In -->
         <div
@@ -149,7 +151,6 @@ const handleSignUp = async () => {
             </p>
 
             <div class="space-y-3 w-full max-w-sm">
-              <!-- ช่องกรอก Username -->
               <div class="relative">
                 <i
                   class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
@@ -204,17 +205,17 @@ const handleSignUp = async () => {
             class="p-8 md:p-10 flex flex-col justify-center items-center h-full text-center"
           >
             <h2
-              class="text-3xl font-extrabold text-gray-900 mb-4 flex flex-col items-center"
+              class="text-3xl font-extrabold text-gray-900 mb-2 flex flex-col items-center"
             >
               <span class="text-4xl text-green-500 mb-2">🤝</span>
               สวัสดีเพื่อนใหม่!
             </h2>
             <p class="text-sm text-gray-500 mb-4 max-w-sm">
-              สมัครสมาชิกเพื่อเริ่มต้นค้นหาและจองห้องพักกับ MFU Property
+              สมัครสมาชิกเพื่อเริ่มต้นค้นหาและจองห้องพัก
             </p>
 
             <div class="space-y-3 w-full max-w-sm">
-              <!-- แยก ชื่อ และ นามสกุล ให้อยู่บรรทัดเดียวกัน -->
+              <!-- แยก ชื่อ และ นามสกุล -->
               <div class="grid grid-cols-2 gap-3">
                 <div class="relative">
                   <i
@@ -225,7 +226,7 @@ const handleSignUp = async () => {
                     v-model="signUpForm.firstName"
                     required
                     placeholder="ชื่อ"
-                    class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
+                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
                   />
                 </div>
                 <div class="relative">
@@ -234,71 +235,85 @@ const handleSignUp = async () => {
                     v-model="signUpForm.lastName"
                     required
                     placeholder="นามสกุล"
-                    class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
+                    class="w-full px-4 py-2 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
                   />
                 </div>
               </div>
 
-              <!-- ช่อง Username -->
-              <div class="relative">
-                <i
-                  class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
-                ></i>
-                <input
-                  type="text"
-                  v-model="signUpForm.username"
-                  required
-                  placeholder="ชื่อผู้ใช้งาน (Username)"
-                  class="w-full pl-12 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-base"
-                />
+              <!-- ช่อง Username กับ Phone แบ่งครึ่งกัน -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="relative">
+                  <i
+                    class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-sm"
+                  ></i>
+                  <input
+                    type="text"
+                    v-model="signUpForm.username"
+                    required
+                    placeholder="Username"
+                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
+                  />
+                </div>
+                <div class="relative">
+                  <i
+                    class="fas fa-phone absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-sm"
+                  ></i>
+                  <input
+                    type="tel"
+                    v-model="signUpForm.phone"
+                    required
+                    placeholder="เบอร์โทรศัพท์"
+                    class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
+                  />
+                </div>
               </div>
 
               <!-- อีเมลและรหัสผ่าน -->
               <div class="relative">
                 <i
-                  class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
+                  class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-sm"
                 ></i>
                 <input
                   type="email"
                   v-model="signUpForm.email"
                   required
                   placeholder="student@lamduan.mfu.ac.th"
-                  class="w-full pl-12 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-base"
+                  class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
                 />
               </div>
               <div class="relative">
                 <i
-                  class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
+                  class="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-sm"
                 ></i>
                 <input
                   type="password"
                   v-model="signUpForm.password"
                   required
                   placeholder="รหัสผ่าน (อย่างน้อย 8 ตัว)"
-                  class="w-full pl-12 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-base"
+                  class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
                 />
               </div>
               <div class="relative">
                 <i
-                  class="fas fa-check absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
+                  class="fas fa-check absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-sm"
                 ></i>
                 <input
                   type="password"
                   v-model="signUpForm.confirmPassword"
                   required
                   placeholder="ยืนยันรหัสผ่าน"
-                  class="w-full pl-12 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-base"
+                  class="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
                 />
               </div>
             </div>
 
-            <div class="flex items-center mt-4 mb-4">
+            <div class="flex items-center mt-3 mb-3">
               <input
                 type="checkbox"
                 required
                 class="w-4 h-4 text-[#ba0b2f] rounded border-gray-300 focus:ring-[#ba0b2f]"
               />
-              <label class="ml-3 text-sm text-gray-600">
+              <label class="ml-3 text-xs text-gray-600">
                 ฉันยอมรับ
                 <a href="#" class="text-[#ba0b2f] hover:underline font-semibold"
                   >ข้อตกลงและเงื่อนไข</a
@@ -307,7 +322,7 @@ const handleSignUp = async () => {
             </div>
             <button
               type="submit"
-              class="w-full max-w-xs py-3 px-6 bg-[#ba0b2f] hover:bg-[#8c0823] text-white font-bold rounded-full shadow-lg hover:scale-105 transition-all text-base uppercase tracking-wider"
+              class="w-full max-w-xs py-2.5 px-6 bg-[#ba0b2f] hover:bg-[#8c0823] text-white font-bold rounded-full shadow-lg hover:scale-105 transition-all text-sm uppercase tracking-wider"
             >
               สร้างบัญชี
             </button>
