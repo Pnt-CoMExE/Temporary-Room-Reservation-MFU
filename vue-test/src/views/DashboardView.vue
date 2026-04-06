@@ -3,23 +3,32 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const activeTab = ref("bookings"); // ค่าเริ่มต้นให้โชว์หน้า 'bookings' ก่อน
+const activeTab = ref("bookings");
 
-// ตัวแปรเก็บข้อมูลโปรไฟล์
 const userProfile = ref({
   fullName: "กำลังโหลด...",
   email: "กำลังโหลด...",
   phone: "",
   oldPassword: "",
   newPassword: "",
-  profileImage: null, // เก็บ path ของรูปภาพ
+  profileImage: null,
 });
 
-// ตัวแปรอ้างอิงถึงช่อง input type="file" ที่ถูกซ่อนไว้
 const fileInput = ref(null);
 
 // ==========================================
-// 1. ดึงข้อมูลทันทีที่เปิดหน้าเว็บ
+// ตัวแปรสำหรับควบคุม Modal (ป๊อปอัป) ต่างๆ
+// ==========================================
+const showLogoutModal = ref(false); // ควบคุมป๊อปอัปออกจากระบบ
+const alertModal = ref({ show: false, type: "success", title: "", text: "" }); // ควบคุมป๊อปอัปแจ้งเตือนทั่วไป
+
+// ฟังก์ชันเปิดป๊อปอัปแจ้งเตือน
+const showAlert = (type, title, text) => {
+  alertModal.value = { show: true, type, title, text };
+};
+
+// ==========================================
+// ดึงข้อมูลเมื่อเปิดหน้าเว็บ
 // ==========================================
 onMounted(async () => {
   const storedEmail = localStorage.getItem("userEmail");
@@ -27,9 +36,7 @@ onMounted(async () => {
 
   if (storedEmail) {
     userProfile.value.email = storedEmail;
-
     try {
-      // ยิง API ไปดึงข้อมูลล่าสุดจาก Database
       const response = await fetch(
         `http://localhost:3000/api/user/profile?email=${storedEmail}`,
       );
@@ -37,9 +44,9 @@ onMounted(async () => {
         const data = await response.json();
         userProfile.value.fullName = `${data.first_name} ${data.last_name}`;
         userProfile.value.phone = data.phone_number || "";
-        userProfile.value.profileImage = data.profile_image || null; // ดึงรูปมาโชว์
+        userProfile.value.profileImage = data.profile_image || null;
       } else if (storedName) {
-        userProfile.value.fullName = storedName; // สำรองกรณีดึง API ไม่สำเร็จ
+        userProfile.value.fullName = storedName;
       }
     } catch (error) {
       console.error("ดึงข้อมูลจาก Server ไม่สำเร็จ:", error);
@@ -49,7 +56,7 @@ onMounted(async () => {
 });
 
 // ==========================================
-// 2. ฟังก์ชันอัปโหลดรูปโปรไฟล์
+// อัปโหลดรูปโปรไฟล์
 // ==========================================
 const handleFileUpload = async (event) => {
   const file = event.target.files[0];
@@ -64,25 +71,28 @@ const handleFileUpload = async (event) => {
       "http://localhost:3000/api/user/upload-profile",
       {
         method: "POST",
-        body: formData, // ส่งแบบ FormData
+        body: formData,
       },
     );
-
     const data = await response.json();
     if (response.ok) {
-      userProfile.value.profileImage = data.imageUrl; // อัปเดตรูปหน้าเว็บทันที
-      alert("✅ " + data.message);
+      userProfile.value.profileImage = data.imageUrl;
+      showAlert(
+        "success",
+        "อัปโหลดรูปสำเร็จ!",
+        "รูปโปรไฟล์ของคุณถูกอัปเดตเรียบร้อยแล้ว",
+      );
     } else {
-      alert("❌ " + data.message);
+      showAlert("error", "อัปโหลดไม่สำเร็จ", data.message);
     }
   } catch (error) {
     console.error(error);
-    alert("เกิดข้อผิดพลาดในการอัปโหลดรูป");
+    showAlert("error", "ข้อผิดพลาด", "เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
   }
 };
 
 // ==========================================
-// 3. ฟังก์ชันแก้ไขข้อมูลและเปลี่ยนรหัสผ่าน
+// บันทึกข้อมูลส่วนตัว & รหัสผ่าน
 // ==========================================
 const saveProfile = async () => {
   const nameParts = userProfile.value.fullName.split(" ");
@@ -106,31 +116,34 @@ const saveProfile = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      alert("✅ " + data.message);
       localStorage.setItem("userName", userProfile.value.fullName);
       userProfile.value.oldPassword = "";
       userProfile.value.newPassword = "";
+      showAlert(
+        "success",
+        "บันทึกข้อมูลสำเร็จ!",
+        "ข้อมูลส่วนตัวของคุณถูกอัปเดตเรียบร้อยแล้ว",
+      );
     } else {
-      alert("❌ " + data.message);
+      showAlert("error", "บันทึกข้อมูลไม่สำเร็จ", data.message);
     }
   } catch (err) {
     console.error(err);
-    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
+    showAlert("error", "ข้อผิดพลาด", "เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
   }
 };
 
 // ==========================================
-// 4. ฟังก์ชันออกจากระบบ
+// ฟังก์ชันออกจากระบบ
 // ==========================================
-const handleLogout = () => {
-  if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-    localStorage.clear();
-    router.push("/");
-  }
+const confirmLogout = () => {
+  showLogoutModal.value = false;
+  localStorage.clear();
+  router.push("/");
 };
 
 // ==========================================
-// 5. ข้อมูลและฟังก์ชันสำหรับการจอง (History)
+// ข้อมูลประวัติการจองจำลอง
 // ==========================================
 const myBookings = ref([
   {
@@ -213,12 +226,15 @@ const cancelBooking = (bookingId, bookingDate) => {
   const diffDays = Math.ceil((bDate - today) / (1000 * 60 * 60 * 24));
 
   if (diffDays <= 3) {
-    alert(
-      `❌ ไม่สามารถยกเลิกได้\nระบบอนุญาตให้ยกเลิกล่วงหน้าอย่างน้อย 3 วันทำการ (เหลืออีก ${diffDays} วัน)`,
+    showAlert(
+      "error",
+      "ไม่อนุญาตให้ยกเลิก",
+      `ระบบอนุญาตให้ยกเลิกล่วงหน้าอย่างน้อย 3 วันทำการ (เหลืออีก ${diffDays} วัน)`,
     );
     return;
   }
 
+  // ใช้ Native confirm สำหรับความรวดเร็วในการยกเลิก หรือจะสร้าง Modal แยกก็ทำได้เช่นกัน
   if (confirm('คุณแน่ใจหรือไม่ว่าต้องการ "ยกเลิก" การจองรายการนี้?')) {
     const index = myBookings.value.findIndex((b) => b.id === bookingId);
     if (index !== -1) myBookings.value[index].status = "cancelled";
@@ -227,7 +243,8 @@ const cancelBooking = (bookingId, bookingDate) => {
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen pb-20">
+  <div class="bg-gray-50 min-h-screen pb-20 relative">
+    <!-- Header -->
     <div
       class="bg-linear-to-r from-[#ba0b2f] to-[#8c0823] py-12 mb-8 relative overflow-hidden shadow-md"
     >
@@ -260,12 +277,15 @@ const cancelBooking = (bookingId, bookingDate) => {
       </div>
     </div>
 
+    <!-- Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex flex-col md:flex-row gap-8">
+        <!-- Sidebar -->
         <div class="w-full md:w-1/3 lg:w-1/4">
           <div
             class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24"
           >
+            <!-- อัปโหลดรูปโปรไฟล์ -->
             <div class="relative w-28 h-28 mx-auto mb-4">
               <div
                 class="w-28 h-28 bg-gray-100 rounded-full border-4 border-white shadow-md flex items-center justify-center text-gray-400 text-5xl overflow-hidden"
@@ -278,7 +298,6 @@ const cancelBooking = (bookingId, bookingDate) => {
                 />
                 <i v-else class="fas fa-user"></i>
               </div>
-
               <input
                 type="file"
                 ref="fileInput"
@@ -286,7 +305,6 @@ const cancelBooking = (bookingId, bookingDate) => {
                 accept="image/*"
                 @change="handleFileUpload"
               />
-
               <button
                 @click="$refs.fileInput.click()"
                 class="absolute bottom-0 right-0 bg-[#d4af37] text-white w-9 h-9 rounded-full flex items-center justify-center border-2 border-white shadow-md hover:bg-yellow-500 hover:scale-110 transition-all cursor-pointer"
@@ -295,6 +313,7 @@ const cancelBooking = (bookingId, bookingDate) => {
               </button>
             </div>
 
+            <!-- ข้อมูลย่อ -->
             <div class="text-center mb-8">
               <h3 class="text-lg font-bold text-gray-900">
                 {{ userProfile.fullName }}
@@ -307,6 +326,7 @@ const cancelBooking = (bookingId, bookingDate) => {
               </span>
             </div>
 
+            <!-- เมนูนำทาง -->
             <nav class="space-y-2">
               <button
                 @click="activeTab = 'bookings'"
@@ -331,8 +351,9 @@ const cancelBooking = (bookingId, bookingDate) => {
                 <i class="fas fa-user-cog w-5 text-center"></i> ข้อมูลส่วนตัว
               </button>
               <div class="pt-4 mt-4 border-t border-gray-100">
+                <!-- สั่งเปิด Modal ออกจากระบบ -->
                 <button
-                  @click="handleLogout"
+                  @click="showLogoutModal = true"
                   class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-red-600 transition-all font-semibold text-left"
                 >
                   <i class="fas fa-sign-out-alt w-5 text-center"></i> ออกจากระบบ
@@ -342,7 +363,9 @@ const cancelBooking = (bookingId, bookingDate) => {
           </div>
         </div>
 
+        <!-- Main Content -->
         <div class="w-full md:w-2/3 lg:w-3/4">
+          <!-- แท็บประวัติการจอง -->
           <div v-if="activeTab === 'bookings'" class="space-y-6">
             <h2
               class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2"
@@ -440,6 +463,7 @@ const cancelBooking = (bookingId, bookingDate) => {
             </div>
           </div>
 
+          <!-- แท็บข้อมูลส่วนตัว -->
           <div
             v-if="activeTab === 'profile'"
             class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8"
@@ -555,6 +579,87 @@ const cancelBooking = (bookingId, bookingDate) => {
             </form>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ป๊อปอัปต่างๆ (วาดด้วย Tailwind) -->
+    <!-- ========================================== -->
+
+    <!-- 🔴 ป๊อปอัปยืนยันการออกจากระบบ -->
+    <div
+      v-if="showLogoutModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+    >
+      <div
+        class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl transform transition-all text-center"
+      >
+        <div
+          class="flex items-center justify-center w-16 h-16 rounded-full bg-red-50 text-[#ba0b2f] mx-auto mb-4 text-3xl"
+        >
+          <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">ออกจากระบบ?</h3>
+        <p class="text-sm text-gray-500 mb-6">
+          คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบบัญชีนี้?
+        </p>
+        <div class="flex gap-3">
+          <button
+            @click="showLogoutModal = false"
+            class="flex-1 py-3 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+          >
+            ยกเลิก
+          </button>
+          <button
+            @click="confirmLogout"
+            class="flex-1 py-3 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transition-colors shadow-md shadow-red-200"
+          >
+            ใช่, ออกจากระบบ
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 🟢/🔴 ป๊อปอัปแจ้งเตือนผลลัพธ์ (สำเร็จ/ล้มเหลว) -->
+    <div
+      v-if="alertModal.show"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity"
+    >
+      <div
+        class="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 shadow-2xl transform transition-all text-center"
+      >
+        <!-- ไอคอนแสดงตามสถานะ (เขียว=สำเร็จ, แดง=ผิดพลาด) -->
+        <div
+          v-if="alertModal.type === 'success'"
+          class="flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-600 mx-auto mb-4 text-3xl shadow-inner"
+        >
+          <i class="fas fa-check"></i>
+        </div>
+        <div
+          v-else
+          class="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-[#ba0b2f] mx-auto mb-4 text-3xl shadow-inner"
+        >
+          <i class="fas fa-times"></i>
+        </div>
+
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">
+          {{ alertModal.title }}
+        </h3>
+        <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+          {{ alertModal.text }}
+        </p>
+
+        <button
+          @click="alertModal.show = false"
+          :class="
+            alertModal.type === 'success'
+              ? 'bg-green-600 hover:bg-green-700 shadow-green-200'
+              : 'bg-[#ba0b2f] hover:bg-[#8c0823] shadow-red-200'
+          "
+          class="w-full py-3.5 text-white font-bold rounded-xl transition-all shadow-lg text-lg"
+        >
+          ตกลง
+        </button>
       </div>
     </div>
   </div>

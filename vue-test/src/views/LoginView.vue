@@ -1,20 +1,20 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+// อิมพอร์ต useToast เข้ามาใช้งาน
+import { useToast } from "vue-toastification";
 
 const router = useRouter();
+const toast = useToast(); // สร้างตัวแปร toast ไว้เรียกใช้
 
-// ตัวแปรควบคุมสถานะ: true = แสดง Sign In, false = แสดง Sign Up
 const isSignIn = ref(true);
 
 const toggleForm = () => {
   isSignIn.value = !isSignIn.value;
 };
 
-// ฟอร์มเข้าสู่ระบบ
 const signInForm = ref({ username: "", password: "" });
 
-// ฟอร์มสมัครสมาชิก (เพิ่ม phone แล้ว)
 const signUpForm = ref({
   firstName: "",
   lastName: "",
@@ -25,10 +25,9 @@ const signUpForm = ref({
   confirmPassword: "",
 });
 
-// ฟังก์ชันจัดการ Sign In (เข้าสู่ระบบ)
 const handleSignIn = async () => {
   if (!signInForm.value.username || !signInForm.value.password) {
-    alert("กรุณากรอก Username และ Password ให้ครบถ้วน");
+    toast.warning("กรุณากรอก Username และ Password ให้ครบถ้วน");
     return;
   }
 
@@ -53,21 +52,25 @@ const handleSignIn = async () => {
         data.user.firstName + " " + data.user.lastName,
       );
 
-      alert(`ยินดีต้อนรับคุณ ${data.user.firstName}`);
-      router.push("/home");
+      // แจ้งเตือนสีเขียว สวยๆ
+      toast.success(`ยินดีต้อนรับคุณ ${data.user.firstName} 👋`);
+
+      // หน่วงเวลา 1 วินาทีให้ผู้ใช้เห็นข้อความ แล้วค่อยย้ายหน้า
+      setTimeout(() => {
+        router.push("/home"); // หรือ /dashboard ตามที่คุณตั้งไว้
+      }, 1000);
     } else {
-      alert("❌ " + data.message);
+      toast.error(data.message);
     }
   } catch (error) {
     console.error(error);
-    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
+    toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
   }
 };
 
-// ฟังก์ชันจัดการ Sign Up (สมัครสมาชิก)
 const handleSignUp = async () => {
   if (signUpForm.value.password !== signUpForm.value.confirmPassword) {
-    alert("❌ รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน!");
+    toast.error("รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน!");
     return;
   }
 
@@ -79,7 +82,7 @@ const handleSignUp = async () => {
         firstName: signUpForm.value.firstName,
         lastName: signUpForm.value.lastName,
         username: signUpForm.value.username,
-        phone: signUpForm.value.phone, // ส่งเบอร์โทรไปให้ Backend
+        phone: signUpForm.value.phone,
         email: signUpForm.value.email,
         password: signUpForm.value.password,
       }),
@@ -88,10 +91,9 @@ const handleSignUp = async () => {
     const data = await response.json();
 
     if (response.ok) {
-      alert("✅ " + data.message + "\nกรุณาเข้าสู่ระบบด้วยบัญชีที่สร้างใหม่");
-      isSignIn.value = true;
+      toast.success("สร้างบัญชีสำเร็จ! กรุณาเข้าสู่ระบบ");
 
-      // ล้างข้อมูลในฟอร์มหลังสมัครเสร็จ
+      isSignIn.value = true;
       signUpForm.value = {
         firstName: "",
         lastName: "",
@@ -102,11 +104,11 @@ const handleSignUp = async () => {
         confirmPassword: "",
       };
     } else {
-      alert("❌ " + data.message);
+      toast.error(data.message);
     }
   } catch (error) {
     console.error(error);
-    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
+    toast.error("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
   }
 };
 </script>
@@ -126,7 +128,6 @@ const handleSignUp = async () => {
       <div
         class="bg-white rounded-[35px] shadow-2xl border border-gray-100 overflow-hidden relative min-h-162.5 max-w-5xl mx-auto"
       >
-        <!-- แผง Sign In -->
         <div
           class="absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out bg-white"
           :class="
@@ -191,7 +192,6 @@ const handleSignUp = async () => {
           </form>
         </div>
 
-        <!-- แผง Sign Up -->
         <div
           class="absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out bg-white"
           :class="
@@ -215,7 +215,6 @@ const handleSignUp = async () => {
             </p>
 
             <div class="space-y-3 w-full max-w-sm">
-              <!-- แยก ชื่อ และ นามสกุล -->
               <div class="grid grid-cols-2 gap-3">
                 <div class="relative">
                   <i
@@ -240,7 +239,6 @@ const handleSignUp = async () => {
                 </div>
               </div>
 
-              <!-- ช่อง Username กับ Phone แบ่งครึ่งกัน -->
               <div class="grid grid-cols-2 gap-3">
                 <div class="relative">
                   <i
@@ -268,7 +266,6 @@ const handleSignUp = async () => {
                 </div>
               </div>
 
-              <!-- อีเมลและรหัสผ่าน -->
               <div class="relative">
                 <i
                   class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-sm"
@@ -329,7 +326,6 @@ const handleSignUp = async () => {
           </form>
         </div>
 
-        <!-- แผง Overlay สีแดง/ทองตรงกลาง -->
         <div
           class="absolute top-0 h-full w-1/2 left-1/2 overflow-hidden z-30 transition-all duration-700 ease-in-out"
           :class="isSignIn ? 'translate-x-0' : '-translate-x-full'"

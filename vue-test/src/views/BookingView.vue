@@ -17,6 +17,13 @@ const bookingForm = ref({
   acceptTerms: false,
 });
 
+// ==========================================
+// ตัวแปรควบคุม Modal (ป๊อปอัป)
+// ==========================================
+const showSuccessModal = ref(false);
+const showErrorModal = ref(false);
+const errorMessage = ref("");
+
 const fetchRoomData = () => {
   setTimeout(() => {
     room.value = {
@@ -58,23 +65,30 @@ const estimatedPrice = computed(() => {
 });
 
 const submitBooking = () => {
+  // ตรวจสอบการยอมรับเงื่อนไข (โชว์ Modal สีแดงแทน alert)
   if (!bookingForm.value.acceptTerms) {
-    alert("กรุณายอมรับเงื่อนไขการใช้บริการก่อนทำการจอง");
+    errorMessage.value = "กรุณายอมรับเงื่อนไขการใช้บริการก่อนทำการจอง";
+    showErrorModal.value = true;
     return;
   }
 
-  // แจ้งเตือนเมื่อจองสำเร็จ พร้อมย้ำเตือนเรื่องการชำระเงิน
-  alert(
-    `✅ ส่งคำขอจองสำเร็จ!\nระบบได้บันทึกคำขอจองห้อง ${room.value.name} เรียบร้อยแล้ว\n\n📌 กรุณาติดต่อชำระเงินที่ "ส่วนจัดการทรัพย์สิน มฟล." เพื่อยืนยันสิทธิ์การจองของคุณ`,
-  );
-  router.push("/dashboard");
+  // ----------------------------------------------------
+  // จำลองการส่งข้อมูลไป Database สำเร็จ (ใช้ Modal สีเขียวแทน alert)
+  // ----------------------------------------------------
+  showSuccessModal.value = true;
+};
+
+// ฟังก์ชันเมื่อกดปุ่ม "ตกลง" ในหน้าจองสำเร็จ
+const closeSuccessModal = () => {
+  showSuccessModal.value = false;
+  router.push("/dashboard"); // เด้งกลับไปหน้าประวัติการจอง
 };
 
 const goBack = () => router.push(`/rooms/${roomId}`);
 </script>
 
 <template>
-  <div class="bg-gray-50 min-h-screen">
+  <div class="bg-gray-50 min-h-screen relative">
     <!-- Header แบบ Mini Hero -->
     <div class="bg-[#ba0b2f] py-16 mb-10 relative overflow-hidden">
       <div
@@ -101,6 +115,7 @@ const goBack = () => router.push(`/rooms/${roomId}`);
     </div>
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+      <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center py-20">
         <div
           class="animate-spin rounded-full h-12 w-12 border-4 border-t-[#ba0b2f] border-gray-200"
@@ -242,7 +257,7 @@ const goBack = () => router.push(`/rooms/${roomId}`);
                 </div>
               </div>
 
-              <!-- ส่วนที่แก้ไข: ลบฟอร์มชำระเงิน เปลี่ยนเป็นกล่องแจ้งเตือน -->
+              <!-- ช่องทางการชำระเงิน -->
               <div
                 v-if="estimatedPrice > 0"
                 class="pt-8 border-t border-gray-100"
@@ -310,7 +325,7 @@ const goBack = () => router.push(`/rooms/${roomId}`);
                 <button
                   type="submit"
                   :disabled="!bookingForm.acceptTerms"
-                  class="w-full py-4 bg-[#ba0b2f] disabled:bg-gray-400 text-white font-black rounded-2xl shadow-xl shadow-red-100 hover:bg-[#8c0823] transform hover:scale-[1.02] transition-all uppercase tracking-widest"
+                  class="w-full py-4 bg-[#ba0b2f] disabled:bg-gray-400 text-white font-black rounded-2xl shadow-xl shadow-red-100 hover:bg-[#8c0823] transform hover:scale-[1.02] transition-all uppercase tracking-widest cursor-pointer disabled:cursor-not-allowed"
                 >
                   ส่งคำขอจอง
                 </button>
@@ -318,6 +333,86 @@ const goBack = () => router.push(`/rooms/${roomId}`);
             </form>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- ป๊อปอัปต่างๆ (วาดด้วย Tailwind) -->
+    <!-- ========================================== -->
+
+    <!-- 🔴 Modal แจ้งเตือนข้อผิดพลาด (เช่น ลืมติ๊กยอมรับเงื่อนไข) -->
+    <div
+      v-if="showErrorModal"
+      class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity px-4"
+    >
+      <div
+        class="bg-white rounded-3xl p-8 max-w-sm w-full shadow-2xl transform transition-all text-center"
+      >
+        <div
+          class="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-[#ba0b2f] mx-auto mb-4 text-3xl shadow-inner"
+        >
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-gray-900 mb-2">ข้อผิดพลาด</h3>
+        <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+          {{ errorMessage }}
+        </p>
+        <button
+          @click="showErrorModal = false"
+          class="w-full py-3.5 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transition-all shadow-lg shadow-red-200 text-lg"
+        >
+          ตกลง
+        </button>
+      </div>
+    </div>
+
+    <!-- 🟢 Modal แจ้งเตือนจองสำเร็จ -->
+    <div
+      v-if="showSuccessModal"
+      class="fixed inset-0 z-100 flex items-center justify-center bg-black/50 backdrop-blur-sm transition-opacity px-4"
+    >
+      <div
+        class="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl transform transition-all"
+      >
+        <!-- ไอคอนติ๊กถูก -->
+        <div
+          class="flex items-center justify-center w-20 h-20 rounded-full bg-green-100 text-green-600 mx-auto mb-6 text-4xl shadow-inner"
+        >
+          <i class="fas fa-check"></i>
+        </div>
+
+        <h3 class="text-2xl font-extrabold text-center text-gray-900 mb-4">
+          ส่งคำขอจองสำเร็จ!
+        </h3>
+
+        <div class="text-gray-600 space-y-4 mb-8 text-center md:text-left">
+          <p class="text-center text-lg">
+            ระบบได้บันทึกคำขอจอง <br />
+            <b class="text-[#ba0b2f] text-xl">{{ room.name }}</b> <br />
+            เรียบร้อยแล้ว
+          </p>
+
+          <!-- กล่องข้อความเน้นเรื่องการชำระเงิน -->
+          <div
+            class="bg-red-50 p-4 rounded-xl border border-red-100 flex items-start gap-3 mt-4 shadow-sm text-left"
+          >
+            <span class="text-xl text-[#ba0b2f] mt-0.5"
+              ><i class="fas fa-thumbtack"></i
+            ></span>
+            <p class="text-[#ba0b2f] font-bold text-sm leading-relaxed">
+              กรุณาติดต่อชำระเงินที่ "ส่วนจัดการทรัพย์สิน มฟล."
+              เพื่อยืนยันสิทธิ์การจองของคุณ
+            </p>
+          </div>
+        </div>
+
+        <!-- ปุ่มกดรับทราบ -->
+        <button
+          @click="closeSuccessModal"
+          class="w-full py-4 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transition-all shadow-lg shadow-red-200 text-lg tracking-wide"
+        >
+          ตกลง
+        </button>
       </div>
     </div>
   </div>
