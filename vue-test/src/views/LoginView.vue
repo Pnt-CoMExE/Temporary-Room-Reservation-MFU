@@ -11,36 +11,101 @@ const toggleForm = () => {
   isSignIn.value = !isSignIn.value;
 };
 
-const signInForm = ref({ email: "", password: "" });
+// ฟอร์มเข้าสู่ระบบ
+const signInForm = ref({ username: "", password: "" });
+
+// ฟอร์มสมัครสมาชิก
 const signUpForm = ref({
-  fullName: "",
+  firstName: "",
+  lastName: "",
+  username: "",
   email: "",
   password: "",
   confirmPassword: "",
 });
 
-// ในไฟล์ LoginView.vue ส่วน <script setup>
-const handleSignIn = () => {
-  // พิมพ์อะไรก็ได้ แค่ไม่ว่างเปล่า
-  if (signInForm.value.email && signInForm.value.password) {
-    // บันทึกสถานะไว้ในเครื่อง
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("userEmail", signInForm.value.email); // เก็บชื่อไว้โชว์
+// ฟังก์ชันจัดการ Sign In (เข้าสู่ระบบ)
+const handleSignIn = async () => {
+  if (!signInForm.value.username || !signInForm.value.password) {
+    alert("กรุณากรอก Username และ Password ให้ครบถ้วน");
+    return;
+  }
 
-    alert(`ยินดีต้อนรับคุณ ${signInForm.value.email}`);
-    router.push("/home"); // ไปหน้าหลัก
-  } else {
-    alert("กรุณากรอก Email และ Password (อะไรก็ได้)");
+  try {
+    const response = await fetch("http://localhost:3000/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        username: signInForm.value.username,
+        password: signInForm.value.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // เซฟข้อมูลลง LocalStorage ไว้ใช้ข้ามหน้า
+      localStorage.setItem("user_token", data.token);
+      localStorage.setItem("userEmail", data.user.email);
+      localStorage.setItem("isLoggedIn", "true");
+      localStorage.setItem(
+        "userName",
+        data.user.firstName + " " + data.user.lastName,
+      );
+
+      alert(`ยินดีต้อนรับคุณ ${data.user.firstName}`);
+      router.push("/home");
+    } else {
+      alert("❌ " + data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
   }
 };
 
-const handleSignUp = () => {
+// ฟังก์ชันจัดการ Sign Up (สมัครสมาชิก)
+const handleSignUp = async () => {
   if (signUpForm.value.password !== signUpForm.value.confirmPassword) {
     alert("❌ รหัสผ่านและการยืนยันรหัสผ่านไม่ตรงกัน!");
     return;
   }
-  alert("✅ สมัครสมาชิกสำเร็จ!\nกรุณาเข้าสู่ระบบด้วยบัญชีที่สร้างใหม่");
-  isSignIn.value = true;
+
+  try {
+    const response = await fetch("http://localhost:3000/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        firstName: signUpForm.value.firstName,
+        lastName: signUpForm.value.lastName,
+        username: signUpForm.value.username,
+        email: signUpForm.value.email,
+        password: signUpForm.value.password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      alert("✅ " + data.message + "\nกรุณาเข้าสู่ระบบด้วยบัญชีที่สร้างใหม่");
+      isSignIn.value = true;
+
+      // ล้างข้อมูลในฟอร์มหลังสมัครเสร็จ
+      signUpForm.value = {
+        firstName: "",
+        lastName: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      };
+    } else {
+      alert("❌ " + data.message);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("เกิดข้อผิดพลาดในการเชื่อมต่อ Server");
+  }
 };
 </script>
 
@@ -59,6 +124,7 @@ const handleSignUp = () => {
       <div
         class="bg-white rounded-[35px] shadow-2xl border border-gray-100 overflow-hidden relative min-h-150 max-w-5xl mx-auto"
       >
+        <!-- แผง Sign In -->
         <div
           class="absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out bg-white"
           :class="
@@ -83,15 +149,16 @@ const handleSignUp = () => {
             </p>
 
             <div class="space-y-3 w-full max-w-sm">
+              <!-- ช่องกรอก Username -->
               <div class="relative">
                 <i
-                  class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
+                  class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
                 ></i>
                 <input
-                  type="email"
-                  v-model="signInForm.email"
+                  type="text"
+                  v-model="signInForm.username"
                   required
-                  placeholder="student@lamduan.mfu.ac.th"
+                  placeholder="ชื่อผู้ใช้งาน (Username)"
                   class="w-full pl-12 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-base"
                 />
               </div>
@@ -123,6 +190,7 @@ const handleSignUp = () => {
           </form>
         </div>
 
+        <!-- แผง Sign Up -->
         <div
           class="absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out bg-white"
           :class="
@@ -141,23 +209,51 @@ const handleSignUp = () => {
               <span class="text-4xl text-green-500 mb-2">🤝</span>
               สวัสดีเพื่อนใหม่!
             </h2>
-            <p class="text-sm text-gray-500 mb-6 max-w-sm">
+            <p class="text-sm text-gray-500 mb-4 max-w-sm">
               สมัครสมาชิกเพื่อเริ่มต้นค้นหาและจองห้องพักกับ MFU Property
             </p>
 
             <div class="space-y-3 w-full max-w-sm">
+              <!-- แยก ชื่อ และ นามสกุล ให้อยู่บรรทัดเดียวกัน -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="relative">
+                  <i
+                    class="fas fa-address-card absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-sm"
+                  ></i>
+                  <input
+                    type="text"
+                    v-model="signUpForm.firstName"
+                    required
+                    placeholder="ชื่อ"
+                    class="w-full pl-10 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
+                  />
+                </div>
+                <div class="relative">
+                  <input
+                    type="text"
+                    v-model="signUpForm.lastName"
+                    required
+                    placeholder="นามสกุล"
+                    class="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-sm"
+                  />
+                </div>
+              </div>
+
+              <!-- ช่อง Username -->
               <div class="relative">
                 <i
                   class="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
                 ></i>
                 <input
                   type="text"
-                  v-model="signUpForm.fullName"
+                  v-model="signUpForm.username"
                   required
-                  placeholder="ชื่อ-นามสกุล"
+                  placeholder="ชื่อผู้ใช้งาน (Username)"
                   class="w-full pl-12 pr-4 py-2.5 bg-gray-100 border border-gray-200 rounded-full focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner text-base"
                 />
               </div>
+
+              <!-- อีเมลและรหัสผ่าน -->
               <div class="relative">
                 <i
                   class="fas fa-envelope absolute left-4 top-1/2 -translate-y-1/2 text-[#d4af37] text-lg"
@@ -196,18 +292,18 @@ const handleSignUp = () => {
               </div>
             </div>
 
-            <div class="flex items-center mt-5 mb-5">
+            <div class="flex items-center mt-4 mb-4">
               <input
                 type="checkbox"
                 required
                 class="w-4 h-4 text-[#ba0b2f] rounded border-gray-300 focus:ring-[#ba0b2f]"
               />
-              <label class="ml-3 text-sm text-gray-600"
-                >ฉันยอมรับ
+              <label class="ml-3 text-sm text-gray-600">
+                ฉันยอมรับ
                 <a href="#" class="text-[#ba0b2f] hover:underline font-semibold"
                   >ข้อตกลงและเงื่อนไข</a
-                ></label
-              >
+                >
+              </label>
             </div>
             <button
               type="submit"
@@ -218,6 +314,7 @@ const handleSignUp = () => {
           </form>
         </div>
 
+        <!-- แผง Overlay สีแดง/ทองตรงกลาง -->
         <div
           class="absolute top-0 h-full w-1/2 left-1/2 overflow-hidden z-30 transition-all duration-700 ease-in-out"
           :class="isSignIn ? 'translate-x-0' : '-translate-x-full'"
