@@ -1,56 +1,74 @@
 import { createRouter, createWebHistory } from "vue-router";
-import LoginView from "../views/LoginView.vue";
+import LoginView from "@/views/users/LoginView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+  scrollBehavior() {
+    return { top: 0, behavior: "smooth" };
+  },
   routes: [
+    // 1. หน้า Login (เปิดมาเจอหน้านี้ก่อน)
     {
-      path: "/", // หน้าแรกเป็น Login
+      path: "/",
       name: "login",
       component: LoginView,
     },
+    // 2. กลุ่มหน้า User (ทุกหน้าในนี้จะถูกสวมหน้ากาก UserLayout ที่มี Navbar + Footer)
     {
-      path: "/home",
-      name: "home",
-      component: () => import("../views/HomeView.vue"),
-      meta: { requiresAuth: true }, // ติดล็อค
-    },
-    {
-      path: "/rooms",
-      name: "room-list",
-      component: () => import("../views/RoomListView.vue"),
-      meta: { requiresAuth: true }, // ติดล็อค
-    },
-    {
-      path: "/rooms/:id",
-      name: "room-detail",
-      component: () => import("../views/RoomDetailView.vue"),
+      path: "/user",
+      component: () => import("@/layouts/UserLayout.vue"),
       meta: { requiresAuth: true },
+      children: [
+        {
+          path: "/home",
+          name: "home",
+          component: () => import("@/views/users/HomeView.vue"),
+        },
+        {
+          path: "/rooms",
+          name: "room-list",
+          component: () => import("@/views/users/RoomListView.vue"),
+        },
+        {
+          path: "/rooms/:id",
+          name: "room-detail",
+          component: () => import("@/views/users/RoomDetailView.vue"),
+        },
+        {
+          path: "/booking/:id",
+          name: "booking",
+          component: () => import("@/views/users/BookingView.vue"),
+        },
+        {
+          path: "/dashboard",
+          name: "dashboard",
+          component: () => import("@/views/users/DashboardView.vue"),
+        },
+      ],
     },
+    // 3. กลุ่มหน้า Admin (ทุกหน้าในนี้จะถูกสวมหน้ากาก AdminLayout)
     {
-      path: "/booking/:id",
-      name: "booking",
-      component: () => import("../views/BookingView.vue"),
+      path: "/admin",
+      component: () => import("@/layouts/AdminLayout.vue"),
       meta: { requiresAuth: true },
-    },
-    {
-      path: "/dashboard",
-      name: "dashboard",
-      component: () => import("../views/DashboardView.vue"),
-      meta: { requiresAuth: true },
+      children: [
+        {
+          path: "dashboard",
+          name: "admin-dashboard",
+          component: () => import("@/views/admin/AdminDashboardView.vue"),
+        },
+      ],
     },
   ],
 });
 
-// --- ส่วนสำคัญ: ตัวตรวจเช็คก่อนเปลี่ยนหน้า ---
+// ระบบป้องกันคนไม่ล็อกอิน
 router.beforeEach((to, from, next) => {
   const isAuthenticated = localStorage.getItem("isLoggedIn") === "true";
 
-  if (to.name !== "login" && !isAuthenticated) {
-    // ถ้าจะไปหน้าอื่นแต่ยังไม่ Login ให้เด้งกลับไป Login
+  if (to.meta.requiresAuth && !isAuthenticated) {
     next({ name: "login" });
   } else if (to.name === "login" && isAuthenticated) {
-    // ถ้า Login แล้วแต่จะพยายามเข้าหน้า Login อีก ให้ส่งไปหน้า Home
     next({ name: "home" });
   } else {
     next();
