@@ -213,7 +213,7 @@ const confirmLogout = () => {
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
-                <i class="fas fa-images w-5"></i> จัดการแบนเนอร์ (Banners)
+                <i class="fas fa-bullhorn w-5"></i> การประกาศและโปรโมชั่น
               </button>
 
               <div class="pt-6 mt-6 border-t border-gray-100">

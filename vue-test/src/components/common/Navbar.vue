@@ -1,34 +1,54 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import Swal from "sweetalert2"; // ✨ เพิ่ม SweetAlert2
+import Swal from "sweetalert2";
 
 const router = useRouter();
 const isMenuOpen = ref(false);
+const isNotifOpen = ref(false); // ✨ จัดการเปิดปิดกล่องแจ้งเตือน
+
+// ✨ ข้อมูลแจ้งเตือนจำลอง
+const notifications = ref([
+  {
+    id: 1,
+    type: "promo",
+    title: "โปรโมชั่นใหม่!",
+    desc: "รับส่วนลด 20% ทันทีเมื่อกรอกโค้ด MFU2026",
+    time: "10 นาทีที่แล้ว",
+    read: false,
+  },
+  {
+    id: 2,
+    type: "status",
+    title: "การจองสำเร็จ",
+    desc: "การจองห้องประชุมคำมอกหลวง ได้รับการอนุมัติแล้ว",
+    time: "2 ชั่วโมงที่แล้ว",
+    read: true,
+  },
+]);
 
 const closeMenu = () => {
   isMenuOpen.value = false;
 };
+const toggleNotif = () => {
+  isNotifOpen.value = !isNotifOpen.value;
+};
+const markAllAsRead = () => {
+  notifications.value.forEach((n) => (n.read = true));
+};
 
-// ✨ ฟังก์ชัน Logout แบบ SweetAlert2
 const confirmLogout = () => {
-  // สำหรับ Navbar อย่าลืมใส่: isMenuOpen.value = false; ไว้บรรทัดแรกด้วยนะครับ
+  isMenuOpen.value = false;
   Swal.fire({
     html: `
       <div class="relative w-24 h-24 mx-auto mb-6">
-        <!-- เอฟเฟกต์วงแหวนกระเพื่อมด้านหลัง (Pulse effect) -->
         <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
-        <!-- วงกลมไอคอนหลัก -->
         <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
           <i class="fas fa-sign-out-alt ml-1 translate-x-0.5"></i>
         </div>
       </div>
-      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">
-        ออกจากระบบ?
-      </h3>
-      <p class="text-sm text-gray-500 font-medium px-2">
-        คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?
-      </p>
+      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">ออกจากระบบ?</h3>
+      <p class="text-sm text-gray-500 font-medium px-2">คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?</p>
     `,
     showCancelButton: true,
     confirmButtonText: "ออกจากระบบ",
@@ -36,12 +56,10 @@ const confirmLogout = () => {
     reverseButtons: true,
     buttonsStyling: false,
     customClass: {
-      popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl", // ขอบโค้งมนแบบพรีเมียม
+      popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
       actions: "flex flex-row gap-3 mt-8 w-full justify-center",
-      // ปุ่มออกจากระบบ: ใช้สีไล่ระดับ Gradient, มีเงาสีแดงตกกระทบ, ขยับขึ้นเวลานำเมาส์ชี้
       confirmButton:
         "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
-      // ปุ่มยกเลิก: สไตล์มินิมอล นุ่มนวล ดูไม่แย่งความสนใจ
       cancelButton:
         "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
     },
@@ -104,19 +122,102 @@ const confirmLogout = () => {
               ></span>
             </RouterLink>
 
-            <!-- ✨ ปุ่ม Logout ฝั่ง Desktop -->
-            <button
-              @click="confirmLogout"
-              class="group bg-white text-gray-600 px-5 py-2.5 rounded-full font-bold hover:bg-red-50 hover:text-[#ba0b2f] transition-all duration-300 border border-gray-200 hover:border-red-100 text-sm flex items-center gap-2 shadow-sm hover:shadow-md cursor-pointer"
-            >
-              <i
-                class="fas fa-sign-out-alt text-gray-400 group-hover:text-[#ba0b2f] transition-colors"
-              ></i>
-              ออกจากระบบ
-            </button>
+            <div class="flex items-center gap-4 pl-4 border-l border-gray-200">
+              <!-- ✨ ไอคอนกระดิ่งแจ้งเตือน -->
+              <div class="relative">
+                <button
+                  @click="toggleNotif"
+                  class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 hover:bg-red-50 hover:text-[#ba0b2f] flex items-center justify-center transition-colors relative cursor-pointer outline-none"
+                >
+                  <i class="fas fa-bell"></i>
+                  <span
+                    v-if="notifications.some((n) => !n.read)"
+                    class="absolute top-2 right-2.5 w-2 h-2 bg-[#ba0b2f] rounded-full border border-white"
+                  ></span>
+                </button>
+
+                <!-- กล่อง Popup แจ้งเตือน -->
+                <div
+                  v-if="isNotifOpen"
+                  class="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden animate-fade-down z-50"
+                >
+                  <div
+                    class="flex justify-between items-center p-4 border-b border-gray-50 bg-gray-50/50"
+                  >
+                    <h3 class="font-bold text-gray-900">การแจ้งเตือน</h3>
+                    <button
+                      @click="markAllAsRead"
+                      class="text-[10px] font-bold text-[#ba0b2f] hover:underline cursor-pointer"
+                    >
+                      อ่านทั้งหมด
+                    </button>
+                  </div>
+                  <div class="max-h-80 overflow-y-auto">
+                    <div
+                      v-for="notif in notifications"
+                      :key="notif.id"
+                      class="p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
+                      :class="!notif.read ? 'bg-red-50/30' : ''"
+                    >
+                      <div class="flex gap-3">
+                        <div
+                          class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                          :class="
+                            notif.type === 'promo'
+                              ? 'bg-yellow-50 text-yellow-600'
+                              : 'bg-green-50 text-green-600'
+                          "
+                        >
+                          <i
+                            class="fas"
+                            :class="
+                              notif.type === 'promo'
+                                ? 'fa-tags'
+                                : 'fa-check-circle'
+                            "
+                          ></i>
+                        </div>
+                        <div>
+                          <p class="text-sm font-bold text-gray-900 mb-0.5">
+                            {{ notif.title }}
+                          </p>
+                          <p class="text-xs text-gray-500 leading-relaxed">
+                            {{ notif.desc }}
+                          </p>
+                          <p class="text-[10px] font-bold text-gray-400 mt-2">
+                            <i class="far fa-clock"></i> {{ notif.time }}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                @click="confirmLogout"
+                class="group bg-white text-gray-600 px-5 py-2.5 rounded-full font-bold hover:bg-red-50 hover:text-[#ba0b2f] transition-all duration-300 border border-gray-200 hover:border-red-100 text-sm flex items-center gap-2 shadow-sm hover:shadow-md cursor-pointer"
+              >
+                <i
+                  class="fas fa-sign-out-alt text-gray-400 group-hover:text-[#ba0b2f] transition-colors"
+                ></i>
+                ออกจากระบบ
+              </button>
+            </div>
           </div>
 
-          <div class="flex md:hidden items-center">
+          <!-- Mobile menu button -->
+          <div class="flex md:hidden items-center gap-3">
+            <button
+              @click="toggleNotif"
+              class="relative w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center cursor-pointer"
+            >
+              <i class="fas fa-bell"></i>
+              <span
+                v-if="notifications.some((n) => !n.read)"
+                class="absolute top-2 right-2.5 w-2 h-2 bg-[#ba0b2f] rounded-full border border-white"
+              ></span>
+            </button>
             <button
               @click="isMenuOpen = !isMenuOpen"
               class="text-gray-600 hover:text-[#ba0b2f] focus:outline-none p-2 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center transition-colors cursor-pointer"
@@ -131,7 +232,7 @@ const confirmLogout = () => {
       <!-- เมนูมือถือ -->
       <div
         v-if="isMenuOpen"
-        class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl absolute w-full left-0 animate-fade-down"
+        class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl absolute w-full left-0 animate-fade-down z-50"
       >
         <div class="px-4 pt-4 pb-6 space-y-2">
           <RouterLink
@@ -153,10 +254,9 @@ const confirmLogout = () => {
             >รายการของฉัน</RouterLink
           >
           <div class="pt-4 border-t border-gray-100 mt-2">
-            <!-- ✨ ปุ่ม Logout ฝั่ง Mobile -->
             <button
               @click="confirmLogout"
-              class="w-full bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white py-4 rounded-xl font-bold shadow-md shadow-red-200 flex justify-center items-center gap-2 active:scale-95 transition-transform cursor-pointer"
+              class="w-full bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white py-4 rounded-xl font-bold shadow-md flex justify-center items-center gap-2 active:scale-95 transition-transform cursor-pointer"
             >
               <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
             </button>

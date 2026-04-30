@@ -14,7 +14,6 @@ const popularRooms = ref([
   { name: "ห้องประชุม ท่าสุด", usage: 35, color: "bg-yellow-500" },
 ]);
 
-// ✨ เพิ่มตัวแปรสำหรับเปิด/ปิด การแสดงรายได้ย้อนหลัง
 const isRevenueExpanded = ref(false);
 </script>
 
@@ -60,7 +59,6 @@ const isRevenueExpanded = ref(false);
         </div>
       </div>
 
-      <!-- ✨ กล่องรายได้ (เพิ่มลูกเล่นกดขยายดูย้อนหลัง) -->
       <div
         class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col justify-center transition-all duration-300"
       >
@@ -82,8 +80,6 @@ const isRevenueExpanded = ref(false);
             </p>
           </div>
         </div>
-
-        <!-- ส่วนที่กดคลิกได้ -->
         <div
           @click="isRevenueExpanded = !isRevenueExpanded"
           class="pt-3 border-t border-gray-100 cursor-pointer group select-none"
@@ -107,8 +103,6 @@ const isRevenueExpanded = ref(false);
               >฿{{ stats.lastMonthRevenue.toLocaleString() }}</span
             >
           </div>
-
-          <!-- ข้อมูลจำลองย้อนหลัง 2 เดือน (รวมเดือนที่ผ่านมาเป็น 3 เดือน) -->
           <div
             v-show="isRevenueExpanded"
             class="mt-3 flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100"
@@ -130,16 +124,56 @@ const isRevenueExpanded = ref(false);
       </div>
     </div>
 
+    <!-- ✨ ส่วน Data Visualization (Graphs & Charts) ตามเอกสาร Proposal ✨ -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <h3
+          class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
+        >
+          <i class="fas fa-chart-line text-[#ba0b2f]"></i> แนวโน้มรายได้
+          (Revenue Trend)
+        </h3>
+        <!-- ใช้ภาพจำลองกราฟแท่ง (Bar Chart) จาก QuickChart -->
+        <div
+          class="w-full h-64 bg-gray-50 rounded-2xl border border-gray-100 p-4 flex items-center justify-center"
+        >
+          <img
+            src="https://quickchart.io/chart?c={type:'bar',data:{labels:['ม.ค.','ก.พ.','มี.ค.','เม.ย.'],datasets:[{label:'รายได้',data:[110500,85000,98000,124500],backgroundColor:'#ba0b2f',borderRadius:5}]},options:{plugins:{legend:{display:false}}}}"
+            class="w-full h-full object-contain"
+            alt="Revenue Chart"
+          />
+        </div>
+      </div>
+
+      <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <h3
+          class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
+        >
+          <i class="fas fa-chart-pie text-[#d4af37]"></i> สัดส่วนประเภทผู้เช่า
+          (User Types)
+        </h3>
+        <!-- ใช้ภาพจำลองกราฟโดนัท (Doughnut Chart) จาก QuickChart -->
+        <div
+          class="w-full h-64 bg-gray-50 rounded-2xl border border-gray-100 p-4 flex items-center justify-center"
+        >
+          <img
+            src="https://quickchart.io/chart?c={type:'doughnut',data:{labels:['บุคคลภายนอก','หน่วยงานมฟล.','ร่วมจัด (Co-op)'],datasets:[{data:[55,30,15],backgroundColor:['#ba0b2f','#1f2937','#d4af37']}]}}"
+            class="w-full h-full object-contain"
+            alt="User Types Chart"
+          />
+        </div>
+      </div>
+    </div>
+
     <!-- อัตราการใช้งานห้องพัก -->
     <div class="grid grid-cols-1 gap-6">
       <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <h3
           class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
         >
-          <i class="fas fa-chart-bar text-[#ba0b2f]"></i> อัตราการใช้งานห้องพัก
+          <i class="fas fa-fire-alt text-orange-500"></i> อัตราการใช้งานห้องพัก
           (เดือนนี้)
         </h3>
-
         <div class="space-y-5">
           <div v-for="(room, index) in popularRooms" :key="index">
             <div class="flex justify-between items-center mb-2">
