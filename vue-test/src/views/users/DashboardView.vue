@@ -70,22 +70,33 @@ const saveProfile = async () => {
 
 const openPayment = (booking) => {
   Swal.fire({
-    title: "Scan to Pay",
+    title:
+      '<span class="font-extrabold text-2xl text-gray-900">แสกนเพื่อชำระเงิน</span>',
     html: `
-      <p class="text-sm text-gray-500 mb-4 font-medium">ยอดชำระสุทธิ: <span class="text-[#ba0b2f] font-black text-lg">฿${booking.totalPrice.toLocaleString()}</span></p>
-      <div class="bg-white p-4 rounded-3xl border-2 border-dashed border-gray-200 mb-4 inline-block mx-auto">
-        <img src="https://quickchart.io/qr?text=MFU_PAYMENT_ID_${booking.id}&size=250&margin=1" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg'" class="w-48 h-48 mx-auto" alt="Payment QR Code" />
+      <p class="text-sm text-gray-500 mb-4 font-medium">ยอดชำระสุทธิ: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
+      
+      <!-- โซน QR Code -->
+      <div class="bg-white p-4 rounded-3xl border border-gray-200 mb-4 inline-block mx-auto shadow-sm">
+        <img src="https://quickchart.io/qr?text=MFU_PAYMENT_ID_${booking.id}&size=250&margin=1" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg'" class="w-52 h-52 mx-auto" alt="Payment QR Code" />
       </div>
-      <div class="bg-blue-50 p-4 rounded-xl text-left flex gap-2 border border-blue-100 text-xs text-blue-800 font-medium">
-        <p>สแกนเพื่อชำระเงินผ่านแอปธนาคาร เมื่อชำระเสร็จแล้ว แอดมินจะตรวจสอบข้อมูลภายใน 1 ชั่วโมง</p>
+      
+      <div class="bg-blue-50 p-4 rounded-xl text-left flex gap-3 border border-blue-100 text-xs text-blue-800 font-medium mb-4">
+        <i class="fas fa-info-circle mt-0.5 text-blue-500 text-lg"></i>
+        <p>กรุณาสแกนเพื่อชำระเงินผ่านแอปพลิเคชันธนาคาร (PromptPay) เมื่อชำระเสร็จแล้ว ระบบจะตรวจสอบยอดเงินอัตโนมัติ</p>
+      </div>
+
+      <!-- ✨ เพิ่มเครดิต Opn Payments ตาม Requirement ✨ -->
+      <div class="flex items-center justify-center gap-2 mt-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest border-t border-gray-100 pt-4">
+        <i class="fas fa-shield-alt text-green-500"></i> Secure Payment Processing by <span class="text-gray-800 font-black tracking-normal">Opn Payments</span>
       </div>
     `,
     showConfirmButton: true,
     confirmButtonText: "ปิดหน้าต่าง",
     confirmButtonColor: "#111827",
     customClass: {
-      popup: "rounded-[2rem]",
-      confirmButton: "rounded-xl w-full py-3 tracking-widest cursor-pointer",
+      popup: "rounded-[2.5rem] p-8 max-w-md",
+      confirmButton:
+        "rounded-xl w-full py-3.5 font-bold tracking-widest cursor-pointer mt-2 hover:bg-black transition-colors",
     },
   });
 };

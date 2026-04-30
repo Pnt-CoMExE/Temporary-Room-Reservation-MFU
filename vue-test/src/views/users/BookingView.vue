@@ -10,14 +10,14 @@ const roomId = route.params.id;
 const loading = ref(true);
 const room = ref(null);
 
-// ✨ วันปัจจุบันในรูปแบบ YYYY-MM-DD สำหรับล็อก input min
+// วันปัจจุบันในรูปแบบ YYYY-MM-DD สำหรับล็อก input min
 const today = new Date().toISOString().split("T")[0];
 
-// ✨ จำลองข้อมูลการจองที่มีอยู่แล้ว (สำหรับตรวจสอบคิวว่างใน 1 สัปดาห์ข้างหน้า)
+// จำลองข้อมูลการจองที่มีอยู่แล้ว
 const existingBookings = ref([
-  { date: "2026-05-01", duration: "full" }, // วันพรุ่งนี้เต็มวัน
-  { date: "2026-05-03", duration: "half_morning" }, // วันที่ 3 จองเช้าแล้ว
-  { date: "2026-05-04", duration: "half_afternoon" }, // วันที่ 4 จองบ่ายแล้ว
+  { date: "2026-05-01", duration: "full" },
+  { date: "2026-05-03", duration: "half_morning" },
+  { date: "2026-05-04", duration: "half_afternoon" },
 ]);
 
 const bookingForm = ref({
@@ -25,6 +25,7 @@ const bookingForm = ref({
   userType: "",
   date: "",
   duration: "",
+  promoCode: "", // ✨ เพิ่มตัวแปรสำหรับเก็บโค้ดโปรโมชั่น
   acceptTerms: false,
 });
 
@@ -55,7 +56,12 @@ const addOns = ref([
   },
 ]);
 
-// ดึงข้อมูลห้อง (เหมือนเดิม)
+// ✨ ตัวแปรระบบส่วนลด
+const discountAmount = ref(0);
+const isPromoApplied = ref(false);
+const promoMessage = ref("");
+
+// ดึงข้อมูลห้อง
 const fetchRoomData = () => {
   setTimeout(() => {
     const roomsDatabase = {
@@ -106,17 +112,15 @@ const fetchRoomData = () => {
 
 onMounted(() => fetchRoomData());
 
-// ✨ ตรวจสอบสถานะความว่างของวันที่เลือก
 const dateStatus = computed(() => {
   if (!bookingForm.value.date) return null;
   const booking = existingBookings.value.find(
     (b) => b.date === bookingForm.value.date,
   );
-  if (!booking) return "available"; // ว่างทั้งวัน
-  return booking.duration; // 'full', 'half_morning', หรือ 'half_afternoon'
+  if (!booking) return "available";
+  return booking.duration;
 });
 
-// ✨ ล้างค่าช่วงเวลาถ้าเปลี่ยนวันที่แล้วชนกับคิวเดิม
 watch(
   () => bookingForm.value.date,
   () => {
@@ -124,7 +128,6 @@ watch(
   },
 );
 
-// การคำนวณราคา
 const currentPriceHalfDay = computed(() => {
   if (!room.value || !bookingForm.value.userType) return 0;
   if (bookingForm.value.userType === "external")
@@ -143,7 +146,8 @@ const currentPriceFullDay = computed(() => {
   return room.value.priceFullDayInternal;
 });
 
-const estimatedPrice = computed(() => {
+// ✨ คำนวณราคาแบบยังไม่หักส่วนลด (Subtotal)
+const subTotalPrice = computed(() => {
   if (!room.value || !bookingForm.value.userType || !bookingForm.value.duration)
     return 0;
   const isHalfDay =
@@ -158,6 +162,41 @@ const estimatedPrice = computed(() => {
   );
   return basePrice + addOnTotal;
 });
+
+// ✨ คำนวณราคาสุทธิ (หักส่วนลดแล้ว)
+const finalPrice = computed(() => {
+  return Math.max(0, subTotalPrice.value - discountAmount.value);
+});
+
+// ✨ ฟังก์ชันสำหรับตรวจสอบและใช้โค้ดโปรโมชั่น
+const applyPromoCode = () => {
+  const code = bookingForm.value.promoCode.trim().toUpperCase();
+  if (!code) return;
+
+  if (subTotalPrice.value === 0) {
+    promoMessage.value = "กรุณาเลือกประเภทหน่วยงานและช่วงเวลาก่อนใช้ส่วนลด";
+    isPromoApplied.value = false;
+    discountAmount.value = 0;
+    return;
+  }
+
+  // จำลองการตรวจสอบรหัส
+  if (code === "MFU2026") {
+    // ลด 20% จากยอดรวม
+    discountAmount.value = subTotalPrice.value * 0.2;
+    isPromoApplied.value = true;
+    promoMessage.value = "ส่วนลด 20% ถูกใช้งานแล้ว!";
+  } else if (code === "FREEMIC") {
+    // โค้ดฟรีไมค์ (จำลองลด 200)
+    discountAmount.value = 200;
+    isPromoApplied.value = true;
+    promoMessage.value = "รับส่วนลด ฿200 ฟรีไมโครโฟน!";
+  } else {
+    discountAmount.value = 0;
+    isPromoApplied.value = false;
+    promoMessage.value = "รหัสโปรโมชั่นไม่ถูกต้อง หรือหมดอายุแล้ว";
+  }
+};
 
 const submitBooking = () => {
   if (!bookingForm.value.acceptTerms) {
@@ -257,17 +296,38 @@ const submitBooking = () => {
               </p>
 
               <div
-                v-if="estimatedPrice > 0"
-                class="p-6 bg-red-50 rounded-2xl border border-red-100 text-center relative overflow-hidden"
+                v-if="subTotalPrice > 0"
+                class="p-6 bg-red-50 rounded-2xl border border-red-100 relative overflow-hidden"
               >
                 <p
-                  class="text-xs font-bold text-red-700 uppercase tracking-widest mb-1"
+                  class="text-xs font-bold text-red-700 uppercase tracking-widest mb-3 text-center"
                 >
                   ยอดชำระโดยประมาณ
                 </p>
-                <p class="text-4xl font-black text-[#ba0b2f]">
-                  ฿{{ estimatedPrice.toLocaleString() }}
-                </p>
+
+                <!-- ✨ แสดงราคาก่อนหักส่วนลด -->
+                <div
+                  class="flex justify-between items-center mb-1 text-sm font-medium text-gray-600"
+                >
+                  <span>ค่าบริการสุทธิ</span>
+                  <span>฿{{ subTotalPrice.toLocaleString() }}</span>
+                </div>
+
+                <!-- ✨ แสดงส่วนลด (ถ้ามี) -->
+                <div
+                  v-if="discountAmount > 0"
+                  class="flex justify-between items-center mb-3 text-sm font-bold text-green-600 border-b border-red-200/50 pb-3"
+                >
+                  <span>ส่วนลดโปรโมชั่น</span>
+                  <span>- ฿{{ discountAmount.toLocaleString() }}</span>
+                </div>
+
+                <!-- ✨ แสดงราคาสุทธิ -->
+                <div class="text-center mt-2">
+                  <p class="text-4xl font-black text-[#ba0b2f]">
+                    ฿{{ finalPrice.toLocaleString() }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -323,7 +383,6 @@ const submitBooking = () => {
                   </select>
                 </div>
 
-                <!-- ✨ ช่องเลือกวันที่ (ล็อกวันย้อนหลัง) -->
                 <div>
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
@@ -336,7 +395,6 @@ const submitBooking = () => {
                     required
                     class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
                   />
-                  <!-- แจ้งเตือนกรณีจองเต็มวัน -->
                   <p
                     v-if="dateStatus === 'full'"
                     class="text-red-500 text-[10px] font-bold mt-1 animate-pulse"
@@ -346,7 +404,6 @@ const submitBooking = () => {
                   </p>
                 </div>
 
-                <!-- ✨ ช่องเลือกช่วงเวลา (ปรับตามคิวที่มีอยู่) -->
                 <div class="md:col-span-2">
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
@@ -359,7 +416,6 @@ const submitBooking = () => {
                     class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm disabled:opacity-50"
                   >
                     <option value="" disabled>-- เลือกช่วงเวลา --</option>
-
                     <option
                       value="half_morning"
                       :disabled="dateStatus === 'half_morning'"
@@ -367,7 +423,6 @@ const submitBooking = () => {
                       ครึ่งวันเช้า (08:00 - 12:00 น.)
                       {{ dateStatus === "half_morning" ? "[ไม่ว่าง]" : "" }}
                     </option>
-
                     <option
                       value="half_afternoon"
                       :disabled="dateStatus === 'half_afternoon'"
@@ -375,7 +430,6 @@ const submitBooking = () => {
                       ครึ่งวันบ่าย (13:00 - 17:00 น.)
                       {{ dateStatus === "half_afternoon" ? "[ไม่ว่าง]" : "" }}
                     </option>
-
                     <option value="full" :disabled="dateStatus !== 'available'">
                       เต็มวัน (08:00 - 17:00 น.)
                       {{
@@ -437,6 +491,66 @@ const submitBooking = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <!-- ✨ โปรโมชั่นโค้ด (ตาม Requirement) ✨ -->
+              <div class="pt-4">
+                <h2
+                  class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4 border-b border-gray-100 pb-4"
+                >
+                  <span
+                    class="w-10 h-10 bg-[#d4af37] text-white rounded-full flex items-center justify-center text-lg"
+                    >3</span
+                  >
+                  รหัสโปรโมชั่น / ส่วนลด
+                </h2>
+                <div
+                  class="flex flex-col sm:flex-row gap-4 items-start sm:items-center"
+                >
+                  <div class="flex-1 w-full">
+                    <input
+                      type="text"
+                      v-model="bookingForm.promoCode"
+                      placeholder="ระบุโค้ดส่วนลด (เช่น MFU2026)"
+                      class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-bold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none uppercase shadow-sm"
+                      :disabled="isPromoApplied"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    @click="
+                      isPromoApplied
+                        ? ((isPromoApplied = false),
+                          (discountAmount = 0),
+                          (bookingForm.promoCode = ''),
+                          (promoMessage = ''))
+                        : applyPromoCode()
+                    "
+                    class="w-full sm:w-auto px-6 py-3.5 rounded-xl font-bold shadow-sm transition-all whitespace-nowrap cursor-pointer"
+                    :class="
+                      isPromoApplied
+                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                        : 'bg-gray-900 text-white hover:bg-black'
+                    "
+                  >
+                    {{ isPromoApplied ? "ยกเลิกโค้ด" : "ใช้ส่วนลด" }}
+                  </button>
+                </div>
+                <p
+                  v-if="promoMessage"
+                  class="text-xs font-bold mt-2"
+                  :class="isPromoApplied ? 'text-green-600' : 'text-red-500'"
+                >
+                  <i
+                    class="fas"
+                    :class="
+                      isPromoApplied
+                        ? 'fa-check-circle'
+                        : 'fa-exclamation-circle'
+                    "
+                  ></i>
+                  {{ promoMessage }}
+                </p>
               </div>
 
               <div
