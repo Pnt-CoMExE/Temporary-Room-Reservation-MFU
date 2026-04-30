@@ -1,6 +1,6 @@
 <script setup>
 import { RouterView } from "vue-router";
-// เช็คให้แน่ใจว่า import Navbar ถูกตำแหน่ง (โฟลเดอร์ components/common)
+
 import Navbar from "@/components/common/Navbar.vue";
 </script>
 

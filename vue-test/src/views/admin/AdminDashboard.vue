@@ -2,7 +2,7 @@
 import { ref } from "vue";
 
 const stats = ref({
-  pendingCount: 5,
+  pendingCount: 1,
   approvedToday: 12,
   currentMonthRevenue: 124500,
   lastMonthRevenue: 98000,
@@ -14,40 +14,13 @@ const popularRooms = ref([
   { name: "ห้องประชุม ท่าสุด", usage: 35, color: "bg-yellow-500" },
 ]);
 
-const recentActivities = ref([
-  {
-    id: 1,
-    text: "ได้รับคำขอจองใหม่ (BK-202603017)",
-    time: "10 นาทีที่แล้ว",
-    icon: "fas fa-envelope-open-text",
-    color: "text-blue-500 bg-blue-50",
-  },
-  {
-    id: 2,
-    text: "คุณสมหญิง แจ้งชำระเงิน (BK-202603012)",
-    time: "1 ชั่วโมงที่แล้ว",
-    icon: "fas fa-file-invoice-dollar",
-    color: "text-green-500 bg-green-50",
-  },
-  {
-    id: 3,
-    text: "คุณอนุมัติคำขอ (BK-202603014)",
-    time: "2 ชั่วโมงที่แล้ว",
-    icon: "fas fa-check",
-    color: "text-[#ba0b2f] bg-red-50",
-  },
-  {
-    id: 4,
-    text: "เพิ่มห้อง 'ห้องบรรยาย C1' เข้าระบบ",
-    time: "เมื่อวานนี้",
-    icon: "fas fa-plus",
-    color: "text-gray-500 bg-gray-100",
-  },
-]);
+// ✨ เพิ่มตัวแปรสำหรับเปิด/ปิด การแสดงรายได้ย้อนหลัง
+const isRevenueExpanded = ref(false);
 </script>
 
 <template>
   <div class="space-y-8 animate-fade-up">
+    <!-- ส่วนแสดงสถิติ (Stats) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       <div
         class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
@@ -87,8 +60,9 @@ const recentActivities = ref([
         </div>
       </div>
 
+      <!-- ✨ กล่องรายได้ (เพิ่มลูกเล่นกดขยายดูย้อนหลัง) -->
       <div
-        class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col justify-center"
+        class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col justify-center transition-all duration-300"
       >
         <div
           class="absolute right-0 top-0 w-2 h-full bg-linear-to-b from-[#d4af37] to-yellow-500"
@@ -108,20 +82,56 @@ const recentActivities = ref([
             </p>
           </div>
         </div>
+
+        <!-- ส่วนที่กดคลิกได้ -->
         <div
-          class="pt-3 border-t border-gray-100 flex justify-between items-center"
+          @click="isRevenueExpanded = !isRevenueExpanded"
+          class="pt-3 border-t border-gray-100 cursor-pointer group select-none"
         >
-          <span class="text-sm text-gray-500 font-bold"
-            >รายได้เดือนที่ผ่านมา</span
+          <div class="flex justify-between items-center">
+            <span
+              class="text-sm text-gray-500 font-bold group-hover:text-[#ba0b2f] transition-colors flex items-center gap-1.5"
+            >
+              รายได้เดือนที่ผ่านมา
+              <i
+                class="fas text-[10px] transition-transform duration-300"
+                :class="
+                  isRevenueExpanded
+                    ? 'fa-chevron-up text-[#ba0b2f]'
+                    : 'fa-chevron-down opacity-50'
+                "
+              ></i>
+            </span>
+            <span
+              class="text-sm font-black text-gray-700 group-hover:text-[#ba0b2f] transition-colors"
+              >฿{{ stats.lastMonthRevenue.toLocaleString() }}</span
+            >
+          </div>
+
+          <!-- ข้อมูลจำลองย้อนหลัง 2 เดือน (รวมเดือนที่ผ่านมาเป็น 3 เดือน) -->
+          <div
+            v-show="isRevenueExpanded"
+            class="mt-3 flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100"
           >
-          <span class="text-sm font-black text-gray-700"
-            >฿{{ stats.lastMonthRevenue.toLocaleString() }}</span
-          >
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-400 font-bold"
+                ><i class="far fa-calendar-alt mr-1"></i> กุมภาพันธ์ 2569</span
+              >
+              <span class="text-xs font-black text-gray-500">฿85,000</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-xs text-gray-400 font-bold"
+                ><i class="far fa-calendar-alt mr-1"></i> มกราคม 2569</span
+              >
+              <span class="text-xs font-black text-gray-500">฿110,500</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- อัตราการใช้งานห้องพัก -->
+    <div class="grid grid-cols-1 gap-6">
       <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
         <h3
           class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
@@ -129,6 +139,7 @@ const recentActivities = ref([
           <i class="fas fa-chart-bar text-[#ba0b2f]"></i> อัตราการใช้งานห้องพัก
           (เดือนนี้)
         </h3>
+
         <div class="space-y-5">
           <div v-for="(room, index) in popularRooms" :key="index">
             <div class="flex justify-between items-center mb-2">
@@ -145,32 +156,6 @@ const recentActivities = ref([
                 class="h-2.5 rounded-full transition-all duration-1000"
                 :style="`width: ${room.usage}%`"
               ></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
-        <h3
-          class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
-        >
-          <i class="fas fa-history text-[#ba0b2f]"></i> ความเคลื่อนไหวล่าสุด
-        </h3>
-        <div class="space-y-6">
-          <div
-            v-for="activity in recentActivities"
-            :key="activity.id"
-            class="flex gap-4 items-start"
-          >
-            <div
-              :class="activity.color"
-              class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-sm"
-            >
-              <i :class="activity.icon"></i>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-gray-800">{{ activity.text }}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ activity.time }}</p>
             </div>
           </div>
         </div>

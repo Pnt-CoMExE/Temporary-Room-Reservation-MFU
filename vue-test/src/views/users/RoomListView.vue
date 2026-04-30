@@ -5,13 +5,14 @@ import RoomCard from "@/components/room/RoomCard.vue";
 
 const route = useRoute();
 const searchQuery = ref("");
+const selectedDate = ref(""); // ✨ เพิ่มตัวแปรสำหรับวันที่
 const selectedType = ref("");
 const selectedCapacity = ref("");
 const sortBy = ref("default");
 
 onMounted(() => {
   if (route.query.q) searchQuery.value = route.query.q;
-  if (route.query.date) console.log("วันที่ต้องการใช้งาน:", route.query.date);
+  if (route.query.date) selectedDate.value = route.query.date; // ✨ ดึงค่าวันที่มาจากหน้า Home
   if (route.query.loc) selectedType.value = route.query.loc;
 });
 
@@ -25,7 +26,8 @@ const rooms = ref([
     image: "/images/room1.jpg",
     isAvailable: true,
     priceHalfDayInternal: 2400,
-  },
+    bookedDates: ["2026-03-25", "2026-03-26"],
+  }, // จำลองว่าห้องนี้ถูกจองวันที่ 25-26 มีนา
   {
     id: 2,
     name: "ห้องประชุมคำมอกหลวง",
@@ -35,6 +37,7 @@ const rooms = ref([
     image: "/images/room2.jpg",
     isAvailable: true,
     priceHalfDayInternal: 6000,
+    bookedDates: [],
   },
   {
     id: 3,
@@ -45,7 +48,8 @@ const rooms = ref([
     image: "/images/room3.jpg",
     isAvailable: true,
     priceHalfDayInternal: 3000,
-  },
+    bookedDates: ["2026-04-10"],
+  }, // จำลองว่าห้องนี้ถูกจอง 10 เมษา
   {
     id: 4,
     name: "ห้องบรรยายประดู่แดง 1 , 2",
@@ -55,6 +59,7 @@ const rooms = ref([
     image: "/images/room4.jpg",
     isAvailable: true,
     priceHalfDayInternal: 8200,
+    bookedDates: [],
   },
   {
     id: 5,
@@ -65,6 +70,7 @@ const rooms = ref([
     image: "/images/room5.jpg",
     isAvailable: false,
     priceHalfDayInternal: 4000,
+    bookedDates: [],
   },
   {
     id: 6,
@@ -75,23 +81,33 @@ const rooms = ref([
     image: "/images/room6.jpg",
     isAvailable: true,
     priceHalfDayInternal: 3030,
+    bookedDates: [],
   },
 ]);
 
 const filteredRooms = computed(() => {
   let result = rooms.value;
+
   if (searchQuery.value)
     result = result.filter((r) =>
       r.name.toLowerCase().includes(searchQuery.value.toLowerCase()),
     );
   if (selectedType.value)
     result = result.filter((r) => r.type === selectedType.value);
+
   if (selectedCapacity.value === "small")
     result = result.filter((r) => r.capacity <= 50);
   else if (selectedCapacity.value === "medium")
     result = result.filter((r) => r.capacity > 50 && r.capacity <= 150);
   else if (selectedCapacity.value === "large")
     result = result.filter((r) => r.capacity > 150);
+
+  // ✨ ระบบฟิลเตอร์วันที่: จะซ่อนห้องที่ระบุว่า isAvailable: false อยู่แล้ว และซ่อนห้องที่ถูกจองในวันที่ผู้ใช้เลือกค้นหา
+  if (selectedDate.value) {
+    result = result.filter(
+      (r) => r.isAvailable && !r.bookedDates.includes(selectedDate.value),
+    );
+  }
 
   if (sortBy.value === "capacity_asc")
     result = result.slice().sort((a, b) => a.capacity - b.capacity);
@@ -101,6 +117,7 @@ const filteredRooms = computed(() => {
     result = result
       .slice()
       .sort((a, b) => a.priceHalfDayInternal - b.priceHalfDayInternal);
+
   return result;
 });
 </script>
@@ -113,7 +130,6 @@ const filteredRooms = computed(() => {
       <div class="absolute inset-0 z-0">
         <img
           src="https://static.thairath.co.th/media/dFQROr7oWzulq5Fa5KTT15OVLSTQhWtkEWq8KGIaO0aDoI1BaMC9XRYanYRgyuBbONE.webp"
-          alt="MFU Background"
           class="w-full h-full object-cover filter brightness-[0.6]"
         />
         <div
@@ -140,20 +156,35 @@ const filteredRooms = computed(() => {
       <div
         class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 mb-12 -mt-24 relative z-20"
       >
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- ✨ เปลี่ยนเป็น Grid 5 คอลัมน์สำหรับเพิ่มช่องวันที่ -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <div>
             <label
               class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-              ><i class="fas fa-search text-[#ba0b2f] mr-1"></i>
-              ค้นหาชื่อห้อง</label
+              ><i class="fas fa-search text-[#ba0b2f] mr-1"></i> ค้นหา</label
             >
             <input
               type="text"
               v-model="searchQuery"
-              placeholder="พิมพ์ชื่อห้อง หรืออาคาร..."
+              placeholder="ชื่อห้อง/อาคาร..."
               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-semibold"
             />
           </div>
+
+          <!-- ✨ ช่องเลือกวันที่ -->
+          <div>
+            <label
+              class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
+              ><i class="far fa-calendar-alt text-[#ba0b2f] mr-1"></i>
+              วันที่ต้องการ</label
+            >
+            <input
+              type="date"
+              v-model="selectedDate"
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-semibold"
+            />
+          </div>
+
           <div>
             <label
               class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
@@ -209,26 +240,29 @@ const filteredRooms = computed(() => {
         class="mb-8 flex items-center justify-between border-b border-gray-200 pb-4"
       >
         <p class="text-gray-600 font-medium text-lg">
-          พบห้องที่ตรงกับเงื่อนไข
+          พบห้องว่าง
           <span class="text-[#ba0b2f] text-2xl font-black mx-1">{{
             filteredRooms.length
           }}</span>
           ห้อง
         </p>
+        <!-- ✨ อัปเดตปุ่มล้างตัวกรองให้เคลียร์ค่า selectedDate ด้วย -->
         <button
           v-if="
             searchQuery ||
+            selectedDate ||
             selectedType ||
             selectedCapacity ||
             sortBy !== 'default'
           "
           @click="
             searchQuery = '';
+            selectedDate = '';
             selectedType = '';
             selectedCapacity = '';
             sortBy = 'default';
           "
-          class="text-sm font-bold text-[#ba0b2f] hover:text-[#8c0823] hover:underline flex items-center gap-1 transition-colors"
+          class="text-sm font-bold text-[#ba0b2f] hover:text-[#8c0823] hover:underline flex items-center gap-1 transition-colors cursor-pointer"
         >
           <i class="fas fa-times-circle"></i> ล้างตัวกรอง
         </button>
@@ -248,10 +282,10 @@ const filteredRooms = computed(() => {
           <i class="fas fa-search-minus"></i>
         </div>
         <h3 class="text-2xl font-bold text-gray-800 mb-3">
-          ไม่พบห้องที่คุณกำลังมองหา
+          ไม่พบห้องว่างในวันที่หรือเงื่อนไขที่เลือก
         </h3>
         <p class="text-gray-500 max-w-sm mx-auto leading-relaxed">
-          ลองเปลี่ยนคำค้นหา หรือรีเซ็ตตัวกรองเพื่อดูห้องพักรายการอื่นที่มีในระบบ
+          ลองเปลี่ยนวันเวลา หรือรีเซ็ตตัวกรองเพื่อดูห้องพักรายการอื่น
         </p>
       </div>
     </div>

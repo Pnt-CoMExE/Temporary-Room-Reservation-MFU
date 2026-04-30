@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import RoomCard from "@/components/room/RoomCard.vue";
 
@@ -21,6 +21,56 @@ const handleSearch = () => {
     },
   });
 };
+
+// ✨ ข้อมูล Banner จำลอง (ดึงจาก Database จริงในอนาคต)
+const banners = ref([
+  {
+    id: 1,
+    image:
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop",
+    title: "ต้อนรับเปิดเทอมใหม่ ลดราคาพื้นที่กิจกรรม 20%",
+    link: "/rooms",
+  },
+  {
+    id: 2,
+    image:
+      "https://images.unsplash.com/photo-1511578314322-379afb476865?q=80&w=2000&auto=format&fit=crop",
+    title: "เปิดให้บริการแล้ว! MFU Co-Working Space",
+    link: "/rooms",
+  },
+  {
+    id: 3,
+    image:
+      "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2000&auto=format&fit=crop",
+    title: "จองลานกิจกรรมประดู่แดงล่วงหน้า รับฟรีอุปกรณ์เสริม",
+    link: "/rooms",
+  },
+]);
+
+const currentBanner = ref(0);
+let bannerInterval = null;
+
+const nextBanner = () => {
+  currentBanner.value = (currentBanner.value + 1) % banners.value.length;
+};
+
+const prevBanner = () => {
+  currentBanner.value =
+    (currentBanner.value - 1 + banners.value.length) % banners.value.length;
+};
+
+const setBanner = (index) => {
+  currentBanner.value = index;
+};
+
+onMounted(() => {
+  // เลื่อน Banner อัตโนมัติทุกๆ 5 วินาที
+  bannerInterval = setInterval(nextBanner, 5000);
+});
+
+onUnmounted(() => {
+  if (bannerInterval) clearInterval(bannerInterval);
+});
 
 const featuredRooms = ref([
   {
@@ -58,6 +108,7 @@ const featuredRooms = ref([
 
 <template>
   <div class="min-h-screen bg-[#f8f9fa] flex flex-col font-sans">
+    <!-- Hero Section -->
     <div
       class="relative pt-32 pb-48 lg:pt-40 lg:pb-56 flex items-center justify-center overflow-hidden"
     >
@@ -86,9 +137,8 @@ const featuredRooms = ref([
           ค้นหาและจองพื้นที่ <br class="hidden md:block" />
           <span
             class="text-transparent bg-clip-text bg-linear-to-r from-[#d4af37] to-yellow-200"
+            >มหาวิทยาลัยแม่ฟ้าหลวง</span
           >
-            มหาวิทยาลัยแม่ฟ้าหลวง
-          </span>
         </h1>
         <p
           class="text-lg md:text-xl text-gray-100 mb-12 font-medium max-w-2xl mx-auto drop-shadow-md"
@@ -126,7 +176,6 @@ const featuredRooms = ref([
                 />
               </div>
             </div>
-
             <div
               class="flex-1 px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-text transition-colors group"
             >
@@ -147,7 +196,6 @@ const featuredRooms = ref([
                 />
               </div>
             </div>
-
             <div
               class="flex-1 px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-pointer transition-colors group relative"
             >
@@ -175,11 +223,10 @@ const featuredRooms = ref([
                 ></i>
               </div>
             </div>
-
             <div class="p-2 w-full md:w-auto mt-2 md:mt-0">
               <button
                 type="submit"
-                class="w-full md:w-auto bg-[#ba0b2f] hover:bg-[#8c0823] text-white text-base font-bold py-4 md:py-4 px-8 rounded-2xl md:rounded-full transition-all duration-300 shadow-md hover:shadow-xl flex justify-center items-center gap-2 transform hover:-translate-y-0.5"
+                class="w-full md:w-auto bg-[#ba0b2f] hover:bg-[#8c0823] text-white text-base font-bold py-4 px-8 rounded-2xl md:rounded-full transition-all duration-300 shadow-md hover:shadow-xl flex justify-center items-center gap-2 transform hover:-translate-y-0.5"
               >
                 <span>ค้นหาพื้นที่</span>
                 <i class="fas fa-arrow-right ml-1"></i>
@@ -190,9 +237,81 @@ const featuredRooms = ref([
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 w-full">
+      <!-- ✨ ส่วนของ Banner Slider -->
       <div
-        class="mb-12 flex flex-col sm:flex-row justify-between items-end gap-4 border-b border-gray-200 pb-5"
+        v-if="banners.length > 0"
+        class="mb-16 relative rounded-3xl overflow-hidden shadow-2xl group animate-fade-up"
+      >
+        <div
+          class="relative h-48 sm:h-64 md:h-80 lg:h-96 w-full overflow-hidden"
+        >
+          <div
+            class="flex h-full transition-transform duration-700 ease-in-out"
+            :style="{ transform: `translateX(-${currentBanner * 100}%)` }"
+          >
+            <div
+              v-for="banner in banners"
+              :key="banner.id"
+              class="w-full h-full shrink-0 relative cursor-pointer"
+              @click="router.push(banner.link)"
+            >
+              <img
+                :src="banner.image"
+                :alt="banner.title"
+                class="w-full h-full object-cover"
+              />
+              <div
+                class="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"
+              ></div>
+              <div class="absolute bottom-0 left-0 p-6 md:p-10 w-full">
+                <span
+                  class="inline-block px-3 py-1 bg-[#ba0b2f] text-white text-[10px] font-bold uppercase tracking-wider rounded-md mb-3"
+                  >Announcement</span
+                >
+                <h2
+                  class="text-white text-xl md:text-3xl font-extrabold drop-shadow-md truncate"
+                >
+                  {{ banner.title }}
+                </h2>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ปุ่มเลื่อนซ้าย/ขวา -->
+        <button
+          @click="prevBanner"
+          class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-[#ba0b2f] cursor-pointer"
+        >
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        <button
+          @click="nextBanner"
+          class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-[#ba0b2f] cursor-pointer"
+        >
+          <i class="fas fa-chevron-right"></i>
+        </button>
+
+        <!-- จุด Indicators -->
+        <div class="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
+          <button
+            v-for="(_, index) in banners"
+            :key="index"
+            @click="setBanner(index)"
+            class="w-2.5 h-2.5 rounded-full transition-all cursor-pointer"
+            :class="
+              currentBanner === index
+                ? 'bg-[#d4af37] w-8'
+                : 'bg-white/50 hover:bg-white/80'
+            "
+          ></button>
+        </div>
+      </div>
+
+      <!-- พื้นที่แนะนำ -->
+      <div
+        class="mb-12 flex flex-col sm:flex-row justify-between items-end gap-4 border-b border-gray-200 pb-5 mt-10"
       >
         <div>
           <h2
@@ -223,6 +342,7 @@ const featuredRooms = ref([
       </div>
     </div>
 
+    <!-- ✨ ขั้นตอนการทำงาน (How it works) ✨ -->
     <div class="bg-white py-24 border-t border-gray-100">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <span
@@ -287,6 +407,7 @@ const featuredRooms = ref([
       </div>
     </div>
 
+    <!-- ✨ Big Footer ✨ -->
     <footer
       class="bg-[#111827] text-white py-16 mt-auto border-t-[6px] border-[#ba0b2f]"
     >

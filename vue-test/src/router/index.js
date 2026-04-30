@@ -64,13 +64,21 @@ const router = createRouter({
 
 // ระบบป้องกันคนไม่ล็อกอิน
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = localStorage.getItem("isLoggedIn") === "true";
+  // เช็คว่ามีข้อมูล userEmail ใน localStorage ไหม (ถ้ามีแปลว่า Login แล้ว)
+  const isLoggedIn = localStorage.getItem("userEmail");
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next({ name: "login" });
-  } else if (to.name === "login" && isAuthenticated) {
-    next({ name: "home" });
+  // กำหนดชื่อ path ที่อนุญาตให้เข้าได้โดยไม่ต้อง Login (เช่น หน้าล็อกอิน หรือหน้าสมัครสมาชิก)
+  const publicPages = ["/"];
+  const authRequired = !publicPages.includes(to.path);
+
+  if (authRequired && !isLoggedIn) {
+    // 1. ถ้าหน้าที่กำลังจะไป "ต้อง Login" แต่ "ยังไม่ได้ Login" -> เด้งไปหน้า Login
+    next("/");
+  } else if (to.path === "/" && isLoggedIn) {
+    // 2. ถ้า "Login แล้ว" แต่ดันจะกดเข้าหน้า Login อีก -> เด้งไปหน้า Dashboard หรือ Home
+    next("/dashboard"); // หรือเปลี่ยนเป็น '/home' ตามที่คุณต้องการ
   } else {
+    // 3. กรณีอื่นๆ ให้ผ่านเข้าหน้าได้ปกติ
     next();
   }
 });

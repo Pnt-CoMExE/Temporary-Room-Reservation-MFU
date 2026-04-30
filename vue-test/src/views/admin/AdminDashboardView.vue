@@ -1,20 +1,21 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import AdminDashboard from "@/components/admin/AdminDashboard.vue";
-import AdminBookings from "@/components/admin/AdminBookings.vue";
-import AdminRooms from "@/components/admin/AdminRooms.vue";
+import Swal from "sweetalert2";
+import AdminDashboard from "./AdminDashboard.vue";
+import AdminBookings from "./AdminBookings.vue";
+import AdminRooms from "./AdminRooms.vue";
+import AdminActivityLog from "./AdminActivityLog.vue";
+import AdminBanners from "./AdminBanners.vue";
 
 const router = useRouter();
-const activeTab = ref("bookings");
-const showLogoutModal = ref(false);
+const activeTab = ref("overview");
 
 const adminProfile = ref({
   fullName: "เจ้าหน้าที่ จัดการทรัพย์สิน",
-  role: "Super Admin",
+  role: "Admin",
 });
 
-// ✨ อัปเดตข้อมูลจำลองให้มีครบ 4 สถานะ
 const bookings = ref([
   {
     id: "BK-202603015",
@@ -63,9 +64,36 @@ const pendingCount = computed(() => {
 });
 
 const confirmLogout = () => {
-  showLogoutModal.value = false;
-  localStorage.clear();
-  router.push("/");
+  Swal.fire({
+    html: `
+      <div class="relative w-24 h-24 mx-auto mb-6">
+        <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
+        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
+          <i class="fas fa-sign-out-alt ml-1 translate-x-0.5"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">ออกจากระบบ?</h3>
+      <p class="text-sm text-gray-500 font-medium px-2">คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?</p>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "ออกจากระบบ",
+    cancelButtonText: "ยกเลิก",
+    reverseButtons: true,
+    buttonsStyling: false,
+    customClass: {
+      popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
+      actions: "flex flex-row gap-3 mt-8 w-full justify-center",
+      confirmButton:
+        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
+      cancelButton:
+        "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.clear();
+      router.push("/");
+    }
+  });
 };
 </script>
 
@@ -99,9 +127,7 @@ const confirmLogout = () => {
       </div>
     </div>
 
-    <div
-      class="max-w-350 mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20"
-    >
+    <div class="max-w-350 mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
       <div class="flex flex-col xl:flex-row gap-8">
         <div class="w-full xl:w-1/4">
           <div
@@ -130,11 +156,10 @@ const confirmLogout = () => {
                     ? 'bg-red-50 text-[#ba0b2f]'
                     : 'text-gray-600 hover:bg-gray-50'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left"
+                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
                 <i class="fas fa-chart-pie w-5"></i> Dashboard
               </button>
-
               <button
                 @click="activeTab = 'bookings'"
                 :class="
@@ -142,7 +167,7 @@ const confirmLogout = () => {
                     ? 'bg-red-50 text-[#ba0b2f]'
                     : 'text-gray-600 hover:bg-gray-50'
                 "
-                class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left group"
+                class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left group cursor-pointer"
               >
                 <div class="flex items-center gap-4">
                   <i class="fas fa-clipboard-list w-5"></i> จัดการคำขอจอง
@@ -154,7 +179,6 @@ const confirmLogout = () => {
                   {{ pendingCount }}
                 </div>
               </button>
-
               <button
                 @click="activeTab = 'rooms'"
                 :class="
@@ -162,18 +186,44 @@ const confirmLogout = () => {
                     ? 'bg-red-50 text-[#ba0b2f]'
                     : 'text-gray-600 hover:bg-gray-50'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left"
+                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
                 <i class="fas fa-building w-5"></i> ข้อมูลห้องพัก (Rooms)
               </button>
+
+              <button
+                @click="activeTab = 'logs'"
+                :class="
+                  activeTab === 'logs'
+                    ? 'bg-red-50 text-[#ba0b2f]'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+              >
+                <i class="fas fa-history w-5"></i> ประวัติการทำงาน (Logs)
+              </button>
+
+              <!-- ✨ เมนูใหม่ จัดการแบนเนอร์ -->
+              <button
+                @click="activeTab = 'banners'"
+                :class="
+                  activeTab === 'banners'
+                    ? 'bg-red-50 text-[#ba0b2f]'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+              >
+                <i class="fas fa-images w-5"></i> จัดการแบนเนอร์ (Banners)
+              </button>
+
               <div class="pt-6 mt-6 border-t border-gray-100">
                 <button
-                  @click="showLogoutModal = true"
-                  class="group w-full flex items-center justify-between px-5 py-3.5 rounded-xl text-gray-500 hover:bg-red-50 transition-all font-bold text-sm"
+                  @click="confirmLogout"
+                  class="group w-full flex items-center justify-between px-5 py-3.5 rounded-xl text-gray-500 hover:bg-red-50 transition-all font-bold text-sm cursor-pointer"
                 >
                   <div class="flex items-center gap-4">
                     <div
-                      class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                      class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:text-[#ba0b2f] transition-colors"
                     >
                       <i class="fas fa-sign-out-alt"></i>
                     </div>
@@ -192,41 +242,9 @@ const confirmLogout = () => {
             :initialBookings="bookings"
           />
           <AdminRooms v-if="activeTab === 'rooms'" />
-        </div>
-      </div>
-    </div>
-
-    <div
-      v-if="showLogoutModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md px-4"
-    >
-      <div
-        class="bg-white rounded-4xl p-8 max-w-sm w-full shadow-2xl text-center"
-      >
-        <div
-          class="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-red-500 to-[#ba0b2f]"
-        ></div>
-        <div
-          class="w-24 h-24 rounded-full bg-red-50 text-[#ba0b2f] mx-auto mb-6 flex items-center justify-center text-4xl shadow-inner border-[6px] border-white ring-1 ring-red-100"
-        >
-          <i class="fas fa-sign-out-alt"></i>
-        </div>
-        <h3 class="text-2xl font-extrabold text-gray-900 mb-3 tracking-tight">
-          ออกจากระบบ?
-        </h3>
-        <div class="flex gap-4 mt-8">
-          <button
-            @click="showLogoutModal = false"
-            class="flex-1 py-4 bg-white text-gray-700 font-bold rounded-2xl border-2 border-gray-100 hover:bg-gray-50 transition-all text-sm uppercase tracking-wider"
-          >
-            ยกเลิก
-          </button>
-          <button
-            @click="confirmLogout"
-            class="flex-1 py-4 bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white font-bold rounded-2xl hover:shadow-lg transition-all text-sm uppercase tracking-wider"
-          >
-            ออกจากระบบ
-          </button>
+          <AdminActivityLog v-if="activeTab === 'logs'" />
+          <!-- ✨ แสดง Component แบนเนอร์ -->
+          <AdminBanners v-if="activeTab === 'banners'" />
         </div>
       </div>
     </div>

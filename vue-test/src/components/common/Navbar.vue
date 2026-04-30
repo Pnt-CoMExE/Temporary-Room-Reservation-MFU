@@ -1,24 +1,56 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import Swal from "sweetalert2"; // ✨ เพิ่ม SweetAlert2
+
 const router = useRouter();
-
 const isMenuOpen = ref(false);
-const showLogoutModal = ref(false);
-
-const handleLogoutClick = () => {
-  isMenuOpen.value = false;
-  showLogoutModal.value = true;
-};
-
-const confirmLogout = () => {
-  showLogoutModal.value = false;
-  localStorage.clear();
-  router.push("/");
-};
 
 const closeMenu = () => {
   isMenuOpen.value = false;
+};
+
+// ✨ ฟังก์ชัน Logout แบบ SweetAlert2
+const confirmLogout = () => {
+  // สำหรับ Navbar อย่าลืมใส่: isMenuOpen.value = false; ไว้บรรทัดแรกด้วยนะครับ
+  Swal.fire({
+    html: `
+      <div class="relative w-24 h-24 mx-auto mb-6">
+        <!-- เอฟเฟกต์วงแหวนกระเพื่อมด้านหลัง (Pulse effect) -->
+        <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
+        <!-- วงกลมไอคอนหลัก -->
+        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
+          <i class="fas fa-sign-out-alt ml-1 translate-x-0.5"></i>
+        </div>
+      </div>
+      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">
+        ออกจากระบบ?
+      </h3>
+      <p class="text-sm text-gray-500 font-medium px-2">
+        คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?
+      </p>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "ออกจากระบบ",
+    cancelButtonText: "ยกเลิก",
+    reverseButtons: true,
+    buttonsStyling: false,
+    customClass: {
+      popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl", // ขอบโค้งมนแบบพรีเมียม
+      actions: "flex flex-row gap-3 mt-8 w-full justify-center",
+      // ปุ่มออกจากระบบ: ใช้สีไล่ระดับ Gradient, มีเงาสีแดงตกกระทบ, ขยับขึ้นเวลานำเมาส์ชี้
+      confirmButton:
+        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
+      // ปุ่มยกเลิก: สไตล์มินิมอล นุ่มนวล ดูไม่แย่งความสนใจ
+      cancelButton:
+        "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
+    },
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.clear();
+      router.push("/");
+    }
+  });
 };
 </script>
 
@@ -51,8 +83,7 @@ const closeMenu = () => {
               to="/home"
               class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
-              หน้าแรก
-              <span
+              หน้าแรก<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
               ></span>
             </RouterLink>
@@ -60,8 +91,7 @@ const closeMenu = () => {
               to="/rooms"
               class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
-              จองห้องพัก
-              <span
+              จองห้องพัก<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
               ></span>
             </RouterLink>
@@ -69,15 +99,15 @@ const closeMenu = () => {
               to="/dashboard"
               class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
-              รายการของฉัน
-              <span
+              รายการของฉัน<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
               ></span>
             </RouterLink>
 
+            <!-- ✨ ปุ่ม Logout ฝั่ง Desktop -->
             <button
-              @click="handleLogoutClick"
-              class="group bg-white text-gray-600 px-5 py-2.5 rounded-full font-bold hover:bg-red-50 hover:text-[#ba0b2f] transition-all duration-300 border border-gray-200 hover:border-red-100 text-sm flex items-center gap-2 shadow-sm hover:shadow-md"
+              @click="confirmLogout"
+              class="group bg-white text-gray-600 px-5 py-2.5 rounded-full font-bold hover:bg-red-50 hover:text-[#ba0b2f] transition-all duration-300 border border-gray-200 hover:border-red-100 text-sm flex items-center gap-2 shadow-sm hover:shadow-md cursor-pointer"
             >
               <i
                 class="fas fa-sign-out-alt text-gray-400 group-hover:text-[#ba0b2f] transition-colors"
@@ -89,7 +119,7 @@ const closeMenu = () => {
           <div class="flex md:hidden items-center">
             <button
               @click="isMenuOpen = !isMenuOpen"
-              class="text-gray-600 hover:text-[#ba0b2f] focus:outline-none p-2 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center transition-colors"
+              class="text-gray-600 hover:text-[#ba0b2f] focus:outline-none p-2 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center transition-colors cursor-pointer"
             >
               <i v-if="!isMenuOpen" class="fas fa-bars text-lg"></i>
               <i v-else class="fas fa-times text-lg"></i>
@@ -98,6 +128,7 @@ const closeMenu = () => {
         </div>
       </div>
 
+      <!-- เมนูมือถือ -->
       <div
         v-if="isMenuOpen"
         class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl absolute w-full left-0 animate-fade-down"
@@ -122,9 +153,10 @@ const closeMenu = () => {
             >รายการของฉัน</RouterLink
           >
           <div class="pt-4 border-t border-gray-100 mt-2">
+            <!-- ✨ ปุ่ม Logout ฝั่ง Mobile -->
             <button
-              @click="handleLogoutClick"
-              class="w-full bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white py-4 rounded-xl font-bold shadow-md shadow-red-200 flex justify-center items-center gap-2 active:scale-95 transition-transform"
+              @click="confirmLogout"
+              class="w-full bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white py-4 rounded-xl font-bold shadow-md shadow-red-200 flex justify-center items-center gap-2 active:scale-95 transition-transform cursor-pointer"
             >
               <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
             </button>
@@ -132,46 +164,5 @@ const closeMenu = () => {
         </div>
       </div>
     </nav>
-
-    <div
-      v-if="showLogoutModal"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md px-4"
-    >
-      <div
-        class="bg-white rounded-4xl p-8 max-w-sm w-full shadow-2xl text-center animate-fade-up relative overflow-hidden"
-      >
-        <div
-          class="absolute top-0 left-0 w-full h-2 bg-linear-to-r from-red-500 to-[#ba0b2f]"
-        ></div>
-
-        <div
-          class="w-24 h-24 rounded-full bg-red-50 text-[#ba0b2f] mx-auto mb-6 flex items-center justify-center text-4xl shadow-inner border-[6px] border-white ring-1 ring-red-100 transform transition-transform hover:scale-110 duration-300"
-        >
-          <i class="fas fa-sign-out-alt ml-1"></i>
-        </div>
-
-        <h3 class="text-2xl font-extrabold text-gray-900 mb-3 tracking-tight">
-          ออกจากระบบ?
-        </h3>
-        <p class="text-gray-500 mb-8 font-medium leading-relaxed text-sm">
-          คุณแน่ใจหรือไม่ว่าต้องการออกจากระบบ?<br />คุณจะต้องเข้าสู่ระบบใหม่ในครั้งถัดไป
-        </p>
-
-        <div class="flex gap-4">
-          <button
-            @click="showLogoutModal = false"
-            class="flex-1 py-4 bg-white text-gray-700 font-bold rounded-2xl hover:bg-gray-50 border-2 border-gray-100 hover:border-gray-200 transition-all text-sm uppercase tracking-wider"
-          >
-            ยกเลิก
-          </button>
-          <button
-            @click="confirmLogout"
-            class="flex-1 py-4 bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white font-bold rounded-2xl hover:shadow-lg hover:shadow-red-200/50 transform hover:-translate-y-0.5 transition-all text-sm uppercase tracking-wider"
-          >
-            ออกจากระบบ
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
