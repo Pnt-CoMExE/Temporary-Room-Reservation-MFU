@@ -2,11 +2,32 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
-import AdminDashboard from "./AdminDashboard.vue";
 import AdminBookings from "./AdminBookings.vue";
 import AdminRooms from "./AdminRooms.vue";
 import AdminActivityLog from "./AdminActivityLog.vue";
 import AdminBanners from "./AdminBanners.vue";
+
+// ✨ นำเข้า Chart.js
+import { Bar, Doughnut } from "vue-chartjs";
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+} from "chart.js";
+ChartJS.register(
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+);
 
 const router = useRouter();
 const activeTab = ref("overview");
@@ -63,6 +84,55 @@ const pendingCount = computed(() => {
   return bookings.value.filter((b) => b.status === "pending").length;
 });
 
+// ข้อมูลสำหรับ Dashboard
+const stats = ref({
+  pendingCount: pendingCount, // เชื่อมกับ computed ด้านบน
+  approvedToday: 12,
+  currentMonthRevenue: 124500,
+  lastMonthRevenue: 98000,
+});
+
+const popularRooms = ref([
+  { name: "ห้องประชุมคำมอกหลวง", usage: 85, color: "bg-green-500" },
+  { name: "ลานกิจกรรม ลานประดู่แดง", usage: 60, color: "bg-blue-500" },
+  { name: "ห้องประชุม ท่าสุด", usage: 35, color: "bg-yellow-500" },
+]);
+
+const isRevenueExpanded = ref(false);
+
+// ข้อมูลกราฟแท่ง
+const barChartData = ref({
+  labels: ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน"],
+  datasets: [
+    {
+      label: "รายได้ (บาท)",
+      backgroundColor: "#ba0b2f",
+      borderRadius: 6,
+      data: [110500, 85000, 98000, 124500],
+    },
+  ],
+});
+
+const barChartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+});
+
+// ข้อมูลกราฟโดนัท
+const doughnutChartData = ref({
+  labels: ["บุคคลภายนอก", "หน่วยงานภายใน", "ร่วมจัด (Co-op)"],
+  datasets: [
+    { backgroundColor: ["#ba0b2f", "#1f2937", "#d4af37"], data: [55, 30, 15] },
+  ],
+});
+
+const doughnutChartOptions = ref({
+  responsive: true,
+  maintainAspectRatio: false,
+  plugins: { legend: { position: "bottom" } },
+});
+
 const confirmLogout = () => {
   Swal.fire({
     html: `
@@ -84,9 +154,9 @@ const confirmLogout = () => {
       popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
       actions: "flex flex-row gap-3 mt-8 w-full justify-center",
       confirmButton:
-        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
       cancelButton:
-        "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
   }).then((result) => {
     if (result.isConfirmed) {
@@ -110,7 +180,7 @@ const confirmLogout = () => {
         ></div>
       </div>
       <div
-        class="max-w-350 mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full mt-8 text-center md:text-left"
+        class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full mt-8 text-center md:text-left"
       >
         <span
           class="inline-block py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/30 text-xs font-bold tracking-widest uppercase mb-3 shadow-lg"
@@ -127,8 +197,9 @@ const confirmLogout = () => {
       </div>
     </div>
 
-    <div class="max-w-350 mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
       <div class="flex flex-col xl:flex-row gap-8">
+        <!-- Sidebar -->
         <div class="w-full xl:w-1/4">
           <div
             class="bg-white rounded-3xl shadow-sm border border-white/50 p-6 sticky top-8"
@@ -190,7 +261,6 @@ const confirmLogout = () => {
               >
                 <i class="fas fa-building w-5"></i> ข้อมูลห้องพัก (Rooms)
               </button>
-
               <button
                 @click="activeTab = 'logs'"
                 :class="
@@ -202,8 +272,6 @@ const confirmLogout = () => {
               >
                 <i class="fas fa-history w-5"></i> ประวัติการทำงาน (Logs)
               </button>
-
-              <!-- ✨ เมนูใหม่ จัดการแบนเนอร์ -->
               <button
                 @click="activeTab = 'banners'"
                 :class="
@@ -235,15 +303,192 @@ const confirmLogout = () => {
           </div>
         </div>
 
+        <!-- Content Area -->
         <div class="w-full xl:w-3/4">
-          <AdminDashboard v-if="activeTab === 'overview'" />
+          <!-- ✨ ส่วน Overview Dashboard ถูกนำมารวมไว้ที่นี่โดยตรง ไม่ต้องแยกไฟล์แล้ว ✨ -->
+          <div
+            v-if="activeTab === 'overview'"
+            class="space-y-8 animate-fade-up"
+          >
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div
+                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
+              >
+                <div class="flex items-center gap-5">
+                  <div
+                    class="w-16 h-16 rounded-full bg-yellow-50 text-yellow-500 flex items-center justify-center text-2xl shrink-0"
+                  >
+                    <i class="fas fa-clock"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-gray-500 mb-1">
+                      คำขอรออนุมัติ
+                    </p>
+                    <p class="text-3xl font-black text-gray-900">
+                      {{ stats.pendingCount }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
+              >
+                <div class="flex items-center gap-5">
+                  <div
+                    class="w-16 h-16 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-2xl shrink-0"
+                  >
+                    <i class="fas fa-check-double"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-gray-500 mb-1">
+                      อนุมัติแล้ววันนี้
+                    </p>
+                    <p class="text-3xl font-black text-gray-900">
+                      {{ stats.approvedToday }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col justify-center transition-all duration-300"
+              >
+                <div
+                  class="absolute right-0 top-0 w-2 h-full bg-linear-to-b from-[#d4af37] to-yellow-500"
+                ></div>
+                <div class="flex items-center gap-5 mb-4">
+                  <div
+                    class="w-16 h-16 rounded-full bg-red-50 text-[#ba0b2f] flex items-center justify-center text-2xl shrink-0"
+                  >
+                    <i class="fas fa-wallet"></i>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-gray-500 mb-1">
+                      รายได้รวมเดือนนี้
+                    </p>
+                    <p class="text-3xl font-black text-[#ba0b2f]">
+                      ฿{{ stats.currentMonthRevenue.toLocaleString() }}
+                    </p>
+                  </div>
+                </div>
+                <div
+                  @click="isRevenueExpanded = !isRevenueExpanded"
+                  class="pt-3 border-t border-gray-100 cursor-pointer group select-none"
+                >
+                  <div class="flex justify-between items-center">
+                    <span
+                      class="text-sm text-gray-500 font-bold group-hover:text-[#ba0b2f] transition-colors flex items-center gap-1.5"
+                      >รายได้เดือนที่ผ่านมา
+                      <i
+                        class="fas text-[10px] transition-transform duration-300"
+                        :class="
+                          isRevenueExpanded
+                            ? 'fa-chevron-up text-[#ba0b2f]'
+                            : 'fa-chevron-down opacity-50'
+                        "
+                      ></i></span
+                    ><span
+                      class="text-sm font-black text-gray-700 group-hover:text-[#ba0b2f] transition-colors"
+                      >฿{{ stats.lastMonthRevenue.toLocaleString() }}</span
+                    >
+                  </div>
+                  <div
+                    v-show="isRevenueExpanded"
+                    class="mt-3 flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100"
+                  >
+                    <div class="flex justify-between items-center">
+                      <span class="text-xs text-gray-400 font-bold"
+                        ><i class="far fa-calendar-alt mr-1"></i> กุมภาพันธ์
+                        2569</span
+                      ><span class="text-xs font-black text-gray-500"
+                        >฿85,000</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-xs text-gray-400 font-bold"
+                        ><i class="far fa-calendar-alt mr-1"></i> มกราคม
+                        2569</span
+                      ><span class="text-xs font-black text-gray-500"
+                        >฿110,500</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- กราฟ Chart.js -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div
+                class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+              >
+                <h3
+                  class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
+                >
+                  <i class="fas fa-chart-line text-[#ba0b2f]"></i> แนวโน้มรายได้
+                </h3>
+                <div class="w-full h-64">
+                  <Bar :data="barChartData" :options="barChartOptions" />
+                </div>
+              </div>
+              <div
+                class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+              >
+                <h3
+                  class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
+                >
+                  <i class="fas fa-chart-pie text-[#d4af37]"></i>
+                  สัดส่วนประเภทผู้เช่า
+                </h3>
+                <div class="w-full h-64">
+                  <Doughnut
+                    :data="doughnutChartData"
+                    :options="doughnutChartOptions"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- ความนิยม -->
+            <div
+              class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+            >
+              <h3
+                class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
+              >
+                <i class="fas fa-fire-alt text-orange-500"></i>
+                อัตราการใช้งานห้องพัก
+              </h3>
+              <div class="space-y-5">
+                <div v-for="(room, index) in popularRooms" :key="index">
+                  <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-bold text-gray-700">{{
+                      room.name
+                    }}</span
+                    ><span class="text-sm font-bold text-gray-900"
+                      >{{ room.usage }}%</span
+                    >
+                  </div>
+                  <div
+                    class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden"
+                  >
+                    <div
+                      :class="room.color"
+                      class="h-2.5 rounded-full transition-all duration-1000"
+                      :style="`width: ${room.usage}%`"
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Components อื่นๆ -->
           <AdminBookings
             v-if="activeTab === 'bookings'"
             :initialBookings="bookings"
           />
           <AdminRooms v-if="activeTab === 'rooms'" />
           <AdminActivityLog v-if="activeTab === 'logs'" />
-          <!-- ✨ แสดง Component แบนเนอร์ -->
           <AdminBanners v-if="activeTab === 'banners'" />
         </div>
       </div>
