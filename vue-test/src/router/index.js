@@ -76,7 +76,7 @@ router.beforeEach((to, from, next) => {
     next("/");
   } else if (to.path === "/" && isLoggedIn) {
     // 2. ถ้า "Login แล้ว" แต่ดันจะกดเข้าหน้า Login อีก -> เด้งไปหน้า Dashboard หรือ Home
-    next("/dashboard"); // หรือเปลี่ยนเป็น '/home' ตามที่คุณต้องการ
+    next("/home"); // หรือเปลี่ยนเป็น '/home' ตามที่คุณต้องการ
   } else {
     // 3. กรณีอื่นๆ ให้ผ่านเข้าหน้าได้ปกติ
     next();
