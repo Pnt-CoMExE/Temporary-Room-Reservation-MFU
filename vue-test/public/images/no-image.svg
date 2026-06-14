@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" fill="none">
+  <rect width="400" height="250" fill="#f3f4f6"/>
+  <path d="M200 80C180.67 80 165 95.67 165 115C165 134.33 180.67 150 200 150C219.33 150 235 134.33 235 115C235 95.67 219.33 80 200 80ZM200 100C208.84 100 216 107.16 216 116C216 124.84 208.84 132 200 132C191.16 132 184 124.84 184 116C184 107.16 191.16 100 200 100Z" fill="#d1d5db"/>
+  <path d="M200 155C166.67 155 138.67 179 132 210H268C261.33 179 233.33 155 200 155Z" fill="#d1d5db"/>
+  <text x="200" y="230" text-anchor="middle" fill="#9ca3af" font-size="16" font-weight="bold" font-family="sans-serif">ไม่มีรูป</text>
+</svg>

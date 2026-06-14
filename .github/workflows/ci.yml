@@ -1,0 +1,96 @@
+name: CI — Typecheck & Build
+
+on:
+  push:
+    branches: [master, main, develop]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+
+  # ─── Backend: Typecheck + Build + Test ───────────────
+  backend:
+    name: Backend (Node + Express + TypeScript)
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mfu_booking_test
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: ./backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npm run typecheck
+
+      - name: Build TypeScript
+        run: npx tsc --outDir dist
+
+      - name: Run tests
+        run: npm test
+        env:
+          PORT: 3000
+          JWT_SECRET: ci-test-secret
+          FRONTEND_URL: http://localhost:5173
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/mfu_booking_test
+
+  # ─── Frontend: Typecheck + Build ─────────────────────
+  frontend:
+    name: Frontend (Vue 3 + TypeScript + Vite)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./vue-test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+          cache-dependency-path: ./vue-test/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript type-check
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: ./vue-test/dist
+          if-no-files-found: error

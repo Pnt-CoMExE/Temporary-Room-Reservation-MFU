@@ -1,0 +1,37 @@
+# ─── Dependencies ─────────────────────────
+node_modules/
+
+# ─── Build output ─────────────────────────
+dist/
+build/
+
+# ─── Environment files ────────────────────
+.env
+.env.local
+.env.*.local
+
+# ─── IDE/Editor ───────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ─── Logs ─────────────────────────────────
+*.log
+npm-debug.log*
+
+# ─── Uploaded files ───────────────────────
+backend/uploads/
+
+# ─── Large binary/document directories ────
+Data Set/
+documents/
+Diagram/
+script presentation/
+
+# ─── OS files ─────────────────────────────
+.DS_Store
+Thumbs.db

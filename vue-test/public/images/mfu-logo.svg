@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <title>Mae Fah Luang University Logo</title>
+  <desc>Official emblem of Mae Fah Luang University featuring the Golden Trumpet flower (Dok Bua Tong)</desc>
+  <!-- Outer circle -->
+  <circle cx="60" cy="60" r="58" fill="#ba0b2f" stroke="#d4af37" stroke-width="3"/>
+  <!-- Inner circle -->
+  <circle cx="60" cy="60" r="50" fill="#ba0b2f" stroke="#d4af37" stroke-width="1.5"/>
+  <!-- Decorative ring dots -->
+  <circle cx="60" cy="16" r="2.5" fill="#d4af37"/>
+  <circle cx="60" cy="104" r="2.5" fill="#d4af37"/>
+  <circle cx="16" cy="60" r="2.5" fill="#d4af37"/>
+  <circle cx="104" cy="60" r="2.5" fill="#d4af37"/>
+  <!-- Golden Trumpet Flower (Dok Bua Tong) - 5 petals -->
+  <g transform="translate(60,58)">
+    <path d="M0,-30 C8,-25 14,-14 10,-6 C6,2 0,0 0,0 C0,0 -6,2 -10,-6 C-14,-14 -8,-25 0,-30Z" fill="#d4af37" opacity="0.9"/>
+    <path d="M28.5,-9.3 C32,-1 28,10 20,14 C14,17 10,8 10,8 C10,8 8,14 14,17 C20,10 32,-1 28.5,-9.3Z" fill="#d4af37" opacity="0.9"/>
+    <path d="M17.6,24.3 C8,26 -2,22 -6,14 C-8,10 -4,6 -4,6 C-4,6 -8,10 -6,14 C-2,22 8,26 17.6,24.3Z" fill="#d4af37" opacity="0.9"/>
+    <path d="M-17.6,24.3 C-8,26 2,22 6,14 C8,10 4,6 4,6 C4,6 8,10 6,14 C2,22 -8,26 -17.6,24.3Z" fill="#d4af37" opacity="0.85"/>
+    <path d="M-28.5,-9.3 C-32,-1 -28,10 -20,14 C-14,17 -10,8 -10,8 C-10,8 -8,14 -14,17 C-20,10 -32,-1 -28.5,-9.3Z" fill="#d4af37" opacity="0.85"/>
+    <circle cx="0" cy="0" r="6" fill="#ba0b2f" stroke="#d4af37" stroke-width="1.5"/>
+    <polygon points="0,-4 1,-1.5 4,-1.5 1.5,0.5 2.5,4 0,2 -2.5,4 -1.5,0.5 -4,-1.5 -1,-1.5" fill="#d4af37"/>
+  </g>
+  <!-- MFU text at bottom (converted to path-like rendering) -->
+  <text x="60" y="102" text-anchor="middle" fill="#d4af37" font-size="12" font-weight="900" font-family="system-ui,-apple-system,sans-serif" letter-spacing="2">MFU</text>
+</svg>
