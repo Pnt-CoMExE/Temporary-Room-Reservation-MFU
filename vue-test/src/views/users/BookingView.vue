@@ -30,7 +30,7 @@ interface AddonItem {
   price: number;
   unit: string;
   quantity: number;
-  icon: string;
+  iconName: string;
 }
 
 const route = useRoute();
@@ -57,6 +57,19 @@ const bookingForm = ref({
 
 const memoFile = ref<File | null>(null);
 const memoFileName = ref("");
+const memoInput = ref<HTMLInputElement | null>(null);
+
+const triggerFileInput = () => {
+  memoInput.value?.click();
+};
+
+const clearMemoFile = () => {
+  memoFile.value = null;
+  memoFileName.value = "";
+  if (memoInput.value) {
+    memoInput.value.value = "";
+  }
+};
 
 const handleMemoFile = (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -68,9 +81,7 @@ const handleMemoFile = (event: Event) => {
         title: "ไฟล์ไม่ถูกต้อง",
         text: "กรุณาเลือกไฟล์ PDF เท่านั้น",
       });
-      input.value = "";
-      memoFile.value = null;
-      memoFileName.value = "";
+      clearMemoFile();
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
@@ -79,9 +90,7 @@ const handleMemoFile = (event: Event) => {
         title: "ไฟล์มีขนาดใหญ่เกินไป",
         text: "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 10 MB",
       });
-      input.value = "";
-      memoFile.value = null;
-      memoFileName.value = "";
+      clearMemoFile();
       return;
     }
     memoFile.value = file;
@@ -117,7 +126,7 @@ const fetchRoomData = async () => {
     
     // ดึงข้อมูลอุปกรณ์เสริมด้วย
     const addonsResponse = await api.get("/api/addons");
-    addOns.value = addonsResponse.data.map(a => ({
+    addOns.value = addonsResponse.data.map((a: any) => ({
       id: a.id,
       name: a.name,
       price: parseFloat(a.price_per_unit) || 0,
@@ -128,7 +137,7 @@ const fetchRoomData = async () => {
 
     // ดึงคิวการจองที่มีอยู่แล้วของห้องนี้เพื่อล็อควันที่
     const bookingsResponse = await api.get(`/api/rooms/${roomId}/bookings`);
-    existingBookings.value = bookingsResponse.data.map(b => ({
+    existingBookings.value = bookingsResponse.data.map((b: any) => ({
       date: b.booking_date.split('T')[0],
       duration: b.time_slot
     }));
@@ -231,7 +240,7 @@ const applyPromoCode = async () => {
     discountAmount.value = Math.round(subTotalPrice.value * (promo.discount / 100));
     isPromoApplied.value = true;
     promoMessage.value = `✅ ${promo.message}`;
-  } catch (err) {
+  } catch (err: any) {
     discountAmount.value = 0;
     discountPercent.value = 0;
     isPromoApplied.value = false;
@@ -254,8 +263,8 @@ const submitBooking = async () => {
 
   // เตรียมข้อมูล Add-ons
   const selectedAddons = addOns.value
-    .filter(a => a.quantity > 0)
-    .map(a => ({
+    .filter((a: AddonItem) => a.quantity > 0)
+    .map((a: AddonItem) => ({
       addon_id: a.id,
       quantity: a.quantity,
       unit_price: a.price,
@@ -294,6 +303,9 @@ const submitBooking = async () => {
   formData.append("addonsPrice", String(addOns.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)));
   formData.append("totalPrice", String(finalPrice.value));
   formData.append("addons", JSON.stringify(selectedAddons));
+  if (isPromoApplied.value && bookingForm.value.promoCode) {
+    formData.append("promoCode", bookingForm.value.promoCode.trim().toUpperCase());
+  }
 
   try {
     await api.post("/api/bookings", formData);
@@ -308,7 +320,7 @@ const submitBooking = async () => {
         confirmButton: "bg-[#ba0b2f] text-white font-bold rounded-xl px-10 py-4 mt-4 cursor-pointer w-full",
       },
     }).then(() => router.push("/dashboard"));
-  } catch (err) {
+  } catch (err: any) {
     console.error("Booking error:", err);
     const errorMsg = err.response?.data?.message || "ไม่สามารถส่งคำขอจองได้ในขณะนี้";
     Swal.fire({
@@ -376,7 +388,7 @@ const submitBooking = async () => {
             class="bg-white rounded-3xl shadow-xl border border-white/50 overflow-hidden sticky top-24"
           >
             <div class="relative h-48 bg-gray-200">
-              <img :src="room.image" loading="lazy" class="w-full h-full object-cover" />
+              <img :src="room?.image" loading="lazy" class="w-full h-full object-cover" />
               <div
                 class="absolute inset-0 bg-linear-to-t from-black/60 to-transparent"
               ></div>
@@ -389,11 +401,11 @@ const submitBooking = async () => {
             </div>
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">
-                {{ room.name }}
+                {{ room?.name }}
               </h3>
               <p class="text-sm text-gray-500 mb-6 flex items-start gap-2">
                 <font-awesome-icon icon="map-marker-alt" class="text-[#d4af37]" />
-                {{ room.location }}
+                {{ room?.location }}
               </p>
 
               <div
@@ -572,7 +584,7 @@ const submitBooking = async () => {
                       ? 'border-green-400 bg-green-50/50'
                       : 'border-gray-300 bg-gray-50'
                   "
-                  @click="$refs.memoInput?.click()"
+                  @click="triggerFileInput"
                 >
                   <input
                     ref="memoInput"
@@ -593,11 +605,7 @@ const submitBooking = async () => {
                     </p>
                     <button
                       type="button"
-                      @click.stop="
-                        (memoFile = null),
-                          (memoFileName = ''),
-                          ($refs.memoInput ? ($refs.memoInput.value = '') : '')
-                      "
+                      @click.stop="clearMemoFile"
                       class="mt-2 text-xs text-red-500 font-bold hover:text-red-700"
                     >
                       <font-awesome-icon icon="times" class="mr-1" />เปลี่ยนไฟล์

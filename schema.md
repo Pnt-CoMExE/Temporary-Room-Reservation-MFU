@@ -58,6 +58,8 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 - `status` (varchar 50): Booking status (e.g., approved, pending).
 - `approved_by` (integer, FK): Admin user ID who approved.
 - `approved_at` (timestamp): Time of approval.
+- `memo_document_url` (text): URL/path to the attached PDF memorandum document.
+- `promo_code` (varchar 50): Applied promotion discount code.
 - `remarks` (text): Additional remarks.
 - `created_at` (timestamp): Record creation time.
 - `updated_at` (timestamp): Record update time.
@@ -83,7 +85,7 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 - `booking_id` (integer, FK): Reference to `bookings` table.
 - `transaction_id` (varchar 100, Unique): Transaction ID from gateway.
 - `amount` (numeric 10,2): Payment amount.
-- `payment_method` (varchar 100, Unique): Method (e.g., promptpay).
+- `payment_method` (varchar 100): Method (e.g., promptpay).
 - `status` (varchar 50): Payment status.
 - `paid_at` (timestamp): Payment completion time.
 - `created_at` (timestamp): Record creation time.
@@ -97,12 +99,22 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 
 ### 9. `admin_activity_logs`
 - `id` (serial, PK): Activity log ID.
-- `admin_id` (integer, FK): Reference to `users` table (Admin ID).
-- `action_type` (varchar 100): Type of action performed (e.g., update).
-- `target_table` (varchar 100): Target table affected.
-- `target_id` (integer): ID of affected record.
-- `old_value` (jsonb): Previous data before change.
-- `new_value` (jsonb): Updated data after change.
-- `ip_address` (varchar 50): IP address of user.
-- `user_agent` (text): Browser or device information.
+- `admin_name` (varchar 255): Name or identifier of the administrator performing the action.
+- `action` (varchar 255): Action description (e.g., "อัปเดตสถานะการจอง").
+- `details` (text): Details or parameters of the recorded activity.
 - `created_at` (timestamp): Record creation time.
+
+### 10. `promo_codes`
+- `id` (serial, PK): Promo code ID.
+- `code` (varchar 50, Unique): Promotional code string.
+- `discount` (numeric 10,2): Discount amount or value.
+- `limit_count` (integer): Usage limit count (default 100).
+- `is_active` (boolean): Active status flag.
+
+### 11. `banners`
+- `id` (serial, PK): Banner ID.
+- `title` (varchar 255): Banner headline or title.
+- `image_url` (text): Image URL for the promo banner.
+- `link` (varchar 255): Target destination route link.
+- `is_active` (boolean): Active status flag.
+

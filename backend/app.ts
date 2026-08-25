@@ -124,11 +124,17 @@ query(
     ) THEN
       ALTER TABLE bookings ADD COLUMN memo_document_url TEXT;
     END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'bookings' AND column_name = 'promo_code'
+    ) THEN
+      ALTER TABLE bookings ADD COLUMN promo_code VARCHAR(50);
+    END IF;
   END $$;`
 )
-  .then(() => console.log("✅ ตรวจสอบ/เพิ่มคอลัมน์ memo_document_url แล้ว"))
+  .then(() => console.log("✅ ตรวจสอบ/เพิ่มคอลัมน์ memo_document_url และ promo_code แล้ว"))
   .catch((err: any) =>
-    console.error("⚠️ ไม่สามารถเพิ่มคอลัมน์ memo_document_url:", err.message)
+    console.error("⚠️ ไม่สามารถเพิ่มคอลัมน์ระบบ:", err.message)
   );
 
 // ---- Modular Routes ----

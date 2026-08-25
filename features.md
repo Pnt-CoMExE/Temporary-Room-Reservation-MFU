@@ -17,3 +17,8 @@ Here are several proposed features to elevate the Temporary Rental Space Managem
 ## 3. Communication & Support
 - **In-App Chatbot / FAQ Assistant:** Implement a simple chatbot or a floating widget to instantly answer common user questions about pricing, policies, or space capacities.
 - **LINE Notify Integration:** In addition to email notifications, send instant alerts to the Admin's LINE group when a new booking needs approval, and send LINE reminders to users 24 hours before their event.
+
+## 4. Recently Implemented Advanced Features
+- **Automated Email Notifications:** System automatically dispatches confirmation emails upon booking creation and status update emails (Approved / Disapproved with remarks) upon administrator review.
+- **Dynamic PromptPay EMVCo QR Code Payment:** Integrated client-side PromptPay EMVCo QR payload generator with `qrcode` library to display dynamic QR codes with exact booking amounts in user `DashboardView.vue`.
+- **Batch PDF Memorandum ZIP Export for Admin:** Built high-performance ZIP archive streaming endpoint (`POST /api/admin/bookings/export-zip`) using `archiver` allowing admins to download selected PDF memorandum documents in one click.

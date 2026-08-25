@@ -5,6 +5,7 @@ import fs from "fs";
 import archiver from "archiver";
 import { query, pool } from "../../../db";
 import { verifyToken, verifyAdmin } from "../../middleware/auth";
+import { sendBookingStatusEmail } from "../../services/email.service";
 
 const router = Router();
 
@@ -71,6 +72,27 @@ router.put(
           [status, remarks, adminId, id]
         );
       }
+
+      // Trigger status email notification
+      (async () => {
+        try {
+          const detailRes = await query(
+            `SELECT b.booking_no, u.email, r.name as room_name
+             FROM bookings b
+             JOIN users u ON b.user_id = u.id
+             JOIN rooms r ON b.room_id = r.id
+             WHERE b.id = $1`,
+            [id]
+          );
+          if (detailRes.rows.length > 0) {
+            const { booking_no, email, room_name } = detailRes.rows[0];
+            await sendBookingStatusEmail(email, booking_no, room_name, status, remarks);
+          }
+        } catch (e) {
+          console.error("[admin/bookings] Email status notification error:", e);
+        }
+      })();
+
       res.json({ message: "อัปเดตสถานะการจองสำเร็จ", documentUrl });
     } catch (err) {
       console.error("[admin/bookings] Error updating status:", err);

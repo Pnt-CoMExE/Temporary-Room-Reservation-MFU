@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import api, { deleteCookie } from "@/services/api";
 import QRCode from "qrcode";
+import { generatePromptPayPayload } from "@/services/promptpay";
 
 interface UserProfile {
   fullName: string;
@@ -70,7 +71,7 @@ onMounted(async () => {
       const userId = payload.userId;
       
       const bookingsRes = await api.get(`/api/user/bookings/${userId}`);
-      myBookings.value = bookingsRes.data.map(b => ({
+      myBookings.value = bookingsRes.data.map((b: any) => ({
         ...b,
         id: b.booking_no,
         dbId: b.id,
@@ -94,7 +95,7 @@ onMounted(async () => {
   }
 });
 
-const handleFileUpload = async (event) => {
+const handleFileUpload = async (_event: Event) => {
   Swal.fire({
     icon: "info",
     title: "โหมดทดสอบ",
@@ -125,17 +126,18 @@ const saveProfile = async () => {
       timer: 1500,
       customClass: { popup: "rounded-[2rem]" },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error saving profile:", err);
     Swal.fire("ข้อผิดพลาด", "ไม่สามารถบันทึกข้อมูลได้", "error");
   }
 };
 
-const openPayment = async (booking) => {
-  // สร้าง QR Code แบบ local ด้วย qrcode library
+const openPayment = async (booking: BookingItem) => {
+  // สร้าง QR Code แบบ PromptPay EMVCo ด้วย qrcode library
   let qrDataUrl = "/images/qr-fallback.svg";
   try {
-    qrDataUrl = await QRCode.toDataURL(`MFU_PAYMENT_ID_${booking.id}`, {
+    const payload = generatePromptPayPayload("0994000165789", booking.totalPrice);
+    qrDataUrl = await QRCode.toDataURL(payload, {
       width: 250,
       margin: 1,
       color: {
@@ -143,7 +145,7 @@ const openPayment = async (booking) => {
         light: "#ffffff",
       },
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("QR generation failed:", err);
   }
 
@@ -236,7 +238,7 @@ const filteredBookings = computed(() => {
   });
 });
 
-const cancelBooking = (booking) => {
+const cancelBooking = (booking: BookingItem) => {
   Swal.fire({
     title: "ยกเลิกการจอง?",
     text: `คุณต้องการยกเลิกคำขอจองรหัส ${booking.id} ใช่หรือไม่?`,
@@ -264,14 +266,14 @@ const cancelBooking = (booking) => {
           timer: 1500,
           customClass: { popup: "rounded-[2rem]" },
         });
-      } catch (err) {
+      } catch (err: any) {
         Swal.fire("ข้อผิดพลาด", err.response?.data?.message || "ไม่สามารถยกเลิกการจองได้", "error");
       }
     }
   });
 };
 
-const giveFeedback = (booking) => {
+const giveFeedback = (booking: BookingItem) => {
   Swal.fire({
     title:
       '<h2 class="text-2xl font-extrabold text-gray-900">ให้คะแนนการใช้บริการ</h2>',
@@ -310,10 +312,10 @@ const giveFeedback = (booking) => {
     },
     didOpen: () => {
       const stars = document.querySelectorAll(".star-icon");
-      const ratingInput = document.getElementById("feedback-rating");
+      const ratingInput = document.getElementById("feedback-rating") as HTMLInputElement | null;
       const ratingText = document.getElementById("rating-text");
 
-      const texts = {
+      const texts: Record<number, string> = {
         1: "ต้องปรับปรุง (1 ดาว)",
         2: "พอใช้ (2 ดาว)",
         3: "ดี (3 ดาว)",
@@ -321,9 +323,9 @@ const giveFeedback = (booking) => {
         5: "ยอดเยี่ยม (5 ดาว)",
       };
 
-      const updateStars = (value) => {
+      const updateStars = (value: number) => {
         stars.forEach((star) => {
-          const starVal = parseInt(star.getAttribute("data-value"));
+          const starVal = parseInt(star.getAttribute("data-value") || "0");
           if (starVal <= value) {
             star.classList.remove("text-gray-200");
             star.classList.add("text-yellow-400", "drop-shadow-sm");
@@ -332,19 +334,22 @@ const giveFeedback = (booking) => {
             star.classList.add("text-gray-200");
           }
         });
-        ratingText.innerText = texts[value];
-        ratingText.className =
-          value <= 2
-            ? "text-sm font-black text-gray-500"
-            : "text-sm font-black text-[#ba0b2f]";
+        if (ratingText) {
+          ratingText.innerText = texts[value] || "";
+          ratingText.className =
+            value <= 2
+              ? "text-sm font-black text-gray-500"
+              : "text-sm font-black text-[#ba0b2f]";
+        }
       };
 
       stars.forEach((star) => {
-        star.addEventListener("mouseover", function () {
-          updateStars(parseInt(this.getAttribute("data-value")));
+        star.addEventListener("mouseover", function (this: Element) {
+          updateStars(parseInt(this.getAttribute("data-value") || "0"));
         });
-        star.addEventListener("click", function () {
-          ratingInput.value = this.getAttribute("data-value");
+        star.addEventListener("click", function (this: Element) {
+          const val = this.getAttribute("data-value") || "5";
+          if (ratingInput) ratingInput.value = val;
           this.classList.add("scale-125");
           setTimeout(() => this.classList.remove("scale-125"), 150);
         });
@@ -352,17 +357,20 @@ const giveFeedback = (booking) => {
 
       document
         .getElementById("star-rating-container")
-        .addEventListener("mouseleave", () => {
-          updateStars(parseInt(ratingInput.value));
+        ?.addEventListener("mouseleave", () => {
+          const currentVal = parseInt(ratingInput?.value || "5");
+          updateStars(currentVal);
         });
     },
     preConfirm: () => {
-      const rating = document.getElementById("feedback-rating").value;
-      const comment = document.getElementById("feedback-comment").value;
-      return { rating: parseInt(rating), comment };
+      const ratingInput = document.getElementById("feedback-rating") as HTMLInputElement | null;
+      const commentInput = document.getElementById("feedback-comment") as HTMLTextAreaElement | null;
+      const rating = ratingInput ? parseInt(ratingInput.value) : 5;
+      const comment = commentInput ? commentInput.value : "";
+      return { rating, comment };
     },
   }).then(async (result) => {
-    if (result.isConfirmed) {
+    if (result.isConfirmed && result.value) {
       try {
         await api.post("/api/user/feedback", {
           bookingId: booking.dbId,
@@ -380,15 +388,15 @@ const giveFeedback = (booking) => {
           timer: 2500,
           customClass: { popup: "rounded-3xl" },
         });
-      } catch (err) {
+      } catch (err: any) {
         Swal.fire("ข้อผิดพลาด", "ไม่สามารถส่งรีวิวได้ในขณะนี้", "error");
       }
     }
   });
 };
 
-const getStatusText = (status) => status;
-const getStatusClass = (status) => {
+const getStatusText = (status: string) => status;
+const getStatusClass = (status: string) => {
   switch (status) {
     case "รออนุมัติ":
       return "bg-yellow-50 text-yellow-700 border-yellow-200";
@@ -405,7 +413,7 @@ const getStatusClass = (status) => {
   }
 };
 
-const formatDate = (dateString) =>
+const formatDate = (dateString: string) =>
   new Date(dateString).toLocaleDateString("th-TH", {
     year: "numeric",
     month: "long",

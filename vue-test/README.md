@@ -1,38 +1,45 @@
-# vue-test
+# Temporary Rental Space Management System - Frontend (`vue-test`)
 
-This template should help get you started developing with Vue 3 in Vite.
+This is the Single Page Application (SPA) frontend for the **Temporary Rental Space Management System of MFU**, built with **Vue 3**, **Vite**, **Tailwind CSS**, and **FontAwesome**.
 
-## Recommended IDE Setup
+## Tech Stack
+- **Framework:** Vue 3 (Composition API)
+- **Build Tool:** Vite
+- **Styling:** Tailwind CSS, FontAwesome Icons
+- **Routing:** Vue Router
+- **HTTP Client:** Axios (configured with credentials for backend session/JWT authentication)
+- **UI Utilities:** SweetAlert2, Vue Toastification, Chart.js / Vue-ChartJS, QRCode
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Main Feature Views
+- **User Portal:**
+  - `HomeView.vue`: Room recommendations, promotional banners, search filters.
+  - `RoomView.vue`: Complete room catalog and availability filters.
+  - `RoomDetailView.vue`: Room specifications, multi-tier pricing table, gallery.
+  - `BookingView.vue`: Booking request form, add-on equipment picker, PDF memo document attachment, promo code validation.
+  - `DashboardView.vue`: User booking history, QR code payment modal, status tracking, cancellation, and review submission.
+  - `ProfileView.vue`: User account details.
+- **Admin Portal:**
+  - `AdminDashboard.vue`: Facility statistics, utilization metrics, monthly revenue chart.
+  - `AdminRooms.vue`: Room CRUD management, pricing tier controls, bulk Excel import (`ExcelJS`).
+  - `AdminBookings.vue`: Approval workflow (Approve/Reject), memorandum document viewer.
+  - `AdminPromos.vue`: Promotional discount code creation and limit management.
+  - `AdminLogs.vue`: Audit trail log of administrator activities.
 
-## Recommended Browser Setup
+## Project Setup & Running
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
+### 1. Install Dependencies
 ```sh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
-
+### 2. Run Development Server
 ```sh
 npm run dev
 ```
+Runs the app locally at `http://localhost:5173`. Make sure the backend server (`backend`) is running at `http://localhost:5000`.
 
-### Compile and Minify for Production
-
+### 3. Build for Production
 ```sh
 npm run build
 ```
+

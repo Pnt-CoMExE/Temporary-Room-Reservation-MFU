@@ -16,7 +16,7 @@ export const validateCreateBooking = [
   body("userId").isInt({ min: 1 }).withMessage("กรุณาระบุ ID ผู้ใช้"),
   body("roomId").isInt({ min: 1 }).withMessage("กรุณาระบุ ID ห้อง"),
   body("userType")
-    .isIn(["internal", "external", "co_organizer"])
+    .isIn(["internal", "external", "co_op", "co_organizer"])
     .withMessage("ประเภทผู้ใช้ไม่ถูกต้อง"),
   body("bookingDate")
     .matches(/^\d{4}-\d{2}-\d{2}$/)

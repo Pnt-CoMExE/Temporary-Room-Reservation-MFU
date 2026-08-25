@@ -5,6 +5,7 @@ import fs from "fs";
 import { query, pool } from "../../db";
 import { verifyToken } from "../middleware/auth";
 import { validateCreateBooking } from "../middleware/validate";
+import { sendBookingSubmittedEmail } from "../services/email.service";
 
 const router = Router();
 
@@ -47,7 +48,7 @@ router.post(
     const memoDocumentUrl = `/uploads/${req.file.filename}`;
     const {
       userId, roomId, userType, partnerName, bookingDate,
-      timeSlot, objective, roomPrice, addonsPrice, totalPrice, addons,
+      timeSlot, objective, roomPrice, addonsPrice, totalPrice, addons, promoCode,
     } = req.body;
 
     let parsedAddons: any[] = [];
@@ -95,11 +96,11 @@ router.post(
         `INSERT INTO bookings (
           booking_no, user_id, room_id, organization_type, partner_name,
           booking_date, time_slot, objective, room_price, addons_price,
-          total_price, status, memo_document_url
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, 'pending')
+          total_price, status, memo_document_url, promo_code
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', $12, $13)
         RETURNING id`,
         [bookingNo, userId, roomId, userType, partnerName, bookingDate,
-         timeSlot, objective, roomPrice, addonsPrice, totalPrice, memoDocumentUrl]
+         timeSlot, objective, roomPrice, addonsPrice, totalPrice, memoDocumentUrl, promoCode || null]
       );
 
       const bookingId = bookingResult.rows[0].id;
@@ -117,6 +118,20 @@ router.post(
       }
 
       await client.query("COMMIT");
+
+      // Trigger email notification
+      (async () => {
+        try {
+          const userRes = await query("SELECT email FROM users WHERE id = $1", [userId]);
+          const roomRes = await query("SELECT name FROM rooms WHERE id = $1", [roomId]);
+          const userEmail = userRes.rows[0]?.email || "user@mfu.ac.th";
+          const roomName = roomRes.rows[0]?.name || "ห้องประชุม";
+          await sendBookingSubmittedEmail(userEmail, bookingNo, roomName, String(bookingDate));
+        } catch (e) {
+          console.error("[bookings] Email dispatch error:", e);
+        }
+      })();
+
       res.status(201).json({ message: "ส่งคำขอจองสำเร็จ!", bookingId, bookingNo });
     } catch (err) {
       await client.query("ROLLBACK");
