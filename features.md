@@ -22,3 +22,7 @@ Here are several proposed features to elevate the Temporary Rental Space Managem
 - **Automated Email Notifications:** System automatically dispatches confirmation emails upon booking creation and status update emails (Approved / Disapproved with remarks) upon administrator review.
 - **Dynamic PromptPay EMVCo QR Code Payment:** Integrated client-side PromptPay EMVCo QR payload generator with `qrcode` library to display dynamic QR codes with exact booking amounts in user `DashboardView.vue`.
 - **Batch PDF Memorandum ZIP Export for Admin:** Built high-performance ZIP archive streaming endpoint (`POST /api/admin/bookings/export-zip`) using `archiver` allowing admins to download selected PDF memorandum documents in one click.
+- **API Rate Limiting Protection:** Integrated `express-rate-limit` middleware across general endpoints, authentication routes (`/api/auth`), and booking creation (`/api/bookings`) to prevent spam and brute-force attempts.
+- **Database Query Indexing & Performance:** Configured PostgreSQL index migration scripts for key search columns (`bookings`, `users`, `room_pricing`) to optimize response times under heavy concurrent loads.
+- **Enhanced UI Feedback & Loading States:** Added submitting spinners, disabled button states during API requests, and user feedback popups across Vue components.
+

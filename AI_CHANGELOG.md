@@ -23,4 +23,12 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - Implemented PromptPay EMVCo QR code payload generator service (`promptpay.service.ts` / `promptpay.ts`) and integrated dynamic PromptPay QR code payment modal in user `DashboardView.vue`.
 - Implemented Admin PDF Memorandum ZIP Export endpoint `POST /api/admin/bookings/export-zip` using `archiver` and batch download button in `AdminBookings.vue`.
 - Expanded Vitest unit test suite to 93 passing tests across 6 test files.
+- Fixed `archiver` v8 module import signature issue in `backend/src/routes/admin/booking.routes.ts` (`ZipArchive`).
+
+## [2026-08-26]
+- Installed `express-rate-limit` and created `rateLimiter.ts` middleware (`generalLimiter`, `authLimiter`, `bookingLimiter`) to protect backend APIs.
+- Configured PostgreSQL index migration statements in `backend/app.ts` (`idx_bookings_date_slot`, `idx_bookings_user_id`, `idx_bookings_status`, `idx_users_email`, `idx_room_pricing_room_id`).
+- Enhanced Vue frontend submit loading UX and button states in `BookingView.vue`.
+- Updated project documentation files (`schema.md`, `features.md`, and `AI_CHANGELOG.md`).
+
 

@@ -250,6 +250,8 @@ const applyPromoCode = async () => {
   }
 };
 
+const submitting = ref(false);
+
 const submitBooking = async () => {
   if (!bookingForm.value.acceptTerms) {
     Swal.fire({
@@ -307,6 +309,7 @@ const submitBooking = async () => {
     formData.append("promoCode", bookingForm.value.promoCode.trim().toUpperCase());
   }
 
+  submitting.value = true;
   try {
     await api.post("/api/bookings", formData);
     
@@ -328,6 +331,8 @@ const submitBooking = async () => {
       title: "เกิดข้อผิดพลาด",
       text: errorMsg,
     });
+  } finally {
+    submitting.value = false;
   }
 };
 </script>
@@ -753,10 +758,15 @@ const submitBooking = async () => {
 
               <button
                 type="submit"
-                :disabled="!bookingForm.acceptTerms || dateStatus === 'full'"
-                class="w-full py-5 bg-[#ba0b2f] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-xl hover:bg-[#8c0823] transition-all uppercase tracking-widest text-lg cursor-pointer transform hover:-translate-y-0.5"
+                :disabled="!bookingForm.acceptTerms || dateStatus === 'full' || submitting"
+                class="w-full py-5 bg-[#ba0b2f] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-xl hover:bg-[#8c0823] transition-all uppercase tracking-widest text-lg cursor-pointer transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
-                ยืนยันการส่งคำขอจอง <font-awesome-icon icon="paper-plane" class="ml-2" />
+                <template v-if="submitting">
+                  <font-awesome-icon icon="spinner" spin /> กำลังส่งข้อมูลคำขอ...
+                </template>
+                <template v-else>
+                  ยืนยันการส่งคำขอจอง <font-awesome-icon icon="paper-plane" />
+                </template>
               </button>
             </form>
           </div>

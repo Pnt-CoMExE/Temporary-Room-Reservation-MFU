@@ -2,7 +2,7 @@ import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import { query, pool } from "../../../db";
 import { verifyToken, verifyAdmin } from "../../middleware/auth";
 import { sendBookingStatusEmail } from "../../services/email.service";
@@ -222,7 +222,7 @@ router.post(
         return res.status(404).json({ message: "ไม่พบไฟล์เอกสารสำหรับรายการที่เลือก" });
       }
 
-      const archive = archiver("zip", { zlib: { level: 9 } });
+      const archive = new ZipArchive({ zlib: { level: 9 } });
 
       res.setHeader("Content-Type", "application/zip");
       res.setHeader(

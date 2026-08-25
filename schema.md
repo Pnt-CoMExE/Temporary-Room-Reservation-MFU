@@ -118,3 +118,13 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 - `link` (varchar 255): Target destination route link.
 - `is_active` (boolean): Active status flag.
 
+## Database Indexes
+
+To optimize query execution and search performance under high concurrency:
+- `idx_bookings_date_slot`: `bookings(booking_date, time_slot)` — Speeds up room availability checks and schedule conflicts.
+- `idx_bookings_user_id`: `bookings(user_id)` — Accelerates user booking history lookup.
+- `idx_bookings_status`: `bookings(status)` — Optimizes administrative status filtering (e.g. pending vs approved).
+- `idx_users_email`: `users(email)` — Optimizes user lookup during authentication and OAuth login.
+- `idx_room_pricing_room_id`: `room_pricing(room_id)` — Speeds up room rate calculations per tier.
+
+

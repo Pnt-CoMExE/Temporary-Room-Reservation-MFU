@@ -13,6 +13,7 @@ import { errorHandler } from "./src/middleware/errorHandler";
 import { verifyToken, verifyAdmin } from "./src/middleware/auth";
 import { getRevenueByMonth } from "./src/services/revenue.service";
 import { JwtPayload } from "./src/types";
+import { generalLimiter, authLimiter, bookingLimiter } from "./src/middleware/rateLimiter";
 
 // ---- Environment ----
 dotenv.config();
@@ -34,6 +35,7 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
+app.use("/api", generalLimiter);
 
 // ---- Session + Passport ----
 app.use(
@@ -115,7 +117,7 @@ passport.deserializeUser(async (id: number, done) => {
   }
 });
 
-// ---- Database migration check ----
+// ---- Database migration & Indexing check ----
 query(
   `DO $$ BEGIN
     IF NOT EXISTS (
@@ -130,11 +132,18 @@ query(
     ) THEN
       ALTER TABLE bookings ADD COLUMN promo_code VARCHAR(50);
     END IF;
+
+    -- Database Performance Indexes
+    CREATE INDEX IF NOT EXISTS idx_bookings_date_slot ON bookings(booking_date, time_slot);
+    CREATE INDEX IF NOT EXISTS idx_bookings_user_id ON bookings(user_id);
+    CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+    CREATE INDEX IF NOT EXISTS idx_room_pricing_room_id ON room_pricing(room_id);
   END $$;`
 )
-  .then(() => console.log("✅ ตรวจสอบ/เพิ่มคอลัมน์ memo_document_url และ promo_code แล้ว"))
+  .then(() => console.log("✅ ตรวจสอบ/เพิ่มคอลัมน์ระบบ และสร้าง Database Indexes เรียบร้อยแล้ว"))
   .catch((err: any) =>
-    console.error("⚠️ ไม่สามารถเพิ่มคอลัมน์ระบบ:", err.message)
+    console.error("⚠️ ไม่สามารถปรับปรุงตาราง/ดัชนีระบบ:", err.message)
   );
 
 // ---- Modular Routes ----
@@ -152,10 +161,10 @@ import adminRoomRoutes from "./src/routes/admin/room.routes";
 import adminPromoRoutes from "./src/routes/admin/promo.routes";
 import adminLogRoutes from "./src/routes/admin/log.routes";
 
-app.use("/api/auth", authRoutes);
+app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/featured-rooms", featuredRoomRoutes);
-app.use("/api/bookings", bookingRoutes);
+app.use("/api/bookings", bookingLimiter, bookingRoutes);
 app.use("/api/promo-codes", promoRoutes);
 app.use("/api/addons", addonRoutes);
 app.use("/api/user", userRoutes);
