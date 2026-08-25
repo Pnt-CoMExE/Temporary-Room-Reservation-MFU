@@ -1,73 +1,82 @@
-# Agile Sprint Plan (3 Months)
+# Production Ready Deployment Plan (2 Months / 8 Sprints)
+# แผนการดำเนินงานและเตรียมความพร้อมสู่ Production Deployment (ระยะเวลา 2 เดือน / 8 สัปดาห์)
 
-**Project Phase:** Senior Project 2 (System Development and Deployment)
-**Duration:** 3 Months (12 Sprints / Weeks)
-**Goal:** Full implementation, third-party integrations, testing, and deployment of the Temporary Rental Space Management System.
+**Project Phase / เฟสโครงการ:** Temporary Rental Space Management System of MFU - Production Deployment  
+**Duration / ระยะเวลา:** 2 Months (8 Weeks / Sprints) / 2 เดือน (8 สัปดาห์ / 8 Sprints)  
+**Goal / เป้าหมาย:** Transition system to a hardened, fully tested, portable, and production-ready state, overcoming infrastructure and payment gateway constraints. (ยกระดับและปรับปรุงระบบให้มีความมั่นคงปลอดภัย ผ่านการทดสอบอย่างครอบคลุม รองรับการย้ายเครื่อง และพร้อมใช้งานจริงบน Production โดยก้าวข้ามข้อจำกัดด้านโครงสร้างพื้นฐานและช่องทางการชำระเงิน)
 
-## Month 1: Core System & Foundation (Sprints 1 - 4)
-**Focus:** Infrastructure, Authentication, and Basic CRUD operations.
+---
 
-* **Sprint 1 (Week 1): Setup & Foundation**
-  - Set up PostgreSQL database with `pgAdmin4`.
-  - Initialize Node.js backend and Vue.js (Tailwind CSS) frontend repositories.
-  - Create database schemas (`users`, `rooms`, `room_pricing`, `addons`).
+## 💡 Pragmatic Execution Strategy / กลยุทธ์การดำเนินงานแบบยืดหยุ่น
 
-* **Sprint 2 (Week 2): Authentication & Role Management**
-  - Implement Google OAuth 2.0 Single Sign-On (SSO).
-  - Develop automated role assignment based on email domains (`@mfu.ac.th`, `@lamduan.mfu.ac.th` for internal, else external).
-  - Build the Login UI and secure routing.
+1. **Unconfirmed CITS Server / กรณีเครื่อง Server CITS ยังไม่แน่นอน:**  
+   - 🇬🇧 100% **Docker & Docker Compose Portability**. Run on Staging/Cloud VM during UAT, then 1-click deploy (`docker-compose up -d`) when CITS Server is provisioned.
+   - 🇹🇭 ใช้ระบบ **Docker & Docker Compose Portability 100%** รันบน Staging/Cloud VM ชั่วคราวช่วง UAT และเมื่อ CITS มอบ Server จะสั่ง Deploy ด้วยคำสั่งเดียว (`docker-compose up -d`) ได้ทันที
+2. **Pending Payment Provider Selection / กรณีส่วนทรัพย์สินยังไม่ได้สรุปค่าย Payment เอกชน:**  
+   - **Modular Payment Adapter Pattern / รูปแบบสถาปัตยกรรมแบบโมดูลาร์**
+     - *Mode A (Immediate / พร้อมใช้ทันที):* Dynamic PromptPay EMVCo QR Code + Slip Upload Verification by Admin. (สแกนจ่าย PromptPay + อัปโหลด Slip + เจ้าหน้าที่ตรวจสอบ)
+     - *Mode B (Plug-and-Play / พร้อมต่อ API):* Abstracted Payment Adapter ready to attach to Opn Payments, SCB, Krungthai, or KBank once Asset Management Dept decides. (พร้อมต่อ API กับค่ายเอกชนทันทีเมื่อมีข้อสรุป)
 
-* **Sprint 3 (Week 3): Facility Management (Admin)**
-  - Implement Admin APIs to add, edit, disable rooms and add-ons.
-  - Develop Admin UI for managing room records and pricing tiers.
-  - Implement bulk import functionality via Excel for room data.
+---
 
-* **Sprint 4 (Week 4): User Browsing Experience**
-  - Develop user home page, all-room list, and room details views.
-  - Implement real-time room availability search and filtering.
+## 🗓️ Month 1: Portable Infrastructure, Modular Payment & Core Hardening (Sprints 1 - 4)
+## เดือนที่ 1: โครงสร้างพื้นฐานย้ายง่าย, ระบบชำระเงินแบบโมดูลาร์ และยกระดับความปลอดภัย
 
-## Month 2: Advanced Workflows & Third-Party Integrations (Sprints 5 - 8)
-**Focus:** Booking workflows, Admin approvals, and Payment Integration.
+* **Sprint 1 (Week 1 / สัปดาห์ที่ 1): Dockerization & Portable Environment Setup / การทำ Dockerization & จัดตั้งสภาพแวดล้อมที่ย้ายง่าย**
+  - 🇬🇧 Multi-stage Dockerfiles for Express Backend and Vue 3 + Nginx Frontend.
+  - 🇹🇭 สร้าง Multi-stage Dockerfiles สำหรับ Express Backend และ Vue 3 + Nginx Frontend
+  - 🇬🇧 Portable `docker-compose.prod.yml` with PostgreSQL 16 & Redis.
+  - 🇹🇭 กำหนดค่า `docker-compose.prod.yml` ที่รันร่วมกับ PostgreSQL 16 และ Redis
+  - 🇬🇧 Automated Database Migration and Backup Scripts.
+  - 🇹🇭 สร้างสคริปต์ Database Migration และระบบสำรองข้อมูล (Backup) อัตโนมัติ
 
-* **Sprint 5 (Week 5): Booking Engine**
-  - Implement advanced booking request submission.
-  - Develop add-on selection and automated cost calculation logic.
-  - Handle document uploads (e.g., proof of organization).
+* **Sprint 2 (Week 2 / สัปดาห์ที่ 2): Dynamic PromptPay EMVCo QR & Slip Verification Engine / ระบบชำระเงิน Dynamic PromptPay EMVCo QR & ตรวจสอบ Slip**
+  - 🇬🇧 PromptPay EMVCo QR generator on UI.
+  - 🇹🇭 ตัวสร้าง QR Code ชำระเงิน Dynamic PromptPay EMVCo บนหน้าจอผู้ใช้
+  - 🇬🇧 Payment Slip Upload feature for users and Slip Verification Dashboard for Admins.
+  - 🇹🇭 ฟังก์ชันอัปโหลด Slip หลักฐานการชำระเงินสำหรับผู้ใช้ และระบบตรวจสอบ Slip สำหรับผู้ดูแลระบบ (Admin)
 
-* **Sprint 6 (Week 6): Admin Approval Workflow**
-  - Develop admin request management dashboard (Approve/Reject).
-  - Implement official approval document export/import.
-  - Set up automated email notifications for booking status updates.
+* **Sprint 3 (Week 3 / สัปดาห์ที่ 3): Security Hardening, Audit Logging & OAuth Enforcement / การยกระดับความปลอดภัย, บันทึกการทำงาน & จัดสิทธิ์ OAuth**
+  - 🇬🇧 Strict MFU Google OAuth domain separation (`@mfu.ac.th` vs `@lamduan.mfu.ac.th` vs external).
+  - 🇹🇭 บังคับใช้ Google OAuth 2.0 แยกสิทธิ์ตามโดเมนอย่างเข้มงวด (`@mfu.ac.th` บุคลากร vs `@lamduan.mfu.ac.th` นักศึกษา vs บุคคลภายนอก)
+  - 🇬🇧 Security hardening with `helmet`, CORS, API Rate Limiting, and Admin Audit Logs.
+  - 🇹🇭 เพิ่มความปลอดภัยด้วย `helmet`, CORS Policy, การจำกัดอัตราเรียกใช้งาน API (Rate Limiting) และระบบ Admin Audit Logs
 
-* **Sprint 7 (Week 7): Payment Gateway Integration**
-  - Integrate Opn Payments API for generating dynamic PromptPay QR Codes.
-  - Develop payment UI for scanning QR codes during checkout.
-  - Implement Webhook listener to automatically update booking status to "Paid".
+* **Sprint 4 (Week 4 / สัปดาห์ที่ 4): Modular Payment Adapter & Automated Receipt PDF Generation / Modular Payment Adapter & ระบบออกใบเสร็จ PDF อัตโนมัติ**
+  - 🇬🇧 Modular Payment Provider Adapter Interface.
+  - 🇹🇭 สร้างโครงสร้าง Interface กลางสำหรับเชื่อมต่อ Payment Provider ของเอกชน (Modular Payment Adapter)
+  - 🇬🇧 Automated PDF invoice/receipt generation service.
+  - 🇹🇭 ระบบสร้างเอกสาร PDF ใบเสร็จรับเงิน/ใบอนุญาตใช้งานพื้นที่อัตโนมัติ
+  - 🇬🇧 Real-time Add-on equipment inventory lock logic.
+  - 🇹🇭 Logic คำนวณคลังอุปกรณ์เสริมแบบ Real-time (Add-on Inventory Lock) เพื่อป้องกันการจองอุปกรณ์เกินจำนวนจริง
 
-* **Sprint 8 (Week 8): User Dashboard & Management**
-  - Develop User Dashboard to track bookings, statuses, and history.
-  - Implement booking cancellation logic according to system policies.
-  - Create Post-Service Feedback and review forms.
+---
 
-## Month 3: Polish, Testing, and Deployment (Sprints 9 - 12)
-**Focus:** Analytics, Quality Assurance, and Final Release.
+## 🗓️ Month 2: QA, UAT, CITS Readiness, CI/CD & Go-Live (Sprints 5 - 8)
+## เดือนที่ 2: QA, UAT, ความพร้อมสำหรับ CITS, CI/CD & การเปิดใช้งานจริง
 
-* **Sprint 9 (Week 9): Data Visualization & Promotions**
-  - Develop centralized Admin Analytics Dashboard (interactive charts for revenue, utilization).
-  - Implement Promotion Management (Promo codes) and Broadcast announcements.
-  - Implement Activity Logs for system administrators.
+* **Sprint 5 (Week 5 / สัปดาห์ที่ 5): E2E Automation Testing & Concurrency Load Testing / การทดสอบ E2E อัตโนมัติ & ทดสอบโหลดรองรับผู้ใช้พร้อมกัน**
+  - 🇬🇧 Playwright E2E automation tests covering full user booking journeys.
+  - 🇹🇭 ชุดทดสอบ Playwright E2E Automation ครอบคลุมการทำงานตั้งแต่เริ่มจองจนถึงชำระเงิน
+  - 🇬🇧 Concurrency load testing with k6 (300+ VUs) ensuring database row locks prevent double-booking.
+  - 🇹🇭 การทดสอบโหลดและความพร้อมด้วย k6 (จำลองผู้ใช้ 300+ คนพร้อมกัน) เพื่อการันตีว่า PostgreSQL Transaction Lock ป้องกันการจองซ้ำซ้อน (Double-Booking) ได้ 100%
 
-* **Sprint 10 (Week 10): System Testing & QA**
-  - Conduct End-to-End (E2E) testing and resolve critical bugs.
-  - Validate role-based access control and scheduling conflict prevention.
-  - Perform User Acceptance Testing (UAT) with internal stakeholders.
+* **Sprint 6 (Week 6 / สัปดาห์ที่ 6): User Acceptance Testing (UAT) & Asset Dept Review / การทดสอบยอมรับจากผู้ใช้ (UAT) & สอบทานร่วมกับส่วนทรัพย์สิน**
+  - 🇬🇧 UAT execution with MFU Admin, Faculty, Student Orgs, and Asset Management Dept.
+  - 🇹🇭 เปิดรอบทดสอบ UAT ร่วมกับผู้ดูแลระบบ MFU, อาจารย์/บุคลากร, สโมสร/ชมรมนักศึกษา และเจ้าหน้าที่ส่วนทรัพย์สิน
+  - 🇬🇧 Rapid feedback triage and bug fixing.
+  - 🇹🇭 การรวบรวมข้อเสนอแนะ การจัดลำดับความสำคัญของปัญหา และการแก้ไขข้อผิดพลาดอย่างรวดเร็ว
 
-* **Sprint 11 (Week 11): Refinement & Optimization**
-  - UI/UX polish (transitions, responsiveness, empty states).
-  - Database indexing and query optimization for performance.
-  - Security review (API rate limiting, data validation).
+* **Sprint 7 (Week 7 / สัปดาห์ที่ 7): CI/CD Automation Pipeline & CITS Readiness Package / ท่อส่งมอบงานอัตโนมัติ (CI/CD Pipeline) & แพ็กเกจพร้อมส่งมอบ CITS**
+  - 🇬🇧 GitHub Actions CI/CD pipeline setup.
+  - 🇹🇭 ติดตั้ง GitHub Actions CI/CD Pipeline (ทดสอบรัน Unit Test, Linting และ Build Docker Image อัตโนมัติ)
+  - 🇬🇧 Preparation of "CITS Deployment Readiness Package" for smooth server handover.
+  - 🇹🇭 จัดทำ "CITS Deployment Readiness Package" สำหรับการส่งมอบเซิร์ฟเวอร์แก่ทีมวิศวกร CITS
 
-* **Sprint 12 (Week 12): Final Deployment & Documentation**
-  - Deploy frontend and backend to production servers.
-  - Finalize Senior Project 2 documentation and user manuals.
-  - Prepare presentation and system demonstration for the final examination committee defense.
+* **Sprint 8 (Week 8 / สัปดาห์ที่ 8): CITS Server Deployment, DNS Cutover & Go-Live / การนำขึ้น Server CITS, การชี้ DNS Domain & เปิดใช้งานจริง**
+  - 🇬🇧 Deploy to CITS Production Server via Docker Compose.
+  - 🇹🇭 Deploy ขึ้น Production Server ของ CITS ผ่าน Docker Compose
+  - 🇬🇧 Seed initial room, pricing, and admin data.
+  - 🇹🇭 นำเข้าข้อมูลเริ่มต้น (ข้อมูลห้องพัก, อัตราค่าเช่า, อุปกรณ์เสริม, บัญชีผู้ดูแลระบบ)
+  - 🇬🇧 Domain DNS cutover, SSL activation, monitoring setup, and operational handover.
+  - 🇹🇭 ชี้ Domain DNS ของมหาวิทยาลัย, เปิดใช้งาน SSL Certificate, ติดตั้งระบบ Monitoring และส่งมอบคู่มือการใช้งานระบบ

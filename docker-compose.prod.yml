@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # 1. PostgreSQL Database Service
+  # ==========================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: mfu_space_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mfu_reservation}
+      POSTGRES_USER: ${POSTGRES_USER:-mfu_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mfu_secure_password_2026}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mfu_admin} -d ${POSTGRES_DB:-mfu_reservation}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mfu_network
+
+  # ==========================================
+  # 2. Redis Cache & Rate Limit Service
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: mfu_space_redis
+    restart: always
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mfu_network
+
+  # ==========================================
+  # 3. Express TypeScript Backend Service
+  # ==========================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mfu_space_backend
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-mfu_reservation}
+      DB_USER: ${POSTGRES_USER:-mfu_admin}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-mfu_secure_password_2026}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-mfu_space_jwt_secret_key_production_2026}
+      SESSION_SECRET: ${SESSION_SECRET:-mfu_space_session_secret_production_2026}
+      PROMPTPAY_ID: ${PROMPTPAY_ID:-0575532000100}
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - mfu_network
+
+  # ==========================================
+  # 4. Vue 3 Frontend Web Server Service
+  # ==========================================
+  frontend:
+    build:
+      context: ./vue-test
+      dockerfile: Dockerfile
+    container_name: mfu_space_frontend
+    restart: always
+    ports:
+      - "${PORT:-80}:80"
+    depends_on:
+      - backend
+    networks:
+      - mfu_network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+networks:
+  mfu_network:
+    driver: bridge

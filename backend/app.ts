@@ -132,6 +132,18 @@ query(
     ) THEN
       ALTER TABLE bookings ADD COLUMN promo_code VARCHAR(50);
     END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'bookings' AND column_name = 'payment_slip_url'
+    ) THEN
+      ALTER TABLE bookings ADD COLUMN payment_slip_url TEXT;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'bookings' AND column_name = 'payment_status'
+    ) THEN
+      ALTER TABLE bookings ADD COLUMN payment_status VARCHAR(50) DEFAULT 'unpaid';
+    END IF;
 
     -- Database Performance Indexes
     CREATE INDEX IF NOT EXISTS idx_bookings_date_slot ON bookings(booking_date, time_slot);
@@ -155,6 +167,7 @@ import promoRoutes from "./src/routes/promo.routes";
 import addonRoutes from "./src/routes/addon.routes";
 import userRoutes from "./src/routes/user.routes";
 import bannerRoutes from "./src/routes/banner.routes";
+import paymentRoutes from "./src/routes/payment.routes";
 import adminStatsRoutes from "./src/routes/admin/stats.routes";
 import adminBookingRoutes from "./src/routes/admin/booking.routes";
 import adminRoomRoutes from "./src/routes/admin/room.routes";
@@ -165,6 +178,7 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/rooms", roomRoutes);
 app.use("/api/featured-rooms", featuredRoomRoutes);
 app.use("/api/bookings", bookingLimiter, bookingRoutes);
+app.use("/api/payment", paymentRoutes);
 app.use("/api/promo-codes", promoRoutes);
 app.use("/api/addons", addonRoutes);
 app.use("/api/user", userRoutes);

@@ -29,6 +29,12 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - Installed `express-rate-limit` and created `rateLimiter.ts` middleware (`generalLimiter`, `authLimiter`, `bookingLimiter`) to protect backend APIs.
 - Configured PostgreSQL index migration statements in `backend/app.ts` (`idx_bookings_date_slot`, `idx_bookings_user_id`, `idx_bookings_status`, `idx_users_email`, `idx_room_pricing_room_id`).
 - Enhanced Vue frontend submit loading UX and button states in `BookingView.vue`.
-- Updated project documentation files (`schema.md`, `features.md`, and `AI_CHANGELOG.md`).
+- Developed 2-Month Production Deployment Plan (`implementation_plan.md` artifact and updated `planning.md`) addressing CITS Server & Payment provider constraints.
+- Created Production Docker Infrastructure: `backend/Dockerfile`, `backend/.dockerignore`, `vue-test/Dockerfile`, `vue-test/nginx.conf`, `vue-test/.dockerignore`, `docker-compose.prod.yml`, and `.env.production.example`.
+- Implemented Payment API Engine (`backend/src/routes/payment.routes.ts`) for PromptPay EMVCo QR code payload generation, Slip Upload middleware, and Admin Verification routes.
+- Configured database schema migration for `payment_slip_url` and `payment_status` columns in `backend/app.ts`.
+- Added unit test suite `backend/src/__tests__/payment.test.ts` verifying EMVCo CRC16 checksum calculation and API security.
+- Updated task tracking artifact `task.md`.
+
 
 
