@@ -16,9 +16,7 @@ export const deleteCookie = (name: string): void => {
 
 // ── API instance ──────────────────────────────────────────
 const api: AxiosInstance = axios.create({
-  baseURL:
-    (import.meta as Record<string, any>).env.VITE_API_URL ||
-    "http://localhost:3000",
+  baseURL: (import.meta as Record<string, any>).env.VITE_API_URL || "",
   withCredentials: true,
   timeout: 30000, // 30s timeout
   headers: {
