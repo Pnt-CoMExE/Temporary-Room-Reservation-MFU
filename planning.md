@@ -42,9 +42,9 @@
   - 🇬🇧 Security hardening with `helmet`, CORS, API Rate Limiting, and Admin Audit Logs.
   - 🇹🇭 เพิ่มความปลอดภัยด้วย `helmet`, CORS Policy, การจำกัดอัตราเรียกใช้งาน API (Rate Limiting) และระบบ Admin Audit Logs
 
-* **Sprint 4 (Week 4 / สัปดาห์ที่ 4): Modular Payment Adapter & Automated Receipt PDF Generation / Modular Payment Adapter & ระบบออกใบเสร็จ PDF อัตโนมัติ**
-  - 🇬🇧 Modular Payment Provider Adapter Interface.
-  - 🇹🇭 สร้างโครงสร้าง Interface กลางสำหรับเชื่อมต่อ Payment Provider ของเอกชน (Modular Payment Adapter)
+* **Sprint 4 (Week 4 / สัปดาห์ที่ 4): Modular Payment Adapter & Automated Receipt PDF Generation / Modular Payment Adapter & ระบบออกใบเสร็จ PDF อัตโนมัติ [✅ COMPLETED / ดำเนินการแล้ว]**
+  - 🇬🇧 Modular Payment Provider Adapter Interface (`IPaymentAdapter`, `PaymentGatewayManager`, Adapters: PromptPay, Opn, SCB, KBank, KTB, Mock).
+  - 🇹🇭 สร้างโครงสร้าง Interface กลางสำหรับเชื่อมต่อ Payment Provider (Modular Payment Adapter) พร้อม Adapters สำหรับ Opn, SCB, KBank, KTB และ Mock Sandbox พร้อมสลับด้วย `.env`
   - 🇬🇧 Automated PDF invoice/receipt generation service.
   - 🇹🇭 ระบบสร้างเอกสาร PDF ใบเสร็จรับเงิน/ใบอนุญาตใช้งานพื้นที่อัตโนมัติ
   - 🇬🇧 Real-time Add-on equipment inventory lock logic.

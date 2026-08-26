@@ -18,6 +18,7 @@ import {
   CategoryScale,
   LinearScale,
   ArcElement,
+  type ChartOptions,
 } from "chart.js";
 ChartJS.register(
   Title,
@@ -30,6 +31,7 @@ ChartJS.register(
 );
 
 import api, { getCookie } from "@/services/api";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 
 interface BookingInfo {
   id: string;
@@ -85,7 +87,7 @@ const fetchAdminData = async () => {
     stats.value = statsRes.data;
 
     const bookingsRes = await api.get("/api/admin/bookings");
-    bookings.value = bookingsRes.data.map(b => ({
+    bookings.value = bookingsRes.data.map((b: any) => ({
       ...b,
       id: b.booking_no,
       dbId: b.id,
@@ -103,12 +105,12 @@ const fetchAdminData = async () => {
     const revenueRes = await api.get("/api/admin/revenue-by-month");
     if (revenueRes.data && revenueRes.data.length > 0) {
       barChartData.value = {
-        labels: revenueRes.data.map(r => r.label),
+        labels: revenueRes.data.map((r: any) => r.label),
         datasets: [{
           label: "รายได้ (บาท)",
           backgroundColor: "#ba0b2f",
           borderRadius: 6,
-          data: revenueRes.data.map(r => r.revenue),
+          data: revenueRes.data.map((r: any) => r.revenue),
         }]
       };
       // คำนวณรายได้เดือนที่ผ่านมาจากข้อมูล API (ข้อมูลเรียง ASC, ตัวสุดท้าย = เดือนปัจจุบัน)
@@ -118,19 +120,19 @@ const fetchAdminData = async () => {
         stats.value.lastMonthRevenue = 0;
       }
       // เตรียมข้อมูลรายเดือนสำหรับแสดงในส่วนขยาย
-      revenueMonths.value = revenueRes.data.map(r => ({
+      revenueMonths.value = revenueRes.data.map((r: any) => ({
         label: r.label,
         revenue: r.revenue
       }));
     }
 
     // คำนวณห้องยอดนิยม
-    const roomCounts = {};
-    bookings.value.forEach(b => {
+    const roomCounts: Record<string, number> = {};
+    bookings.value.forEach((b: BookingInfo) => {
       roomCounts[b.roomName] = (roomCounts[b.roomName] || 0) + 1;
     });
     const sortedRooms = Object.entries(roomCounts)
-      .sort((a, b) => b[1] - a[1])
+      .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
       .slice(0, 3)
       .map((entry, index) => {
         const colors = ["bg-green-500", "bg-blue-500", "bg-yellow-500"];
@@ -144,7 +146,7 @@ const fetchAdminData = async () => {
 
     // คำนวณ Doughnut Chart
     const typeCounts = { external: 0, internal: 0, co_op: 0 };
-    bookings.value.forEach(b => {
+    bookings.value.forEach((b: BookingInfo) => {
       if (b.organization_type === 'internal') typeCounts.internal++;
       else if (b.organization_type === 'co_op') typeCounts.co_op++;
       else typeCounts.external++;
@@ -182,7 +184,7 @@ const barChartData = ref({
   ],
 });
 
-const barChartOptions = ref({
+const barChartOptions = ref<ChartOptions<'bar'>>({
   responsive: true,
   maintainAspectRatio: false,
   plugins: { legend: { display: false } },
@@ -196,7 +198,7 @@ const doughnutChartData = ref({
   ],
 });
 
-const doughnutChartOptions = ref({
+const doughnutChartOptions = ref<ChartOptions<'doughnut'>>({
   responsive: true,
   maintainAspectRatio: false,
   plugins: { legend: { position: "bottom" } },
@@ -253,20 +255,26 @@ const confirmLogout = () => {
         ></div>
       </div>
       <div
-        class="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full mt-8 text-center md:text-left"
+        class="max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full mt-8 flex flex-col md:flex-row justify-between items-center md:items-end gap-4"
       >
-        <span
-          class="inline-block py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/30 text-xs font-bold tracking-widest uppercase mb-3 shadow-lg"
-          >Administrator Portal</span
-        >
-        <h1
-          class="text-4xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-lg mb-2"
-        >
-          MFU Property Admin
-        </h1>
-        <p class="text-gray-200 text-lg font-medium">
-          ระบบบริหารจัดการพื้นที่เช่ามหาวิทยาลัยแม่ฟ้าหลวง
-        </p>
+        <div class="text-center md:text-left">
+          <span
+            class="inline-block py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/30 text-xs font-bold tracking-widest uppercase mb-3 shadow-lg"
+            >Administrator Portal</span
+          >
+          <h1
+            class="text-4xl md:text-5xl font-extrabold text-white tracking-tight drop-shadow-lg mb-2"
+          >
+            MFU Property Admin
+          </h1>
+          <p class="text-gray-200 text-lg font-medium">
+            {{ $t('admin.dashboard_title') }}
+          </p>
+        </div>
+
+        <div class="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30 shadow-lg">
+          <LanguageSwitcher />
+        </div>
       </div>
     </div>
 

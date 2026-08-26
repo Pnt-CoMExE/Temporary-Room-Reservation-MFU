@@ -72,7 +72,7 @@ services:
       - mfu_network
 
   # ==========================================
-  # 4. Vue 3 Frontend Web Server Service
+  # 4. Vue 3 Frontend Web Server Service & Nginx Reverse Proxy
   # ==========================================
   frontend:
     build:
@@ -82,8 +82,27 @@ services:
     restart: always
     ports:
       - "${PORT:-80}:80"
+      - "443:443"
     depends_on:
       - backend
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/lib/letsencrypt
+    networks:
+      - mfu_network
+
+  # ==========================================
+  # 5. Certbot Auto-SSL Renewal Service
+  # ==========================================
+  certbot:
+    image: certbot/certbot
+    container_name: mfu_space_certbot
+    restart: unless-stopped
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/lib/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while true; do certbot renew; sleep 12h & wait $${!}; done;'"
     networks:
       - mfu_network
 
@@ -94,7 +113,14 @@ volumes:
     driver: local
   backend_uploads:
     driver: local
+  certbot_etc:
+    driver: local
+  certbot_var:
+    driver: local
+  certbot_www:
+    driver: local
 
 networks:
   mfu_network:
     driver: bridge
+

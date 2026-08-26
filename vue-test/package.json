@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",
@@ -22,10 +23,12 @@
     "sweetalert2": "^11.26.25",
     "vue": "^3.5.41",
     "vue-chartjs": "^5.3.4",
+    "vue-i18n": "^11.4.10",
     "vue-router": "^5.2.0",
     "vue-toastification": "^2.0.0-rc.5"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
     "@types/node": "^26.3.0",
     "@types/qrcode": "^1.5.6",
@@ -33,7 +36,7 @@
     "autoprefixer": "^10.5.4",
     "postcss": "^8.5.13",
     "tailwindcss": "^4.3.3",
-    "typescript": "^7.0.2",
+    "typescript": "~5.7.3",
     "vite": "^8.0.10",
     "vite-plugin-vue-devtools": "^8.2.1",
     "vue-tsc": "^3.3.11"

@@ -32,9 +32,13 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - Developed 2-Month Production Deployment Plan (`implementation_plan.md` artifact and updated `planning.md`) addressing CITS Server & Payment provider constraints.
 - Created Production Docker Infrastructure: `backend/Dockerfile`, `backend/.dockerignore`, `vue-test/Dockerfile`, `vue-test/nginx.conf`, `vue-test/.dockerignore`, `docker-compose.prod.yml`, and `.env.production.example`.
 - Implemented Payment API Engine (`backend/src/routes/payment.routes.ts`) for PromptPay EMVCo QR code payload generation, Slip Upload middleware, and Admin Verification routes.
-- Configured database schema migration for `payment_slip_url` and `payment_status` columns in `backend/app.ts`.
-- Added unit test suite `backend/src/__tests__/payment.test.ts` verifying EMVCo CRC16 checksum calculation and API security.
-- Updated task tracking artifact `task.md`.
+- Implemented Modular Payment Gateway Adapter Architecture (`payment.adapter.interface.ts`, `payment.manager.ts`).
+- Created Payment Provider Adapters: `PromptPayAdapter`, `OpnPaymentAdapter` (Omise), `SCBPaymentAdapter`, `KBankPaymentAdapter`, `KTBPaymentAdapter`, and `MockPaymentAdapter` (Mock Sandbox for UAT).
+- Updated Payment API Routes (`backend/src/routes/payment.routes.ts`) with `GET /api/payment/providers`, `POST /api/payment/checkout`, and `POST /api/payment/webhook/:provider`.
+- Created comprehensive `payment_gateway.md` developer & admin configuration guide.
+- Updated `.env.production.example`, `schema.md`, and `planning.md` with modular payment provider settings.
+- Added unit test suite `backend/src/__tests__/payment_adapter.test.ts` covering provider resolution, standby fallback, and mock webhook verification.
+
 
 
 

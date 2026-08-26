@@ -1,7 +1,14 @@
+export interface EmailAttachment {
+  filename: string;
+  content: Buffer;
+  contentType?: string;
+}
+
 export interface EmailOptions {
   to: string;
   subject: string;
   html: string;
+  attachments?: EmailAttachment[];
 }
 
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
@@ -10,6 +17,13 @@ export async function sendEmail(options: EmailOptions): Promise<boolean> {
     console.log(`[EMAIL SERVICE] Sending email to: ${options.to}`);
     console.log(`[EMAIL SERVICE] Subject: ${options.subject}`);
     console.log(`[EMAIL SERVICE] Content: ${options.html.substring(0, 100)}...`);
+    if (options.attachments && options.attachments.length > 0) {
+      console.log(
+        `[EMAIL SERVICE] Attachments (${options.attachments.length}): ${options.attachments
+          .map((a) => a.filename)
+          .join(", ")}`
+      );
+    }
     return true;
   } catch (err) {
     console.error("[EMAIL SERVICE] Error sending email:", err);
@@ -68,4 +82,35 @@ export async function sendBookingStatusEmail(
     </div>
   `;
   return sendEmail({ to: userEmail, subject, html });
+}
+
+export async function sendPaymentApprovedWithPermitEmail(
+  userEmail: string,
+  bookingNo: string,
+  roomName: string,
+  pdfBuffer: Buffer
+): Promise<boolean> {
+  const subject = `[MFU Space Reservation] ยืนยันการชำระเงินและใบอนุญาตใช้งานพื้นที่ - ${bookingNo}`;
+  const html = `
+    <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
+      <h2 style="color: #16a34a;">ยืนยันการชำระเงินเรียบร้อยแล้ว</h2>
+      <p>เรียน คุณผู้ใช้,</p>
+      <p>เจ้าหน้าที่ได้ตรวจสอบและยืนยันการชำระเงินสำหรับรายการจอง <strong>${bookingNo}</strong> (${roomName}) เรียบร้อยแล้ว</p>
+      <p>ระบบได้แนบเอกสาร <strong>"ใบอนุญาตใช้งานพื้นที่และใบเสร็จรับเงิน (Space Permit & Official Receipt)"</strong> มาพร้อมกับอีเมลนี้ กรุณาเก็บไว้เป็นหลักฐานในการเข้าใช้งานพื้นที่</p>
+      <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+      <p style="font-size: 12px; color: #888;">ส่วนจัดการทรัพย์สิน มหาวิทยาลัยแม่ฟ้าหลวง</p>
+    </div>
+  `;
+  return sendEmail({
+    to: userEmail,
+    subject,
+    html,
+    attachments: [
+      {
+        filename: `Permit_Receipt_${bookingNo}.pdf`,
+        content: pdfBuffer,
+        contentType: "application/pdf",
+      },
+    ],
+  });
 }

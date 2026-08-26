@@ -85,8 +85,10 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 - `booking_id` (integer, FK): Reference to `bookings` table.
 - `transaction_id` (varchar 100, Unique): Transaction ID from gateway.
 - `amount` (numeric 10,2): Payment amount.
-- `payment_method` (varchar 100): Method (e.g., promptpay).
-- `status` (varchar 50): Payment status.
+- `payment_method` (varchar 100): Provider identifier (e.g., `promptpay_manual`, `opn`, `scb`, `kbank`, `ktb`, `mock_sandbox`).
+- `payment_gateway_ref` (text): External gateway charge/checkout reference ID.
+- `raw_payload` (jsonb/text): Webhook callback payload metadata.
+- `status` (varchar 50): Payment status (`pending_verification`, `verified`, `failed`).
 - `paid_at` (timestamp): Payment completion time.
 - `created_at` (timestamp): Record creation time.
 

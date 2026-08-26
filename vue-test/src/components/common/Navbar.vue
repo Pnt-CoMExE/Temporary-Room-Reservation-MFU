@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import api, { getCookie } from "@/services/api";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 
 interface Notification {
   id: number;
@@ -138,7 +139,7 @@ const confirmLogout = () => {
               to="/home"
               class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
-              หน้าแรก<span
+              {{ $t('nav.home') }}<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
               ></span>
             </RouterLink>
@@ -146,7 +147,7 @@ const confirmLogout = () => {
               to="/rooms"
               class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
-              จองห้องและพื้นที่<span
+              {{ $t('nav.rooms') }}<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
               ></span>
             </RouterLink>
@@ -154,18 +155,21 @@ const confirmLogout = () => {
               to="/dashboard"
               class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
-              รายการของฉัน<span
+              {{ $t('nav.dashboard') }}<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
               ></span>
             </RouterLink>
 
             <div class="flex items-center gap-4 pl-4 border-l border-gray-200">
+              <!-- ✨ ปุ่มสลับภาษา (TH / EN) -->
+              <LanguageSwitcher />
+
               <!-- ✨ ชื่อผู้ใช้งาน และ รูปโปรไฟล์ Google -->
               <div class="hidden lg:flex items-center gap-3">
                 <img v-if="profileImage" :src="profileImage" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full shadow-sm object-cover border border-gray-200" />
                 <div v-else class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200"><FontAwesomeIcon :icon="['fas', 'user']" class="text-xs" /></div>
                 <span class="text-xs font-bold text-gray-500">
-                  สวัสดีคุณ <span class="text-[#ba0b2f]">{{ userName }}</span>
+                  {{ $t('nav.welcome') }} <span class="text-[#ba0b2f]">{{ userName }}</span>
                 </span>
               </div>
 
@@ -190,12 +194,12 @@ const confirmLogout = () => {
                   <div
                     class="flex justify-between items-center p-4 border-b border-gray-50 bg-gray-50/50"
                   >
-                    <h3 class="font-bold text-gray-900">การแจ้งเตือน</h3>
+                    <h3 class="font-bold text-gray-900">{{ $t('nav.notifications') }}</h3>
                     <button
                       @click="markAllAsRead"
                       class="text-[10px] font-bold text-[#ba0b2f] hover:underline cursor-pointer"
                     >
-                      อ่านทั้งหมด
+                      {{ $t('nav.mark_all_read') }}
                     </button>
                   </div>
                   <div class="max-h-80 overflow-y-auto">
@@ -245,13 +249,14 @@ const confirmLogout = () => {
                   <FontAwesomeIcon
                     :icon="['fas', 'sign-out-alt']" class="text-gray-400 group-hover:text-[#ba0b2f] transition-colors"
                   />
-                ออกจากระบบ
+                {{ $t('nav.logout') }}
               </button>
             </div>
           </div>
 
           <!-- Mobile menu button -->
           <div class="flex md:hidden items-center gap-3">
+            <LanguageSwitcher />
             <button
               @click="toggleNotif"
               class="relative w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center cursor-pointer"
@@ -283,26 +288,26 @@ const confirmLogout = () => {
             to="/home"
             @click="closeMenu"
             class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-[#ba0b2f] rounded-xl font-bold transition-colors"
-            >หน้าแรก</RouterLink
+            >{{ $t('nav.home') }}</RouterLink
           >
           <RouterLink
             to="/rooms"
             @click="closeMenu"
             class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-[#ba0b2f] rounded-xl font-bold transition-colors"
-            >จองห้องและพื้นที่</RouterLink
+            >{{ $t('nav.rooms') }}</RouterLink
           >
           <RouterLink
             to="/dashboard"
             @click="closeMenu"
             class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-[#ba0b2f] rounded-xl font-bold transition-colors"
-            >รายการของฉัน</RouterLink
+            >{{ $t('nav.dashboard') }}</RouterLink
           >
           <div class="pt-4 border-t border-gray-100 mt-2">
             <button
               @click="confirmLogout"
               class="w-full bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white py-4 rounded-xl font-bold shadow-md flex justify-center items-center gap-2 active:scale-95 transition-transform cursor-pointer"
             >
-              <FontAwesomeIcon :icon="['fas', 'sign-out-alt']" class="mr-2" /> ออกจากระบบ
+              <FontAwesomeIcon :icon="['fas', 'sign-out-alt']" class="mr-2" /> {{ $t('nav.logout') }}
             </button>
           </div>
         </div>

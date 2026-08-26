@@ -7,9 +7,12 @@ import { registerFontAwesome } from './plugins/fontawesome'
 import Toast from "vue-toastification";
 import "vue-toastification/dist/index.css";
 
+import i18n from "./i18n";
+
 const app = createApp(App)
 
 app.use(router) // สั่งให้ Vue ใช้งาน Router
+app.use(i18n) // สั่งให้ Vue ใช้งาน i18n Multi-language
 registerFontAwesome(app)
 app.use(Toast, {
   position: "top-right", // ให้อยู่มุมขวาบน

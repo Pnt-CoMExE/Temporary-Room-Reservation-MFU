@@ -7,6 +7,7 @@
     "test": "vitest run",
     "dev": "tsx watch server.ts",
     "start": "tsx server.ts",
+    "seed": "tsx seed-mfu-rooms.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
@@ -28,6 +29,7 @@
     "multer": "^2.1.1",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "pdfkit": "^0.20.1",
     "pg": "^8.23.0",
     "xlsx": "^0.18.5"
   },
@@ -44,6 +46,7 @@
     "@types/node": "^26.3.0",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
+    "@types/pdfkit": "^0.17.6",
     "@types/pg": "^8.23.1",
     "@types/supertest": "^7.2.1",
     "nodemon": "^3.1.14",

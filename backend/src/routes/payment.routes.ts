@@ -5,6 +5,7 @@ import fs from "fs";
 import { query } from "../../db";
 import { verifyToken, verifyAdmin } from "../middleware/auth";
 import { generatePromptPayPayload } from "../services/promptpay.service";
+import { paymentGateway } from "../services/payment/payment.manager";
 
 const router = Router();
 
@@ -33,6 +34,89 @@ const upload = multer({
   },
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
 });
+
+/**
+ * GET /api/payment/providers
+ * Returns list of available payment gateway adapters and active state
+ */
+router.get("/providers", (_req: any, res: Response) => {
+  const activeAdapter = paymentGateway.getActiveAdapter();
+  const providers = paymentGateway.listAvailableProviders();
+
+  res.json({
+    activeProvider: {
+      id: activeAdapter.providerId,
+      name: activeAdapter.providerName,
+    },
+    providers,
+  });
+});
+
+/**
+ * POST /api/payment/checkout
+ * Unified payment session initialization for active payment provider
+ */
+router.post("/checkout", verifyToken, async (req: any, res: Response) => {
+  try {
+    const { bookingId } = req.body;
+    if (!bookingId) {
+      return res.status(400).json({ message: "กรุณาระบุ bookingId" });
+    }
+
+    const bookingRes = await query(
+      "SELECT id, booking_no, total_price, status FROM bookings WHERE id = $1",
+      [bookingId]
+    );
+
+    if (bookingRes.rows.length === 0) {
+      return res.status(404).json({ message: "ไม่พบข้อมูลการจอง" });
+    }
+
+    const booking = bookingRes.rows[0];
+
+    const session = await paymentGateway.createPaymentSession({
+      bookingId: booking.id,
+      bookingNo: booking.booking_no,
+      amount: Number(booking.total_price),
+      customerEmail: req.user?.email,
+      customerName: req.user?.firstname ? `${req.user.firstname} ${req.user.lastname || ""}`.trim() : undefined,
+    });
+
+    res.json(session);
+  } catch (err: any) {
+    console.error("[payment/checkout] Error:", err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการสร้างรายการชำระเงิน" });
+  }
+});
+
+/**
+ * POST /api/payment/webhook/:provider
+ * Webhook handler for external payment gateways (Opn, SCB, KBank, KTB, Mock Sandbox)
+ */
+router.post("/webhook/:provider", async (req: any, res: Response) => {
+  try {
+    const providerId = req.params.provider;
+    const result = await paymentGateway.handleWebhook(providerId, req.body, req.headers);
+
+    if (result.success && result.bookingNo && result.status === "verified") {
+      await query(
+        `UPDATE bookings
+         SET payment_status = 'verified', status = 'approved'
+         WHERE booking_no = $1`,
+        [result.bookingNo]
+      );
+    }
+
+    res.json({
+      received: true,
+      result,
+    });
+  } catch (err: any) {
+    console.error(`[payment/webhook/${req.params.provider}] Error:`, err);
+    res.status(500).json({ message: "Webhook processing error" });
+  }
+});
+
 
 /**
  * POST /api/payment/promptpay/generate
@@ -118,6 +202,9 @@ router.post(
   }
 );
 
+import { generateBookingPDFReceipt } from "../services/pdf.service";
+import { sendPaymentApprovedWithPermitEmail } from "../services/email.service";
+
 /**
  * POST /api/payment/verify
  * Admin verifies and approves/rejects payment slip
@@ -136,7 +223,7 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
       `UPDATE bookings
        SET payment_status = $1, status = $2
        WHERE id = $3
-       RETURNING id, booking_no, status, payment_status`,
+       RETURNING id, booking_no, user_id, room_id, organization_type, booking_date, time_slot, room_price, addons_price, total_price, status, payment_status`,
       [newPaymentStatus, newBookingStatus, bookingId]
     );
 
@@ -144,14 +231,55 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
       return res.status(404).json({ message: "ไม่พบข้อมูลการจอง" });
     }
 
+    const booking = updateRes.rows[0];
+
+    // If verified, generate PDF permit and send via email
+    if (isVerified) {
+      try {
+        const userRes = await query("SELECT email, firstname, lastname FROM users WHERE id = $1", [booking.user_id]);
+        const roomRes = await query("SELECT name, location FROM rooms WHERE id = $1", [booking.room_id]);
+
+        const user = userRes.rows[0] || {};
+        const room = roomRes.rows[0] || {};
+
+        const pdfBuffer = await generateBookingPDFReceipt({
+          bookingNo: booking.booking_no,
+          userName: `${user.firstname || "ผู้ใช้"} ${user.lastname || ""}`.trim(),
+          userEmail: user.email || "",
+          organizationType: booking.organization_type || "internal",
+          roomName: room.name || "พื้นที่อเนกประสงค์",
+          location: room.location,
+          bookingDate: String(booking.booking_date).split("T")[0],
+          timeSlot: booking.time_slot,
+          roomPrice: Number(booking.room_price || 0),
+          addonsPrice: Number(booking.addons_price || 0),
+          totalPrice: Number(booking.total_price || 0),
+          paymentStatus: "verified",
+          paidAt: new Date().toLocaleString("th-TH"),
+        });
+
+        if (user.email) {
+          await sendPaymentApprovedWithPermitEmail(
+            user.email,
+            booking.booking_no,
+            room.name || "พื้นที่จอง",
+            pdfBuffer
+          );
+        }
+      } catch (pdfErr) {
+        console.error("[payment/verify] PDF generation/email error:", pdfErr);
+      }
+    }
+
     res.json({
-      message: isVerified ? "ยืนยันการชำระเงินเรียบร้อยแล้ว" : "ปฏิเสธการชำระเงินเรียบร้อยแล้ว",
-      booking: updateRes.rows[0],
+      message: isVerified ? "ยืนยันการชำระเงินเรียบร้อยแล้ว และส่งเอกสารใบอนุญาตเข้าอีเมลผู้ใช้แล้ว" : "ปฏิเสธการชำระเงินเรียบร้อยแล้ว",
+      booking,
     });
   } catch (err: any) {
     console.error("[payment/verify] Error:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการตรวจสอบการชำระเงิน" });
   }
 });
+
 
 export default router;

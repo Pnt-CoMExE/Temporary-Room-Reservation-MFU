@@ -73,17 +73,17 @@ const goToRoom = () => {
       >
         <span v-if="room.isAvailable"
           ><FontAwesomeIcon :icon="['fas', 'circle']" class="text-[8px] mr-1.5 animate-pulse" />
-          ว่าง</span
+          {{ $t('room.status_available') }}</span
         >
         <span v-else
-          ><FontAwesomeIcon :icon="['fas', 'times-circle']" class="mr-1" /> มีคิวจองแล้ว</span
+          ><FontAwesomeIcon :icon="['fas', 'times-circle']" class="mr-1" /> {{ $t('room.status_unavailable') }}</span
         >
       </div>
 
       <div
         class="absolute bottom-4 left-4 px-4 py-1.5 bg-[#ba0b2f] text-white rounded-lg text-xs font-bold shadow-lg transform translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
       >
-        {{ room.type || "ห้องประชุม" }}
+        {{ room.type || "Space" }}
       </div>
     </div>
 
@@ -104,7 +104,7 @@ const goToRoom = () => {
             <FontAwesomeIcon :icon="['fas', 'map-marker-alt']" />
           </div>
           <span class="flex-1 leading-relaxed">{{
-            room.location || "มหาวิทยาลัยแม่ฟ้าหลวง"
+            room.location || "Mae Fah Luang University"
           }}</span>
         </div>
         <div class="flex items-center text-sm text-gray-500 font-medium">
@@ -112,9 +112,9 @@ const goToRoom = () => {
             <FontAwesomeIcon :icon="['fas', 'users']" />
           </div>
           <span
-            >รองรับผู้เข้าร่วม
+            >{{ $t('room.capacity') }}
             <strong class="text-gray-900">{{ room.capacity || "-" }}</strong>
-            ท่าน</span
+            {{ $t('room.people') }}</span
           >
         </div>
       </div>
@@ -126,7 +126,7 @@ const goToRoom = () => {
           <p
             class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5"
           >
-            ราคาเริ่มต้น
+            {{ $t('room.half_day') }} ({{ $t('room.price_internal') }})
           </p>
           <p class="text-lg font-black text-[#ba0b2f]">
             ฿{{ room.priceHalfDayInternal?.toLocaleString() || "0" }}
@@ -136,7 +136,7 @@ const goToRoom = () => {
         <button
           @click="goToRoom"
           class="w-12 h-12 bg-red-50 hover:bg-[#ba0b2f] text-[#ba0b2f] hover:text-white rounded-full transition-all duration-300 flex justify-center items-center group/btn shadow-sm hover:shadow-md hover:-translate-y-1"
-          title="ดูรายละเอียด"
+          :title="$t('room.details')"
         >
           <FontAwesomeIcon
             :icon="['fas', 'arrow-right']" class="transform group-hover/btn:translate-x-1 transition-transform duration-300"

@@ -80,7 +80,7 @@ onMounted(async () => {
     const res = await api.get("/api/featured-rooms");
     if (res.data && res.data.length > 0) {
       // ดึงห้องแนะนำตามหมวดหมู่
-      featuredRooms.value = res.data.map(room => ({
+      featuredRooms.value = res.data.map((room: any) => ({
         id: room.id,
         name: room.name,
         type: room.type,
@@ -137,23 +137,17 @@ onUnmounted(() => {
         <span
           class="inline-block py-1.5 px-4 rounded-full bg-black/30 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/50 text-xs font-bold tracking-widest uppercase mb-6 shadow-lg"
         >
-          MFU Property Reservation
+          {{ $t('hero.badge') }}
         </span>
         <h1
           class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-xl leading-tight"
         >
-          ค้นหาและจองพื้นที่ <br class="hidden md:block" />
-          <span
-            class="text-transparent bg-clip-text bg-linear-to-r from-[#d4af37] to-yellow-200"
-            >มหาวิทยาลัยแม่ฟ้าหลวง</span
-          >
+          {{ $t('hero.title') }}
         </h1>
         <p
           class="text-lg md:text-xl text-gray-100 mb-12 font-medium max-w-2xl mx-auto drop-shadow-md"
         >
-          ระบบจองห้องประชุม ลานกิจกรรม และพื้นที่ส่วนกลาง
-          <br class="hidden sm:block" />สะดวก รวดเร็ว เช็คคิวว่างได้ตลอด 24
-          ชั่วโมง
+          {{ $t('hero.subtitle') }}
         </p>
 
         <div
@@ -174,12 +168,12 @@ onUnmounted(() => {
               <div class="w-full text-left">
                 <label
                   class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1"
-                  >ค้นหา</label
+                  >{{ $t('hero.search_btn') }}</label
                 >
                 <input
                   type="text"
                   v-model="searchParams.query"
-                  placeholder="ชื่อห้อง หรือ อาคาร..."
+                  :placeholder="$t('hero.search_placeholder')"
                   class="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-gray-800 font-semibold placeholder-gray-400 outline-none"
                 />
               </div>
@@ -195,7 +189,7 @@ onUnmounted(() => {
               <div class="w-full text-left">
                 <label
                   class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1"
-                  >วันที่ใช้งาน</label
+                  >{{ $t('booking.booking_date') }}</label
                 >
                 <input
                   type="date"
@@ -215,16 +209,16 @@ onUnmounted(() => {
               <div class="w-full text-left pr-6">
                 <label
                   class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1"
-                  >ประเภทพื้นที่</label
+                  >{{ $t('room.type') }}</label
                 >
                 <select
                   v-model="searchParams.location"
                   class="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-gray-800 font-semibold outline-none cursor-pointer appearance-none relative z-10"
                 >
-                  <option value="">ทั้งหมด</option>
-                  <option value="ห้องประชุม">ห้องประชุม</option>
-                  <option value="ห้องบรรยาย">ห้องบรรยาย</option>
-                  <option value="ลานกิจกรรม">ลานกิจกรรมกลางแจ้ง</option>
+                  <option value="">{{ $t('hero.all_types') }}</option>
+                  <option value="ห้องประชุม">ห้องประชุม (Meeting Room)</option>
+                  <option value="ห้องบรรยาย">ห้องบรรยาย (Lecture Hall)</option>
+                  <option value="ลานกิจกรรม">ลานกิจกรรมกลางแจ้ง (Outdoor Plaza)</option>
                 </select><font-awesome-icon icon="chevron-down" class="absolute right-6 top-1/2 transform -translate-y-1 text-gray-400 text-xs z-0" />
               </div>
             </div>
@@ -233,7 +227,7 @@ onUnmounted(() => {
                 type="submit"
                 class="w-full md:w-auto bg-[#ba0b2f] hover:bg-[#8c0823] text-white text-base font-bold py-4 px-8 rounded-2xl md:rounded-full transition-all duration-300 shadow-md hover:shadow-xl flex justify-center items-center gap-2 transform hover:-translate-y-0.5"
               >
-                <span>ค้นหาพื้นที่</span>
+                <span>{{ $t('hero.search_btn') }}</span>
                 <font-awesome-icon icon="arrow-right" class="ml-1" />
               </button>
             </div>
