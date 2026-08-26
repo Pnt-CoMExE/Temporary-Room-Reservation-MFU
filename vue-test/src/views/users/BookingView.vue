@@ -33,6 +33,10 @@ interface AddonItem {
   iconName: string;
 }
 
+import { useI18n } from "vue-i18n";
+import { translateRoomName, translateLocation } from "@/utils/translator";
+
+const { locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const roomId = route.params.id as string;
@@ -278,7 +282,7 @@ const submitBooking = async () => {
   if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      userId = payload.userId;
+      userId = payload.userId || payload.id;
     } catch(e) {}
   }
 
@@ -361,17 +365,17 @@ const submitBooking = async () => {
           <h1
             class="text-4xl md:text-5xl font-extrabold tracking-tight drop-shadow-lg mb-2"
           >
-            ยืนยันการจองห้อง
+            {{ $t('booking.title') }}
           </h1>
           <p class="text-gray-200 text-lg font-medium">
-            ตรวจสอบวันว่างและกรอกข้อมูลการใช้งาน
+            {{ $t('booking.subtitle') }}
           </p>
         </div>
         <button
           @click="router.push('/rooms')"
           class="bg-white/10 backdrop-blur-md hover:bg-white hover:text-[#ba0b2f] text-white px-6 py-2.5 rounded-full font-bold transition-all border border-white/30 flex items-center gap-2 shadow-lg cursor-pointer"
         >
-          <font-awesome-icon icon="arrow-left" /> ย้อนกลับ
+          <font-awesome-icon icon="arrow-left" /> {{ $t('booking.back_to_rooms') }}
         </button>
       </div>
     </div>
@@ -406,11 +410,11 @@ const submitBooking = async () => {
             </div>
             <div class="p-6">
               <h3 class="text-xl font-bold text-gray-900 mb-2">
-                {{ room?.name }}
+                {{ translateRoomName(room?.name, locale) }}
               </h3>
               <p class="text-sm text-gray-500 mb-6 flex items-start gap-2">
                 <font-awesome-icon icon="map-marker-alt" class="text-[#d4af37]" />
-                {{ room?.location }}
+                {{ translateLocation(room?.location, locale) }}
               </p>
 
               <div
@@ -420,14 +424,14 @@ const submitBooking = async () => {
                 <p
                   class="text-xs font-bold text-red-700 uppercase tracking-widest mb-3 text-center"
                 >
-                  ยอดชำระโดยประมาณ
+                  {{ $t('booking.estimated_payment') }}
                 </p>
 
                 <!-- ✨ แสดงราคาก่อนหักส่วนลด -->
                 <div
                   class="flex justify-between items-center mb-1 text-sm font-medium text-gray-600"
                 >
-                  <span>ค่าบริการสุทธิ</span>
+                  <span>{{ $t('booking.net_service_fee') }}</span>
                   <span>฿{{ subTotalPrice.toLocaleString() }}</span>
                 </div>
 
@@ -436,7 +440,7 @@ const submitBooking = async () => {
                   v-if="discountAmount > 0"
                   class="flex justify-between items-center mb-3 text-sm font-bold text-green-600 border-b border-red-200/50 pb-3"
                 >
-                  <span>ส่วนลดโปรโมชั่น</span>
+                  <span>{{ $t('booking.promo_discount') }}</span>
                   <span>- ฿{{ discountAmount.toLocaleString() }}</span>
                 </div>
 
@@ -463,7 +467,7 @@ const submitBooking = async () => {
                 class="w-10 h-10 bg-[#ba0b2f] text-white rounded-full flex items-center justify-center text-lg"
                 >1</span
               >
-              กรอกข้อมูลการใช้งาน
+              {{ $t('booking.step_1') }}
             </h2>
 
             <form @submit.prevent="submitBooking" class="space-y-8">
@@ -471,13 +475,13 @@ const submitBooking = async () => {
                 <div class="md:col-span-2">
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >ชื่อผู้จอง / หน่วยงาน *</label
+                    >{{ $t('booking.applicant_name') }} *</label
                   >
                   <input
                     type="text"
                     v-model="bookingForm.userName"
                     required
-                    placeholder="ระบุชื่อ-นามสกุล หรือชื่อหน่วยงาน"
+                    :placeholder="$t('booking.applicant_name')"
                     class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
                   />
                 </div>
@@ -485,26 +489,24 @@ const submitBooking = async () => {
                 <div>
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >ประเภทหน่วยงาน *</label
+                    >{{ $t('booking.organization_type') }} *</label
                   >
                   <select
                     v-model="bookingForm.userType"
                     required
                     class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
                   >
-                    <option value="" disabled>-- เลือกประเภท --</option>
-                    <option value="internal">หน่วยงานภายใน (มฟล.)</option>
-                    <option value="co_op">หน่วยงานร่วมจัด (Co-op)</option>
-                    <option value="external">
-                      หน่วยงานภายนอก (บุคคลทั่วไป/บริษัท)
-                    </option>
+                    <option value="" disabled>{{ $t('booking.select_org') }}</option>
+                    <option value="internal">{{ $t('booking.org_internal') }}</option>
+                    <option value="co_op">{{ $t('booking.org_coop') }}</option>
+                    <option value="external">{{ $t('booking.org_external') }}</option>
                   </select>
                 </div>
 
                 <div>
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >วันที่ใช้งาน *</label
+                    >{{ $t('booking.booking_date') }} *</label
                   >
                   <input
                     type="date"
@@ -518,14 +520,14 @@ const submitBooking = async () => {
                     class="text-red-500 text-[10px] font-bold mt-1 animate-pulse"
                   >
                     <font-awesome-icon icon="exclamation-triangle" />
-                    วันนี้ถูกจองเต็มวันแล้ว กรุณาเลือกวันอื่น
+                    {{ $t('booking.date_full_notice') }}
                   </p>
                 </div>
 
                 <div class="md:col-span-2">
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >ระยะเวลา *</label
+                    >{{ $t('booking.duration') }} *</label
                   >
                   <select
                     v-model="bookingForm.duration"
@@ -533,26 +535,26 @@ const submitBooking = async () => {
                     required
                     class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm disabled:opacity-50"
                   >
-                    <option value="" disabled>-- เลือกช่วงเวลา --</option>
+                    <option value="" disabled>{{ $t('booking.select_duration') }}</option>
                     <option
                       value="half_morning"
                       :disabled="dateStatus === 'half_morning'"
                     >
-                      ครึ่งวันเช้า (08:00 - 12:00 น.)
-                      {{ dateStatus === "half_morning" ? "[ไม่ว่าง]" : "" }}
+                      {{ $t('booking.slot_morning') }}
+                      {{ dateStatus === "half_morning" ? $t('booking.slot_unavailable') : "" }}
                     </option>
                     <option
                       value="half_afternoon"
                       :disabled="dateStatus === 'half_afternoon'"
                     >
-                      ครึ่งวันบ่าย (13:00 - 17:00 น.)
-                      {{ dateStatus === "half_afternoon" ? "[ไม่ว่าง]" : "" }}
+                      {{ $t('booking.slot_afternoon') }}
+                      {{ dateStatus === "half_afternoon" ? $t('booking.slot_unavailable') : "" }}
                     </option>
                     <option value="full" :disabled="dateStatus !== 'available'">
-                      เต็มวัน (08:00 - 17:00 น.)
+                      {{ $t('booking.slot_fullday') }}
                       {{
                         dateStatus !== "available" && dateStatus !== null
-                          ? "[ไม่ว่าง]"
+                          ? $t('booking.slot_unavailable')
                           : ""
                       }}
                     </option>
@@ -563,13 +565,13 @@ const submitBooking = async () => {
                 <div class="md:col-span-2">
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >วัตถุประสงค์การใช้งาน *</label
+                    >{{ $t('booking.objective') }} *</label
                   >
                   <textarea
                     v-model="bookingForm.objective"
                     required
                     rows="3"
-                    placeholder="ระบุวัตถุประสงค์การใช้งาน เช่น ประชุมโครงการ, จัดงานสัมมนา..."
+                    :placeholder="$t('booking.objective_placeholder')"
                     class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm resize-none"
                   ></textarea>
                 </div>
@@ -580,7 +582,7 @@ const submitBooking = async () => {
                 <label
                   class="block text-xs font-bold text-gray-500 mb-2 uppercase"
                 >
-                  แนบหนังสือบันทึกข้อความ *
+                  {{ $t('booking.memo_title') }} *
                 </label>
                 <div
                   class="relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer hover:border-[#ba0b2f] hover:bg-red-50/30"
@@ -606,22 +608,19 @@ const submitBooking = async () => {
                     <p
                       class="text-[10px] text-gray-400 mt-1 font-medium"
                     >
-                      ไฟล์ PDF พร้อมแนบ
+                      PDF
                     </p>
                     <button
                       type="button"
                       @click.stop="clearMemoFile"
                       class="mt-2 text-xs text-red-500 font-bold hover:text-red-700"
                     >
-                      <font-awesome-icon icon="times" class="mr-1" />เปลี่ยนไฟล์
+                      <font-awesome-icon icon="times" class="mr-1" />{{ $t('booking.change_file') }}
                     </button>
                   </template>
                   <template v-else><font-awesome-icon icon="cloud-upload-alt" class="text-3xl text-gray-300 mb-2" />
                     <p class="font-bold text-gray-600 text-sm">
-                      คลิกเพื่อเลือกไฟล์ PDF
-                    </p>
-                    <p class="text-[10px] text-gray-400 mt-1 font-medium">
-                      เฉพาะไฟล์ PDF ขนาดไม่เกิน 10 MB เท่านั้น
+                      {{ $t('booking.memo_hint') }}
                     </p>
                   </template>
                 </div>
@@ -636,7 +635,7 @@ const submitBooking = async () => {
                     class="w-10 h-10 bg-[#d4af37] text-white rounded-full flex items-center justify-center text-lg"
                     >2</span
                   >
-                  อุปกรณ์เสริม (Optional)
+                  {{ $t('booking.step_2') }}
                 </h2>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div
@@ -678,7 +677,7 @@ const submitBooking = async () => {
                 </div>
               </div>
 
-              <!-- ✨ โปรโมชั่นโค้ด (ตาม Requirement) ✨ -->
+              <!-- ✨ โปรโมชั่นโค้ด ✨ -->
               <div class="pt-4">
                 <h2
                   class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4 border-b border-gray-100 pb-4"
@@ -687,7 +686,7 @@ const submitBooking = async () => {
                     class="w-10 h-10 bg-[#d4af37] text-white rounded-full flex items-center justify-center text-lg"
                     >3</span
                   >
-                  รหัสโปรโมชั่น / ส่วนลด
+                  {{ $t('booking.step_3') }}
                 </h2>
                 <div
                   class="flex flex-col sm:flex-row gap-4 items-start sm:items-center"
@@ -696,7 +695,7 @@ const submitBooking = async () => {
                     <input
                       type="text"
                       v-model="bookingForm.promoCode"
-                      placeholder="ระบุโค้ดส่วนลด (เช่น MFU2026)"
+                      :placeholder="$t('booking.promo_placeholder')"
                       class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-bold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none uppercase shadow-sm"
                       :disabled="isPromoApplied"
                     />
@@ -720,8 +719,8 @@ const submitBooking = async () => {
                         : 'bg-gray-900 text-white hover:bg-black'
                     "
                   >
-                    <span v-if="promoLoading"><font-awesome-icon icon="spinner" spin class="mr-1" />กำลังตรวจสอบ...</span>
-                    <span v-else>{{ isPromoApplied ? "ยกเลิกโค้ด" : "ใช้ส่วนลด" }}</span>
+                    <span v-if="promoLoading"><font-awesome-icon icon="spinner" spin class="mr-1" />{{ $t('booking.checking') }}</span>
+                    <span v-else>{{ isPromoApplied ? $t('booking.cancel_code') : $t('booking.apply_code') }}</span>
                   </button>
                 </div>
                 <p
@@ -748,11 +747,7 @@ const submitBooking = async () => {
                   for="terms"
                   class="ml-4 text-sm text-gray-600 leading-relaxed cursor-pointer"
                 >
-                  ยอมรับ
-                  <span class="text-[#ba0b2f] font-bold underline"
-                    >เงื่อนไขและข้อตกลง</span
-                  >
-                  การขอใช้พื้นที่และยืนยันข้อมูลเป็นความจริง
+                  {{ $t('booking.accept_terms') }}
                 </label>
               </div>
 
@@ -762,10 +757,10 @@ const submitBooking = async () => {
                 class="w-full py-5 bg-[#ba0b2f] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-xl hover:bg-[#8c0823] transition-all uppercase tracking-widest text-lg cursor-pointer transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
               >
                 <template v-if="submitting">
-                  <font-awesome-icon icon="spinner" spin /> กำลังส่งข้อมูลคำขอ...
+                  <font-awesome-icon icon="spinner" spin /> {{ $t('booking.submitting') }}
                 </template>
                 <template v-else>
-                  ยืนยันการส่งคำขอจอง <font-awesome-icon icon="paper-plane" />
+                  {{ $t('booking.submit_btn') }} <font-awesome-icon icon="paper-plane" />
                 </template>
               </button>
             </form>

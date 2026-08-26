@@ -1,22 +1,34 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
-  <title>Mae Fah Luang University Logo (White)</title>
-  <desc>Official emblem of Mae Fah Luang University featuring the Golden Trumpet flower (Dok Bua Tong) in white</desc>
-  <!-- Outer circle -->
-  <circle cx="60" cy="60" r="58" fill="white" opacity="0.95"/>
-  <!-- Decorative dots -->
-  <circle cx="60" cy="16" r="2.5" fill="white"/>
-  <circle cx="60" cy="104" r="2.5" fill="white"/>
-  <circle cx="16" cy="60" r="2.5" fill="white"/>
-  <circle cx="104" cy="60" r="2.5" fill="white"/>
-  <!-- Golden Trumpet Flower - 5 petals in white -->
-  <g transform="translate(60,58)">
-    <path d="M0,-30 C8,-25 14,-14 10,-6 C6,2 0,0 0,0 C0,0 -6,2 -10,-6 C-14,-14 -8,-25 0,-30Z" fill="white" opacity="0.9"/>
-    <path d="M28.5,-9.3 C32,-1 28,10 20,14 C14,17 10,8 10,8 C10,8 8,14 14,17 C20,10 32,-1 28.5,-9.3Z" fill="white" opacity="0.9"/>
-    <path d="M17.6,24.3 C8,26 -2,22 -6,14 C-8,10 -4,6 -4,6 C-4,6 -8,10 -6,14 C-2,22 8,26 17.6,24.3Z" fill="white" opacity="0.9"/>
-    <path d="M-17.6,24.3 C-8,26 2,22 6,14 C8,10 4,6 4,6 C4,6 8,10 6,14 C2,22 -8,26 -17.6,24.3Z" fill="white" opacity="0.85"/>
-    <path d="M-28.5,-9.3 C-32,-1 -28,10 -20,14 C-14,17 -10,8 -10,8 C-10,8 -8,14 -14,17 C-20,10 -32,-1 -28.5,-9.3Z" fill="white" opacity="0.85"/>
-    <circle cx="0" cy="0" r="6" fill="white" stroke="white" stroke-width="1.5"/>
-    <polygon points="0,-4 1,-1.5 4,-1.5 1.5,0.5 2.5,4 0,2 -2.5,4 -1.5,0.5 -4,-1.5 -1,-1.5" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <title>Official Mae Fah Luang University Red and Gold Emblem Logo</title>
+  <desc>Official emblem featuring crimson background, gold border, Dok Bua Tong flame with star, elephant tusks, and MFU gold text</desc>
+
+  <!-- Outer Gold Border Ring -->
+  <circle cx="80" cy="80" r="76" fill="#ba0b2f" stroke="#d4af37" stroke-width="4.5"/>
+  <!-- Inner Gold Decorative Ring -->
+  <circle cx="80" cy="80" r="66" stroke="#d4af37" stroke-width="2" fill="none"/>
+  
+  <!-- 4 Cardinal Gold Dots -->
+  <circle cx="80" cy="11" r="3.5" fill="#d4af37"/>
+  <circle cx="80" cy="149" r="3.5" fill="#d4af37"/>
+  <circle cx="11" cy="80" r="3.5" fill="#d4af37"/>
+  <circle cx="149" cy="80" r="3.5" fill="#d4af37"/>
+
+  <!-- Center Emblem (Flame / Dok Bua Tong / Star / Tusks) -->
+  <g transform="translate(80,72)">
+    <!-- Central Flame Petal -->
+    <path d="M0,-38 C12,-30 18,-16 13,-6 C8,3 0,0 0,0 C0,0 -8,3 -13,-6 C-18,-16 -12,-30 0,-38Z" fill="#d4af37"/>
+    
+    <!-- Central Star Badge -->
+    <circle cx="0" cy="-6" r="8" fill="#ba0b2f" stroke="#d4af37" stroke-width="1.8"/>
+    <polygon points="0,-11 2.2,-7.5 6,-7.5 3,-5.2 4.2,-1.5 0,-3.8 -4.2,-1.5 -3,-5.2 -6,-7.5 -2.2,-7.5" fill="#d4af37"/>
+
+    <!-- Left Upward Elephant Tusk / Leaf -->
+    <path d="M-14,8 C-26,5 -38,-8 -32,-22 C-30,-26 -26,-24 -28,-18 C-31,-9 -20,2 -10,4 Z" fill="#d4af37"/>
+    
+    <!-- Right Upward Elephant Tusk / Leaf -->
+    <path d="M14,8 C26,5 38,-8 32,-22 C30,-26 26,-24 28,-18 C31,-9 20,2 10,4 Z" fill="#d4af37"/>
   </g>
-  <text x="60" y="102" text-anchor="middle" fill="white" font-size="12" font-weight="900" font-family="system-ui,-apple-system,sans-serif" letter-spacing="2">MFU</text>
+
+  <!-- MFU Gold Text at Bottom -->
+  <text x="80" y="132" text-anchor="middle" fill="#d4af37" font-size="19" font-weight="900" font-family="system-ui, -apple-system, sans-serif" letter-spacing="2">MFU</text>
 </svg>

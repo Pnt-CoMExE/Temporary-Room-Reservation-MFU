@@ -13,33 +13,31 @@ const setLanguage = (lang: "th" | "en") => {
 </script>
 
 <template>
-  <div class="inline-flex items-center bg-gray-100/80 p-1 rounded-full border border-gray-200 shadow-inner">
+  <div class="inline-flex items-center bg-gray-100/90 p-1 rounded-full border border-gray-200 shadow-inner">
     <button
       @click="setLanguage('th')"
       type="button"
-      class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer"
+      class="px-3.5 py-1 rounded-full text-xs font-black tracking-wider transition-all duration-300 cursor-pointer"
       :class="
         currentLang === 'th'
           ? 'bg-white text-[#ba0b2f] shadow-md shadow-red-100 scale-105'
           : 'text-gray-500 hover:text-gray-900'
       "
     >
-      <span class="text-sm">🇹🇭</span>
-      <span>TH</span>
+      TH
     </button>
 
     <button
       @click="setLanguage('en')"
       type="button"
-      class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer"
+      class="px-3.5 py-1 rounded-full text-xs font-black tracking-wider transition-all duration-300 cursor-pointer"
       :class="
         currentLang === 'en'
           ? 'bg-white text-[#ba0b2f] shadow-md shadow-red-100 scale-105'
           : 'text-gray-500 hover:text-gray-900'
       "
     >
-      <span class="text-sm">🇬🇧</span>
-      <span>EN</span>
+      EN
     </button>
   </div>
 </template>

@@ -15,8 +15,7 @@ import Navbar from "@/components/common/Navbar.vue";
     <footer
       class="bg-[#111827] text-gray-400 text-center py-6 text-sm w-full border-t-4 border-[#ba0b2f]"
     >
-      &copy; 2026 ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง.
-      <br class="sm:hidden" />All rights reserved.
+      {{ $t('home.footer_copyright') }}
     </footer>
   </div>
 </template>

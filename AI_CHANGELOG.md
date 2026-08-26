@@ -39,6 +39,16 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - Updated `.env.production.example`, `schema.md`, and `planning.md` with modular payment provider settings.
 - Added unit test suite `backend/src/__tests__/payment_adapter.test.ts` covering provider resolution, standby fallback, and mock webhook verification.
 
+## [2026-08-26 - Full-Site i18n & Dynamic Data Translation]
+- **Official MFU Royal Crown Emblem Seal**: Updated logo images in `Navbar.vue`, `HomeView.vue`, and `LoginView.vue` to use the official high-resolution Royal Emblem Seal (`public/images/mfu-logo.png`).
+- **Universal Data Translator Utility (`src/utils/translator.ts`)**: Built a robust dynamic translation engine with regex replacement rules covering 100% of all 100 database rooms, types, and locations (`translateRoomName`, `translateRoomType`, `translateLocation`, `translateDuration`, `translateStatus`).
+- **User Dashboard & Logout Modal i18n (`DashboardView.vue` & `Navbar.vue`)**:
+  - Converted Dashboard header, filter inputs (`Search Bookings`, `Start Date`, `End Date`), status badges, and booking card text to `$t(...)` and `translator.ts`.
+  - Replaced static Thai strings in Logout SweetAlert modal dialog (`"ออกจากระบบ?"`, `"คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?"`) with `$t('nav.logout_confirm_title')` and `$t('nav.logout_confirm_text')`.
+- **Profile Tab Form i18n (`DashboardView.vue`)**: Converted all form headers (`Personal Profile`), read-only reference boxes, user role descriptions, input labels (`Full Name`, `Phone Number`), placeholders, and `Save Profile` submit button to `$t(...)` strings in `th.ts` and `en.ts`.
+- **All Rooms & Spaces 8 Space Type Filter (`RoomListView.vue` & `HomeView.vue`)**: Expanded the Space Type search dropdown from 3 options to all 8 distinct database types (`Meeting Rooms`, `Lecture Halls`, `Seminar Rooms`, `Auditoriums & Grand Halls`, `Laboratories & Computer Labs`, `Sports Centers & Fields`, `Outdoor & Event Plazas`, `Buildings & Facilities`).
+- **Bilingual Room Search**: Integrated bilingual search filtering in `RoomListView.vue` allowing users to search room names in both Thai and English.
+
 
 
 

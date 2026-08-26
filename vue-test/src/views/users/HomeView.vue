@@ -129,9 +129,9 @@ onUnmounted(() => {
         <!-- MFU Logo in Hero -->
         <div class="flex justify-center mb-6">
           <img
-            src="/images/mfu-logo-white.svg"
+            src="/images/mfu-logo.png"
             alt="Mae Fah Luang University"
-            class="h-20 md:h-24 w-auto drop-shadow-[0_0_20px_rgba(255,255,255,0.15)]"
+            class="h-24 md:h-32 w-auto object-contain filter drop-shadow-[0_0_25px_rgba(212,175,55,0.6)]"
           />
         </div>
         <span
@@ -216,9 +216,14 @@ onUnmounted(() => {
                   class="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-gray-800 font-semibold outline-none cursor-pointer appearance-none relative z-10"
                 >
                   <option value="">{{ $t('hero.all_types') }}</option>
-                  <option value="ห้องประชุม">ห้องประชุม (Meeting Room)</option>
-                  <option value="ห้องบรรยาย">ห้องบรรยาย (Lecture Hall)</option>
-                  <option value="ลานกิจกรรม">ลานกิจกรรมกลางแจ้ง (Outdoor Plaza)</option>
+                  <option value="ห้องประชุม">{{ $t('room.filter_meeting') }}</option>
+                  <option value="ห้องบรรยาย">{{ $t('room.filter_lecture') }}</option>
+                  <option value="ห้องสัมมนา">{{ $t('room.filter_seminar') }}</option>
+                  <option value="หอประชุม">{{ $t('room.filter_auditorium') }}</option>
+                  <option value="ห้องปฏิบัติการ">{{ $t('room.filter_lab') }}</option>
+                  <option value="ศูนย์กีฬา">{{ $t('room.filter_sports') }}</option>
+                  <option value="ลานกิจกรรม">{{ $t('room.filter_plaza') }}</option>
+                  <option value="อาคารสถานที่">{{ $t('room.filter_building') }}</option>
                 </select><font-awesome-icon icon="chevron-down" class="absolute right-6 top-1/2 transform -translate-y-1 text-gray-400 text-xs z-0" />
               </div>
             </div>
@@ -317,20 +322,20 @@ onUnmounted(() => {
           <h2
             class="text-3xl font-extrabold text-gray-900 flex items-center gap-3"
           >
-            พื้นที่แนะนำ
+            {{ $t('home.featured_title') }}
             <span class="text-[#d4af37] text-2xl">
               <font-awesome-icon icon="star" />
             </span>
           </h2>
           <p class="text-gray-500 mt-2 text-base">
-            ห้องยอดนิยมที่ถูกจองบ่อยที่สุดในมหาวิทยาลัย
+            {{ $t('home.featured_subtitle') }}
           </p>
         </div>
         <router-link
           to="/rooms"
           class="group text-sm font-bold text-[#ba0b2f] hover:text-[#8c0823] transition-all flex items-center gap-2 bg-red-50 hover:bg-red-100 px-5 py-2.5 rounded-full"
         >
-          ดูห้องทั้งหมด
+          {{ $t('home.view_all') }}
           <font-awesome-icon icon="arrow-right" class="transform group-hover:translate-x-1 transition-transform" />
         </router-link>
       </div>
@@ -345,13 +350,13 @@ onUnmounted(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <span
           class="text-[#ba0b2f] font-bold tracking-wider text-sm uppercase mb-2 block"
-          >How it works</span
+          >{{ $t('home.how_it_works_badge') }}</span
         >
         <h2 class="text-3xl font-extrabold text-gray-900 mb-4">
-          ขั้นตอนการจองพื้นที่ง่ายๆ
+          {{ $t('home.how_it_works_title') }}
         </h2>
         <p class="text-gray-500 mb-16 max-w-2xl mx-auto text-base">
-          เพียง 3 ขั้นตอน คุณก็สามารถใช้งานพื้นที่ของมหาวิทยาลัยได้อย่างรวดเร็ว
+          {{ $t('home.how_it_works_subtitle') }}
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
@@ -366,10 +371,10 @@ onUnmounted(() => {
               <font-awesome-icon icon="search" />
             </div>
             <h3 class="text-lg font-bold text-gray-900 mb-2">
-              1. ค้นหาและเลือกห้อง
+              {{ $t('home.step_1_title') }}
             </h3>
             <p class="text-gray-500 text-sm leading-relaxed max-w-62.5">
-              ค้นหาห้องที่ตรงกับความต้องการ ตรวจสอบคิวว่างและราคาแบบ Real-time
+              {{ $t('home.step_1_desc') }}
             </p>
           </div>
 
@@ -380,10 +385,10 @@ onUnmounted(() => {
               <font-awesome-icon icon="file-signature" />
             </div>
             <h3 class="text-lg font-bold text-gray-900 mb-2">
-              2. กรอกข้อมูลและส่งคำขอ
+              {{ $t('home.step_2_title') }}
             </h3>
             <p class="text-gray-500 text-sm leading-relaxed max-w-62.5">
-              ระบุรายละเอียดการจัดงาน เลือกอุปกรณ์เสริม และแนบเอกสารอ้างอิง
+              {{ $t('home.step_2_desc') }}
             </p>
           </div>
 
@@ -394,11 +399,10 @@ onUnmounted(() => {
               <font-awesome-icon icon="qrcode" />
             </div>
             <h3 class="text-lg font-bold text-gray-900 mb-2">
-              3. รออนุมัติและชำระเงิน
+              {{ $t('home.step_3_title') }}
             </h3>
             <p class="text-gray-500 text-sm leading-relaxed max-w-62.5">
-              เมื่อเจ้าหน้าที่ตรวจสอบและอนุมัติแล้ว สามารถสแกน QR Code
-              ชำระเงินได้ทันที
+              {{ $t('home.step_3_desc') }}
             </p>
           </div>
         </div>
@@ -416,9 +420,8 @@ onUnmounted(() => {
           <h3 class="text-2xl font-extrabold tracking-wider mb-4">
             <span class="text-[#d4af37]">MFU</span> PROPERTY
           </h3>
-          <p class="text-gray-400 text-sm leading-relaxed mb-6">
-            ระบบบริหารจัดการพื้นที่เช่าชั่วคราว<br />มหาวิทยาลัยแม่ฟ้าหลวง
-            จังหวัดเชียงราย
+          <p class="text-gray-400 text-sm leading-relaxed mb-6 whitespace-pre-line">
+            {{ $t('home.footer_desc') }}
           </p>
           <div class="flex gap-4">
             <a
@@ -438,7 +441,7 @@ onUnmounted(() => {
           <h4
             class="text-base font-bold text-white mb-6 uppercase tracking-wider"
           >
-            ติดต่อส่วนจัดการทรัพย์สิน
+            {{ $t('home.footer_contact_title') }}
           </h4>
           <ul class="text-gray-400 text-sm space-y-4">
             <li class="flex items-start gap-3">
@@ -451,9 +454,8 @@ onUnmounted(() => {
             </li>
             <li class="flex items-start gap-3">
               <font-awesome-icon icon="map-marker-alt" class="mt-1 text-[#d4af37]" />
-              <span class="leading-relaxed"
-                >อาคารบริหาร (AD) ชั้น 1<br />333 หมู่ 1 ต.ท่าสุด อ.เมือง
-                จ.เชียงราย 57100</span
+              <span class="leading-relaxed whitespace-pre-line"
+                >{{ $t('home.footer_contact_address') }}</span
               >
             </li>
           </ul>
@@ -463,7 +465,7 @@ onUnmounted(() => {
           <h4
             class="text-base font-bold text-white mb-6 uppercase tracking-wider"
           >
-            เมนูใช้งาน
+            {{ $t('home.footer_menu_title') }}
           </h4>
           <ul class="text-gray-400 text-sm space-y-3">
             <li>
@@ -471,7 +473,7 @@ onUnmounted(() => {
                 to="/rooms"
                 class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
-                                ค้นหาและจองพื้นที่</router-link
+                {{ $t('home.footer_menu_search') }}</router-link
               >
             </li>
             <li>
@@ -479,15 +481,7 @@ onUnmounted(() => {
                 href="#"
                 class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
-                                คู่มือการใช้งานระบบ</a
-              >
-            </li>
-            <li>
-              <a
-                href="#"
-                class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
-                ><font-awesome-icon icon="angle-right" class="text-xs" /> อัตราค่าบริการ
-                (PDF)</a
+                {{ $t('home.footer_menu_manual') }}</a
               >
             </li>
             <li>
@@ -495,7 +489,15 @@ onUnmounted(() => {
                 href="#"
                 class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
-                                นโยบายความเป็นส่วนตัว</a
+                {{ $t('home.footer_menu_rates') }}</a
+              >
+            </li>
+            <li>
+              <a
+                href="#"
+                class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
+                ><font-awesome-icon icon="angle-right" class="text-xs" />
+                {{ $t('home.footer_menu_privacy') }}</a
               >
             </li>
           </ul>
@@ -505,8 +507,8 @@ onUnmounted(() => {
       <div
         class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-500 text-xs"
       >
-        <p>&copy; 2026 Mae Fah Luang University. All rights reserved.</p>
-        <p>Developed by CE Senior Project Team</p>
+        <p>{{ $t('home.footer_copyright') }}</p>
+        <p>{{ $t('home.footer_dev_team') }}</p>
       </div>
     </footer>
   </div>

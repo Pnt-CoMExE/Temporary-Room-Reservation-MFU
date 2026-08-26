@@ -39,6 +39,13 @@ router.post(
   "/",
   verifyToken,
   upload.single("memoDocument"),
+  (req: any, _res: Response, next: any) => {
+    if (!req.body) req.body = {};
+    if (!req.body.userId || req.body.userId === "null" || req.body.userId === "undefined") {
+      req.body.userId = req.user?.id || req.user?.userId;
+    }
+    next();
+  },
   ...validateCreateBooking,
   async (req: any, res: Response) => {
     if (!req.file) {

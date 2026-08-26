@@ -81,7 +81,7 @@ router.get(
       const result = await query(
         `SELECT booking_date, time_slot, status, memo_document_url
          FROM bookings
-         WHERE room_id = $1 AND status NOT IN ('disapproved', 'ยกเลิกแล้ว')
+         WHERE room_id = $1 AND booking_date >= CURRENT_DATE AND status NOT IN ('disapproved', 'ยกเลิกแล้ว')
          ORDER BY booking_date ASC`,
         [id]
       );

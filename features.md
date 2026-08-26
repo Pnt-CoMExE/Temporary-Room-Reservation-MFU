@@ -25,4 +25,7 @@ Here are several proposed features to elevate the Temporary Rental Space Managem
 - **API Rate Limiting Protection:** Integrated `express-rate-limit` middleware across general endpoints, authentication routes (`/api/auth`), and booking creation (`/api/bookings`) to prevent spam and brute-force attempts.
 - **Database Query Indexing & Performance:** Configured PostgreSQL index migration scripts for key search columns (`bookings`, `users`, `room_pricing`) to optimize response times under heavy concurrent loads.
 - **Enhanced UI Feedback & Loading States:** Added submitting spinners, disabled button states during API requests, and user feedback popups across Vue components.
+- **Full-Site Multi-Language Support (i18n TH/EN):** Implemented seamless Thai/English toggle with `vue-i18n` across all user-facing views, navbar, footers, modals, forms, and user dashboard.
+- **Universal Dynamic Data Translator Engine (`translator.ts`):** Built automated regex & dictionary translation engine converting 100% of all 100 backend database room names, room types, locations, time slots, and booking statuses dynamically with zero Thai remaining.
+- **8 Space Type Filter & Bilingual Search:** Expanded search filter dropdowns across `RoomListView.vue` and `HomeView.vue` to all 8 database space categories with instant bilingual search matching.
 

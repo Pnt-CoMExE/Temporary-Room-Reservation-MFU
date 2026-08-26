@@ -30,6 +30,14 @@ interface BookingItem {
   memoDocumentUrl?: string;
 }
 
+import { useI18n } from "vue-i18n";
+import {
+  translateRoomName,
+  translateDuration,
+  translateStatus,
+} from "@/utils/translator";
+
+const { t, locale } = useI18n();
 const router = useRouter();
 const activeTab = ref("bookings");
 
@@ -189,12 +197,12 @@ const confirmLogout = () => {
           🚪
         </div>
       </div>
-      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">ออกจากระบบ?</h3>
-      <p class="text-sm text-gray-500 font-medium px-2">คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?</p>
+      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">${t('nav.logout_confirm_title')}</h3>
+      <p class="text-sm text-gray-500 font-medium px-2">${t('nav.logout_confirm_text')}</p>
     `,
     showCancelButton: true,
-    confirmButtonText: "ออกจากระบบ",
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t('nav.logout'),
+    cancelButtonText: t('common.cancel'),
     reverseButtons: true,
     buttonsStyling: false,
     customClass: {
@@ -395,16 +403,20 @@ const giveFeedback = (booking: BookingItem) => {
   });
 };
 
-const getStatusText = (status: string) => status;
+const getStatusText = (status: string) => translateStatus(status, locale.value);
 const getStatusClass = (status: string) => {
   switch (status) {
     case "รออนุมัติ":
+    case "pending":
       return "bg-yellow-50 text-yellow-700 border-yellow-200";
     case "รอชำระเงิน":
+    case "approved_pending_payment":
       return "bg-blue-50 text-blue-700 border-blue-200";
     case "สำเร็จแล้ว":
+    case "approved_paid":
       return "bg-green-50 text-green-700 border-green-200";
     case "ไม่อนุมัติ":
+    case "disapproved":
       return "bg-red-50 text-red-700 border-red-200";
     case "ยกเลิกแล้ว":
       return "bg-gray-100 text-gray-500 border-gray-200 line-through";
@@ -414,7 +426,7 @@ const getStatusClass = (status: string) => {
 };
 
 const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString("th-TH", {
+  new Date(dateString).toLocaleDateString(locale.value === "en" ? "en-US" : "th-TH", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -454,7 +466,7 @@ const formatDate = (dateString: string) =>
           to="/rooms"
           class="mt-6 md:mt-0 bg-white text-[#ba0b2f] px-8 py-3.5 rounded-full font-black hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2 transform hover:-translate-y-1"
         >
-          <font-awesome-icon icon="plus" /> จองพื้นที่ใหม่
+          <font-awesome-icon icon="plus" /> {{ $t('dashboard.new_booking') }}
         </RouterLink>
       </div>
     </div>
@@ -497,7 +509,7 @@ const formatDate = (dateString: string) =>
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
-                <font-awesome-icon icon="ticket-alt" class="w-5" /> ประวัติการจอง
+                <font-awesome-icon icon="ticket-alt" class="w-5" /> {{ $t('dashboard.title') }}
               </button>
               <button
                 @click="activeTab = 'profile'"
@@ -508,14 +520,14 @@ const formatDate = (dateString: string) =>
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
-                <font-awesome-icon icon="user-cog" class="w-5" /> ข้อมูลส่วนตัว
+                <font-awesome-icon icon="user-cog" class="w-5" /> {{ $t('dashboard.profile_tab') }}
               </button>
               <div class="pt-6 mt-6 border-t border-gray-100">
                 <button
                   @click="confirmLogout"
                   class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl text-gray-500 hover:bg-red-50 transition-all font-bold text-sm cursor-pointer"
                 >
-                  <font-awesome-icon icon="sign-out-alt" /> ออกจากระบบ
+                  <font-awesome-icon icon="sign-out-alt" /> {{ $t('nav.logout') }}
                 </button>
               </div>
             </nav>
@@ -533,7 +545,7 @@ const formatDate = (dateString: string) =>
                 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
               >
                 <font-awesome-icon icon="history" class="text-[#ba0b2f]" />
-                รายการจองพื้นที่ของฉัน
+                {{ $t('dashboard.my_bookings_title') }}
               </h2>
             </div>
 
@@ -543,14 +555,14 @@ const formatDate = (dateString: string) =>
               <div class="flex-1">
                 <label
                   class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
-                  >ค้นหารายการ</label
+                  >{{ $t('dashboard.search_label') }}</label
                 >
                 <div class="relative">
                   <font-awesome-icon icon="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Booking ID, ชื่อห้อง..."
+                    :placeholder="$t('dashboard.search_placeholder')"
                     class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
                   />
                 </div>
@@ -559,7 +571,7 @@ const formatDate = (dateString: string) =>
                 <div class="w-1/2 md:w-auto">
                   <label
                     class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
-                    >วันที่เริ่มต้น</label
+                    >{{ $t('dashboard.start_date') }}</label
                   >
                   <input
                     v-model="filterStartDate"
@@ -570,7 +582,7 @@ const formatDate = (dateString: string) =>
                 <div class="w-1/2 md:w-auto">
                   <label
                     class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
-                    >ถึงวันที่</label
+                    >{{ $t('dashboard.end_date') }}</label
                   >
                   <input
                     v-model="filterEndDate"
@@ -610,7 +622,7 @@ const formatDate = (dateString: string) =>
                   <h3
                     class="text-xl font-black text-gray-800 mb-2 group-hover:text-[#ba0b2f] transition-colors"
                   >
-                    {{ booking.roomName }}
+                    {{ translateRoomName(booking.roomName, locale) }}
                   </h3>
                   <div
                     class="flex flex-wrap gap-4 text-sm text-gray-500 font-medium mb-4"
@@ -621,7 +633,7 @@ const formatDate = (dateString: string) =>
                     >
                     <span class="flex items-center gap-2"
                       ><font-awesome-icon :icon="['far', 'clock']" class="text-[#d4af37]" />
-                      {{ booking.durationText }}</span
+                      {{ translateDuration(booking.durationText, locale) }}</span
                     >
                   </div>
                   <div
@@ -647,33 +659,33 @@ const formatDate = (dateString: string) =>
                       class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 hover:bg-blue-100 hover:text-blue-800 transition-all"
                     >
                       <font-awesome-icon icon="file-pdf" />
-                      ดูหนังสือบันทึกข้อความ
+                      PDF Document
                       <font-awesome-icon icon="external-link-alt" class="text-[10px] opacity-50" />
                     </a>
                   </div>
 
                   <div
-                    v-if="['สำเร็จแล้ว', 'ไม่อนุมัติ'].includes(booking.status)"
+                    v-if="['สำเร็จแล้ว', 'ไม่อนุมัติ', 'approved_paid', 'disapproved'].includes(booking.status)"
                     class="mt-4 pt-4 border-t border-gray-100"
                   >
                     <p
                       class="text-xs text-gray-600 font-medium flex items-center gap-2"
                     >
                       <font-awesome-icon icon="user-tie" class="text-gray-400" />
-                      อัปเดตสถานะโดย:
+                      {{ $t('dashboard.updated_by') }}
                       <span class="text-gray-900 font-bold">{{
-                        booking.adminName || "ผู้ดูแลระบบ"
+                        booking.adminName || $t('dashboard.admin_user')
                       }}</span>
                     </p>
                     <div
-                      v-if="booking.status === 'ไม่อนุมัติ' && booking.remark"
+                      v-if="(booking.status === 'ไม่อนุมัติ' || booking.status === 'disapproved') && booking.remark"
                       class="mt-2 bg-red-50 p-3 rounded-xl border border-red-100 flex items-start gap-2"
                     >
                       <font-awesome-icon icon="info-circle" class="text-red-500 mt-0.5" />
                       <p
                         class="text-xs text-red-700 font-medium leading-relaxed"
                       >
-                        หมายเหตุ: {{ booking.remark }}
+                        Remark: {{ booking.remark }}
                       </p>
                     </div>
                   </div>
@@ -687,38 +699,38 @@ const formatDate = (dateString: string) =>
                   </p>
 
                   <button
-                    v-if="booking.status === 'รอชำระเงิน'"
+                    v-if="booking.status === 'รอชำระเงิน' || booking.status === 'approved_pending_payment'"
                     @click="openPayment(booking)"
                     class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon icon="qrcode" /> สแกนจ่ายเงิน
+                    <font-awesome-icon icon="qrcode" /> {{ $t('dashboard.scan_pay') }}
                   </button>
 
                   <button
-                    v-if="booking.status === 'รออนุมัติ'"
+                    v-if="booking.status === 'รออนุมัติ' || booking.status === 'pending'"
                     @click="cancelBooking(booking)"
                     class="bg-white text-gray-500 border border-gray-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-gray-50 hover:text-red-600 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon icon="times" /> ยกเลิกคำขอ
+                    <font-awesome-icon icon="times" /> {{ $t('dashboard.cancel_request') }}
                   </button>
 
                   <button
                     v-if="
-                      booking.status === 'สำเร็จแล้ว' && !booking.hasFeedback
+                      (booking.status === 'สำเร็จแล้ว' || booking.status === 'approved_paid') && !booking.hasFeedback
                     "
                     @click="giveFeedback(booking)"
                     class="bg-yellow-50 text-yellow-600 border border-yellow-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-100 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon icon="star" /> ให้คะแนน/รีวิว
+                    <font-awesome-icon icon="star" /> {{ $t('dashboard.give_review') }}
                   </button>
 
                   <div
                     v-if="
-                      booking.status === 'สำเร็จแล้ว' && booking.hasFeedback
+                      (booking.status === 'สำเร็จแล้ว' || booking.status === 'approved_paid') && booking.hasFeedback
                     "
                     class="bg-green-50 text-green-600 border border-green-200 px-4 py-1.5 rounded-xl font-bold text-[10px] flex items-center gap-1.5 mt-1"
                   >
-                    <font-awesome-icon icon="check-circle" /> ส่งรีวิวแล้ว
+                    <font-awesome-icon icon="check-circle" /> {{ $t('dashboard.review_submitted') }}
                   </div>
                 </div>
               </div>
@@ -729,7 +741,7 @@ const formatDate = (dateString: string) =>
               class="text-center py-10 text-gray-400 font-bold"
             >
               <font-awesome-icon icon="search-minus" class="text-4xl mb-3 opacity-50" />
-              <p>ไม่พบข้อมูลการจองที่ตรงกับเงื่อนไข</p>
+              <p>{{ $t('dashboard.no_search_results') }}</p>
             </div>
           </div>
 
@@ -741,7 +753,7 @@ const formatDate = (dateString: string) =>
             <h2
               class="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-3 border-b border-gray-100 pb-4"
             >
-              <font-awesome-icon icon="user-edit" class="text-[#ba0b2f]" /> ข้อมูลส่วนตัว
+              <font-awesome-icon icon="user-edit" class="text-[#ba0b2f]" /> {{ $t('dashboard.profile_tab') }}
             </h2>
             <form @submit.prevent="saveProfile" class="space-y-8">
               <div
@@ -753,14 +765,13 @@ const formatDate = (dateString: string) =>
                 <h4
                   class="text-sm font-bold text-[#ba0b2f] mb-4 flex items-center gap-2"
                 >
-                  <font-awesome-icon icon="lock" /> ข้อมูลอ้างอิงจากระบบ
-                  (ไม่สามารถแก้ไขได้)
+                  <font-awesome-icon icon="lock" /> {{ $t('dashboard.system_info_title') }}
                 </h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label
                       class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1"
-                      >อีเมลบัญชี</label
+                      >{{ $t('dashboard.account_email') }}</label
                     >
                     <p
                       class="text-gray-700 font-semibold bg-white px-4 py-3 rounded-xl border border-gray-200 opacity-70 cursor-not-allowed"
@@ -771,16 +782,16 @@ const formatDate = (dateString: string) =>
                   <div>
                     <label
                       class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1"
-                      >สิทธิ์การใช้งาน</label
+                      >{{ $t('dashboard.user_role') }}</label
                     >
                     <p
                       class="text-gray-700 font-semibold bg-white px-4 py-3 rounded-xl border border-gray-200 opacity-70 cursor-not-allowed"
                     >
                       {{
-                        userProfile.role === 'admin' ? 'ผู้ดูแลระบบ (Admin)' :
-                        userProfile.role === 'internal' ? 'บุคลากรภายใน (Internal)' :
-                        userProfile.role === 'co_organizer' ? 'หน่วยงานร่วมจัด (Co-Organizer)' :
-                        'บุคคลทั่วไป (External)'
+                        userProfile.role === 'admin' ? $t('dashboard.role_admin') :
+                        userProfile.role === 'internal' ? $t('dashboard.role_internal') :
+                        userProfile.role === 'co_organizer' ? $t('dashboard.role_coop') :
+                        $t('dashboard.role_external')
                       }}
                     </p>
                   </div>
@@ -792,32 +803,32 @@ const formatDate = (dateString: string) =>
                   class="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2"
                 >
                   <font-awesome-icon icon="pencil-alt" class="text-gray-400" />
-                  ข้อมูลที่สามารถแก้ไขได้
+                  {{ $t('dashboard.editable_info_title') }}
                 </h4>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label
                       class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-                      >ชื่อ-นามสกุล <span class="text-red-500">*</span></label
+                      >{{ $t('dashboard.full_name') }} <span class="text-red-500">*</span></label
                     >
                     <input
                       type="text"
                       v-model="userProfile.fullName"
                       required
                       class="w-full px-4 py-3.5 bg-white border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
-                      placeholder="ระบุชื่อ-นามสกุลของคุณ"
+                      :placeholder="$t('dashboard.name_placeholder')"
                     />
                   </div>
                   <div>
                     <label
                       class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-                      >เบอร์โทรศัพท์</label
+                      >{{ $t('dashboard.phone_number') }}</label
                     >
                     <input
                       type="tel"
                       v-model="userProfile.phone"
                       class="w-full px-4 py-3.5 bg-white border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
-                      placeholder="เช่น 0812345678"
+                      :placeholder="$t('dashboard.phone_placeholder')"
                     />
                   </div>
                 </div>
@@ -828,7 +839,7 @@ const formatDate = (dateString: string) =>
                   type="submit"
                   class="bg-[#ba0b2f] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#8c0823] shadow-lg shadow-red-200 transition-all flex items-center gap-2 cursor-pointer transform hover:-translate-y-0.5"
                 >
-                  บันทึกข้อมูล <font-awesome-icon icon="save" />
+                  {{ $t('dashboard.save_profile') }} <font-awesome-icon icon="save" />
                 </button>
               </div>
             </form>

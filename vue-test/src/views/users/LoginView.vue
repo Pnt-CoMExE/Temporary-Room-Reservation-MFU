@@ -79,9 +79,9 @@ const loginWithGoogle = () => {
       <!-- 🎓 หัวข้อระบบ -->
       <div class="text-center mb-8 animate-fade-down">
         <img
-          src="/images/mfu-logo-white.svg"
+          src="/images/mfu-logo.png"
           alt="MFU Logo"
-          class="h-20 w-auto mx-auto mb-4"
+          class="h-28 w-auto mx-auto mb-4 object-contain filter drop-shadow-[0_0_20px_rgba(212,175,55,0.6)]"
         />
         <h1
           class="text-4xl font-extrabold text-white tracking-wider drop-shadow-lg"
@@ -89,7 +89,7 @@ const loginWithGoogle = () => {
           <span class="text-[#d4af37]">MFU</span> PROPERTY
         </h1>
         <p class="text-gray-300 mt-2 text-sm font-medium">
-          ระบบบริหารจัดการพื้นที่เช่าชั่วคราว
+          {{ $t('hero.badge') }}
         </p>
       </div>
 
@@ -103,9 +103,9 @@ const loginWithGoogle = () => {
           >
             <FontAwesomeIcon :icon="['fas', 'fingerprint']" class="text-3xl" />
           </div>
-          <h2 class="text-2xl font-bold text-gray-900 mb-2">เข้าสู่ระบบ</h2>
+          <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $t('nav.login') }}</h2>
           <p class="text-sm font-medium transition-colors duration-300 text-gray-500">
-            กรุณาเข้าสู่ระบบด้วยบัญชี Google ของท่าน
+            Sign in with Google Account
           </p>
         </div>
 

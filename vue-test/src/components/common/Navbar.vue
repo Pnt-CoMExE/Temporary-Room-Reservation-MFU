@@ -14,6 +14,8 @@ interface Notification {
   read: boolean;
 }
 
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const router = useRouter();
 const isMenuOpen = ref(false);
 const isNotifOpen = ref(false);
@@ -80,12 +82,12 @@ const confirmLogout = () => {
           <FontAwesomeIcon :icon="['fas', 'sign-out-alt']" class="ml-1 translate-x-0.5" />
         </div>
       </div>
-      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">ออกจากระบบ?</h3>
-      <p class="text-sm text-gray-500 font-medium px-2">คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?</p>
+      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">${t('nav.logout_confirm_title')}</h3>
+      <p class="text-sm text-gray-500 font-medium px-2">${t('nav.logout_confirm_text')}</p>
     `,
     showCancelButton: true,
-    confirmButtonText: "ออกจากระบบ",
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t('nav.logout'),
+    cancelButtonText: t('common.cancel'),
     reverseButtons: true,
     buttonsStyling: false,
     customClass: {
@@ -115,9 +117,9 @@ const confirmLogout = () => {
           <div class="flex items-center">
             <RouterLink to="/home" class="flex items-center group">
               <img
-                src="/images/mfu-logo.svg"
+                src="/images/mfu-logo.png"
                 alt="MFU Logo"
-                class="h-8 md:h-10 w-auto mr-2 md:mr-3"
+                class="h-9 md:h-12 w-auto mr-2 md:mr-3 object-contain drop-shadow-sm"
               />
               <div
                 class="flex flex-col transform group-hover:scale-105 transition-transform duration-300"

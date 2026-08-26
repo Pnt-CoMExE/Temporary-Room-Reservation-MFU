@@ -19,6 +19,19 @@ const props = defineProps<{
   room: RoomData;
 }>();
 
+import { useI18n } from "vue-i18n";
+import {
+  translateRoomName,
+  translateRoomType,
+  translateLocation,
+} from "@/utils/translator";
+
+const { locale } = useI18n();
+
+const displayType = computed(() => translateRoomType(props.room.type, locale.value));
+const displayLocation = computed(() => translateLocation(props.room.location, locale.value));
+const displayName = computed(() => translateRoomName(props.room.name, locale.value));
+
 /**
  * Determine which AVIF/WebP fallback source to use based on the current room.image.
  * If the image is from the API (external URL), return null so no <source> is rendered.
@@ -43,6 +56,7 @@ const goToRoom = () => {
 <template>
   <div
     class="group bg-white rounded-4xl shadow-sm hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full cursor-pointer transform hover:-translate-y-2"
+    @click="goToRoom"
   >
     <div class="relative h-56 md:h-64 overflow-hidden bg-gray-100">
       <picture>
@@ -53,7 +67,7 @@ const goToRoom = () => {
             room.image ||
             '/images/room-placeholder.jpg'
           "
-          :alt="room.name"
+          :alt="displayName"
           loading="lazy"
           class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
         />
@@ -83,7 +97,7 @@ const goToRoom = () => {
       <div
         class="absolute bottom-4 left-4 px-4 py-1.5 bg-[#ba0b2f] text-white rounded-lg text-xs font-bold shadow-lg transform translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
       >
-        {{ room.type || "Space" }}
+        {{ displayType }}
       </div>
     </div>
 
@@ -95,7 +109,7 @@ const goToRoom = () => {
       <h3
         class="text-xl font-extrabold text-gray-900 mb-4 line-clamp-2 group-hover:text-[#ba0b2f] transition-colors duration-300 leading-snug"
       >
-        {{ room.name }}
+        {{ displayName }}
       </h3>
 
       <div class="space-y-3 mb-6 mt-auto">
@@ -104,7 +118,7 @@ const goToRoom = () => {
             <FontAwesomeIcon :icon="['fas', 'map-marker-alt']" />
           </div>
           <span class="flex-1 leading-relaxed">{{
-            room.location || "Mae Fah Luang University"
+            displayLocation
           }}</span>
         </div>
         <div class="flex items-center text-sm text-gray-500 font-medium">
