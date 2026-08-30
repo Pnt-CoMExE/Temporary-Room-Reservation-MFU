@@ -6,7 +6,9 @@
   "scripts": {
     "test": "vitest run",
     "dev": "tsx watch server.ts",
-    "start": "tsx server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "start:dev": "tsx server.ts",
     "seed": "tsx seed-mfu-rooms.ts",
     "typecheck": "tsc --noEmit"
   },
@@ -24,6 +26,7 @@
     "express-session": "^1.19.0",
     "express-validator": "^7.3.2",
     "helmet": "^8.3.0",
+    "ioredis": "^6.0.0",
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "multer": "^2.1.1",
@@ -31,6 +34,7 @@
     "passport-google-oauth20": "^2.0.0",
     "pdfkit": "^0.20.1",
     "pg": "^8.23.0",
+    "rate-limit-redis": "^6.0.1",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
@@ -39,6 +43,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.19.0",
+    "@types/ioredis": "^4.28.10",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/microsoft-sdk-soap": "^0.0.40",
     "@types/morgan": "^1.9.10",

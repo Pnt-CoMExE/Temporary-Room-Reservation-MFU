@@ -1,82 +1,129 @@
-# Production Ready Deployment Plan (2 Months / 8 Sprints)
-# แผนการดำเนินงานและเตรียมความพร้อมสู่ Production Deployment (ระยะเวลา 2 เดือน / 8 สัปดาห์)
+# แผนการดำเนินงานปรับปรุงใหม่: เน้น UAT ก่อน Deploy (8 Sprints)
 
-**Project Phase / เฟสโครงการ:** Temporary Rental Space Management System of MFU - Production Deployment  
-**Duration / ระยะเวลา:** 2 Months (8 Weeks / Sprints) / 2 เดือน (8 สัปดาห์ / 8 Sprints)  
-**Goal / เป้าหมาย:** Transition system to a hardened, fully tested, portable, and production-ready state, overcoming infrastructure and payment gateway constraints. (ยกระดับและปรับปรุงระบบให้มีความมั่นคงปลอดภัย ผ่านการทดสอบอย่างครอบคลุม รองรับการย้ายเครื่อง และพร้อมใช้งานจริงบน Production โดยก้าวข้ามข้อจำกัดด้านโครงสร้างพื้นฐานและช่องทางการชำระเงิน)
-
----
-
-## 💡 Pragmatic Execution Strategy / กลยุทธ์การดำเนินงานแบบยืดหยุ่น
-
-1. **Unconfirmed CITS Server / กรณีเครื่อง Server CITS ยังไม่แน่นอน:**  
-   - 🇬🇧 100% **Docker & Docker Compose Portability**. Run on Staging/Cloud VM during UAT, then 1-click deploy (`docker-compose up -d`) when CITS Server is provisioned.
-   - 🇹🇭 ใช้ระบบ **Docker & Docker Compose Portability 100%** รันบน Staging/Cloud VM ชั่วคราวช่วง UAT และเมื่อ CITS มอบ Server จะสั่ง Deploy ด้วยคำสั่งเดียว (`docker-compose up -d`) ได้ทันที
-2. **Pending Payment Provider Selection / กรณีส่วนทรัพย์สินยังไม่ได้สรุปค่าย Payment เอกชน:**  
-   - **Modular Payment Adapter Pattern / รูปแบบสถาปัตยกรรมแบบโมดูลาร์**
-     - *Mode A (Immediate / พร้อมใช้ทันที):* Dynamic PromptPay EMVCo QR Code + Slip Upload Verification by Admin. (สแกนจ่าย PromptPay + อัปโหลด Slip + เจ้าหน้าที่ตรวจสอบ)
-     - *Mode B (Plug-and-Play / พร้อมต่อ API):* Abstracted Payment Adapter ready to attach to Opn Payments, SCB, Krungthai, or KBank once Asset Management Dept decides. (พร้อมต่อ API กับค่ายเอกชนทันทีเมื่อมีข้อสรุป)
+**เฟสโครงการ:** ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง — การทดสอบ UAT และการติดตั้งใช้งานจริง (Production Deployment)  
+**ระยะเวลา:** 2 เดือน (8 สัปดาห์ / 8 Sprints)  
+**เป้าหมายที่ปรับใหม่:** ทำให้ระบบผ่านการทดสอบ UAT ครบทุกโมดูลก่อนในเดือนแรก แล้วจึงยกระดับความปลอดภัย ระบบชำระเงิน และ Deploy จริงบนเซิร์ฟเวอร์ CITS ในเดือนที่สอง  
+**วันที่ปรับแผน:** 2026-08-27 (ปรับปรุงตามคำแนะนำอาจารย์ที่ปรึกษา)
 
 ---
 
-## 🗓️ Month 1: Portable Infrastructure, Modular Payment & Core Hardening (Sprints 1 - 4)
-## เดือนที่ 1: โครงสร้างพื้นฐานย้ายง่าย, ระบบชำระเงินแบบโมดูลาร์ และยกระดับความปลอดภัย
+## 💡 กลยุทธ์การดำเนินงานที่ปรับปรุงใหม่
 
-* **Sprint 1 (Week 1 / สัปดาห์ที่ 1): Dockerization & Portable Environment Setup / การทำ Dockerization & จัดตั้งสภาพแวดล้อมที่ย้ายง่าย**
-  - 🇬🇧 Multi-stage Dockerfiles for Express Backend and Vue 3 + Nginx Frontend.
-  - 🇹🇭 สร้าง Multi-stage Dockerfiles สำหรับ Express Backend และ Vue 3 + Nginx Frontend
-  - 🇬🇧 Portable `docker-compose.prod.yml` with PostgreSQL 16 & Redis.
-  - 🇹🇭 กำหนดค่า `docker-compose.prod.yml` ที่รันร่วมกับ PostgreSQL 16 และ Redis
-  - 🇬🇧 Automated Database Migration and Backup Scripts.
-  - 🇹🇭 สร้างสคริปต์ Database Migration และระบบสำรองข้อมูล (Backup) อัตโนมัติ
+> **เหตุผลที่ปรับแผน:** อาจารย์ที่ปรึกษาแนะนำให้ดำเนินการทดสอบ UAT ให้ครอบคลุมทุกโมดูลก่อน เพื่อค้นหาและแก้ไขข้อผิดพลาดจากผู้ใช้งานจริงก่อนการติดตั้งจริง ซึ่งช่วยลดความเสี่ยงและการแก้ไขงานซ้ำซ้อนหลังขึ้น Production
 
-* **Sprint 2 (Week 2 / สัปดาห์ที่ 2): Dynamic PromptPay EMVCo QR & Slip Verification Engine / ระบบชำระเงิน Dynamic PromptPay EMVCo QR & ตรวจสอบ Slip**
-  - 🇬🇧 PromptPay EMVCo QR generator on UI.
-  - 🇹🇭 ตัวสร้าง QR Code ชำระเงิน Dynamic PromptPay EMVCo บนหน้าจอผู้ใช้
-  - 🇬🇧 Payment Slip Upload feature for users and Slip Verification Dashboard for Admins.
-  - 🇹🇭 ฟังก์ชันอัปโหลด Slip หลักฐานการชำระเงินสำหรับผู้ใช้ และระบบตรวจสอบ Slip สำหรับผู้ดูแลระบบ (Admin)
+**เดือนที่ 1 — ทำให้ระบบพร้อมสำหรับ UAT ครบทุกโมดูล (UAT-Ready):**
+- **Sprint 1:** ตรวจสอบฟีเจอร์ เติมเต็มส่วนที่ขาด แก้ไข Unit Tests และปรับปรุงระบบภาษา [✅ เสร็จสมบูรณ์]
+- **Sprint 2:** ทดสอบการทำงานร่วมกัน (Integration Testing) และจัดเตรียมสภาพแวดล้อมสำหรับ UAT Demo
+- **Sprint 3:** การทดสอบ UAT รอบที่ 1 — ทดสอบทุกโมดูลกับผู้ใช้งานจริง (User & Admin)
+- **Sprint 4:** การทดสอบ UAT รอบที่ 2 — แก้ไขข้อผิดพลาด ทดสอบซ้ำ (Regression) และรับการอนุมัติจากอาจารย์ที่ปรึกษา
 
-* **Sprint 3 (Week 3 / สัปดาห์ที่ 3): Security Hardening, Audit Logging & OAuth Enforcement / การยกระดับความปลอดภัย, บันทึกการทำงาน & จัดสิทธิ์ OAuth**
-  - 🇬🇧 Strict MFU Google OAuth domain separation (`@mfu.ac.th` vs `@lamduan.mfu.ac.th` vs external).
-  - 🇹🇭 บังคับใช้ Google OAuth 2.0 แยกสิทธิ์ตามโดเมนอย่างเข้มงวด (`@mfu.ac.th` บุคลากร vs `@lamduan.mfu.ac.th` นักศึกษา vs บุคคลภายนอก)
-  - 🇬🇧 Security hardening with `helmet`, CORS, API Rate Limiting, and Admin Audit Logs.
-  - 🇹🇭 เพิ่มความปลอดภัยด้วย `helmet`, CORS Policy, การจำกัดอัตราเรียกใช้งาน API (Rate Limiting) และระบบ Admin Audit Logs
-
-* **Sprint 4 (Week 4 / สัปดาห์ที่ 4): Modular Payment Adapter & Automated Receipt PDF Generation / Modular Payment Adapter & ระบบออกใบเสร็จ PDF อัตโนมัติ [✅ COMPLETED / ดำเนินการแล้ว]**
-  - 🇬🇧 Modular Payment Provider Adapter Interface (`IPaymentAdapter`, `PaymentGatewayManager`, Adapters: PromptPay, Opn, SCB, KBank, KTB, Mock).
-  - 🇹🇭 สร้างโครงสร้าง Interface กลางสำหรับเชื่อมต่อ Payment Provider (Modular Payment Adapter) พร้อม Adapters สำหรับ Opn, SCB, KBank, KTB และ Mock Sandbox พร้อมสลับด้วย `.env`
-  - 🇬🇧 Automated PDF invoice/receipt generation service.
-  - 🇹🇭 ระบบสร้างเอกสาร PDF ใบเสร็จรับเงิน/ใบอนุญาตใช้งานพื้นที่อัตโนมัติ
-  - 🇬🇧 Real-time Add-on equipment inventory lock logic.
-  - 🇹🇭 Logic คำนวณคลังอุปกรณ์เสริมแบบ Real-time (Add-on Inventory Lock) เพื่อป้องกันการจองอุปกรณ์เกินจำนวนจริง
+**เดือนที่ 2 — ความปลอดภัย ระบบชำระเงิน CI/CD และการติดตั้งใช้งานจริง:**
+- **Sprint 5:** ยกระดับความปลอดภัย (Security Hardening), บังคับใช้สิทธิ์ OAuth และสรุประบบชำระเงิน
+- **Sprint 6:** การทดสอบแบบอัตโนมัติ (E2E Automation Testing) และการทดสอบรองรับการใช้งานพร้อมกัน (Load Testing)
+- **Sprint 7:** ติดตั้งระบบ CI/CD Pipeline และจัดทำชุดเอกสารส่งมอบงานสำหรับ CITS
+- **Sprint 8:** ติดตั้งระบบบนเซิร์ฟเวอร์ CITS, การชี้ Domain DNS และเปิดใช้งานจริง (Go-Live)
 
 ---
 
-## 🗓️ Month 2: QA, UAT, CITS Readiness, CI/CD & Go-Live (Sprints 5 - 8)
-## เดือนที่ 2: QA, UAT, ความพร้อมสำหรับ CITS, CI/CD & การเปิดใช้งานจริง
+## 🗓️ เดือนที่ 1: การพัฒนาฟีเจอร์ให้ครบถ้วนและการทดสอบ UAT ทุกโมดูล (Sprints 1–4)
 
-* **Sprint 5 (Week 5 / สัปดาห์ที่ 5): E2E Automation Testing & Concurrency Load Testing / การทดสอบ E2E อัตโนมัติ & ทดสอบโหลดรองรับผู้ใช้พร้อมกัน**
-  - 🇬🇧 Playwright E2E automation tests covering full user booking journeys.
-  - 🇹🇭 ชุดทดสอบ Playwright E2E Automation ครอบคลุมการทำงานตั้งแต่เริ่มจองจนถึงชำระเงิน
-  - 🇬🇧 Concurrency load testing with k6 (300+ VUs) ensuring database row locks prevent double-booking.
-  - 🇹🇭 การทดสอบโหลดและความพร้อมด้วย k6 (จำลองผู้ใช้ 300+ คนพร้อมกัน) เพื่อการันตีว่า PostgreSQL Transaction Lock ป้องกันการจองซ้ำซ้อน (Double-Booking) ได้ 100%
+---
 
-* **Sprint 6 (Week 6 / สัปดาห์ที่ 6): User Acceptance Testing (UAT) & Asset Dept Review / การทดสอบยอมรับจากผู้ใช้ (UAT) & สอบทานร่วมกับส่วนทรัพย์สิน**
-  - 🇬🇧 UAT execution with MFU Admin, Faculty, Student Orgs, and Asset Management Dept.
-  - 🇹🇭 เปิดรอบทดสอบ UAT ร่วมกับผู้ดูแลระบบ MFU, อาจารย์/บุคลากร, สโมสร/ชมรมนักศึกษา และเจ้าหน้าที่ส่วนทรัพย์สิน
-  - 🇬🇧 Rapid feedback triage and bug fixing.
-  - 🇹🇭 การรวบรวมข้อเสนอแนะ การจัดลำดับความสำคัญของปัญหา และการแก้ไขข้อผิดพลาดอย่างรวดเร็ว
+### 🔹 Sprint 1 (สัปดาห์ที่ 1): ตรวจสอบฟีเจอร์ เติมเต็มส่วนที่ขาด และแก้ไข Unit Tests [✅ เสร็จสมบูรณ์]
 
-* **Sprint 7 (Week 7 / สัปดาห์ที่ 7): CI/CD Automation Pipeline & CITS Readiness Package / ท่อส่งมอบงานอัตโนมัติ (CI/CD Pipeline) & แพ็กเกจพร้อมส่งมอบ CITS**
-  - 🇬🇧 GitHub Actions CI/CD pipeline setup.
-  - 🇹🇭 ติดตั้ง GitHub Actions CI/CD Pipeline (ทดสอบรัน Unit Test, Linting และ Build Docker Image อัตโนมัติ)
-  - 🇬🇧 Preparation of "CITS Deployment Readiness Package" for smooth server handover.
-  - 🇹🇭 จัดทำ "CITS Deployment Readiness Package" สำหรับการส่งมอบเซิร์ฟเวอร์แก่ทีมวิศวกร CITS
+**ฝั่ง Backend — การเติมเต็มและแก้ไขระบบ:**
+- เชื่อมต่อ Redis จริงสำหรับ Rate Limiter (`ioredis` + `rate-limit-redis`) เพื่อให้ทำงานต่อเนื่องแม้ Server Restart ✅ เสร็จแล้ว
+- สคริปต์สำรองข้อมูล PostgreSQL อัตโนมัติ (`backend/scripts/backup.sh` พร้อม `pg_dump`, บีบอัด gzip และลบไฟล์ย้อนหลังเกิน 30 วันอัตโนมัติ) ✅ เสร็จแล้ว
+- ปรับปรุง Production Build Pipeline: Compile TypeScript ลงโฟลเดอร์ `dist/` และรันด้วย `node dist/server.js` แทน `tsx` ✅ เสร็จแล้ว
+- ชุดการทดสอบ Unit Tests: ผ่านครบ **105/105 Tests** (เพิ่มขึ้นจาก 93 Tests) ✅ เสร็จแล้ว
+- พัฒนา API จัดการผู้ใช้งานสำหรับ Admin (`/api/admin/users`) สำหรับดึงรายชื่อ สถิติการจอง และปรับเปลี่ยนสิทธิ์ (Role) ✅ เสร็จแล้ว
 
-* **Sprint 8 (Week 8 / สัปดาห์ที่ 8): CITS Server Deployment, DNS Cutover & Go-Live / การนำขึ้น Server CITS, การชี้ DNS Domain & เปิดใช้งานจริง**
-  - 🇬🇧 Deploy to CITS Production Server via Docker Compose.
-  - 🇹🇭 Deploy ขึ้น Production Server ของ CITS ผ่าน Docker Compose
-  - 🇬🇧 Seed initial room, pricing, and admin data.
-  - 🇹🇭 นำเข้าข้อมูลเริ่มต้น (ข้อมูลห้องพัก, อัตราค่าเช่า, อุปกรณ์เสริม, บัญชีผู้ดูแลระบบ)
-  - 🇬🇧 Domain DNS cutover, SSL activation, monitoring setup, and operational handover.
-  - 🇹🇭 ชี้ Domain DNS ของมหาวิทยาลัย, เปิดใช้งาน SSL Certificate, ติดตั้งระบบ Monitoring และส่งมอบคู่มือการใช้งานระบบ
+**ฝั่ง Frontend — หน้าจอ UI, ระบบภาษา และการจัดการสถานะ:**
+- สร้างหน้าจอจัดการผู้ใช้งาน `AdminUsers.vue` (ตารางรายชื่อ, ค้นหา, กรองตาม Role, เปลี่ยนสิทธิ์ผู้ใช้, สถิติการจอง) ✅ เสร็จแล้ว
+- แยกหน้าจอจัดการรหัสส่วนลด `AdminPromoCodes.vue` ออกมาเป็นสัดส่วน (การแสดงสถิติ, กรองสถานะ, ฟอร์มสร้างรหัส, แถบแสดงการใช้งาน) ✅ เสร็จแล้ว
+- อัปเดตเมนู Sidebar ใน `AdminDashboardView.vue` ให้รองรับแท็บจัดการผู้ใช้งานและรหัสส่วนลดครบถ้วน ✅ เสร็จแล้ว
+- เพิ่ม Loading Skeleton, Error Boundary และ Empty State ในหน้าจอฝั่งผู้ใช้ (`HomeView`, `RoomListView`, `RoomDetailView`) ✅ เสร็จแล้ว
+- ตรวจสอบและแก้ไขระบบสลับภาษา (i18n) ครอบคลุม Modal Dialogs ทั้งหมด (QR Code ชำระเงิน, ยกเลิกคำขอจอง, ฟอร์มรีวิวความพึงพอใจ, การแจ้งเตือนต่างๆ) ✅ เสร็จแล้ว
+- ตรวจสอบและแก้ไข TypeScript Errors ทั้งระบบในฝั่ง Frontend (`npx vue-tsc --noEmit` ผ่าน 0 errors) ✅ เสร็จแล้ว
+
+---
+
+### 🔹 Sprint 2 (สัปดาห์ที่ 2): ทดสอบการทำงานร่วมกัน และจัดเตรียมสภาพแวดล้อมสำหรับ UAT
+
+- ทดสอบขั้นตอนการทำงานทั้งหมดตั้งแต่ต้นจนจบ (End-to-End Walkthrough): เข้าสู่ระบบ → ค้นหาและเลือกห้อง → ส่งคำขอจอง → อัปโหลดหนังสือบันทึกข้อความ (Memo PDF) → เจ้าหน้าที่ตรวจสอบและอนุมัติ → แสดง PromptPay QR Code → อัปโหลดสลิปโอนเงิน → เจ้าหน้าที่ตรวจสอบและยืนยันการชำระเงิน
+- จัดเตรียมสภาพแวดล้อม UAT Demo: ติดตั้งระบบบนเครื่องทดสอบหรือ Cloud VM เพื่อให้อาจารย์ที่ปรึกษาและผู้มีส่วนเกี่ยวข้องสามารถเข้าทดสอบได้
+- นำเข้าข้อมูลตัวอย่างที่สมจริง (Seed Realistic Demo Data): ข้อมูลห้องและพื้นที่, อัตราค่าบริการตามประเภทผู้ใช้, รหัสส่วนลด, อุปกรณ์เสริม และบัญชี Admin สำหรับทดสอบ
+- จัดทำเอกสารสถานการณ์การทดสอบ (UAT Test Scenarios) และรายการตรวจสอบ (Checklist) แยกตามบทบาทผู้ใช้งาน (Admin, บุคลากรภายใน, นักศึกษา, บุคคลภายนอก)
+
+---
+
+### 🔹 Sprint 3 (สัปดาห์ที่ 3): การทดสอบ UAT รอบที่ 1 — ทดสอบทุกโมดูลกับผู้ใช้งานจริง
+
+**โมดูลฝั่งผู้ใช้งานทั่วไป (นักศึกษา / บุคลากร / บุคคลภายนอก):**
+- ทดสอบการเข้าสู่ระบบด้วย Google OAuth — การจำแนก Role อัตโนมัติตามโดเมนอีเมล (`@lamduan.mfu.ac.th` นักศึกษา, `@mfu.ac.th` บุคลากร, โดเมนอื่นเป็นบุคคลภายนอก)
+- ทดสอบการค้นหาห้อง, ระบบกรอง (8 ประเภทพื้นที่), การค้นหาสองภาษา (TH/EN) และการแสดงหน้ารายละเอียดห้อง
+- ทดสอบฟอร์มการส่งคำขอจอง: การเลือกวันที่, ช่วงเวลา, อุปกรณ์เสริม, รหัสส่วนลด และการอัปโหลดไฟล์ Memo PDF
+- ทดสอบหน้ารายการของฉัน (User Dashboard): ประวัติการจอง, การติดตามสถานะ, การแสดง QR Code PromptPay, การอัปโหลดหลักฐานการชำระเงิน และการส่งรีวิว
+- ทดสอบการสลับภาษา (i18n): ข้อความบนหน้าจอและ Modal ทั้งหมดเปลี่ยนระหว่างภาษาไทยและภาษาอังกฤษได้อย่างถูกต้อง
+
+**โมดูลฝั่งผู้ดูแลระบบ (เจ้าหน้าที่ส่วนจัดการทรัพย์สิน):**
+- ทดสอบแดชบอร์ดผู้ดูแลระบบ: กราฟสรุปรายได้, สถิติการจอง และประวัติการทำงาน (Activity Logs)
+- ทดสอบระบบจัดการคำขอจอง: ตรวจสอบรายการรออนุมัติ, อนุมัติ/ปฏิเสธพร้อมระบุหมายเหตุ, ตรวจสอบสลิปการโอนเงิน และดาวน์โหลดเอกสารรวมเป็นไฟล์ ZIP
+- ทดสอบระบบจัดการข้อมูลห้อง: เพิ่ม/แก้ไขข้อมูลห้อง และการเลือกห้องแนะนำ (Featured Rooms)
+- ทดสอบระบบจัดการประกาศและแบนเนอร์: อัปโหลดและจัดการแบนเนอร์บนหน้าแรก
+- ทดสอบระบบจัดการรหัสส่วนลด: สร้าง, แก้ไข และเปิด/ปิดการใช้งาน Promo Code
+- ทดสอบระบบจัดการผู้ใช้งาน: ตรวจสอบรายชื่อ, สถิติการจอง และการปรับเปลี่ยนสิทธิ์ (Role)
+- ทดสอบระบบการแจ้งเตือนทางอีเมล: อีเมลยืนยันการส่งคำขอ และอีเมลแจ้งผลการอนุมัติ/ปฏิเสธ
+
+---
+
+### 🔹 Sprint 4 (สัปดาห์ที่ 4): การทดสอบ UAT รอบที่ 2 — แก้ไขข้อผิดพลาด ทดสอบซ้ำ และรับการอนุมัติจากอาจารย์
+
+- รวบรวมและจัดลำดับความสำคัญของรายงานข้อผิดพลาด (Bug Reports) และข้อเสนอแนะทั้งหมดจาก UAT รอบที่ 1
+- ดำเนินการแก้ไขข้อผิดพลาดระดับวิกฤต (P1) และระดับสำคัญ (P2) ทั้งหมดที่พบ
+- ดำเนินการทดสอบซ้ำ (Regression Testing) ในทุกส่วนที่ได้รับการแก้ไข เพื่อยืนยันว่าไม่กระทบต่อการทำงานเดิม
+- รับการตรวจรับ UAT (Sign-Off): นำเสนอระบบตัวอย่างขั้นสุดท้ายให้อาจารย์ที่ปรึกษา และรับการอนุมัติอย่างเป็นทางการก่อนเข้าสู่เฟสการ Deploy
+
+---
+
+## 🗓️ เดือนที่ 2: ความปลอดภัย ระบบชำระเงิน CI/CD และการเปิดใช้งานจริง (Sprints 5–8)
+
+---
+
+### 🔹 Sprint 5 (สัปดาห์ที่ 5): ยกระดับความปลอดภัย, บังคับใช้สิทธิ์ OAuth และสรุประบบชำระเงิน
+
+**ด้านความปลอดภัย (Security):**
+- ตรวจสอบความปลอดภัยรอบด้าน: การตั้งค่า Helmet, CORS Policy, อายุของ JWT Token, ความปลอดภัยของ Session และการป้องกัน SQL Injection
+- ตรวจสอบความรัดกุมในการแยกสิทธิ์ Google OAuth 2.0 ตามโดเมนอีเมลอย่างเข้มงวด
+- ตรวจสอบระบบบันทึกประวัติการทำงานของผู้ดูแลระบบ (Admin Audit Logs) ให้บันทึกทุกการกระทำพร้อม Timestamp อย่างครบถ้วน
+
+**ด้านระบบการชำระเงิน (Payment Finalization):**
+- ทดสอบระบบชำระเงิน PromptPay EMVCo QR Code แบบครบวงจรด้วยการโอนเงินจริงและการแนบสลิป
+- สรุปแนวทาง Payment Gateway ร่วมกับส่วนจัดการทรัพย์สิน (ตั้งค่า Mode B Adapter หากมีข้อสรุป)
+- ทดสอบระบบการสร้างใบเสร็จและใบอนุญาตในรูปแบบ PDF อัตโนมัติด้วยข้อมูลการจองจริง
+
+---
+
+### 🔹 Sprint 6 (สัปดาห์ที่ 6): การทดสอบ E2E แบบอัตโนมัติ และการทดสอบรองรับการใช้งานพร้อมกัน
+
+- พัฒนาชุดทดสอบอัตโนมัติ Playwright E2E ครอบคลุมการทำงานฝั่งผู้ใช้ (เข้าสู่ระบบ → ส่งคำขอจอง → ชำระเงิน → ติดตามสถานะ)
+- พัฒนาชุดทดสอบ Playwright สำหรับฝั่ง Admin (อนุมัติ/ปฏิเสธคำขอ, ตรวจสอบสลิป, ส่งออกเอกสาร ZIP)
+- ดำเนินการทดสอบโหลดและความพร้อมด้วย k6 (จำลองผู้ใช้ 300+ คนพร้อมกัน) เพื่อยืนยันว่าระบบ Transaction Lock ของ PostgreSQL ป้องกันการจองซ้ำ (Double-Booking) ได้ 100%
+- บันทึกและจัดทำรายงานผลการทดสอบทั้งหมดเพื่อใช้เป็นหลักฐานประกอบรายงานโปรเจกต์
+
+---
+
+### 🔹 Sprint 7 (สัปดาห์ที่ 7): ติดตั้งระบบ CI/CD Automation และจัดทำชุดเอกสารส่งมอบ CITS
+
+- ติดตั้ง GitHub Actions CI/CD Pipeline: รัน Unit Test, Linting, ตรวจสอบ TypeScript Build และสร้าง Docker Image อัตโนมัติเมื่อมีการ Push โค้ด
+- กำหนดมาตรฐานการตั้ง Tag และ Versioning สำหรับ Docker Image
+- จัดทำชุดเอกสารส่งมอบงานสำหรับ CITS (CITS Deployment Readiness Package): คู่มือการดูแลระบบ (Runbook), ขั้นตอนการตั้งค่า Environment & Secrets และขั้นตอนการสำรอง/กู้คืนข้อมูล (Backup & Restore)
+
+---
+
+### 🔹 Sprint 8 (สัปดาห์ที่ 8): ติดตั้งระบบบนเซิร์ฟเวอร์ CITS, การชี้ Domain DNS และเปิดใช้งานจริง
+
+- ดำเนินการติดตั้งระบบบน Production Server ของ CITS ผ่าน `docker-compose up -d`
+- นำเข้าข้อมูลเริ่มต้นบนระบบจริง (Initial Production Data): ข้อมูลห้อง, อัตราค่าบริการ, อุปกรณ์เสริม และบัญชีผู้ดูแลระบบหลัก
+- ดำเนินการชี้ Domain DNS ของมหาวิทยาลัย, ติดตั้ง SSL Certificate (Let's Encrypt / MFU CA) และตรวจสอบความพร้อมใช้งาน HTTPS
+- ติดตั้งระบบตรวจสอบสถานะการทำงาน (Uptime Monitoring) และส่งมอบระบบให้เจ้าหน้าที่ส่วนจัดการทรัพย์สิน มฟล. ใช้งานอย่างเป็นทางการ

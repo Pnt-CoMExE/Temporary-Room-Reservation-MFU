@@ -51,4 +51,59 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 
 
 
+## [2026-08-27 — Sprint 1 Completion & Plan Revision]
+
+### Sprint 1 Gap Fixes (Infrastructure)
+- **Redis Integration**: Installed `ioredis` + `rate-limit-redis`; created `backend/src/redisClient.ts` singleton with graceful fallback (memory store when Redis unavailable in dev/test). Updated `rateLimiter.ts` to use Redis store in production (when `REDIS_URL` is set) and memory store in test/dev.
+- **Automated Backup Script**: Created `backend/scripts/backup.sh` — runs `pg_dump`, compresses with gzip, and auto-deletes backups older than 30 days.
+- **TypeScript Production Build**: Added `npm run build` script (`tsc` → `dist/`); updated `backend/Dockerfile` to compile TypeScript and run `node dist/server.js` instead of `tsx` in production.
+- **Nginx HTTPS**: Updated `vue-test/nginx.conf` — added HTTP→HTTPS redirect server block, full HTTPS server block with TLS 1.2/1.3, HTTP/2, Let's Encrypt certbot ACME path, and `/uploads/` proxy.
+- **Backend `.gitignore`**: Added `dist/`, `.env`, `backups/`, `uploads/` to prevent committing compiled JS and secrets.
+- **Vitest Config**: Updated `vitest.config.ts` to set `NODE_ENV=test` and `VITEST=true` env vars + `pool: 'forks'` for test isolation.
+- **Unit Tests**: Fixed test hang caused by Redis connection in test environment. All **105/105 tests now pass** (up from 93).
+
+### Plan Revision (Per Advisor Recommendation)
+- Revised `planning.md` from "Deploy-First" to **"UAT-First" strategy**:
+  - **Month 1** now focuses on Feature Completion + Full UAT (all modules) across 4 sprints.
+  - **Month 2** covers Security Hardening, Payment Finalization, CI/CD Pipeline, and Go-Live Deployment.
+  - Rationale: complete UAT first catches user-reported bugs before production deployment, avoiding costly rework.
+
+## [2026-08-30 — Sprint 1 Frontend Completion]
+
+### Backend (New)
+- **`backend/src/routes/admin/user.routes.ts` [NEW]**: Admin User Management API (`GET /api/admin/users`, `PUT /api/admin/users/:id/role`)
+- **`backend/app.ts`**: mount `adminUserRoutes` ที่ `/api/admin/users`
+
+### Frontend — Admin (New Files)
+- **`AdminUsers.vue` [NEW]**: หน้าจัดการผู้ใช้ — ตาราง users, Avatar, Role Badge, สถิติการจอง, Search/Filter by role, เปลี่ยน Role, Loading skeleton, Empty state
+- **`AdminPromoCodes.vue` [NEW]**: แยก Promo Code management ออกจาก AdminBanners — Stats cards, Search/Filter, Table + progress bar, Toggle สถานะ, Loading skeleton, Empty state
+
+### Frontend — Admin (Modified)
+- **`AdminDashboardView.vue`**: เพิ่ม tabs "จัดการผู้ใช้" และ "รหัสส่วนลด" ใน sidebar; จัดลำดับ tabs ใหม่ทั้งหมด
+
+### Frontend — User Views (Enhanced)
+- **`HomeView.vue`**: Skeleton cards ขณะโหลด Featured Rooms + Empty state
+- **`RoomDetailView.vue`**: Error boundary/Not found state ถ้า room ไม่พบหรือ API ล้มเหลว
+
+### Verification
+- Frontend TypeScript: **0 errors** (`npx vue-tsc --noEmit`)
+- Backend TypeScript: **0 errors** (`npx tsc --noEmit`)
+
+## [2026-08-30 — Full-Site i18n Audit, Modal Translation Fixes & Planning Document Update]
+
+### i18n System & Modal Dialogs (Enhanced)
+- **Locale Dictionary Expansion (`th.ts` & `en.ts`)**:
+  - เพิ่ม Keys ภาษาไทยและภาษาอังกฤษสำหรับ Modal Dialogs ทั้งหมด
+  - `dashboard`: `scan_to_pay`, `net_total`, `scan_instruction`, `close_window`, `cancel_booking_*`, `review_*` (คะแนน 1-5 ดาว, คำอธิบาย, placeholder)
+  - `booking`: `submit_success_title`, `submit_success_desc`, `go_to_dashboard`, `submit_error_title`
+  - `room`: `no_featured_rooms`, `room_not_found_title`, `room_not_found_desc`, `back_to_all_rooms`
+- **Dynamic Translation Integration (`useI18n`)**:
+  - **`DashboardView.vue`**: แปลง SweetAlert Modal ทั้งหมด (PromptPay QR Payment, ยกเลิกการจอง, รีวิวความพึงพอใจ 5 ดาว) ให้ใช้ dynamic translation `t(...)`
+  - **`BookingView.vue`**: แปลง SweetAlert Submit Success & Error Modals ให้ใช้ `t(...)`
+  - **`AdminDashboardView.vue`**: แปลง SweetAlert Logout Confirmation Modal ให้ใช้ `t(...)`
+  - **`HomeView.vue` & `RoomDetailView.vue`**: แปลง Empty State และ Error Boundary ให้ใช้ `$t(...)`
+
+### Documentation Update
+- **`planning.md`**: ปรับปรุงเอกสารแผนงาน 2 เดือน (8 Sprints) ให้เป็น**ภาษาไทย 100%** ทั้งหมดตามคำแนะนำ พร้อมอัปเดตสถานะของ Sprint 1 เป็น **เสร็จสมบูรณ์ (Completed)**
+- **Verification**: `npx vue-tsc --noEmit` ผ่าน 0 errors
 

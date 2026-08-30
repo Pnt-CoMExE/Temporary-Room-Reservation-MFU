@@ -159,9 +159,9 @@ const openPayment = async (booking: BookingItem) => {
 
   Swal.fire({
     title:
-      '<span class="font-extrabold text-2xl text-gray-900">แสกนเพื่อชำระเงิน</span>',
+      `<span class="font-extrabold text-2xl text-gray-900">${t('dashboard.scan_to_pay')}</span>`,
     html: `
-      <p class="text-sm text-gray-500 mb-4 font-medium">ยอดชำระสุทธิ: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
+      <p class="text-sm text-gray-500 mb-4 font-medium">${t('dashboard.net_total')}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
       
       <!-- โซน QR Code -->
       <div class="bg-white p-4 rounded-3xl border border-gray-200 mb-4 inline-block mx-auto shadow-sm">
@@ -169,7 +169,7 @@ const openPayment = async (booking: BookingItem) => {
       </div>
       
       <div class="bg-blue-50 p-4 rounded-xl text-left flex gap-3 border border-blue-100 text-xs text-blue-800 font-medium mb-4">
-        ℹ️ <p>กรุณาสแกนเพื่อชำระเงินผ่านแอปพลิเคชันธนาคาร (PromptPay) เมื่อชำระเสร็จแล้ว ระบบจะตรวจสอบยอดเงินอัตโนมัติ</p>
+        ℹ️ <p>${t('dashboard.scan_instruction')}</p>
       </div>
 
       <!-- ✨ เพิ่มเครดิต Opn Payments ตาม Requirement ✨ -->
@@ -178,7 +178,7 @@ const openPayment = async (booking: BookingItem) => {
       </div>
     `,
     showConfirmButton: true,
-    confirmButtonText: "ปิดหน้าต่าง",
+    confirmButtonText: t('dashboard.close_window'),
     confirmButtonColor: "#111827",
     customClass: {
       popup: "rounded-[2.5rem] p-8 max-w-md",
@@ -248,14 +248,14 @@ const filteredBookings = computed(() => {
 
 const cancelBooking = (booking: BookingItem) => {
   Swal.fire({
-    title: "ยกเลิกการจอง?",
-    text: `คุณต้องการยกเลิกคำขอจองรหัส ${booking.id} ใช่หรือไม่?`,
+    title: t('dashboard.cancel_booking_title'),
+    text: `${t('dashboard.cancel_booking_text')} ${booking.id} ${t('dashboard.cancel_booking_text_suffix')}`,
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#ba0b2f",
     cancelButtonColor: "#f3f4f6",
-    confirmButtonText: "ยืนยันการยกเลิก",
-    cancelButtonText: '<span class="text-gray-700 font-bold">ปิดหน้าต่าง</span>',
+    confirmButtonText: t('dashboard.cancel_booking_confirm'),
+    cancelButtonText: `<span class="text-gray-700 font-bold">${t('dashboard.close_window')}</span>`,
     customClass: {
       popup: "rounded-[2rem]",
       confirmButton: "rounded-xl px-6 py-3 font-bold",
@@ -269,13 +269,13 @@ const cancelBooking = (booking: BookingItem) => {
         booking.status = "ยกเลิกแล้ว";
         Swal.fire({
           icon: "success",
-          title: "ยกเลิกคำขอเรียบร้อย",
+          title: t('dashboard.cancel_booking_success'),
           showConfirmButton: false,
           timer: 1500,
           customClass: { popup: "rounded-[2rem]" },
         });
       } catch (err: any) {
-        Swal.fire("ข้อผิดพลาด", err.response?.data?.message || "ไม่สามารถยกเลิกการจองได้", "error");
+        Swal.fire(t('common.error') || "Error", err.response?.data?.message || "ไม่สามารถยกเลิกการจองได้", "error");
       }
     }
   });
@@ -284,10 +284,10 @@ const cancelBooking = (booking: BookingItem) => {
 const giveFeedback = (booking: BookingItem) => {
   Swal.fire({
     title:
-      '<h2 class="text-2xl font-extrabold text-gray-900">ให้คะแนนการใช้บริการ</h2>',
+      `<h2 class="text-2xl font-extrabold text-gray-900">${t('dashboard.review_title')}</h2>`,
     html: `
       <div class="mb-8 mt-2">
-        <p class="text-sm font-bold text-gray-700 mb-4 text-left">ความพึงพอใจ <span class="text-red-500">*</span></p>
+        <p class="text-sm font-bold text-gray-700 mb-4 text-left">${t('dashboard.review_satisfaction')} <span class="text-red-500">*</span></p>
         
         <div id="star-rating-container" class="flex items-center justify-center gap-2 mb-3 text-4xl cursor-pointer">
           <span class="star-icon text-yellow-400 text-3xl drop-shadow-sm transition-transform cursor-pointer" data-value="1">★</span>
@@ -297,18 +297,18 @@ const giveFeedback = (booking: BookingItem) => {
           <span class="star-icon text-yellow-400 text-3xl drop-shadow-sm transition-transform cursor-pointer" data-value="5">★</span>
         </div>
         
-        <p id="rating-text" class="text-sm font-black text-[#ba0b2f]">ยอดเยี่ยม (5 ดาว)</p>
+        <p id="rating-text" class="text-sm font-black text-[#ba0b2f]">${t('dashboard.review_star_5')}</p>
         <input type="hidden" id="feedback-rating" value="5">
       </div>
 
       <div class="text-left border-t border-gray-100 pt-6">
-        <label class="block text-sm font-bold text-gray-700 mb-2">ข้อเสนอแนะเพิ่มเติม</label>
-        <textarea id="feedback-comment" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 font-medium rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner" placeholder="พิมพ์ข้อเสนอแนะ หรือความประทับใจของคุณที่นี่..."></textarea>
+        <label class="block text-sm font-bold text-gray-700 mb-2">${t('dashboard.review_comment_label')}</label>
+        <textarea id="feedback-comment" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 font-medium rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner" placeholder="${t('dashboard.review_comment_placeholder')}"></textarea>
       </div>
     `,
     showCancelButton: true,
-    confirmButtonText: "ส่งรีวิว",
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t('dashboard.review_submit'),
+    cancelButtonText: t('common.cancel'),
     buttonsStyling: false,
     customClass: {
       popup: "rounded-[2.5rem] p-8 max-w-md",
@@ -324,11 +324,11 @@ const giveFeedback = (booking: BookingItem) => {
       const ratingText = document.getElementById("rating-text");
 
       const texts: Record<number, string> = {
-        1: "ต้องปรับปรุง (1 ดาว)",
-        2: "พอใช้ (2 ดาว)",
-        3: "ดี (3 ดาว)",
-        4: "ดีมาก (4 ดาว)",
-        5: "ยอดเยี่ยม (5 ดาว)",
+        1: t('dashboard.review_star_1'),
+        2: t('dashboard.review_star_2'),
+        3: t('dashboard.review_star_3'),
+        4: t('dashboard.review_star_4'),
+        5: t('dashboard.review_star_5'),
       };
 
       const updateStars = (value: number) => {
@@ -390,14 +390,14 @@ const giveFeedback = (booking: BookingItem) => {
         booking.feedbackData = result.value;
         Swal.fire({
           icon: "success",
-          title: "ขอบคุณสำหรับรีวิว!",
-          text: "ข้อเสนอแนะของคุณจะช่วยให้เราพัฒนาบริการให้ดียิ่งขึ้น",
+          title: t('dashboard.review_thanks_title'),
+          text: t('dashboard.review_thanks_text'),
           showConfirmButton: false,
           timer: 2500,
           customClass: { popup: "rounded-3xl" },
         });
       } catch (err: any) {
-        Swal.fire("ข้อผิดพลาด", "ไม่สามารถส่งรีวิวได้ในขณะนี้", "error");
+        Swal.fire(t('booking.submit_error_title'), "ไม่สามารถส่งรีวิวได้ในขณะนี้", "error");
       }
     }
   });

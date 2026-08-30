@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import api, { getCookie } from "@/services/api";
+
+const { t } = useI18n();
 
 interface RoomData {
   id: number;
@@ -318,10 +321,10 @@ const submitBooking = async () => {
     await api.post("/api/bookings", formData);
     
     Swal.fire({
-      title: '<h2 class="text-2xl font-black text-gray-900 mt-2">ส่งคำขอสำเร็จ!</h2>',
-      html: '<p class="text-gray-500 font-medium leading-relaxed">กรุณารอการอนุมัติและสแกน QR Code<br />ในขั้นตอนถัดไป</p>',
+      title: `<h2 class="text-2xl font-black text-gray-900 mt-2">${t('booking.submit_success_title')}</h2>`,
+      html: `<p class="text-gray-500 font-medium leading-relaxed">${t('booking.submit_success_desc')}</p>`,
       icon: "success",
-      confirmButtonText: "ไปยังแดชบอร์ด",
+      confirmButtonText: t('booking.go_to_dashboard'),
       customClass: {
         popup: "rounded-[2rem] p-10 border-t-8 border-green-500",
         confirmButton: "bg-[#ba0b2f] text-white font-bold rounded-xl px-10 py-4 mt-4 cursor-pointer w-full",
@@ -332,7 +335,7 @@ const submitBooking = async () => {
     const errorMsg = err.response?.data?.message || "ไม่สามารถส่งคำขอจองได้ในขณะนี้";
     Swal.fire({
       icon: "error",
-      title: "เกิดข้อผิดพลาด",
+      title: t('booking.submit_error_title'),
       text: errorMsg,
     });
   } finally {

@@ -62,6 +62,7 @@ const setBanner = (index: number) => {
 };
 
 const featuredRooms = ref<RoomItem[]>([]);
+const loadingFeatured = ref(true);
 
 onMounted(async () => {
   // ดึงข้อมูล Banner
@@ -93,6 +94,8 @@ onMounted(async () => {
     }
   } catch (err) {
     console.error("Error fetching featured rooms:", err);
+  } finally {
+    loadingFeatured.value = false;
   }
 });
 
@@ -340,7 +343,31 @@ onUnmounted(() => {
         </router-link>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Loading Skeleton for Featured Rooms -->
+      <div v-if="loadingFeatured" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-for="i in 3" :key="i" class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
+          <div class="h-52 bg-gray-200"></div>
+          <div class="p-6 space-y-3">
+            <div class="h-4 bg-gray-200 rounded-full w-3/4"></div>
+            <div class="h-3 bg-gray-100 rounded-full w-1/2"></div>
+            <div class="h-3 bg-gray-100 rounded-full w-2/3"></div>
+            <div class="flex justify-between items-center pt-2">
+              <div class="h-6 bg-gray-200 rounded-full w-20"></div>
+              <div class="h-8 bg-gray-200 rounded-xl w-28"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Featured Rooms Grid -->
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Empty state -->
+        <div v-if="featuredRooms.length === 0" class="col-span-3 py-16 flex flex-col items-center justify-center text-center">
+          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 text-2xl mb-4">
+            <font-awesome-icon icon="building" />
+          </div>
+          <p class="text-gray-400 font-medium text-sm">{{ $t('room.no_featured_rooms') }}</p>
+        </div>
         <RoomCard v-for="room in featuredRooms" :key="room.id" :room="room" />
       </div>
     </div>

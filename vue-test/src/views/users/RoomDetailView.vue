@@ -33,12 +33,14 @@ const roomId = route.params.id as string;
 
 const room = ref<RoomDetail | null>(null);
 const loading = ref(true);
+const fetchError = ref(false);
 const userRole = ref(localStorage.getItem("userRole") || "external");
 
 const bookedSlots = ref<BookedSlot[]>([]);
 
 const fetchRoomDetail = async () => {
   loading.value = true;
+  fetchError.value = false;
   try {
     const response = await api.get(`/api/rooms/${roomId}`);
     room.value = response.data;
@@ -51,8 +53,9 @@ const fetchRoomDetail = async () => {
       status: b.status === 'pending' ? 'รออนุมัติ' : 'จองแล้ว',
       memoDocumentUrl: b.memo_document_url || undefined
     }));
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error fetching room details:", err);
+    fetchError.value = true;
   } finally {
     loading.value = false;
   }
@@ -117,6 +120,24 @@ const amenities = [
       <div
         class="animate-spin rounded-full h-14 w-14 border-4 border-gray-200 border-t-[#ba0b2f]"
       ></div>
+    </div>
+
+    <!-- Error / Not Found State -->
+    <div
+      v-else-if="fetchError || !room"
+      class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4"
+    >
+      <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-[#ba0b2f] text-4xl mb-6 border border-red-100">
+        <font-awesome-icon icon="exclamation-triangle" />
+      </div>
+      <h2 class="text-2xl font-extrabold text-gray-900 mb-3">{{ $t('room.room_not_found_title') }}</h2>
+      <p class="text-gray-500 font-medium mb-8 max-w-sm">{{ $t('room.room_not_found_desc') }}</p>
+      <button
+        @click="goBack"
+        class="px-6 py-3 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transition-all cursor-pointer"
+      >
+        <font-awesome-icon icon="arrow-left" class="mr-2" />{{ $t('room.back_to_all_rooms') }}
+      </button>
     </div>
 
     <div v-else-if="room" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

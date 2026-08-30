@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import AdminBookings from "./AdminBookings.vue";
 import AdminRooms from "./AdminRooms.vue";
 import AdminActivityLog from "./AdminActivityLog.vue";
 import AdminBanners from "./AdminBanners.vue";
+import AdminUsers from "./AdminUsers.vue";
+import AdminPromoCodes from "./AdminPromoCodes.vue";
+
+const { t } = useI18n();
 
 // ✨ นำเข้า Chart.js
 import { Bar, Doughnut } from "vue-chartjs";
@@ -213,12 +218,12 @@ const confirmLogout = () => {
           🚪
         </div>
       </div>
-      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">ออกจากระบบ?</h3>
-      <p class="text-sm text-gray-500 font-medium px-2">คุณต้องการออกจากระบบการจัดการพื้นที่ใช่หรือไม่?</p>
+      <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">${t('nav.logout_confirm_title')}</h3>
+      <p class="text-sm text-gray-500 font-medium px-2">${t('nav.logout_confirm_text')}</p>
     `,
     showCancelButton: true,
-    confirmButtonText: "ออกจากระบบ",
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t('nav.logout'),
+    cancelButtonText: t('common.cancel'),
     reverseButtons: true,
     buttonsStyling: false,
     customClass: {
@@ -340,18 +345,29 @@ const confirmLogout = () => {
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
-                <font-awesome-icon icon="building" class="w-5" /> ข้อมูลห้องและพื้นที่ (Rooms)
+                <font-awesome-icon icon="building" class="w-5" /> ข้อมูลห้องและพื้นที่
               </button>
               <button
-                @click="activeTab = 'logs'"
+                @click="activeTab = 'users'"
                 :class="
-                  activeTab === 'logs'
+                  activeTab === 'users'
                     ? 'bg-red-50 text-[#ba0b2f]'
                     : 'text-gray-600 hover:bg-gray-50'
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
-                <font-awesome-icon icon="history" class="w-5" /> ประวัติการทำงาน (Logs)
+                <font-awesome-icon icon="users" class="w-5" /> จัดการผู้ใช้
+              </button>
+              <button
+                @click="activeTab = 'promos'"
+                :class="
+                  activeTab === 'promos'
+                    ? 'bg-red-50 text-[#ba0b2f]'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+              >
+                <font-awesome-icon icon="ticket-alt" class="w-5" /> รหัสส่วนลด
               </button>
               <button
                 @click="activeTab = 'banners'"
@@ -362,7 +378,18 @@ const confirmLogout = () => {
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
               >
-                <font-awesome-icon icon="bullhorn" class="w-5" /> การประกาศและโปรโมชั่น
+                <font-awesome-icon icon="bullhorn" class="w-5" /> การประกาศ
+              </button>
+              <button
+                @click="activeTab = 'logs'"
+                :class="
+                  activeTab === 'logs'
+                    ? 'bg-red-50 text-[#ba0b2f]'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+              >
+                <font-awesome-icon icon="history" class="w-5" /> ประวัติการทำงาน
               </button>
 
               <div class="pt-6 mt-6 border-t border-gray-100">
@@ -566,8 +593,10 @@ const confirmLogout = () => {
             :initialBookings="bookings"
           />
           <AdminRooms v-if="activeTab === 'rooms'" />
-          <AdminActivityLog v-if="activeTab === 'logs'" />
+          <AdminUsers v-if="activeTab === 'users'" />
+          <AdminPromoCodes v-if="activeTab === 'promos'" />
           <AdminBanners v-if="activeTab === 'banners'" />
+          <AdminActivityLog v-if="activeTab === 'logs'" />
         </div>
       </div>
     </div>

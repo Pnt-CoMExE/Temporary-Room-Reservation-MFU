@@ -173,6 +173,7 @@ import adminBookingRoutes from "./src/routes/admin/booking.routes";
 import adminRoomRoutes from "./src/routes/admin/room.routes";
 import adminPromoRoutes from "./src/routes/admin/promo.routes";
 import adminLogRoutes from "./src/routes/admin/log.routes";
+import adminUserRoutes from "./src/routes/admin/user.routes";
 
 app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/rooms", roomRoutes);
@@ -198,6 +199,7 @@ app.use("/api/admin/bookings", adminBookingRoutes);
 app.use("/api/admin/rooms", adminRoomRoutes);
 app.use("/api/admin/promocodes", adminPromoRoutes);
 app.use("/api/admin/logs", adminLogRoutes);
+app.use("/api/admin/users", adminUserRoutes);
 
 // ---- Centralized error handler ----
 app.use(errorHandler);
