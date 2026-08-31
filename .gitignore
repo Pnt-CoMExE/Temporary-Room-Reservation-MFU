@@ -4,6 +4,7 @@ node_modules/
 # ─── Build output ─────────────────────────
 dist/
 build/
+coverage/
 
 # ─── Environment files ────────────────────
 .env
@@ -23,14 +24,10 @@ Thumbs.db
 *.log
 npm-debug.log*
 
-# ─── Uploaded files ───────────────────────
+# ─── Uploaded files & Backups ─────────────
 backend/uploads/
-
-# ─── Large binary/document directories ────
-Data Set/
-documents/
-Diagram/
-script presentation/
+backend/backups/
+uploads/
 
 # ─── OS files ─────────────────────────────
 .DS_Store

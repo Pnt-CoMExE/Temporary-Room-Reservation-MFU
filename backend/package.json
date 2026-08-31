@@ -9,7 +9,9 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "start:dev": "tsx server.ts",
-    "seed": "tsx seed-mfu-rooms.ts",
+    "seed": "tsx scripts/seed-rooms.ts",
+    "seed:demo": "tsx scripts/seed-demo.ts",
+    "clear:db": "tsx scripts/clear-db.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

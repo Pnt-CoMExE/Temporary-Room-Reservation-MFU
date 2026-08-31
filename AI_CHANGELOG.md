@@ -107,3 +107,70 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - **`planning.md`**: ปรับปรุงเอกสารแผนงาน 2 เดือน (8 Sprints) ให้เป็น**ภาษาไทย 100%** ทั้งหมดตามคำแนะนำ พร้อมอัปเดตสถานะของ Sprint 1 เป็น **เสร็จสมบูรณ์ (Completed)**
 - **Verification**: `npx vue-tsc --noEmit` ผ่าน 0 errors
 
+## [2026-08-31 — Sprint 2 Completion: Integration Testing & UAT Demo Preparation]
+
+### Backend — Integration Test Suite (New Test Files)
+- **`backend/src/__tests__/integration.test.ts` [NEW]**: ชุดทดสอบ Integration 33 tests ครอบคลุม:
+  - Health Check Flow: ทดสอบ public endpoints 6 routes (rooms, addons, banners, featured-rooms, payment/providers)
+  - Authentication & Authorization: ทดสอบ JWT token validation, 401/403 rejection, admin route protection
+  - Booking Creation: ทดสอบ validation (memoDocument required, userType, timeSlot, bookingDate format, non-PDF rejection)
+  - Admin Booking Management: ทดสอบ GET/PUT admin bookings, export-zip validation
+  - Payment Flow: ทดสอบ PromptPay QR generation, slip upload, payment verify (auth + input validation)
+  - Promo Code Validation, Room Detail, Webhook endpoint
+
+- **`backend/src/__tests__/api-healthcheck.test.ts` [NEW]**: ชุดทดสอบ API Health Check 25 tests:
+  - Route Mounting: ตรวจสอบ public (5), auth (5), admin (6) routes mount ถูกต้อง
+  - Middleware Chain: ตรวจสอบ Helmet security headers, CORS, JSON parsing, Rate Limiter, Static file serving
+  - Error Handler Format: ตรวจสอบ response format `{ message: '...' }` สำหรับ 400/401/403
+
+### Backend — Unified Demo Seed Script
+- **`backend/seed-demo.ts` [NEW]**: สคริปต์ seed ข้อมูล UAT Demo ครบทุกตาราง:
+  - Users (5 คน): Admin, Internal Staff ×2, Student, External — พร้อม avatar และ phone number
+  - Rooms (8 ห้อง): ครอบคลุมทุก 8 ประเภท (Meeting Room, Lecture Hall, Seminar, Auditorium, Lab, Sports, Event Plaza, Building)
+  - Room Pricing: 3-tier (internal/co-organizer/external) คำนวณตาม capacity
+  - Addons (5 รายการ), Promo Codes (3 รหัส), Banners (3 แบนเนอร์)
+  - Sample Bookings (5 รายการ): pending, approved, disapproved, pending_verification
+  - Activity Logs (4 รายการ), Feedbacks (1 รีวิว 5 ดาว)
+  - แสดงสรุปข้อมูลและบัญชี demo login ทุกครั้งที่รัน
+- **`backend/package.json`**: เพิ่ม `"seed:demo": "tsx seed-demo.ts"`
+
+### Documents — UAT Test Scenarios
+- **`documents/UAT_TEST_SCENARIOS.md` [NEW]**: เอกสารสถานการณ์ทดสอบ UAT **65 Test Cases** แบ่ง 4 ส่วน:
+  - ส่วนที่ 1 — ผู้ใช้ทั่วไป: 28 test cases (Authentication, Room Browsing, Booking, Dashboard, Profile)
+  - ส่วนที่ 2 — ผู้ดูแลระบบ: 22 test cases (Dashboard, Booking Management, Rooms, Banners, Promo Codes, Users, Logs)
+  - ส่วนที่ 3 — ระบบภาษา i18n: 7 test cases (TH/EN switching, Modal translation, Dynamic data translation)
+  - ส่วนที่ 4 — Edge Cases: 8 test cases (404, Token expiry, File validation, Responsive, Email)
+
+### Documentation Update
+- **`planning.md`**: อัปเดตสถานะ Sprint 2 เป็น **เสร็จสมบูรณ์ (Completed)**
+
+### Verification
+- Backend TypeScript: **0 errors** (`npx tsc --noEmit`)
+- Frontend TypeScript: **0 errors** (`npx vue-tsc --noEmit`)
+- Unit + Integration Tests: **163/163 Tests ผ่านทั้งหมด** (เพิ่มจาก 105 → 163, +58 tests ใหม่)
+
+## [2026-08-31 — Project Reorganization & Enterprise Structure Standardization]
+
+### Architecture & Folder Reorganization
+- **`frontend/` [RENAMED from `vue-test`]**: เปลี่ยนชื่อโฟลเดอร์ให้เป็นมาตรฐานอุตสาหกรรม พร้อมอัปเดต paths ใน `docker-compose.prod.yml`, `.github/workflows/ci.yml`, และ `frontend/package.json`.
+- **`docs/` [NEW CENTRALIZED DOCS]**: รวบรวมเอกสารทั้งหมดเข้ามาไว้ในโฟลเดอร์เดียวและจัดหมวดหมู่ชัดเจน:
+  - `docs/planning.md`, `docs/requirements.md`, `docs/schema.md`, `docs/features.md`, `docs/payment_gateway.md`, `docs/UAT_TEST_SCENARIOS.md`
+  - `docs/proposals/`: เอกสารข้อเสนอโครงการและแบบประเมิน (`project-proposal.pdf`, `project-with-com.docx`, etc.)
+  - `docs/presentations/`: สคริปต์นำเสนอ (`online-presentation-script.pdf`, `presentation-script.docx`)
+  - `docs/diagrams/`: ER Diagram และ Data Dictionary (`er-diagram.pgerd`, `data-dictionary.xlsx`, `screenshots/`)
+  - `docs/drafts/`: เอกสารร่างประกอบการพัฒนา (`not-finish.docx`, `workbook-draft.xlsx`)
+- **`data/` [RENAMED from `Data Set`]**: เปลี่ยนชื่อโฟลเดอร์ชุดข้อมูลอัตราค่าบริการ (`room-pricing-rates.xlsx`).
+- **`backend/scripts/` [CONSOLIDATED]**: รวมสคริปต์ seed data, clear database, backup, และ k6 load test ไว้ในโฟลเดอร์ scripts พร้อมปรับปรุง import paths และ npm commands (`seed:demo`, `seed`, `clear:db`).
+
+### Code Fixes & Optimization
+- **`BookingView.vue`**: แก้ไขข้อผิดพลาด duplicate import ของ `useI18n` ทำให้ Vite Production Build ผ่านสมบูรณ์ (`npm run build`).
+- **`payment.routes.ts`**: แก้ไข path uploadsDir จาก 3 levels (`../../../uploads`) ให้เป็น 2 levels (`../../uploads`) เพื่อจัดเก็บไฟล์สลิปไว้ใน `backend/uploads/` อย่างถูกต้อง และลบโฟลเดอร์ `uploads/` ซ้ำซ้อนที่ root.
+- **`README.md` [NEW]**: สร้างเอกสาร README หลักของโปรเจกต์อย่างละเอียด พร้อม Tech Stack Badges, โครงสร้างโปรเจกต์, Quickstart, Demo Credentials, และลิงก์เอกสาร.
+- **`.gitignore`**: อัปเดตรายการ ignore ให้ตรงกับโครงสร้างใหม่.
+
+### Verification
+- Backend Unit & Integration Tests: **163/163 passed**
+- Backend TypeScript Check: **0 errors**
+- Frontend TypeScript Check: **0 errors**
+- Frontend Production Build: **Success (0 errors)**
+

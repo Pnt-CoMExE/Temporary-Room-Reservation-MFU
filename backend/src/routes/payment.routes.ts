@@ -10,7 +10,7 @@ import { paymentGateway } from "../services/payment/payment.manager";
 const router = Router();
 
 // Storage setup for payment slips
-const uploadsDir = path.join(__dirname, "..", "..", "..", "uploads");
+const uploadsDir = path.join(__dirname, "..", "..", "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

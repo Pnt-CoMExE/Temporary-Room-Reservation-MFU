@@ -5,7 +5,7 @@ import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import api, { getCookie } from "@/services/api";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 interface RoomData {
   id: number;
@@ -36,10 +36,8 @@ interface AddonItem {
   iconName: string;
 }
 
-import { useI18n } from "vue-i18n";
 import { translateRoomName, translateLocation } from "@/utils/translator";
 
-const { locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const roomId = route.params.id as string;

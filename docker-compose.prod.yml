@@ -76,7 +76,7 @@ services:
   # ==========================================
   frontend:
     build:
-      context: ./vue-test
+      context: ./frontend
       dockerfile: Dockerfile
     container_name: mfu_space_frontend
     restart: always

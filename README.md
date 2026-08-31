@@ -1,0 +1,184 @@
+# ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง (MFU Space Reservation)
+
+[![CI — Typecheck & Build](https://github.com/Pnt-CoMExE/Temporary-Room-Reservation-MFU/actions/workflows/ci.yml/badge.svg)](https://github.com/Pnt-CoMExE/Temporary-Room-Reservation-MFU/actions/workflows/ci.yml)
+[![Node Version](https://img.shields.io/badge/Node.js-22.x-green.svg)](https://nodejs.org/)
+[![Vue 3](https://img.shields.io/badge/Vue.js-3.5-4FC08D?logo=vue.js)](https://vuejs.org/)
+[![Express](https://img.shields.io/badge/Express-5.x-000000?logo=express)](https://expressjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql)](https://www.postgresql.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+
+ระบบบริหารจัดการและขอใช้พื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง พัฒนาขึ้นเพื่ออำนวยความสะดวกแก่นักศึกษา บุคลากรภายใน และบุคคลภายนอก ในการค้นหา ตรวจสอบตารางเวลา ขออนุมัติใช้พื้นที่ และชำระเงิน พร้อมระบบแดชบอร์ดสำหรับผู้ดูแลระบบส่วนจัดการทรัพย์สิน
+
+---
+
+## 📂 โครงสร้างไดเรกทอรี (Project Structure)
+
+```
+MFU-Space-Reservation/
+├── backend/                          # Express.js REST API (TypeScript)
+│   ├── src/
+│   │   ├── middleware/               # Auth, Rate Limiter, Validator, Error Handler
+│   │   ├── routes/                   # Modular API endpoints (User, Room, Booking, Payment, Admin)
+│   │   ├── services/                 # Email, PDF generation, PromptPay, Payment Gateway Adapters
+│   │   ├── types/                    # TypeScript interfaces & types
+│   │   └── __tests__/                # Vitest unit & integration test suites
+│   ├── scripts/                      # DB Migration, Seed scripts, Backup, k6 Load tests
+│   ├── app.ts                        # Express App & Route registration
+│   ├── server.ts                     # HTTP Server entry point
+│   ├── db.ts                         # PostgreSQL Connection Pool
+│   ├── Dockerfile                    # Production Backend Container
+│   └── package.json
+│
+├── frontend/                         # Vue 3 Single Page Application (Vite + TypeScript)
+│   ├── src/
+│   │   ├── assets/                   # Static images & global CSS
+│   │   ├── components/               # Reusable UI components (Navbar, RoomCard, Dialogs)
+│   │   ├── composables/              # Vue Composables (Toast, etc.)
+│   │   ├── i18n/                     # Bilingual dictionary (TH / EN)
+│   │   ├── layouts/                  # UserLayout & AdminLayout
+│   │   ├── router/                   # Vue Router with auth guards & dynamic metadata
+│   │   ├── services/                 # Axios API service & PromptPay generator
+│   │   ├── utils/                    # Universal data translator engine
+│   │   └── views/                    # Pages: users/ (Home, Rooms, Booking, Dashboard) & admin/
+│   ├── public/                       # Favicon & assets
+│   ├── Dockerfile                    # Production Nginx Container
+│   └── package.json
+│
+├── docs/                             # เอกสารข้อกำหนดและการออกแบบระบบ
+│   ├── planning.md                   # แผนงานโครงการ 8 Sprints (Agile UAT-First Strategy)
+│   ├── requirements.md               # ข้อกำหนดระบบและบทบาทผู้ใช้
+│   ├── schema.md                     # Database Schema Design & Indexes
+│   ├── features.md                   # รายการฟีเจอร์และฟังก์ชันการทำงาน
+│   ├── payment_gateway.md            # คู่มือระบบ Modular Payment Gateway
+│   ├── UAT_TEST_SCENARIOS.md         # เอกสารสถานการณ์ทดสอบ UAT 65 Test Cases
+│   ├── proposals/                    # เอกสารข้อเสนอและรายงานโครงการ (.docx / .pdf)
+│   ├── presentations/                # สคริปต์นำเสนอ (.docx / .pdf)
+│   ├── diagrams/                     # ER Diagram & Data Dictionary
+│   └── drafts/                       # เอกสารร่างประกอบการพัฒนา
+│
+├── data/                             # ชุดข้อมูลอ้างอิง
+│   └── room-pricing-rates.xlsx       # ตารางอัตราค่าบริการพื้นที่ มฟล.
+│
+├── .github/workflows/ci.yml          # GitHub Actions CI/CD Pipeline
+├── docker-compose.prod.yml           # Production Multi-container Setup (DB + Redis + Backend + Frontend + Nginx)
+├── .env.production.example           # ตัวอย่าง Environment variables สำหรับ Production
+└── README.md
+```
+
+---
+
+## 🛠️ เทคโนโลยีที่ใช้งาน (Tech Stack)
+
+| ส่วนของระบบ | เทคโนโลยีที่ใช้ |
+|---|---|
+| **Frontend** | Vue 3 (Composition API), Vite, TypeScript, TailwindCSS, FontAwesome, Chart.js, SweetAlert2, Vue-i18n |
+| **Backend** | Node.js, Express 5, TypeScript, PostgreSQL (pg pool), Redis (ioredis), Multer, PDFKit, Archiver |
+| **Authentication** | Google OAuth 2.0 (Passport.js), JWT, HttpOnly Cookies |
+| **Payment Engine** | Modular Gateway (PromptPay EMVCo, Opn/Omise, SCB, KBank, KTB, Mock Sandbox) |
+| **Testing** | Vitest, Supertest, Playwright E2E, k6 Load Testing |
+| **DevOps & Deploy** | Docker, Docker Compose, Nginx (Reverse Proxy & SSL), Let's Encrypt Certbot, GitHub Actions |
+
+---
+
+## 🚀 การติดตั้งและรันระบบ (Quick Start)
+
+### 1. ติดตั้ง Dependencies
+
+```bash
+# ติดตั้ง Backend dependencies
+cd backend
+npm install
+
+# ติดตั้ง Frontend dependencies
+cd ../frontend
+npm install
+```
+
+### 2. ตั้งค่า Environment Variables
+
+สร้างไฟล์ `.env` ในโฟลเดอร์ `backend/`:
+
+```env
+PORT=3000
+JWT_SECRET=your_super_secret_jwt_key
+FRONTEND_URL=http://localhost:5173
+
+# Database (PostgreSQL)
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=room_booking_db
+DB_USER=postgres
+DB_PASSWORD=your_password
+
+# Google OAuth 2.0
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+```
+
+### 3. นำเข้าข้อมูลเริ่มต้น (Seed Database)
+
+```bash
+cd backend
+
+# นำเข้าข้อมูลตัวอย่างครบวงจรสำหรับทดสอบ UAT (8 ห้อง, 5 ผู้ใช้, 5 การจอง, 3 รหัสส่วนลด)
+npm run seed:demo
+```
+
+### 4. รันระบบสำหรับ Development
+
+```bash
+# รัน Backend (Terminal 1)
+cd backend
+npm run dev
+
+# รัน Frontend (Terminal 2)
+cd frontend
+npm run dev
+```
+
+- **Frontend:** [http://localhost:5173](http://localhost:5173)
+- **Backend API:** [http://localhost:3000/api](http://localhost:3000/api)
+
+---
+
+## 🧪 การทดสอบ (Testing)
+
+```bash
+# รัน Unit & Integration Tests (163/163 passed)
+cd backend
+npm test
+
+# ตรวจสอบ TypeScript ทั้งระบบ
+cd backend && npm run typecheck
+cd ../frontend && npm run typecheck
+
+# ทดสอบ Production Build
+cd frontend && npm run build
+```
+
+---
+
+## 🔑 บัญชีและรหัสส่วนลดสำหรับทดสอบ (Demo Credentials)
+
+| บทบาท | อีเมล | สิทธิ์ในระบบ |
+|---|---|---|
+| **ผู้ดูแลระบบ (Admin)** | `admin.demo@lamduan.mfu.ac.th` | เข้าถึง Admin Dashboard & จัดการคำขอ |
+| **บุคลากรภายใน (Staff)** | `wichai.staff@mfu.ac.th` | จองพื้นที่ในอัตราบุคลากรภายใน |
+| **นักศึกษา (Student)** | `piya.student@lamduan.mfu.ac.th` | จองพื้นที่ในอัตรานักศึกษา |
+| **บุคคลภายนอก (External)** | `john.external@company.com` | จองพื้นที่ในอัตราบุคคลภายนอก |
+
+**รหัสโปรโมชั่นทดสอบ:**
+- `MFUWELCOME` — ส่วนลด 100 บาท (ใช้ได้ 200 ครั้ง)
+- `PROMO2026` — ส่วนลด 200 บาท (ใช้ได้ 100 ครั้ง)
+- `STUDENT10` — ส่วนลด 50 บาท (ใช้ได้ 500 ครั้ง)
+
+---
+
+## 📚 เอกสารประกอบ (Documentation)
+
+- [แผนการดำเนินงาน 8 Sprints (planning.md)](docs/planning.md)
+- [ข้อกำหนดระบบ (requirements.md)](docs/requirements.md)
+- [โครงสร้างฐานข้อมูล (schema.md)](docs/schema.md)
+- [สถาปัตยกรรม Payment Gateway (payment_gateway.md)](docs/payment_gateway.md)
+- [สถานการณ์ทดสอบ UAT 65 Test Cases (UAT_TEST_SCENARIOS.md)](docs/UAT_TEST_SCENARIOS.md)

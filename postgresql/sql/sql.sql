@@ -1,2 +1,0 @@
-
-TRUNCATE rooms, room_pricing RESTART IDENTITY CASCADE;

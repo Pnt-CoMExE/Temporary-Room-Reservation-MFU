@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 dotenv.config();
-import { query } from "./db";
+import { query } from "../db";
 
 async function seedDatabase() {
   console.log("🌱 Starting MFU Space Management Database Seeder...");
