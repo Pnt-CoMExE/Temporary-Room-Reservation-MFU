@@ -283,6 +283,7 @@ router.post(
 
 import { generateBookingPDFReceipt } from "../services/pdf.service";
 import { sendPaymentApprovedWithPermitEmail } from "../services/email.service";
+import { adminNameFromReq, logAdminAction } from "../services/auditLog.service";
 
 /**
  * POST /api/payment/verify
@@ -349,6 +350,12 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
         console.error("[payment/verify] PDF generation/email error:", pdfErr);
       }
     }
+
+    await logAdminAction(
+      adminNameFromReq(req),
+      isVerified ? "ยืนยันการชำระเงิน" : "ปฏิเสธการชำระเงิน",
+      `Booking #${bookingId} (${booking.booking_no})${remark ? ` | ${remark}` : ""}`
+    );
 
     res.json({
       message: isVerified ? "ยืนยันการชำระเงินเรียบร้อยแล้ว และส่งเอกสารใบอนุญาตเข้าอีเมลผู้ใช้แล้ว" : "ปฏิเสธการชำระเงินเรียบร้อยแล้ว",

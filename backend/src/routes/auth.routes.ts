@@ -1,11 +1,12 @@
 import { Router, Response } from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
+import { env } from "../config/env";
 
 const router = Router();
 
-const JWT_SECRET = process.env.JWT_SECRET || "my_super_secret_key";
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const JWT_SECRET = env.jwtSecret;
+const FRONTEND_URL = env.frontendUrl;
 
 // Google OAuth login
 router.get(
@@ -32,6 +33,8 @@ router.get(
 
     res.cookie("mfu_token", token, {
       maxAge: 8 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: env.isProduction,
       sameSite: "lax",
       path: "/",
     });

@@ -1,3 +1,5 @@
+import { env } from "../config/env";
+
 export interface EmailAttachment {
   filename: string;
   content: Buffer;
@@ -13,15 +15,38 @@ export interface EmailOptions {
 
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
   try {
-    // Console audit log for development/testing environment
-    console.log(`[EMAIL SERVICE] Sending email to: ${options.to}`);
+    if (env.smtpEnabled()) {
+      const nodemailer = await import("nodemailer");
+      const transporter = nodemailer.createTransport({
+        host: env.smtp.host,
+        port: env.smtp.port,
+        secure: env.smtp.port === 465,
+        auth: {
+          user: env.smtp.user,
+          pass: env.smtp.pass,
+        },
+      });
+
+      await transporter.sendMail({
+        from: env.smtp.from,
+        to: options.to,
+        subject: options.subject,
+        html: options.html,
+        attachments: options.attachments?.map((a) => ({
+          filename: a.filename,
+          content: a.content,
+          contentType: a.contentType,
+        })),
+      });
+      return true;
+    }
+
+    console.log(`[EMAIL SERVICE] (console mode) To: ${options.to}`);
     console.log(`[EMAIL SERVICE] Subject: ${options.subject}`);
     console.log(`[EMAIL SERVICE] Content: ${options.html.substring(0, 100)}...`);
-    if (options.attachments && options.attachments.length > 0) {
+    if (options.attachments?.length) {
       console.log(
-        `[EMAIL SERVICE] Attachments (${options.attachments.length}): ${options.attachments
-          .map((a) => a.filename)
-          .join(", ")}`
+        `[EMAIL SERVICE] Attachments: ${options.attachments.map((a) => a.filename).join(", ")}`
       );
     }
     return true;

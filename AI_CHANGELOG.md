@@ -199,3 +199,35 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 ### Verification
 - Backend Unit & Integration Tests: **169/169 passed** (เพิ่มจาก 163 → 169, +6 tests ใหม่)
 
+## [2026-09-01 — Sprints 5–8: Security, E2E, CI/CD & Deploy Readiness]
+
+### Sprint 5 — Security Hardening
+- **`backend/src/config/env.ts` [NEW]**: รวม env config, บังคับ JWT_SECRET ใน production, SMTP settings
+- **`backend/src/services/auditLog.service.ts` [NEW]**: Server-side admin audit logging
+- **`app.ts`**, **`auth.routes.ts`**: Secure session/cookies (`httpOnly`, `secure`, `saveUninitialized: false`)
+- **`booking.routes.ts`**: `pg_advisory_xact_lock` + `FOR UPDATE` ป้องกัน double-booking
+- **`email.service.ts`**: SMTP via nodemailer (fallback console เมื่อไม่มี credentials)
+- **`frontend/src/router/index.ts`**: Admin route guard (`requiresAdmin`)
+- **`docs/SECURITY_CHECKLIST.md` [NEW]**
+
+### Sprint 6 — E2E & Load Testing
+- **`frontend/e2e/booking-flow.spec.ts`**: ขยายเป็น 5 tests (public, auth, admin guard)
+- **`frontend/e2e/fixtures/auth.ts` [NEW]**
+- **`backend/scripts/k6-load-test.js`**: browse 300 VUs + concurrent booking scenario
+
+### Sprint 7 — CI/CD & CITS Docs
+- **`.github/workflows/ci.yml`**: Docker build job
+- **`docker-compose.prod.yml`**: env vars ครบ (OAuth, Payment, SMTP, DEV_ADMIN_EMAILS)
+- **`docs/CITS_RUNBOOK.md`**, **`docs/BACKUP_RESTORE.md` [NEW]**
+- **`backend/scripts/pre-deploy-check.js` [NEW]**
+
+### Sprint 8 — Deploy Readiness
+- **`backend/scripts/seed-production.ts` [NEW]**: `npm run seed:production`
+- **`docs/GO_LIVE_CHECKLIST.md` [NEW]**
+- **UAT docs**: `UAT_ROUND1_RESULTS.md`, `UAT_BUG_REPORT_TEMPLATE.md`, `UAT_SIGNOFF.md`
+- **`docs/planning.md`**: อัปเดตสถานะ Sprint 3–8
+
+### Verification
+- Backend Tests: **170/170 passed**
+- TypeScript: **0 errors** (backend + frontend)
+

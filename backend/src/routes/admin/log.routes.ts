@@ -17,8 +17,8 @@ router.get("/", verifyToken, verifyAdmin, async (_req: any, res: Response) => {
   }
 });
 
-// POST /api/admin/logs — create an activity log
-router.post("/", verifyToken, async (req: any, res: Response) => {
+// POST /api/admin/logs — create an activity log (admin only; prefer server-side auditLog.service)
+router.post("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
   const { adminName, action, details } = req.body;
   try {
     const result = await query(

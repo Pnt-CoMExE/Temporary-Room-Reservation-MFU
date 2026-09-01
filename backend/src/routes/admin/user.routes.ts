@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import { query } from "../../../db";
 import { verifyToken, verifyAdmin } from "../../middleware/auth";
+import { adminNameFromReq, logAdminAction } from "../../services/auditLog.service";
 
 const router = Router();
 
@@ -46,6 +47,11 @@ router.put("/:id/role", verifyToken, verifyAdmin, async (req: any, res: Response
   }
   try {
     await query("UPDATE users SET user_type = $1 WHERE id = $2", [userType, id]);
+    await logAdminAction(
+      adminNameFromReq(req),
+      `เปลี่ยน Role ผู้ใช้ #${id}`,
+      `Role ใหม่: ${userType}`
+    );
     res.json({ message: "อัปเดต Role สำเร็จ" });
   } catch (err) {
     console.error("[admin/users] Error updating role:", err);

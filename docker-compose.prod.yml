@@ -65,7 +65,18 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:-mfu_space_jwt_secret_key_production_2026}
       SESSION_SECRET: ${SESSION_SECRET:-mfu_space_session_secret_production_2026}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:-http://localhost/api/auth/google/callback}
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-mock_sandbox}
       PROMPTPAY_ID: ${PROMPTPAY_ID:-0575532000100}
+      DEV_ADMIN_EMAILS: ${DEV_ADMIN_EMAILS:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      EMAIL_FROM: ${EMAIL_FROM:-no-reply@mfu.ac.th}
     volumes:
       - backend_uploads:/app/uploads
     networks:

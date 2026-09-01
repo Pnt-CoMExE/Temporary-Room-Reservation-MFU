@@ -70,6 +70,12 @@ router.post(
     try {
       await client.query("BEGIN");
 
+      const dateKey = Math.floor(new Date(bookingDate).getTime() / 86400000);
+      await client.query("SELECT pg_advisory_xact_lock($1::bigint, $2::integer)", [
+        Number(roomId),
+        dateKey,
+      ]);
+
       let conflictCondition = "";
       if (timeSlot === "full") {
         conflictCondition = "AND time_slot IN ('full', 'half_morning', 'half_afternoon')";
@@ -84,6 +90,7 @@ router.post(
          WHERE room_id = $1 AND booking_date = $2
            AND status NOT IN ('disapproved', 'ยกเลิกแล้ว')
            ${conflictCondition}
+         FOR UPDATE
          LIMIT 1`,
         [roomId, bookingDate]
       );

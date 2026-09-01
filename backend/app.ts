@@ -15,12 +15,12 @@ import { getRevenueByMonth } from "./src/services/revenue.service";
 import { JwtPayload } from "./src/types";
 import { generalLimiter, authLimiter, bookingLimiter } from "./src/middleware/rateLimiter";
 import { resolveUserType } from "./src/utils/resolveUserType";
+import { env } from "./src/config/env";
 
 // ---- Environment ----
 dotenv.config();
 
-const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
-const JWT_SECRET = process.env.JWT_SECRET || "my_super_secret_key";
+const FRONTEND_URL = env.frontendUrl;
 
 // ---- Express app ----
 const app = express();
@@ -29,7 +29,7 @@ const app = express();
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: env.frontendOrigins.length === 1 ? env.frontendOrigins[0] : env.frontendOrigins,
     credentials: true,
   })
 );
@@ -41,9 +41,15 @@ app.use("/api", generalLimiter);
 // ---- Session + Passport ----
 app.use(
   session({
-    secret: JWT_SECRET,
+    secret: env.sessionSecret,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: env.isProduction,
+      sameSite: "lax",
+      maxAge: 8 * 60 * 60 * 1000,
+    },
   })
 );
 app.use(passport.initialize());

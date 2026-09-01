@@ -6,6 +6,7 @@ import { ZipArchive } from "archiver";
 import { query, pool } from "../../../db";
 import { verifyToken, verifyAdmin } from "../../middleware/auth";
 import { sendBookingStatusEmail } from "../../services/email.service";
+import { adminNameFromReq, logAdminAction } from "../../services/auditLog.service";
 
 const router = Router();
 
@@ -92,6 +93,12 @@ router.put(
           console.error("[admin/bookings] Email status notification error:", e);
         }
       })();
+
+      await logAdminAction(
+        adminNameFromReq(req),
+        `อัปเดตสถานะการจอง #${id}`,
+        `สถานะ: ${status}${remarks ? ` | หมายเหตุ: ${remarks}` : ""}`
+      );
 
       res.json({ message: "อัปเดตสถานะการจองสำเร็จ", documentUrl });
     } catch (err) {

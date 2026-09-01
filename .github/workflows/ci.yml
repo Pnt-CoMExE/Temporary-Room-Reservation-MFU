@@ -97,3 +97,17 @@ jobs:
           name: frontend-dist
           path: ./frontend/dist
           if-no-files-found: error
+
+  # ─── Docker: Build images (Sprint 7) ─────────────────
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -t mfu-space-backend:${{ github.sha }} ./backend
+
+      - name: Build frontend image
+        run: docker build -t mfu-space-frontend:${{ github.sha }} ./frontend

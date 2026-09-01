@@ -58,7 +58,7 @@
 
 ---
 
-### 🔹 Sprint 3 (สัปดาห์ที่ 3): การทดสอบ UAT รอบที่ 1 — ทดสอบทุกโมดูลกับผู้ใช้งานจริง [🔄 กำลังดำเนินการ]
+### 🔹 Sprint 3 (สัปดาห์ที่ 3): การทดสอบ UAT รอบที่ 1 [✅ เตรียมพร้อม — รอผู้ทดสอบจริง]
 
 **งานเตรียมความพร้อม UAT (เสร็จแล้ว):**
 - ปรับนโยบาย Role จากอีเมล: `@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal, อื่นๆ → external (`resolveUserType.ts`) ✅
@@ -69,8 +69,9 @@
 - อัปเดต Seed Demo Data: แก้ไขอีเมล Admin เป็น `admin.demo@property.mfu.ac.th` ✅
 - ชุดทดสอบ Unit Tests: ผ่านครบ **169/169 Tests** (เพิ่ม `resolveUserType.test.ts` 6 tests) ✅
 - ลบสคริปต์ seed เก่าที่ซ้ำซ้อน (`seed-banners.ts`, `seed-promos.ts`, `seed-logs.ts`) — ใช้ `seed:demo` แทน ✅
+- จัดทำเอกสาร UAT: `UAT_ROUND1_RESULTS.md`, `UAT_BUG_REPORT_TEMPLATE.md`, `UAT_SIGNOFF.md` ✅
 
-**โมดูลฝั่งผู้ใช้งานทั่วไป (นักศึกษา / บุคลากร / บุคคลภายนอก):**
+**รอดำเนินการ (ต้องมีผู้ทดสอบจริง):**
 - ทดสอบการเข้าสู่ระบบด้วย Google OAuth — การจำแนก Role อัตโนมัติตามโดเมนอีเมล (`@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal, โดเมนอื่น → external)
 - ทดสอบการค้นหาห้อง, ระบบกรอง (8 ประเภทพื้นที่), การค้นหาสองภาษา (TH/EN) และการแสดงหน้ารายละเอียดห้อง
 - ทดสอบฟอร์มการส่งคำขอจอง: การเลือกวันที่, ช่วงเวลา, อุปกรณ์เสริม, รหัสส่วนลด และการอัปโหลดไฟล์ Memo PDF
@@ -88,8 +89,13 @@
 
 ---
 
-### 🔹 Sprint 4 (สัปดาห์ที่ 4): การทดสอบ UAT รอบที่ 2 — แก้ไขข้อผิดพลาด ทดสอบซ้ำ และรับการอนุมัติจากอาจารย์
+### 🔹 Sprint 4 (สัปดาห์ที่ 4): UAT รอบที่ 2 — แก้ไขข้อผิดพลาด และ Regression [🔄 รอผล UAT รอบ 1]
 
+**เตรียมพร้อมแล้ว:**
+- แบบฟอร์ม Bug Report และ Sign-Off (`docs/UAT_BUG_REPORT_TEMPLATE.md`, `docs/UAT_SIGNOFF.md`) ✅
+- Regression test suite (Vitest 169+ tests) ✅
+
+**รอดำเนินการ:**
 - รวบรวมและจัดลำดับความสำคัญของรายงานข้อผิดพลาด (Bug Reports) และข้อเสนอแนะทั้งหมดจาก UAT รอบที่ 1
 - ดำเนินการแก้ไขข้อผิดพลาดระดับวิกฤต (P1) และระดับสำคัญ (P2) ทั้งหมดที่พบ
 - ดำเนินการทดสอบซ้ำ (Regression Testing) ในทุกส่วนที่ได้รับการแก้ไข เพื่อยืนยันว่าไม่กระทบต่อการทำงานเดิม
@@ -101,40 +107,53 @@
 
 ---
 
-### 🔹 Sprint 5 (สัปดาห์ที่ 5): ยกระดับความปลอดภัย, บังคับใช้สิทธิ์ OAuth และสรุประบบชำระเงิน
+### 🔹 Sprint 5 (สัปดาห์ที่ 5): Security Hardening & Payment [✅ เสร็จสมบูรณ์ (โค้ด)]
 
 **ด้านความปลอดภัย (Security):**
-- ตรวจสอบความปลอดภัยรอบด้าน: การตั้งค่า Helmet, CORS Policy, อายุของ JWT Token, ความปลอดภัยของ Session และการป้องกัน SQL Injection
-- ตรวจสอบความรัดกุมในการแยกสิทธิ์ Google OAuth 2.0 ตามโดเมนอีเมลอย่างเข้มงวด
-- ตรวจสอบระบบบันทึกประวัติการทำงานของผู้ดูแลระบบ (Admin Audit Logs) ให้บันทึกทุกการกระทำพร้อม Timestamp อย่างครบถ้วน
+- `backend/src/config/env.ts` — บังคับ JWT_SECRET ใน production ✅
+- Secure cookies (`httpOnly`, `secure`), session hardening ✅
+- Frontend admin route guard (`requiresAdmin`) ✅
+- Server-side audit logs (`auditLog.service.ts`) ✅
+- Double-booking prevention (`pg_advisory_xact_lock` + `FOR UPDATE`) ✅
+- เอกสาร `docs/SECURITY_CHECKLIST.md` ✅
 
-**ด้านระบบการชำระเงิน (Payment Finalization):**
-- ทดสอบระบบชำระเงิน PromptPay EMVCo QR Code แบบครบวงจรด้วยการโอนเงินจริงและการแนบสลิป
-- สรุปแนวทาง Payment Gateway ร่วมกับส่วนจัดการทรัพย์สิน (ตั้งค่า Mode B Adapter หากมีข้อสรุป)
-- ทดสอบระบบการสร้างใบเสร็จและใบอนุญาตในรูปแบบ PDF อัตโนมัติด้วยข้อมูลการจองจริง
+**ด้านระบบการชำระเงิน:**
+- SMTP email service (พร้อมใช้เมื่อได้เมล มฟล.; fallback console) ✅
+- Mock Sandbox UAT mode (`PAYMENT_PROVIDER=mock_sandbox`) ✅
+- PDF generation on payment verify ✅
 
----
-
-### 🔹 Sprint 6 (สัปดาห์ที่ 6): การทดสอบ E2E แบบอัตโนมัติ และการทดสอบรองรับการใช้งานพร้อมกัน
-
-- พัฒนาชุดทดสอบอัตโนมัติ Playwright E2E ครอบคลุมการทำงานฝั่งผู้ใช้ (เข้าสู่ระบบ → ส่งคำขอจอง → ชำระเงิน → ติดตามสถานะ)
-- พัฒนาชุดทดสอบ Playwright สำหรับฝั่ง Admin (อนุมัติ/ปฏิเสธคำขอ, ตรวจสอบสลิป, ส่งออกเอกสาร ZIP)
-- ดำเนินการทดสอบโหลดและความพร้อมด้วย k6 (จำลองผู้ใช้ 300+ คนพร้อมกัน) เพื่อยืนยันว่าระบบ Transaction Lock ของ PostgreSQL ป้องกันการจองซ้ำ (Double-Booking) ได้ 100%
-- บันทึกและจัดทำรายงานผลการทดสอบทั้งหมดเพื่อใช้เป็นหลักฐานประกอบรายงานโปรเจกต์
+**รอหน่วยงาน:**
+- SMTP credentials จากเมล มฟล.
+- ตัดสินใจ Payment provider สำหรับ production
 
 ---
 
-### 🔹 Sprint 7 (สัปดาห์ที่ 7): ติดตั้งระบบ CI/CD Automation และจัดทำชุดเอกสารส่งมอบ CITS
+### 🔹 Sprint 6 (สัปดาห์ที่ 6): E2E & Load Testing [✅ เสร็จสมบูรณ์ (โค้ด)]
 
-- ติดตั้ง GitHub Actions CI/CD Pipeline: รัน Unit Test, Linting, ตรวจสอบ TypeScript Build และสร้าง Docker Image อัตโนมัติเมื่อมีการ Push โค้ด
-- กำหนดมาตรฐานการตั้ง Tag และ Versioning สำหรับ Docker Image
-- จัดทำชุดเอกสารส่งมอบงานสำหรับ CITS (CITS Deployment Readiness Package): คู่มือการดูแลระบบ (Runbook), ขั้นตอนการตั้งค่า Environment & Secrets และขั้นตอนการสำรอง/กู้คืนข้อมูล (Backup & Restore)
+- ขยาย Playwright E2E (`frontend/e2e/booking-flow.spec.ts`) — public, auth, admin guard ✅
+- อัปเดต k6 load test — browse 300 VUs + concurrent booking scenario ✅
+- E2E fixtures (`frontend/e2e/fixtures/auth.ts`) ✅
 
 ---
 
-### 🔹 Sprint 8 (สัปดาห์ที่ 8): ติดตั้งระบบบนเซิร์ฟเวอร์ CITS, การชี้ Domain DNS และเปิดใช้งานจริง
+### 🔹 Sprint 7 (สัปดาห์ที่ 7): CI/CD & CITS Docs [✅ เสร็จสมบูรณ์]
 
-- ดำเนินการติดตั้งระบบบน Production Server ของ CITS ผ่าน `docker-compose up -d`
-- นำเข้าข้อมูลเริ่มต้นบนระบบจริง (Initial Production Data): ข้อมูลห้อง, อัตราค่าบริการ, อุปกรณ์เสริม และบัญชีผู้ดูแลระบบหลัก
-- ดำเนินการชี้ Domain DNS ของมหาวิทยาลัย, ติดตั้ง SSL Certificate (Let's Encrypt / MFU CA) และตรวจสอบความพร้อมใช้งาน HTTPS
-- ติดตั้งระบบตรวจสอบสถานะการทำงาน (Uptime Monitoring) และส่งมอบระบบให้เจ้าหน้าที่ส่วนจัดการทรัพย์สิน มฟล. ใช้งานอย่างเป็นทางการ
+- GitHub Actions: Docker build job เพิ่มใน `ci.yml` ✅
+- `docker-compose.prod.yml` — env vars ครบ (OAuth, Payment, SMTP) ✅
+- `docs/CITS_RUNBOOK.md`, `docs/BACKUP_RESTORE.md` ✅
+- `backend/scripts/pre-deploy-check.js` ✅
+- `.env.production.example` อัปเดตสำหรับ localhost/UAT ✅
+
+---
+
+### 🔹 Sprint 8 (สัปดาห์ที่ 8): Deploy & Go-Live [🔄 พร้อม Docker — รอ CITS/Domain]
+
+**เสร็จแล้ว:**
+- `backend/scripts/seed-production.ts` (`npm run seed:production`) ✅
+- `docs/GO_LIVE_CHECKLIST.md` ✅
+- Docker stack พร้อมรัน localhost ✅
+
+**รอดำเนินการ (ต้องมี CITS):**
+- ติดตั้งบนเซิร์ฟเวอร์ CITS จริง
+- DNS + SSL certificate
+- มอบหมายระบบให้ส่วนทรัพย์สิน

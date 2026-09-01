@@ -140,7 +140,7 @@ npm run dev
 ## 🧪 การทดสอบ (Testing)
 
 ```bash
-# รัน Unit & Integration Tests (169/169 passed)
+# รัน Unit & Integration Tests (170/170 passed)
 cd backend
 npm test
 
@@ -184,3 +184,6 @@ cd frontend && npm run build
 - [โครงสร้างฐานข้อมูล (schema.md)](docs/schema.md)
 - [สถาปัตยกรรม Payment Gateway (payment_gateway.md)](docs/payment_gateway.md)
 - [สถานการณ์ทดสอบ UAT 65 Test Cases (UAT_TEST_SCENARIOS.md)](docs/UAT_TEST_SCENARIOS.md)
+- [CITS Runbook & Docker Deploy (CITS_RUNBOOK.md)](docs/CITS_RUNBOOK.md)
+- [Go-Live Checklist (GO_LIVE_CHECKLIST.md)](docs/GO_LIVE_CHECKLIST.md)
+- [Security Checklist (SECURITY_CHECKLIST.md)](docs/SECURITY_CHECKLIST.md)

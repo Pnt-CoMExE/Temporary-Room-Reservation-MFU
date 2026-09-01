@@ -76,7 +76,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: "/admin",
     component: () => import("@/layouts/AdminLayout.vue"),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, requiresAdmin: true },
     children: [
       {
         path: "dashboard",
@@ -121,19 +121,26 @@ router.beforeEach((to, _from) => {
   const authRequired = !publicPages.includes(to.path) && !isNotFound;
 
   if (authRequired && !isLoggedIn) {
-    // ถ้าหน้าที่กำลังจะไป "ต้อง Login" แต่ "ยังไม่ได้ Login" -> เด้งไปหน้า Login
     return "/";
-  } else if (to.path === "/" && isLoggedIn) {
+  }
+
+  if (to.matched.some((record) => record.meta.requiresAdmin)) {
+    const role = localStorage.getItem("userRole");
+    if (role !== "admin") {
+      return "/home";
+    }
+  }
+
+  if (to.path === "/" && isLoggedIn) {
     // ถ้า "Login แล้ว" แต่ดันจะกดเข้าหน้า Login อีก -> เด้งไปหน้าที่เหมาะสม
     const role = localStorage.getItem("userRole");
     if (role === "admin") {
       return "/admin/dashboard";
-    } else {
-      return "/home";
     }
-  } else {
-    return true;
+    return "/home";
   }
+
+  return true;
 });
 
 // ─── Dynamic Meta Tags ────────────────────────────────────
