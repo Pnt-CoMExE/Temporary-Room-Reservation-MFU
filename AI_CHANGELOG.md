@@ -237,3 +237,112 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - **`RULES.md` [NEW]**: กฎการทำงานสำหรับ AI Agent (ถามก่อนทำ, implementation plan, อัปเดต .md, coding/git/security/testing/workflow/i18n)
 - **`.cursor/rules/project-rules.mdc` [NEW]**: Cursor rule `alwaysApply: true` ชี้ไป `RULES.md` ให้โหลดอัตโนมัติทุก session
 
+## [2026-09-02 — Excel Room Import & Local Docker]
+
+### Room Import from Excel
+- **`backend/src/services/roomImport.service.ts` [NEW]**: แยก logic parse/import จาก admin route
+- **`backend/scripts/import-rooms-from-excel.ts` [NEW]**: CLI `npm run import:rooms` — อ่าน `data/room-pricing-rates.xlsx`
+- **`backend/src/routes/admin/room.routes.ts`**: refactor ใช้ `roomImport.service`
+
+### Local Docker Testing
+- **`backend/scripts/init-schema.sql` [NEW]**: สร้าง schema อัตโนมัติเมื่อ PostgreSQL container เริ่มครั้งแรก
+- **`frontend/nginx.local.conf` [NEW]**: HTTP-only สำหรับ localhost (ไม่ต้องมี SSL)
+- **`docker-compose.local.yml` [NEW]**: override พอร์ต 8080/5433, ปิด certbot
+
+### Verification
+- `npm run import:rooms` → **96 rooms** imported จาก Excel
+- Backend Tests: **170/170 passed**
+- TypeScript: **0 errors**
+- Docker: รอ Docker Desktop เปิดก่อน (`docker compose ... up --build`)
+
+## [2026-09-02 — Fix blank Docker frontend page]
+
+### Root cause
+- Vite 8 (Rolldown) production build ตัด `removeTrailingSlash` จาก vue-router → JS crash → หน้าขาว
+
+### Fixes
+- **`frontend`**: downgrade `vite@6.3.5`, `vue-router@4.5.1`
+- **`frontend/vite.config.ts`**: ปิด `vueDevTools` ใน production build
+- **`frontend/src/utils/cookies.ts`**: แยก cookie helpers แก้ circular import `api ↔ router`
+- **`frontend/src/services/api.ts`**: lazy import router ใน 401 handler
+
+### Verification
+- Production build + Playwright: หน้า Login แสดงปกติ (`Sign in with Google`)
+- Docker http://localhost:8080: แสดงหน้า Login แล้ว
+
+## [2026-09-02 — Fix Docker login error (HttpOnly cookie)]
+
+### Root cause
+- `mfu_token` เป็น HttpOnly cookie — JS `getCookie()` อ่านไม่ได้ → frontend คิดว่ายังไม่ login
+- OAuth callback ส่ง `userId` ใน query string แต่ frontend ยังพึ่ง cookie เป็นหลัก
+
+### Fixes
+- **`frontend/src/utils/auth.ts` [NEW]**: `getStoredUserId()`, `isLoggedIn()`, `clearAuthSession()` จาก localStorage
+- **`LoginView.vue`**: บันทึก `userId`/`role`/`email` จาก OAuth redirect query params
+- **`router/index.ts`**, **`Navbar.vue`**, **`DashboardView.vue`**, **`Admin*View.vue`**: ใช้ localStorage แทน JWT decode จาก cookie
+- **`api.ts`**: ลบ Bearer interceptor; ใช้ `withCredentials` + `clearAuthSession()` เมื่อ 401
+- **`backend/auth.routes.ts`**: เพิ่ม `userId` ใน redirect URL + `POST /api/auth/logout`
+- **`backend/env.ts`**: `cookieSecure=false` สำหรับ localhost HTTP
+- **`rateLimiter.ts`**: skip OAuth routes จาก general/auth limiter
+- **`DashboardView.vue`**: แก้ `async` callback ใน logout handler (build error)
+
+### Verification
+- Docker rebuild สำเร็จ (`docker compose ... up -d --build`)
+- Frontend build ผ่าน (Vite 6.3.5)
+- รอทดสอบ Google OAuth login บน http://localhost:8080
+
+## [2026-09-02 — Fix booking flow for Docker UAT]
+
+### Root cause
+- `BookingView.vue` ไม่ได้ import `api` → หน้าจอง crash ตอนโหลดข้อมูล/ส่งฟอร์ม
+- `pg_advisory_xact_lock($1::bigint, $2::integer)` ไม่ match function signature ใน PostgreSQL → POST `/api/bookings` 500
+
+### Fixes
+- **`BookingView.vue`**: เพิ่ม `import api from "@/services/api"`
+- **`booking.routes.ts`**: เปลี่ยนเป็น `pg_advisory_xact_lock($1::int, $2::int)`
+- **Seed demo data**: รัน `npm run seed:demo` กับ Docker DB (addons, promo codes, sample bookings)
+
+### Verification
+- Docker frontend + backend rebuild สำเร็จ
+- Backend booking tests ผ่าน
+
+## [2026-09-02 — Fix 429 rate limit on booking UAT]
+
+### Root cause
+- การทดสอบ API ซ้ำๆ ทำให้ Redis rate limit เต็ม (20 req/15 นาที)
+- `/api/bookings` ถูกนับทั้ง `generalLimiter` และ `bookingLimiter`
+
+### Fixes
+- **`rateLimiter.ts`**: `RATE_LIMIT_DISABLED=true` ปิด limiter ใน UAT; ยกเว้น booking route จาก general limiter
+- **`docker-compose.prod.yml`**: ส่ง `COOKIE_SECURE`, `RATE_LIMIT_DISABLED` เข้า container
+- **`.env.production`**: `RATE_LIMIT_DISABLED=true`
+
+## [2026-09-02 — Fix PDF upload on booking form]
+
+### Root cause
+- Axios default header `Content-Type: application/json` ทำให้ FormData ส่งไฟล์ PDF ไม่ถึง multer → 400 "กรุณาแนบหนังสือบันทึกข้อความ"
+
+### Fixes
+- **`api.ts`**: ลบ Content-Type เมื่อ body เป็น FormData (ให้ browser ใส่ multipart boundary)
+- **`BookingView.vue`**: แสดง `err.message` จาก API interceptor ได้ถูกต้อง
+
+### Verification
+- Frontend typecheck + Docker rebuild สำเร็จ
+
+## [2026-09-02 — Fix admin approve booking 500]
+
+### Root cause
+- คอลัมน์ `approval_document_url` ไม่มีใน `bookings` (init-schema + migration ขาด)
+
+### Fixes
+- **`init-schema.sql`**: เพิ่ม `approval_document_url TEXT`
+- **`app.ts`**: migration เพิ่มคอลัมน์เมื่อ startup
+
+## [2026-09-02 — UAT docs + commit readiness]
+
+### Docs
+- **`docs/UAT_DOCKER_CHECKLIST.md` [NEW]**: checklist E2E Docker local + env ที่ต้องตั้ง
+- **`docs/UAT_DOCKER_ROUND_RESULTS.md` [NEW]**: บันทึกผล UAT รอบ Docker (flow 1–8 ผ่าน)
+- **`docs/UAT_TEST_SCENARIOS.md`**: เพิ่มสภาพแวดล้อม Docker, อัปเดต session/logout cases
+- **`README.md`**: ลิงก์เอกสาร UAT Docker
+

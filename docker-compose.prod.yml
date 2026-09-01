@@ -77,6 +77,8 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       EMAIL_FROM: ${EMAIL_FROM:-no-reply@mfu.ac.th}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      RATE_LIMIT_DISABLED: ${RATE_LIMIT_DISABLED:-false}
     volumes:
       - backend_uploads:/app/uploads
     networks:

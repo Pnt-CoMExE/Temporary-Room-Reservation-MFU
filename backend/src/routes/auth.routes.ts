@@ -34,17 +34,28 @@ router.get(
     res.cookie("mfu_token", token, {
       maxAge: 8 * 60 * 60 * 1000,
       httpOnly: true,
-      secure: env.isProduction,
+      secure: env.cookieSecure,
       sameSite: "lax",
       path: "/",
     });
 
     res.redirect(
-      `${FRONTEND_URL}/?loginSuccess=true&role=${user.user_type}&name=${encodeURIComponent(
+      `${FRONTEND_URL}/?loginSuccess=true&userId=${user.id}&role=${user.user_type}&name=${encodeURIComponent(
         user.firstname
       )}&email=${encodeURIComponent(user.email)}`
     );
   }
 );
+
+// POST /api/auth/logout — clear HttpOnly session cookie
+router.post("/logout", (_req, res: Response) => {
+  res.clearCookie("mfu_token", {
+    path: "/",
+    httpOnly: true,
+    secure: env.cookieSecure,
+    sameSite: "lax",
+  });
+  res.json({ message: "ออกจากระบบแล้ว" });
+});
 
 export default router;

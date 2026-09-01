@@ -1,9 +1,9 @@
 # เอกสารสถานการณ์ทดสอบ UAT (User Acceptance Testing)
 # ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง
 
-**เวอร์ชัน:** 1.1  
+**เวอร์ชัน:** 1.2  
 **วันที่จัดทำ:** 2026-08-31  
-**อัปเดตล่าสุด:** 2026-09-01  
+**อัปเดตล่าสุด:** 2026-09-02  
 **จัดทำโดย:** ทีมพัฒนาระบบ  
 **Sprint:** Sprint 3 (สัปดาห์ที่ 3 — การทดสอบ UAT รอบที่ 1)
 
@@ -15,15 +15,33 @@
 
 ## 📌 สภาพแวดล้อมทดสอบ
 
+### โหมด Development (npm run dev)
+
 | รายการ | รายละเอียด |
 |--------|-----------|
 | **Frontend URL** | `http://localhost:5173` |
 | **Backend URL** | `http://localhost:3000` |
-| **Database** | PostgreSQL (room_booking_db) |
+| **Database** | PostgreSQL (local / `backend/.env`) |
+| **Payment Mode** | `PAYMENT_PROVIDER=mock_sandbox` ใน `backend/.env` |
+| **Admin Override** | `DEV_ADMIN_EMAILS=your@gmail.com` ใน `backend/.env` |
+
+### โหมด Docker Local UAT (แนะนำสำหรับ E2E)
+
+| รายการ | รายละเอียด |
+|--------|-----------|
+| **Frontend URL** | `http://localhost:8080` |
+| **Backend URL** | `http://localhost:8080/api` (ผ่าน Nginx) |
+| **Database** | PostgreSQL ใน Docker (host port `5433`) |
+| **Env file** | `.env.production` (ไม่ commit — ดู `.env.production.example`) |
+| **Payment Mode** | `PAYMENT_PROVIDER=mock_sandbox` |
+| **HTTP cookies** | `COOKIE_SECURE=false` |
+| **Rate limit UAT** | `RATE_LIMIT_DISABLED=true` (local เท่านั้น) |
+| **คู่มือเต็ม** | [UAT_DOCKER_CHECKLIST.md](UAT_DOCKER_CHECKLIST.md) |
+
+| รายการ | รายละเอียด |
+|--------|-----------|
 | **Browser** | Google Chrome (เวอร์ชันล่าสุด) |
-| **Demo Data** | `npm run seed:demo` (backend) |
-| **Payment Mode** | `PAYMENT_PROVIDER=mock_sandbox` ใน `backend/.env` (จำลองชำระเงิน UAT) |
-| **Admin Override** | `DEV_ADMIN_EMAILS=your@gmail.com` ใน `backend/.env` (เมื่อไม่มีอีเมล @property.mfu.ac.th) |
+| **Demo Data** | `npm run seed:demo` (backend) + `npm run import:rooms` |
 
 ## 📌 บัญชีผู้ใช้สำหรับทดสอบ
 
@@ -56,7 +74,7 @@
 | U-01 | เข้าสู่ระบบด้วย Google OAuth (@mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = internal, redirect ไปหน้า /home | ⬜ |
 | U-02 | เข้าสู่ระบบด้วย Google OAuth (@property.mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @property.mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = admin, redirect ไปหน้า /admin/dashboard | ⬜ |
 | U-03 | เข้าสู่ระบบด้วย Google OAuth (โดเมนอื่น) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @gmail.com | ✅ เข้าสู่ระบบสำเร็จ, Role = external, redirect ไปหน้า /home | ⬜ |
-| U-04 | ออกจากระบบ | 1. กดเมนู Navbar → 2. กดปุ่ม "ออกจากระบบ" → 3. ยืนยันใน SweetAlert | ✅ Redirect ไปหน้า Login, ลบ token ออก | ⬜ |
+| U-04 | ออกจากระบบ | 1. กดเมนู Navbar → 2. กดปุ่ม "ออกจากระบบ" → 3. ยืนยันใน SweetAlert | ✅ Redirect ไปหน้า Login, ลบ localStorage + cookie ผ่าน `POST /api/auth/logout` | ⬜ |
 | U-05 | เข้าหน้าที่ต้อง login โดยไม่ login | 1. เปิด URL /home โดยตรง (ไม่ได้ login) | ✅ Redirect ไปหน้า Login | ⬜ |
 
 ### 1.2 การค้นหาและเรียกดูห้อง (Room Browsing)
@@ -185,7 +203,7 @@
 | # | Test Case | ขั้นตอนทดสอบ | ผลลัพธ์ที่คาดหวัง | สถานะ |
 |---|-----------|-------------|------------------|-------|
 | E-01 | เปิด URL ที่ไม่มีอยู่ | 1. เปิด /nonexistent-page | ✅ แสดงหน้า 404 Not Found | ⬜ |
-| E-02 | Token หมดอายุ | 1. ลบ cookie mfu_token → 2. รีเฟรชหน้า | ✅ Redirect ไปหน้า Login | ⬜ |
+| E-02 | Session หมดอายุ / ไม่ได้ login | 1. ลบ localStorage `isLoggedIn` หรือรอ token หมดอายุ → 2. เรียก API ที่ต้อง auth | ✅ Redirect ไปหน้า Login (401 handler) | ⬜ |
 | E-03 | Non-admin พยายามเข้า Admin | 1. Login ด้วย internal user → 2. เปิด /admin/dashboard | ✅ ไม่สามารถเข้าถึงได้ / redirect | ⬜ |
 | E-04 | ส่งฟอร์มจองที่ไม่กรอกข้อมูล | 1. เปิดฟอร์มจอง → 2. กดส่งโดยไม่กรอกอะไร | ✅ แสดง validation error ครบทุกช่อง | ⬜ |
 | E-05 | อัปโหลดไฟล์เกิน 10MB | 1. แนบไฟล์ PDF ขนาด 15MB → 2. กดส่ง | ✅ แสดง error ไฟล์ใหญ่เกินไป | ⬜ |
@@ -225,4 +243,5 @@
 - ทดสอบบน Google Chrome เวอร์ชันล่าสุด
 - ทดสอบทั้งโหมด Desktop (1920×1080) และ Mobile (iPhone 13 / Pixel 5)
 - ก่อนเริ่มทดสอบทุกครั้ง ให้รัน `npm run seed:demo` ที่ backend เพื่อ reset ข้อมูลตัวอย่าง
+- สำหรับ Docker UAT ดู [UAT_DOCKER_CHECKLIST.md](UAT_DOCKER_CHECKLIST.md) และผลรอบล่าสุด [UAT_DOCKER_ROUND_RESULTS.md](UAT_DOCKER_ROUND_RESULTS.md)
 - หากพบ Bug ให้บันทึกลงตาราง Bug Report แยกต่างหาก พร้อมแนบ Screenshot

@@ -63,6 +63,7 @@ MFU-Space-Reservation/
 │
 ├── .github/workflows/ci.yml          # GitHub Actions CI/CD Pipeline
 ├── docker-compose.prod.yml           # Production Multi-container Setup (DB + Redis + Backend + Frontend + Nginx)
+├── docker-compose.local.yml          # Override สำหรับทดสอบ localhost (HTTP พอร์ต 8080, init schema)
 ├── .env.production.example           # ตัวอย่าง Environment variables สำหรับ Production
 └── README.md
 ```
@@ -111,14 +112,19 @@ PAYMENT_PROVIDER=mock_sandbox          # จำลองชำระเงิน
 # DEV_ADMIN_EMAILS=your@gmail.com    # ใส่อีเมล Google ของคุณเพื่อทดสอบหน้า Admin
 ```
 
-### 3. นำเข้าข้อมูลเริ่มต้น (Seed Database)
+### 3. นำเข้าข้อมูลเริ่มต้น (Seed / Import)
 
 ```bash
 cd backend
 
-# นำเข้าข้อมูลตัวอย่างครบวงจรสำหรับทดสอบ UAT (8 ห้อง, 5 ผู้ใช้, 5 การจอง, 3 รหัสส่วนลด)
+# นำเข้าห้องจริงจาก Excel ของหน่วยทรัพย์สิน (96 ห้อง จาก data/room-pricing-rates.xlsx)
+npm run import:rooms
+
+# หรือนำเข้าข้อมูลตัวอย่างครบวงจรสำหรับทดสอบ UAT (8 ห้อง, 5 ผู้ใช้, 5 การจอง, 3 รหัสส่วนลด)
 npm run seed:demo
 ```
+
+ไฟล์ Excel อยู่ที่ `data/room-pricing-rates.xlsx` — สามารถระบุ path อื่นได้: `npm run import:rooms -- ../data/custom.xlsx`
 
 ### 4. รันระบบสำหรับ Development
 
@@ -134,6 +140,27 @@ npm run dev
 
 - **Frontend:** [http://localhost:5173](http://localhost:5173)
 - **Backend API:** [http://localhost:3000/api](http://localhost:3000/api)
+
+### 5. ทดสอบด้วย Docker (Local)
+
+```bash
+# คัดลอก env สำหรับ Docker แล้วแก้ GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET
+cp .env.production.example .env.production
+
+# เปิด Docker Desktop ก่อน แล้วรัน stack (HTTP ที่พอร์ต 8080)
+docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file .env.production up -d --build
+
+# นำเข้าห้องจาก Excel เข้า PostgreSQL ใน Docker (พอร์ต 5433)
+cd backend
+$env:DB_HOST="localhost"; $env:DB_PORT="5433"; $env:DB_NAME="mfu_reservation"; $env:DB_USER="mfu_admin"; $env:DB_PASSWORD="mfu_local_docker_2026"; npm run import:rooms
+
+# (ถ้าต้องการ) seed demo users, addons, promo codes
+npm run seed:demo
+```
+
+- **Frontend (Docker):** [http://localhost:8080](http://localhost:8080)
+- **API:** [http://localhost:8080/api/rooms](http://localhost:8080/api/rooms)
+- **UAT Checklist:** [docs/UAT_DOCKER_CHECKLIST.md](docs/UAT_DOCKER_CHECKLIST.md)
 
 ---
 
@@ -184,6 +211,8 @@ cd frontend && npm run build
 - [โครงสร้างฐานข้อมูล (schema.md)](docs/schema.md)
 - [สถาปัตยกรรม Payment Gateway (payment_gateway.md)](docs/payment_gateway.md)
 - [สถานการณ์ทดสอบ UAT 65 Test Cases (UAT_TEST_SCENARIOS.md)](docs/UAT_TEST_SCENARIOS.md)
+- [UAT Docker Checklist — E2E local (UAT_DOCKER_CHECKLIST.md)](docs/UAT_DOCKER_CHECKLIST.md)
+- [ผลทดสอบ UAT Docker รอบล่าสุด (UAT_DOCKER_ROUND_RESULTS.md)](docs/UAT_DOCKER_ROUND_RESULTS.md)
 - [CITS Runbook & Docker Deploy (CITS_RUNBOOK.md)](docs/CITS_RUNBOOK.md)
 - [Go-Live Checklist (GO_LIVE_CHECKLIST.md)](docs/GO_LIVE_CHECKLIST.md)
 - [Security Checklist (SECURITY_CHECKLIST.md)](docs/SECURITY_CHECKLIST.md)

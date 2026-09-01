@@ -35,7 +35,7 @@ ChartJS.register(
   ArcElement,
 );
 
-import api, { getCookie } from "@/services/api";
+import api from "@/services/api";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 
 interface BookingInfo {
@@ -63,13 +63,6 @@ interface PopularRoom {
   usage: number;
   color: string;
 }
-
-// Helper: decode JWT payload
-const getTokenPayload = () => {
-  const token = getCookie("mfu_token");
-  if (!token) return null;
-  try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }
-};
 
 const router = useRouter();
 const activeTab = ref("overview");

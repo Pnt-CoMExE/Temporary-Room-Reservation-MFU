@@ -23,6 +23,13 @@ export const env = {
     .split(",")
     .map((origin) => origin.trim())
     .filter(Boolean),
+  // Secure cookies require HTTPS — disable for local Docker (http://localhost:8080)
+  cookieSecure:
+    process.env.COOKIE_SECURE === "true"
+      ? true
+      : process.env.COOKIE_SECURE === "false"
+        ? false
+        : (process.env.FRONTEND_URL || "http://localhost:5173").startsWith("https://"),
   smtp: {
     host: process.env.SMTP_HOST || "",
     port: Number(process.env.SMTP_PORT || 587),

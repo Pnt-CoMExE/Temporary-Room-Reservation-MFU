@@ -2,7 +2,8 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
-import api, { getCookie } from "@/services/api";
+import api from "@/services/api";
+import { clearAuthSession, getStoredUserEmail } from "@/utils/auth";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 
 interface Notification {
@@ -24,18 +25,14 @@ const profileImage = ref<string | null>(null);
 
 // โหลดรูปโปรไฟล์จาก Google (profile_picture ใน DB)
 const loadProfileImage = async () => {
-  const token = getCookie("mfu_token");
-  if (!token) return;
+  const email = getStoredUserEmail();
+  if (!email) return;
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const email = payload.email;
-    if (email) {
-      const res = await api.get("/api/user/profile", { params: { email } });
-      if (res.data && res.data.profile_picture) {
-        profileImage.value = res.data.profile_picture;
-      }
+    const res = await api.get("/api/user/profile", { params: { email } });
+    if (res.data?.profile_picture) {
+      profileImage.value = res.data.profile_picture;
     }
-  } catch (e) {
+  } catch {
     // Silently fail — fallback icon will be shown
   }
 };
@@ -98,8 +95,14 @@ const confirmLogout = () => {
       cancelButton:
         "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
     },
-  }).then((result) => {
+  }).then(async (result) => {
     if (result.isConfirmed) {
+      try {
+        await api.post("/api/auth/logout");
+      } catch {
+        /* cookie cleared best-effort */
+      }
+      clearAuthSession();
       localStorage.clear();
       router.push("/");
     }

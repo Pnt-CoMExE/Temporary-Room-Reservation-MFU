@@ -1,18 +1,8 @@
 import axios, { type AxiosInstance, type AxiosResponse, type InternalAxiosRequestConfig } from "axios";
-import router from "@/router";
 import type { ApiError } from "@/types";
+import { clearAuthSession } from "@/utils/auth";
 
-// ── Cookie helpers ────────────────────────────────────────
-export const getCookie = (name: string): string | null => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()!.split(";").shift() || null;
-  return null;
-};
-
-export const deleteCookie = (name: string): void => {
-  document.cookie = `${name}=; Max-Age=0; path=/`;
-};
+export { getCookie, deleteCookie } from "@/utils/cookies";
 
 // ── API instance ──────────────────────────────────────────
 const api: AxiosInstance = axios.create({
@@ -27,9 +17,9 @@ const api: AxiosInstance = axios.create({
 // ── Request Interceptor ───────────────────────────────────
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const token = getCookie("mfu_token");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+    // FormData must not use application/json — browser/axios sets multipart boundary
+    if (config.data instanceof FormData) {
+      config.headers.setContentType(false);
     }
     return config;
   },
@@ -53,8 +43,8 @@ api.interceptors.response.use(
 
     // 401 — Token expired
     if (status === 401) {
-      localStorage.clear();
-      deleteCookie("mfu_token");
+      clearAuthSession();
+      const { default: router } = await import("@/router");
       router.push("/");
       const apiError: ApiError = {
         message: data?.message || "กรุณาเข้าสู่ระบบอีกครั้ง",

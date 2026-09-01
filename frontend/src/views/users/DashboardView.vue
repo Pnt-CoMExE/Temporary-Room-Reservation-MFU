@@ -2,7 +2,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
-import api, { deleteCookie } from "@/services/api";
+import api from "@/services/api";
+import { clearAuthSession, getStoredUserId } from "@/utils/auth";
 import QRCode from "qrcode";
 import { generatePromptPayPayload } from "@/services/promptpay";
 
@@ -55,12 +56,8 @@ const loadingBookings = ref(true);
 const activePaymentProvider = ref("promptpay_manual");
 
 const fetchBookings = async () => {
-  const { getCookie } = await import("@/services/api");
-  const token = getCookie("mfu_token");
-  if (!token) return;
-
-  const payload = JSON.parse(atob(token.split(".")[1]));
-  const userId = payload.userId;
+  const userId = getStoredUserId();
+  if (!userId) return;
 
   const bookingsRes = await api.get(`/api/user/bookings/${userId}`);
   myBookings.value = bookingsRes.data.map((b: any) => ({
@@ -314,10 +311,15 @@ const confirmLogout = () => {
       cancelButton:
         "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
-  }).then((result) => {
+  }).then(async (result) => {
     if (result.isConfirmed) {
+      try {
+        await api.post("/api/auth/logout");
+      } catch {
+        /* cookie cleared best-effort */
+      }
+      clearAuthSession();
       localStorage.clear();
-      deleteCookie("mfu_token");
       router.push("/");
     }
   });

@@ -2,7 +2,6 @@
 import { onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
-import { getCookie } from "@/services/api";
 
 const router = useRouter();
 const route = useRoute();
@@ -12,17 +11,15 @@ const toast = useToast();
 // Server ส่ง loginSuccess=true&role=...&name=...&email=... (ไม่มี token ใน URL)
 // Token อยู่ใน cookie "mfu_token" ที่ server set ไว้แล้ว
 onMounted(() => {
-  const { loginSuccess, role, name, email } = route.query as Record<string, string>;
+  const { loginSuccess, userId, role, name, email } = route.query as Record<string, string>;
 
   if (loginSuccess === "true") {
-    // ตรวจสอบว่า cookie ถูก set จริง
-    const token = getCookie("mfu_token");
-    if (!token) {
+    if (!userId || !role || !name || !email) {
       toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่");
       return;
     }
 
-    // บันทึกข้อมูล UI ลง localStorage (ไม่ใช่ token)
+    localStorage.setItem("userId", userId);
     localStorage.setItem("userRole", role);
     localStorage.setItem("userName", decodeURIComponent(name));
     localStorage.setItem("userEmail", decodeURIComponent(email));
@@ -47,7 +44,7 @@ const loginWithGoogle = () => {
     timeout: 2000,
   });
 
-  const apiBaseURL = (import.meta as Record<string, any>).env.VITE_API_URL || "http://localhost:3000";
+  const apiBaseURL = (import.meta as Record<string, any>).env.VITE_API_URL || "";
 
   // ยิงไปที่ Backend เพื่อเริ่ม OAuth flow
   setTimeout(() => {

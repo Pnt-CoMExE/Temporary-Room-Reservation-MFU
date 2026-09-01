@@ -25,6 +25,10 @@ const FRONTEND_URL = env.frontendUrl;
 // ---- Express app ----
 const app = express();
 
+if (env.isProduction) {
+  app.set("trust proxy", 1);
+}
+
 // ---- Security & parsing middleware ----
 app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.use(
@@ -46,7 +50,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: env.isProduction,
+      secure: env.cookieSecure,
       sameSite: "lax",
       maxAge: 8 * 60 * 60 * 1000,
     },
@@ -143,6 +147,12 @@ query(
       WHERE table_name = 'bookings' AND column_name = 'payment_status'
     ) THEN
       ALTER TABLE bookings ADD COLUMN payment_status VARCHAR(50) DEFAULT 'unpaid';
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'bookings' AND column_name = 'approval_document_url'
+    ) THEN
+      ALTER TABLE bookings ADD COLUMN approval_document_url TEXT;
     END IF;
 
     -- Database Performance Indexes

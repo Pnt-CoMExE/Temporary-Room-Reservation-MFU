@@ -14,6 +14,7 @@
     "seed:production": "tsx scripts/seed-production.ts",
     "predeploy:check": "node scripts/pre-deploy-check.js",
     "clear:db": "tsx scripts/clear-db.ts",
+    "import:rooms": "tsx scripts/import-rooms-from-excel.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

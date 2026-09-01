@@ -13,8 +13,8 @@ const IS_TEST = process.env.NODE_ENV === "test" || process.env.VITEST === "true"
 // เพื่อไม่ให้ vitest/jest hang เพราะ open connection
 const redisClient = new Redis(REDIS_URL || "redis://localhost:6379", {
   maxRetriesPerRequest: IS_TEST ? 0 : 3,
-  enableOfflineQueue: false,
-  lazyConnect: true,
+  enableOfflineQueue: !IS_TEST,
+  lazyConnect: IS_TEST || !REDIS_URL,
   retryStrategy(times) {
     if (IS_TEST || times > 3) {
       return null; // หยุด retry ใน test หรือหลัง 3 ครั้ง

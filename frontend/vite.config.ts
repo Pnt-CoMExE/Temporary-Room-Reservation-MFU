@@ -6,19 +6,19 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [
     vue(),
-    vueDevTools(),
+    mode !== 'production' && vueDevTools(),
     tailwindcss(),
-  ],
+  ].filter(Boolean),
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   server: {
-    host: true, // Allow external access via IP or ngrok
+    host: true,
     proxy: {
       '/api': {
         target: 'http://localhost:3000',
@@ -30,4 +30,4 @@ export default defineConfig({
       },
     },
   },
-})
+}))

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch, type PropType } from "vue";
 import Swal from "sweetalert2";
-import api, { getCookie } from "@/services/api";
+import api from "@/services/api";
+import { getStoredUserId } from "@/utils/auth";
 
 interface BookingItem {
   id: string;
@@ -20,15 +21,7 @@ interface BookingItem {
   memoDocumentUrl?: string;
 }
 
-// Helper: decode JWT เพื่อดึง userId ของ admin ที่ login อยู่
-const getAdminId = (): number | null => {
-  const token = getCookie("mfu_token");
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return payload.userId;
-  } catch { return null; }
-};
+const getAdminId = (): number | null => getStoredUserId();
 
 const props = defineProps({
   initialBookings: {

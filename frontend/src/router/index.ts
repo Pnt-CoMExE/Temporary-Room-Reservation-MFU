@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
 import LoginView from "@/views/users/LoginView.vue";
-import { getCookie } from "@/services/api";
+import { isLoggedIn } from "@/utils/auth";
 
 const routes: RouteRecordRaw[] = [
   // 1. หน้า Login (เปิดมาเจอหน้านี้ก่อน)
@@ -113,14 +113,13 @@ const router = createRouter({
 // ระบบป้องกันคนไม่ล็อกอิน
 router.beforeEach((to, _from) => {
   // ✅ เช็คทั้ง localStorage และ cookie
-  const isLoggedIn =
-    localStorage.getItem("isLoggedIn") === "true" && !!getCookie("mfu_token");
+  const loggedIn = isLoggedIn();
 
   const publicPages = ["/"];
   const isNotFound = to.name === "not-found";
   const authRequired = !publicPages.includes(to.path) && !isNotFound;
 
-  if (authRequired && !isLoggedIn) {
+  if (authRequired && !loggedIn) {
     return "/";
   }
 
@@ -131,7 +130,7 @@ router.beforeEach((to, _from) => {
     }
   }
 
-  if (to.path === "/" && isLoggedIn) {
+  if (to.path === "/" && loggedIn) {
     // ถ้า "Login แล้ว" แต่ดันจะกดเข้าหน้า Login อีก -> เด้งไปหน้าที่เหมาะสม
     const role = localStorage.getItem("userRole");
     if (role === "admin") {

@@ -3,7 +3,8 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
-import api, { getCookie } from "@/services/api";
+import api from "@/services/api";
+import { getStoredUserId } from "@/utils/auth";
 
 const { t, locale } = useI18n();
 
@@ -278,14 +279,7 @@ const submitBooking = async () => {
       total_price: a.price * a.quantity
     }));
 
-  const token = getCookie("mfu_token");
-  let userId = null;
-  if (token) {
-    try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      userId = payload.userId || payload.id;
-    } catch(e) {}
-  }
+  const userId = getStoredUserId();
 
   if (!memoFile.value) {
     Swal.fire({
@@ -330,7 +324,8 @@ const submitBooking = async () => {
     }).then(() => router.push("/dashboard"));
   } catch (err: any) {
     console.error("Booking error:", err);
-    const errorMsg = err.response?.data?.message || "ไม่สามารถส่งคำขอจองได้ในขณะนี้";
+    const errorMsg =
+      err?.message || err.response?.data?.message || "ไม่สามารถส่งคำขอจองได้ในขณะนี้";
     Swal.fire({
       icon: "error",
       title: t('booking.submit_error_title'),
