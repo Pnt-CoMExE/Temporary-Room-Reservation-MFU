@@ -231,3 +231,9 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - Backend Tests: **170/170 passed**
 - TypeScript: **0 errors** (backend + frontend)
 
+## [2026-09-01 — Project Rules & Cursor Integration]
+
+### Documentation
+- **`RULES.md` [NEW]**: กฎการทำงานสำหรับ AI Agent (ถามก่อนทำ, implementation plan, อัปเดต .md, coding/git/security/testing/workflow/i18n)
+- **`.cursor/rules/project-rules.mdc` [NEW]**: Cursor rule `alwaysApply: true` ชี้ไป `RULES.md` ให้โหลดอัตโนมัติทุก session
+

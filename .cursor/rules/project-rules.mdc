@@ -1,0 +1,27 @@
+---
+description: MFU Space Reservation — กฎโปรเจกต์หลัก (อ่าน RULES.md ก่อนทุกงาน)
+alwaysApply: true
+---
+
+# Project Rules — MFU Space Reservation
+
+**เอกสารฉบับเต็ม / Full reference:** `RULES.md` (project root) — อ่านและปฏิบัติตามทุกข้อ
+
+## 0. Critical (Must Follow First)
+
+1. **ถามก่อนทำ / Ask first** — เมื่อไม่แน่ใจ, มีหลายทางเลือก, หรือกระทบ security / deploy / architecture
+2. **Implementation Plan ก่อนลงมือ** — เสนอ Goal, Files, Approach, Risks, Verify → **รอ user approve** (ยกเว้นงานเล็กมาก หรือ user บอก "ทำเลย")
+3. **อัปเดต `.md` ทุกครั้ง** — อย่างน้อย `AI_CHANGELOG.md` + `docs/` ที่เกี่ยวข้องหลังจบงาน
+
+## Quick Constraints
+
+- **ห้ามลบ** ไฟล์ใน `docs/` และ `data/`
+- **ห้าม commit** `.env`, secrets, `uploads/` — commit เฉพาะเมื่อ user สั่ง
+- **Backend:** parameterized SQL, `resolveUserType()`, `auditLog.service.ts`, `src/config/env.ts`
+- **Frontend:** i18n TH+EN (`th.ts` + `en.ts`), `translator.ts`, admin `requiresAdmin` guard
+- **Role:** `@property.mfu.ac.th` → admin | `@mfu.ac.th` → internal | อื่นๆ → external | UAT: `DEV_ADMIN_EMAILS`
+- **Payment UAT:** `PAYMENT_PROVIDER=mock_sandbox`
+- **Tests:** `npm test` + `npm run typecheck` หลังแก้โค้ดสำคัญ
+- **Scope:** แก้เฉพาะที่ขอ ไม่ over-engineer
+
+เมื่อสงสัย → อ่าน `RULES.md` อีกครั้ง หรือถาม user
