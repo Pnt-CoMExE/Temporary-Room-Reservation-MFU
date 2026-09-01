@@ -1,8 +1,9 @@
 # เอกสารสถานการณ์ทดสอบ UAT (User Acceptance Testing)
 # ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง
 
-**เวอร์ชัน:** 1.0  
+**เวอร์ชัน:** 1.1  
 **วันที่จัดทำ:** 2026-08-31  
+**อัปเดตล่าสุด:** 2026-09-01  
 **จัดทำโดย:** ทีมพัฒนาระบบ  
 **Sprint:** Sprint 3 (สัปดาห์ที่ 3 — การทดสอบ UAT รอบที่ 1)
 
@@ -21,16 +22,20 @@
 | **Database** | PostgreSQL (room_booking_db) |
 | **Browser** | Google Chrome (เวอร์ชันล่าสุด) |
 | **Demo Data** | `npm run seed:demo` (backend) |
+| **Payment Mode** | `PAYMENT_PROVIDER=mock_sandbox` ใน `backend/.env` (จำลองชำระเงิน UAT) |
+| **Admin Override** | `DEV_ADMIN_EMAILS=your@gmail.com` ใน `backend/.env` (เมื่อไม่มีอีเมล @property.mfu.ac.th) |
 
 ## 📌 บัญชีผู้ใช้สำหรับทดสอบ
 
 | บทบาท | อีเมล | ประเภท |
 |--------|--------|--------|
-| **ผู้ดูแลระบบ (Admin)** | admin.demo@lamduan.mfu.ac.th | admin |
+| **ผู้ดูแลระบบ (Admin)** | admin.demo@property.mfu.ac.th | admin |
 | **บุคลากรภายใน (Staff 1)** | wichai.staff@mfu.ac.th | internal |
 | **บุคลากรภายใน (Staff 2)** | suda.staff@mfu.ac.th | internal |
-| **นักศึกษา** | piya.student@lamduan.mfu.ac.th | internal |
+| **นักศึกษา** | piya.student@lamduan.mfu.ac.th | external |
 | **บุคคลภายนอก** | john.external@company.com | external |
+
+> **หมายเหตุ:** การ Login จริงใช้ Google OAuth ด้วยบัญชีของคุณ ระบบกำหนด Role จากโดเมนอีเมล: `@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal, อื่นๆ → external. หากไม่มีอีเมลหน่วยงาน ให้ตั้ง `DEV_ADMIN_EMAILS` ใน `.env`
 
 ## 📌 รหัสส่วนลดทดสอบ
 
@@ -49,7 +54,7 @@
 | # | Test Case | ขั้นตอนทดสอบ | ผลลัพธ์ที่คาดหวัง | สถานะ |
 |---|-----------|-------------|------------------|-------|
 | U-01 | เข้าสู่ระบบด้วย Google OAuth (@mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = internal, redirect ไปหน้า /home | ⬜ |
-| U-02 | เข้าสู่ระบบด้วย Google OAuth (@lamduan.mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @lamduan.mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = admin, redirect ไปหน้า /admin/dashboard | ⬜ |
+| U-02 | เข้าสู่ระบบด้วย Google OAuth (@property.mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @property.mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = admin, redirect ไปหน้า /admin/dashboard | ⬜ |
 | U-03 | เข้าสู่ระบบด้วย Google OAuth (โดเมนอื่น) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @gmail.com | ✅ เข้าสู่ระบบสำเร็จ, Role = external, redirect ไปหน้า /home | ⬜ |
 | U-04 | ออกจากระบบ | 1. กดเมนู Navbar → 2. กดปุ่ม "ออกจากระบบ" → 3. ยืนยันใน SweetAlert | ✅ Redirect ไปหน้า Login, ลบ token ออก | ⬜ |
 | U-05 | เข้าหน้าที่ต้อง login โดยไม่ login | 1. เปิด URL /home โดยตรง (ไม่ได้ login) | ✅ Redirect ไปหน้า Login | ⬜ |
@@ -85,8 +90,9 @@
 | U-20 | ดูรายการจองของตัวเอง | 1. เข้าหน้า /dashboard → 2. ดูแท็บ "รายการจอง" | ✅ แสดงรายการจองทั้งหมดของตัวเอง พร้อมสถานะ (badge) | ⬜ |
 | U-21 | กรองรายการจองตามสถานะ | 1. เลือก filter สถานะ "รอดำเนินการ" | ✅ แสดงเฉพาะรายการที่มีสถานะ pending | ⬜ |
 | U-22 | ค้นหาตาม booking number | 1. พิมพ์ "BK-DEMO" ในช่องค้นหา | ✅ แสดงรายการที่ booking_no ตรงกัน | ⬜ |
-| U-23 | ดู QR Code PromptPay | 1. คลิก "ชำระเงิน" บนรายการที่ approved | ✅ แสดง Modal QR Code + จำนวนเงิน + คำแนะนำ | ⬜ |
-| U-24 | อัปโหลดสลิปการโอนเงิน | 1. คลิก "อัปโหลดสลิป" → 2. แนบรูปสลิป (.jpg) → 3. กดส่ง | ✅ สถานะเปลี่ยนเป็น "รอตรวจสอบการชำระเงิน" | ⬜ |
+| U-23 | ดู QR Code PromptPay | 1. ตั้ง `PAYMENT_PROVIDER=promptpay_manual` → 2. คลิก "สแกนชำระเงิน" บนรายการที่ approved | ✅ แสดง Modal QR Code + จำนวนเงิน + ช่องอัปโหลดสลิป | ⬜ |
+| U-24 | อัปโหลดสลิปการโอนเงิน | 1. ใน Modal ชำระเงิน → 2. แนบรูปสลิป (.jpg) → 3. กดส่ง | ✅ สถานะเปลี่ยนเป็น "รอตรวจสอบการชำระเงิน" | ⬜ |
+| U-24b | จำลองชำระเงิน (Mock Sandbox UAT) | 1. ตั้ง `PAYMENT_PROVIDER=mock_sandbox` → 2. คลิก "จำลองชำระเงิน (ทดสอบ)" → 3. ยืนยัน | ✅ สถานะเปลี่ยนเป็น pending_verification โดยไม่โอนเงินจริง | ⬜ |
 | U-25 | ยกเลิกคำขอจอง | 1. คลิก "ยกเลิก" บนรายการที่ pending → 2. ยืนยันใน SweetAlert | ✅ สถานะเปลี่ยนเป็น "ยกเลิกแล้ว" | ⬜ |
 | U-26 | ส่งรีวิวความพึงพอใจ | 1. คลิก "รีวิว" บนรายการที่ approved → 2. เลือกดาว 1-5 → 3. พิมพ์ความคิดเห็น → 4. ส่ง | ✅ แสดง "ส่งรีวิวสำเร็จ" + ดาวปรากฏในรายการ | ⬜ |
 

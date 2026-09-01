@@ -119,6 +119,85 @@ router.post("/webhook/:provider", async (req: any, res: Response) => {
 
 
 /**
+ * POST /api/payment/mock/simulate
+ * จำลองการชำระเงินสำหรับ UAT — ไม่มีการโอนเงินจริง
+ * ตั้ง PAYMENT_PROVIDER=mock_sandbox ใน .env ก่อนใช้งาน
+ */
+router.post("/mock/simulate", verifyToken, async (req: any, res: Response) => {
+  try {
+    const activeAdapter = paymentGateway.getActiveAdapter();
+    if (activeAdapter.providerId !== "mock_sandbox") {
+      return res.status(400).json({
+        message: "โหมดจำลองการชำระเงินไม่ได้เปิดใช้งาน กรุณาตั้ง PAYMENT_PROVIDER=mock_sandbox",
+      });
+    }
+
+    const { bookingId } = req.body;
+    if (!bookingId) {
+      return res.status(400).json({ message: "กรุณาระบุ bookingId" });
+    }
+
+    const bookingRes = await query(
+      "SELECT id, booking_no, total_price, status, user_id FROM bookings WHERE id = $1",
+      [bookingId]
+    );
+
+    if (bookingRes.rows.length === 0) {
+      return res.status(404).json({ message: "ไม่พบข้อมูลการจอง" });
+    }
+
+    const booking = bookingRes.rows[0];
+
+    if (booking.user_id !== req.user?.userId) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์ดำเนินการกับการจองนี้" });
+    }
+
+    if (booking.status !== "approved_pending_payment") {
+      return res.status(400).json({ message: "การจองนี้ยังไม่พร้อมสำหรับการชำระเงิน" });
+    }
+
+    const session = await paymentGateway.createPaymentSession({
+      bookingId: booking.id,
+      bookingNo: booking.booking_no,
+      amount: Number(booking.total_price),
+      customerEmail: req.user?.email,
+    });
+
+    const webhookResult = await paymentGateway.handleWebhook("mock_sandbox", {
+      bookingId: booking.id,
+      bookingNo: booking.booking_no,
+      amount: Number(booking.total_price),
+      transactionId: session.transactionId,
+      simulateStatus: "success",
+    });
+
+    if (!webhookResult.success) {
+      return res.status(500).json({ message: "การจำลองชำระเงินล้มเหลว" });
+    }
+
+    await query(
+      `UPDATE bookings
+       SET payment_status = 'pending_verification',
+           payment_slip_url = '/uploads/mock-payment-simulated'
+       WHERE id = $1`,
+      [bookingId]
+    );
+
+    res.json({
+      message: "[UAT] จำลองการชำระเงินสำเร็จ — รอเจ้าหน้าที่ตรวจสอบและยืนยัน",
+      bookingNo: booking.booking_no,
+      transactionId: session.transactionId,
+      paymentStatus: "pending_verification",
+      mode: "mock_sandbox",
+    });
+  } catch (err: any) {
+    console.error("[payment/mock/simulate] Error:", err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการจำลองการชำระเงิน" });
+  }
+});
+
+
+/**
  * POST /api/payment/promptpay/generate
  * Generate dynamic PromptPay QR payload for a booking
  */

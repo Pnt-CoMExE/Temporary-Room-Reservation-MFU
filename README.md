@@ -21,7 +21,9 @@ MFU-Space-Reservation/
 │   │   ├── routes/                   # Modular API endpoints (User, Room, Booking, Payment, Admin)
 │   │   ├── services/                 # Email, PDF generation, PromptPay, Payment Gateway Adapters
 │   │   ├── types/                    # TypeScript interfaces & types
+│   │   ├── utils/                    # Shared utilities (resolveUserType, etc.)
 │   │   └── __tests__/                # Vitest unit & integration test suites
+│   ├── .env.example                  # ตัวอย่าง Environment variables สำหรับ Development/UAT
 │   ├── scripts/                      # DB Migration, Seed scripts, Backup, k6 Load tests
 │   ├── app.ts                        # Express App & Route registration
 │   ├── server.ts                     # HTTP Server entry point
@@ -96,24 +98,17 @@ npm install
 
 ### 2. ตั้งค่า Environment Variables
 
-สร้างไฟล์ `.env` ในโฟลเดอร์ `backend/`:
+คัดลอก `backend/.env.example` เป็น `backend/.env` แล้วกรอกค่าจริง:
+
+```bash
+cp backend/.env.example backend/.env   # Windows: copy backend\.env.example backend\.env
+```
+
+ค่าสำคัญสำหรับ UAT:
 
 ```env
-PORT=3000
-JWT_SECRET=your_super_secret_jwt_key
-FRONTEND_URL=http://localhost:5173
-
-# Database (PostgreSQL)
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=room_booking_db
-DB_USER=postgres
-DB_PASSWORD=your_password
-
-# Google OAuth 2.0
-GOOGLE_CLIENT_ID=your_google_client_id
-GOOGLE_CLIENT_SECRET=your_google_client_secret
-GOOGLE_CALLBACK_URL=http://localhost:3000/api/auth/google/callback
+PAYMENT_PROVIDER=mock_sandbox          # จำลองชำระเงิน ไม่โอนเงินจริง
+# DEV_ADMIN_EMAILS=your@gmail.com    # ใส่อีเมล Google ของคุณเพื่อทดสอบหน้า Admin
 ```
 
 ### 3. นำเข้าข้อมูลเริ่มต้น (Seed Database)
@@ -145,7 +140,7 @@ npm run dev
 ## 🧪 การทดสอบ (Testing)
 
 ```bash
-# รัน Unit & Integration Tests (163/163 passed)
+# รัน Unit & Integration Tests (169/169 passed)
 cd backend
 npm test
 
@@ -163,10 +158,17 @@ cd frontend && npm run build
 
 | บทบาท | อีเมล | สิทธิ์ในระบบ |
 |---|---|---|
-| **ผู้ดูแลระบบ (Admin)** | `admin.demo@lamduan.mfu.ac.th` | เข้าถึง Admin Dashboard & จัดการคำขอ |
+| **ผู้ดูแลระบบ (Admin)** | `admin.demo@property.mfu.ac.th` | เข้าถึง Admin Dashboard & จัดการคำขอ |
 | **บุคลากรภายใน (Staff)** | `wichai.staff@mfu.ac.th` | จองพื้นที่ในอัตราบุคลากรภายใน |
-| **นักศึกษา (Student)** | `piya.student@lamduan.mfu.ac.th` | จองพื้นที่ในอัตรานักศึกษา |
+| **นักศึกษา (Student)** | `piya.student@lamduan.mfu.ac.th` | จองพื้นที่ในอัตรานักศึกษา (external ในระบบจริง) |
 | **บุคคลภายนอก (External)** | `john.external@company.com` | จองพื้นที่ในอัตราบุคคลภายนอก |
+
+**การกำหนด Role จากอีเมลจริง:**
+- `@property.mfu.ac.th` → Admin (ส่วนทรัพย์สิน)
+- `@mfu.ac.th` → Internal (บุคลากรภายใน)
+- อื่นๆ → External
+
+**สำหรับ UAT โดยไม่มีอีเมลหน่วยงาน:** ตั้ง `DEV_ADMIN_EMAILS=your@gmail.com` ใน `backend/.env`
 
 **รหัสโปรโมชั่นทดสอบ:**
 - `MFUWELCOME` — ส่วนลด 100 บาท (ใช้ได้ 200 ครั้ง)

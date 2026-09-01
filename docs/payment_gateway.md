@@ -66,6 +66,11 @@ KTB_SECRET_KEY=your_production_ktb_secret_key
 PAYMENT_PROVIDER=mock_sandbox
 ```
 
+เมื่อเปิดใช้งาน Mock Sandbox:
+- หน้า User Dashboard จะแสดงปุ่ม **"จำลองชำระเงิน (ทดสอบ)"** แทน QR Code
+- เรียก `POST /api/payment/mock/simulate` เพื่อจำลองการชำระเงินสำเร็จ (ไม่โอนเงินจริง)
+- สถานะการจองเปลี่ยนเป็น `pending_verification` รอเจ้าหน้าที่ตรวจสอบตามขั้นตอนปกติ
+
 ---
 
 ## 🌐 Webhook Configuration / การตั้งค่า Webhook
@@ -120,5 +125,25 @@ PAYMENT_PROVIDER=mock_sandbox
   "qrPayload": "00020101021229370016A000000677010111011300575532000100530376454061500.005802TH6304ABCD",
   "paymentStatus": "pending_verification",
   "message": "สร้าง QR Code สำหรับ PromptPay เรียบร้อยแล้ว กรุณาอัปโหลดสลิปหลังชำระเงิน"
+}
+```
+
+### 3. จำลองการชำระเงิน (Mock Sandbox — UAT Only)
+* **Endpoint:** `POST /api/payment/mock/simulate` (Requires Bearer Token)
+* **เงื่อนไข:** `PAYMENT_PROVIDER=mock_sandbox` ต้องเปิดใช้งาน
+* **Body:**
+```json
+{
+  "bookingId": 12
+}
+```
+* **Response Sample:**
+```json
+{
+  "message": "[UAT] จำลองการชำระเงินสำเร็จ — รอเจ้าหน้าที่ตรวจสอบและยืนยัน",
+  "bookingNo": "BK-DEMO-001",
+  "transactionId": "MOCK-xxx",
+  "paymentStatus": "pending_verification",
+  "mode": "mock_sandbox"
 }
 ```

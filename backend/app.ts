@@ -14,6 +14,7 @@ import { verifyToken, verifyAdmin } from "./src/middleware/auth";
 import { getRevenueByMonth } from "./src/services/revenue.service";
 import { JwtPayload } from "./src/types";
 import { generalLimiter, authLimiter, bookingLimiter } from "./src/middleware/rateLimiter";
+import { resolveUserType } from "./src/utils/resolveUserType";
 
 // ---- Environment ----
 dotenv.config();
@@ -66,27 +67,20 @@ passport.use(
       const lastName = profile.name.familyName;
       const profilePicture = profile.photos[0].value;
 
-      let userType = "external";
-      if (email.endsWith("@lamduan.mfu.ac.th")) {
-        userType = "admin";
-      } else if (
-        email.endsWith("@mfu.ac.th") ||
-        email.endsWith("@property.mfu.ac.th")
-      ) {
-        userType = "internal";
-      }
-
       try {
         let res = await query("SELECT * FROM users WHERE email = $1", [email]);
         let user: any;
 
         if (res.rows.length > 0) {
           user = res.rows[0];
+          const userType = resolveUserType(email, user.user_type);
           await query(
-            "UPDATE users SET google_id = $1, profile_picture = $2 WHERE email = $3",
-            [googleId, profilePicture, email]
+            "UPDATE users SET google_id = $1, profile_picture = $2, user_type = $3 WHERE email = $4",
+            [googleId, profilePicture, userType, email]
           );
+          user.user_type = userType;
         } else {
+          const userType = resolveUserType(email);
           const newUser = await query(
             "INSERT INTO users (google_id, firstname, lastname, email, profile_picture, user_type) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
             [googleId, firstName, lastName, email, profilePicture, userType]

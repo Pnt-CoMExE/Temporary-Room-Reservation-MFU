@@ -11,7 +11,7 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 - `lastname` (varchar 100): User's last name.
 - `email` (varchar 255, Unique): User's email address.
 - `phone_number` (varchar 20): User's phone number.
-- `user_type` (varchar 50): Type of user (e.g., admin, user).
+- `user_type` (varchar 50): Role of user — `admin`, `internal`, or `external`. Assigned automatically from email domain via `resolveUserType()` (`@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal). UAT override: `DEV_ADMIN_EMAILS` env var.
 - `profile_picture` (text): URL to the user's image.
 - `created_at` (timestamp): Record creation time.
 

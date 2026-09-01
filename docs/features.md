@@ -28,4 +28,7 @@ Here are several proposed features to elevate the Temporary Rental Space Managem
 - **Full-Site Multi-Language Support (i18n TH/EN):** Implemented seamless Thai/English toggle with `vue-i18n` across all user-facing views, navbar, footers, modals, forms, and user dashboard.
 - **Universal Dynamic Data Translator Engine (`translator.ts`):** Built automated regex & dictionary translation engine converting 100% of all 100 backend database room names, room types, locations, time slots, and booking statuses dynamically with zero Thai remaining.
 - **8 Space Type Filter & Bilingual Search:** Expanded search filter dropdowns across `RoomListView.vue` and `HomeView.vue` to all 8 database space categories with instant bilingual search matching.
+- **UAT Role Override (`resolveUserType.ts`):** Centralized email-to-role mapping with `DEV_ADMIN_EMAILS` env var for testing Admin dashboard without `@property.mfu.ac.th` email.
+- **Mock Payment Sandbox (UAT):** `POST /api/payment/mock/simulate` endpoint and Dashboard UI for instant payment simulation when `PAYMENT_PROVIDER=mock_sandbox`.
+- **Integrated Slip Upload in Payment Modal:** User Dashboard payment flow now combines PromptPay QR display and slip upload in a single modal dialog.
 

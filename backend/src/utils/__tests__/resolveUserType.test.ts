@@ -1,0 +1,41 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { resolveUserType } from "../resolveUserType";
+
+describe("resolveUserType", () => {
+  const originalEnv = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnv };
+    delete process.env.DEV_ADMIN_EMAILS;
+  });
+
+  afterEach(() => {
+    process.env = originalEnv;
+  });
+
+  it("กำหนด admin สำหรับ @property.mfu.ac.th", () => {
+    expect(resolveUserType("staff@property.mfu.ac.th")).toBe("admin");
+  });
+
+  it("กำหนด internal สำหรับ @mfu.ac.th", () => {
+    expect(resolveUserType("wichai.staff@mfu.ac.th")).toBe("internal");
+  });
+
+  it("กำหนด external สำหรับอีเมลภายนอก", () => {
+    expect(resolveUserType("john@company.com")).toBe("external");
+  });
+
+  it("คงค่า existingType สำหรับอีเมลภายนอกที่ถูก promote แล้ว", () => {
+    expect(resolveUserType("john@company.com", "admin")).toBe("admin");
+  });
+
+  it("รองรับ DEV_ADMIN_EMAILS สำหรับ UAT", () => {
+    process.env.DEV_ADMIN_EMAILS = "student@gmail.com, tester@outlook.com";
+    expect(resolveUserType("student@gmail.com")).toBe("admin");
+    expect(resolveUserType("tester@outlook.com")).toBe("admin");
+  });
+
+  it("ไม่ใช้ @lamduan.mfu.ac.th เป็น admin อีกต่อไป", () => {
+    expect(resolveUserType("piya.student@lamduan.mfu.ac.th")).toBe("external");
+  });
+});

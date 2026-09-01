@@ -52,20 +52,54 @@ const userProfile = ref<UserProfile>({
 
 const myBookings = ref<BookingItem[]>([]);
 const loadingBookings = ref(true);
+const activePaymentProvider = ref("promptpay_manual");
+
+const fetchBookings = async () => {
+  const { getCookie } = await import("@/services/api");
+  const token = getCookie("mfu_token");
+  if (!token) return;
+
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  const userId = payload.userId;
+
+  const bookingsRes = await api.get(`/api/user/bookings/${userId}`);
+  myBookings.value = bookingsRes.data.map((b: any) => ({
+    ...b,
+    id: b.booking_no,
+    dbId: b.id,
+    roomName: b.room_name,
+    bookingDate: b.booking_date,
+    durationText:
+      b.time_slot === "full"
+        ? "เต็มวัน"
+        : b.time_slot === "half_morning"
+          ? "ครึ่งวันเช้า"
+          : "ครึ่งวันบ่าย",
+    totalPrice: parseFloat(b.total_price),
+    status:
+      b.status === "pending"
+        ? "รออนุมัติ"
+        : b.status === "approved_pending_payment"
+          ? "รอชำระเงิน"
+          : b.status === "approved_paid"
+            ? "สำเร็จแล้ว"
+            : b.status === "disapproved"
+              ? "ไม่อนุมัติ"
+              : b.status,
+    hasFeedback: b.has_feedback,
+    memoDocumentUrl: b.memo_document_url || null,
+    addons: [],
+  }));
+};
 
 onMounted(async () => {
   const storedEmail = localStorage.getItem("userEmail");
   const storedName = localStorage.getItem("userName");
-  // token อยู่ใน cookie แล้ว api.js จัดการให้อัตโนมัติ แต่ต้อง decode เพื่อดึง userId
-  const { getCookie } = await import("@/services/api");
-  const token = getCookie("mfu_token");
 
-  // 1. ใส่ข้อมูลตั้งต้นจากตอน Login ก่อน
   if (storedEmail) userProfile.value.email = storedEmail;
   if (storedName) userProfile.value.fullName = storedName;
 
   try {
-    // 2. ดึงข้อมูลโปรไฟล์
     const profileRes = await api.get(`/api/user/profile?email=${storedEmail}`);
     if (profileRes.data) {
       userProfile.value.fullName = `${profileRes.data.firstname} ${profileRes.data.lastname}`;
@@ -73,29 +107,15 @@ onMounted(async () => {
       userProfile.value.profileImage = profileRes.data.profile_picture || null;
     }
 
-    // 3. ดึงประวัติการจอง
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const userId = payload.userId;
-      
-      const bookingsRes = await api.get(`/api/user/bookings/${userId}`);
-      myBookings.value = bookingsRes.data.map((b: any) => ({
-        ...b,
-        id: b.booking_no,
-        dbId: b.id,
-        roomName: b.room_name,
-        bookingDate: b.booking_date,
-        durationText: b.time_slot === 'full' ? 'เต็มวัน' : b.time_slot === 'half_morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย',
-        totalPrice: parseFloat(b.total_price),
-        status: b.status === 'pending' ? 'รออนุมัติ' : 
-                b.status === 'approved_pending_payment' ? 'รอชำระเงิน' :
-                b.status === 'approved_paid' ? 'สำเร็จแล้ว' :
-                b.status === 'disapproved' ? 'ไม่อนุมัติ' : b.status,
-        hasFeedback: b.has_feedback,
-        memoDocumentUrl: b.memo_document_url || null,
-        addons: [] // Phase 2.5: could fetch booking addons if needed
-      }));
+    try {
+      const providersRes = await api.get("/api/payment/providers");
+      activePaymentProvider.value =
+        providersRes.data?.activeProvider?.id || "promptpay_manual";
+    } catch {
+      activePaymentProvider.value = "promptpay_manual";
     }
+
+    await fetchBookings();
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
   } finally {
@@ -141,51 +161,132 @@ const saveProfile = async () => {
 };
 
 const openPayment = async (booking: BookingItem) => {
-  // สร้าง QR Code แบบ PromptPay EMVCo ด้วย qrcode library
+  if (activePaymentProvider.value === "mock_sandbox") {
+    return openMockPayment(booking);
+  }
+  return openPromptPayPayment(booking);
+};
+
+const openMockPayment = async (booking: BookingItem) => {
+  const result = await Swal.fire({
+    title: `<span class="font-extrabold text-xl text-gray-900">${t("dashboard.mock_pay_title")}</span>`,
+    html: `
+      <p class="text-sm text-gray-500 mb-2 font-medium">${t("dashboard.net_total")}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
+      <div class="bg-amber-50 p-4 rounded-xl text-left border border-amber-100 text-xs text-amber-800 font-medium mb-4">
+        🧪 ${t("dashboard.mock_pay_desc")}
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: t("dashboard.mock_pay_btn"),
+    cancelButtonText: t("dashboard.close_window"),
+    confirmButtonColor: "#2563eb",
+    customClass: {
+      popup: "rounded-[2.5rem] p-8 max-w-md",
+      confirmButton: "rounded-xl px-6 py-3 font-bold cursor-pointer",
+      cancelButton: "rounded-xl px-6 py-3 font-bold cursor-pointer",
+    },
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    await api.post("/api/payment/mock/simulate", { bookingId: booking.dbId });
+    await fetchBookings();
+    Swal.fire({
+      icon: "success",
+      title: t("dashboard.mock_pay_success"),
+      confirmButtonColor: "#ba0b2f",
+      customClass: { popup: "rounded-[2rem]" },
+    });
+  } catch (err: any) {
+    Swal.fire({
+      icon: "error",
+      title: t("booking.submit_error_title"),
+      text: err.response?.data?.message || "เกิดข้อผิดพลาด",
+      confirmButtonColor: "#ba0b2f",
+    });
+  }
+};
+
+const openPromptPayPayment = async (booking: BookingItem) => {
   let qrDataUrl = "/images/qr-fallback.svg";
   try {
-    const payload = generatePromptPayPayload("0994000165789", booking.totalPrice);
+    const { data } = await api.post("/api/payment/promptpay/generate", {
+      bookingId: booking.dbId,
+    });
+    const payload = data.qrPayload || generatePromptPayPayload("0575532000100", booking.totalPrice);
     qrDataUrl = await QRCode.toDataURL(payload, {
       width: 250,
       margin: 1,
-      color: {
-        dark: "#111827",
-        light: "#ffffff",
-      },
+      color: { dark: "#111827", light: "#ffffff" },
     });
   } catch (err: any) {
     console.error("QR generation failed:", err);
+    try {
+      const payload = generatePromptPayPayload("0575532000100", booking.totalPrice);
+      qrDataUrl = await QRCode.toDataURL(payload, { width: 250, margin: 1 });
+    } catch {
+      /* use fallback image */
+    }
   }
 
-  Swal.fire({
-    title:
-      `<span class="font-extrabold text-2xl text-gray-900">${t('dashboard.scan_to_pay')}</span>`,
+  const { value: slipFile } = await Swal.fire({
+    title: `<span class="font-extrabold text-2xl text-gray-900">${t("dashboard.scan_to_pay")}</span>`,
     html: `
-      <p class="text-sm text-gray-500 mb-4 font-medium">${t('dashboard.net_total')}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
-      
-      <!-- โซน QR Code -->
+      <p class="text-sm text-gray-500 mb-4 font-medium">${t("dashboard.net_total")}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
       <div class="bg-white p-4 rounded-3xl border border-gray-200 mb-4 inline-block mx-auto shadow-sm">
         <img src="${qrDataUrl}" class="w-52 h-52 mx-auto" alt="Payment QR Code" />
       </div>
-      
       <div class="bg-blue-50 p-4 rounded-xl text-left flex gap-3 border border-blue-100 text-xs text-blue-800 font-medium mb-4">
-        ℹ️ <p>${t('dashboard.scan_instruction')}</p>
+        ℹ️ <p>${t("dashboard.scan_instruction")}</p>
       </div>
-
-      <!-- ✨ เพิ่มเครดิต Opn Payments ตาม Requirement ✨ -->
-      <div class="flex items-center justify-center gap-2 mt-4 text-[10px] text-gray-400 font-bold uppercase tracking-widest border-t border-gray-100 pt-4">
-        🛡️ Secure Payment Processing by <span class="text-gray-800 font-black tracking-normal">Opn Payments</span>
-      </div>
+      <label class="block text-left text-xs font-bold text-gray-500 mb-2">${t("payment.upload_slip")}</label>
+      <input type="file" id="slip-upload-input" accept="image/*,.pdf" class="w-full text-xs" />
+      <p class="text-[10px] text-gray-400 mt-1 text-left">${t("payment.slip_hint")}</p>
     `,
-    showConfirmButton: true,
-    confirmButtonText: t('dashboard.close_window'),
-    confirmButtonColor: "#111827",
+    showCancelButton: true,
+    confirmButtonText: t("payment.submit_slip_btn"),
+    cancelButtonText: t("dashboard.close_window"),
+    confirmButtonColor: "#2563eb",
+    preConfirm: () => {
+      const input = document.getElementById("slip-upload-input") as HTMLInputElement;
+      if (!input?.files?.length) {
+        Swal.showValidationMessage("กรุณาแนบไฟล์สลิปการชำระเงิน");
+        return false;
+      }
+      return input.files[0];
+    },
     customClass: {
       popup: "rounded-[2.5rem] p-8 max-w-md",
-      confirmButton:
-        "rounded-xl w-full py-3.5 font-bold tracking-widest cursor-pointer mt-2 hover:bg-black transition-colors",
+      confirmButton: "rounded-xl w-full py-3.5 font-bold cursor-pointer mt-2",
+      cancelButton: "rounded-xl w-full py-3 font-bold cursor-pointer mt-2",
     },
   });
+
+  if (!slipFile) return;
+
+  try {
+    const formData = new FormData();
+    formData.append("bookingId", String(booking.dbId));
+    formData.append("slipImage", slipFile);
+    await api.post("/api/payment/slip/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    await fetchBookings();
+    Swal.fire({
+      icon: "success",
+      title: t("payment.verify_pending"),
+      confirmButtonColor: "#ba0b2f",
+      customClass: { popup: "rounded-[2rem]" },
+    });
+  } catch (err: any) {
+    Swal.fire({
+      icon: "error",
+      title: t("booking.submit_error_title"),
+      text: err.response?.data?.message || "อัปโหลดสลิปไม่สำเร็จ",
+      confirmButtonColor: "#ba0b2f",
+    });
+  }
 };
 
 const confirmLogout = () => {
@@ -703,7 +804,8 @@ const formatDate = (dateString: string) =>
                     @click="openPayment(booking)"
                     class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon icon="qrcode" /> {{ $t('dashboard.scan_pay') }}
+                    <font-awesome-icon :icon="activePaymentProvider === 'mock_sandbox' ? 'flask' : 'qrcode'" />
+                    {{ activePaymentProvider === 'mock_sandbox' ? $t('dashboard.mock_pay') : $t('dashboard.scan_pay') }}
                   </button>
 
                   <button

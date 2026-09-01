@@ -174,3 +174,28 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - Frontend TypeScript Check: **0 errors**
 - Frontend Production Build: **Success (0 errors)**
 
+## [2026-09-01 — Sprint 3 UAT Preparation: Role Policy, Mock Payment & Documentation Sync]
+
+### Backend — UAT Role & Payment
+- **`backend/src/utils/resolveUserType.ts` [NEW]**: กำหนด `user_type` จากอีเมลตามนโยบาย มฟล. (`@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal, อื่นๆ → external) พร้อมรองรับ `DEV_ADMIN_EMAILS` สำหรับ UAT
+- **`backend/src/utils/__tests__/resolveUserType.test.ts` [NEW]**: Unit tests 6 cases ครอบคลุม domain mapping และ DEV_ADMIN_EMAILS override
+- **`backend/app.ts`**: ใช้ `resolveUserType()` แทน logic เดิมที่ใช้ `@lamduan.mfu.ac.th` เป็น admin; อัปเดต user_type ทุกครั้งที่ login
+- **`backend/src/routes/payment.routes.ts`**: เพิ่ม `POST /api/payment/mock/simulate` สำหรับจำลองชำระเงิน UAT (ต้องตั้ง `PAYMENT_PROVIDER=mock_sandbox`)
+- **`backend/.env.example` [NEW]**: ตัวอย่าง config สำหรับ Development/UAT รวม `PAYMENT_PROVIDER`, `DEV_ADMIN_EMAILS`, `PROMPTPAY_ID`
+- **`backend/scripts/seed-demo.ts`**: แก้ไขอีเมล Admin เป็น `admin.demo@property.mfu.ac.th`, นักศึกษาเป็น `external`
+
+### Frontend — Dashboard Payment UX
+- **`DashboardView.vue`**: ตรวจสอบ active payment provider จาก API; แสดง Mock Payment modal หรือ PromptPay QR + อัปโหลดสลิปใน Modal เดียว; ปุ่มเปลี่ยนตาม provider
+- **`th.ts` & `en.ts`**: เพิ่ม i18n keys สำหรับ Mock Payment (`mock_pay`, `mock_pay_title`, `mock_pay_desc`, `mock_pay_btn`, `mock_pay_success`)
+
+### Documentation & Cleanup
+- **`README.md`**: อัปเดต Quick Start ให้อ้างอิง `.env.example`, เพิ่มคำอธิบาย Role mapping และ DEV_ADMIN_EMAILS, อัปเดต test count เป็น 169
+- **`docs/UAT_TEST_SCENARIOS.md`**: แก้ไขอีเมล demo, role mapping, เพิ่ม test case U-24b (Mock Sandbox), อัปเดตสภาพแวดล้อมทดสอบ
+- **`docs/planning.md`**: อัปเดต Sprint 3 เป็น "กำลังดำเนินการ" พร้อมรายการงานที่เสร็จแล้ว
+- **`docs/payment_gateway.md`**: เพิ่มคู่มือ Mock Sandbox และ API `POST /api/payment/mock/simulate`
+- **`docs/requirements.md`**, **`docs/features.md`**: อัปเดต role policy และฟีเจอร์ UAT ล่าสุด
+- **ลบไฟล์ที่ไม่จำเป็น**: `frontend/README.md` (ล้าสมัย, อ้างอิง vue-test), `backend/scripts/seed-banners.ts`, `seed-promos.ts`, `seed-logs.ts` (ซ้ำซ้อนกับ `seed:demo`)
+
+### Verification
+- Backend Unit & Integration Tests: **169/169 passed** (เพิ่มจาก 163 → 169, +6 tests ใหม่)
+

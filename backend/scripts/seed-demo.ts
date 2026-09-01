@@ -32,7 +32,7 @@ async function seedDemo() {
         google_id: "demo_admin_001",
         firstname: "สมชาย",
         lastname: "จัดการทรัพย์สิน",
-        email: "admin.demo@lamduan.mfu.ac.th",
+        email: "admin.demo@property.mfu.ac.th",
         phone_number: "053-916-000",
         user_type: "admin",
         profile_picture: "https://ui-avatars.com/api/?name=Admin&background=dc2626&color=fff&size=128",
@@ -61,7 +61,7 @@ async function seedDemo() {
         lastname: "นักศึกษาทดสอบ",
         email: "piya.student@lamduan.mfu.ac.th",
         phone_number: "091-234-5678",
-        user_type: "internal",
+        user_type: "external",
         profile_picture: "https://ui-avatars.com/api/?name=Piya&background=059669&color=fff&size=128",
       },
       {
@@ -462,7 +462,7 @@ async function seedDemo() {
     console.log(`   📝 Activity Logs:  ${counts.logs}`);
 
     console.log(`\n🔑 Demo Login Accounts:`);
-    console.log(`   Admin:    admin.demo@lamduan.mfu.ac.th`);
+    console.log(`   Admin:    admin.demo@property.mfu.ac.th`);
     console.log(`   Staff:    wichai.staff@mfu.ac.th / suda.staff@mfu.ac.th`);
     console.log(`   Student:  piya.student@lamduan.mfu.ac.th`);
     console.log(`   External: john.external@company.com`);
