@@ -3,7 +3,7 @@ import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import api from "@/services/api";
-import { clearAuthSession, getStoredUserEmail } from "@/utils/auth";
+import { clearAuthSession } from "@/utils/auth";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 
 interface Notification {
@@ -23,12 +23,11 @@ const isNotifOpen = ref(false);
 const userName = ref(localStorage.getItem("userName") || "ผู้ใช้งาน");
 const profileImage = ref<string | null>(null);
 
-// โหลดรูปโปรไฟล์จาก Google (profile_picture ใน DB)
+// โหลดรูปโปรไฟล์จาก Google (profile_picture ใน DB) — identity จาก JWT cookie
 const loadProfileImage = async () => {
-  const email = getStoredUserEmail();
-  if (!email) return;
+  if (localStorage.getItem("isLoggedIn") !== "true") return;
   try {
-    const res = await api.get("/api/user/profile", { params: { email } });
+    const res = await api.get("/api/user/profile");
     if (res.data?.profile_picture) {
       profileImage.value = res.data.profile_picture;
     }

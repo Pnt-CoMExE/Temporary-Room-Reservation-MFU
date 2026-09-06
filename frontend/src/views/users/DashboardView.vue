@@ -97,11 +97,13 @@ onMounted(async () => {
   if (storedName) userProfile.value.fullName = storedName;
 
   try {
-    const profileRes = await api.get(`/api/user/profile?email=${storedEmail}`);
+    // Profile identity comes from JWT cookie — do not pass email as authority
+    const profileRes = await api.get("/api/user/profile");
     if (profileRes.data) {
       userProfile.value.fullName = `${profileRes.data.firstname} ${profileRes.data.lastname}`;
       userProfile.value.phone = profileRes.data.phone_number || "";
       userProfile.value.profileImage = profileRes.data.profile_picture || null;
+      if (profileRes.data.email) userProfile.value.email = profileRes.data.email;
     }
 
     try {
@@ -138,7 +140,6 @@ const saveProfile = async () => {
     const lastname = parts.slice(1).join(' ');
 
     await api.put("/api/user/profile", {
-      email: userProfile.value.email,
       firstname,
       lastname,
       phone_number: userProfile.value.phone

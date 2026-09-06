@@ -40,9 +40,13 @@ router.post(
   verifyToken,
   upload.single("memoDocument"),
   (req: any, _res: Response, next: any) => {
+    // Identity from JWT only — never trust client userId
     if (!req.body) req.body = {};
-    if (!req.body.userId || req.body.userId === "null" || req.body.userId === "undefined") {
-      req.body.userId = req.user?.id || req.user?.userId;
+    req.body.userId = String(req.user?.userId);
+    // Prevent external users from spoofing internal pricing tier
+    const role = req.user?.role;
+    if (role === "external") {
+      req.body.userType = "external";
     }
     next();
   },

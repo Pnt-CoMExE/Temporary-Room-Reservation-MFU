@@ -10,6 +10,7 @@ export function getStoredUserEmail(): string | null {
 }
 
 export function isLoggedIn(): boolean {
+  // UI session flag only — authoritative auth is HttpOnly cookie mfu_token on the API
   return localStorage.getItem("isLoggedIn") === "true";
 }
 

@@ -65,7 +65,8 @@ export const validateCreatePromoCode = [
 // ---- User profile validation ----
 
 export const validateUpdateProfile = [
-  body("email").isEmail().withMessage("อีเมลไม่ถูกต้อง"),
+  // email is taken from JWT — ignore/optional if client still sends it
+  body("email").optional({ values: "falsy" }).isEmail().withMessage("อีเมลไม่ถูกต้อง"),
   body("firstname").trim().notEmpty().withMessage("กรุณากรอกชื่อ"),
   body("lastname").trim().notEmpty().withMessage("กรุณากรอกนามสกุล"),
   body("phone_number")

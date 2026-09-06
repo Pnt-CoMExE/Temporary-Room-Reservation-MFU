@@ -216,3 +216,4 @@ cd frontend && npm run build
 - [CITS Runbook & Docker Deploy (CITS_RUNBOOK.md)](docs/CITS_RUNBOOK.md)
 - [Go-Live Checklist (GO_LIVE_CHECKLIST.md)](docs/GO_LIVE_CHECKLIST.md)
 - [Security Checklist (SECURITY_CHECKLIST.md)](docs/SECURITY_CHECKLIST.md)
+- [Demo Security — AuthN/AuthZ script (DEMO_SECURITY.md)](docs/DEMO_SECURITY.md)

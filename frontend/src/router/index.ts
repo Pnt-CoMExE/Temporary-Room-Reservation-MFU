@@ -110,9 +110,8 @@ const router = createRouter({
   routes,
 });
 
-// ระบบป้องกันคนไม่ล็อกอิน
+// Route guards: localStorage is UI-only; API auth uses HttpOnly JWT cookie
 router.beforeEach((to, _from) => {
-  // ✅ เช็คทั้ง localStorage และ cookie
   const loggedIn = isLoggedIn();
 
   const publicPages = ["/"];
@@ -123,6 +122,7 @@ router.beforeEach((to, _from) => {
     return "/";
   }
 
+  // UI gate only — backend still enforces verifyAdmin on /api/admin/*
   if (to.matched.some((record) => record.meta.requiresAdmin)) {
     const role = localStorage.getItem("userRole");
     if (role !== "admin") {

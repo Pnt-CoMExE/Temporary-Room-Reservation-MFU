@@ -346,3 +346,18 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - **`docs/UAT_TEST_SCENARIOS.md`**: เพิ่มสภาพแวดล้อม Docker, อัปเดต session/logout cases
 - **`README.md`**: ลิงก์เอกสาร UAT Docker
 
+## [2026-09-06 — AuthN/AuthZ harden + Demo Security docs]
+
+### Authorization fixes (anti-IDOR)
+- **`user.routes.ts`**: profile/bookings/feedback ใช้ `req.user` จาก JWT เท่านั้น
+- **`booking.routes.ts`**: บังคับ `userId` จาก JWT; external บังคับ `userType=external`
+- **`payment.routes.ts`**: checkout / PromptPay / slip ตรวจเจ้าของ booking
+- **Frontend**: profile ไม่ส่ง email เป็น authority; แก้ comment router/auth utils
+
+### Testing
+- **`authz_idor.test.ts` [NEW]**: IDOR 403, payment ownership, profile จาก JWT
+
+### Docs
+- **`docs/DEMO_SECURITY.md` [NEW]**: อธิบาย Token flow + สคริปต์ Demo สำหรับอาจารย์
+- **`docs/SECURITY_CHECKLIST.md`**, **`README.md`**: อัปเดตลิงก์และรายการ AuthZ
+

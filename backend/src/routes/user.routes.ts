@@ -1,16 +1,27 @@
-import { Router, Request, Response } from "express";
+import { Router, Response } from "express";
 import { query } from "../../db";
 import { verifyToken } from "../middleware/auth";
 import { validateUpdateProfile, validateFeedback } from "../middleware/validate";
 
 const router = Router();
 
-// GET /api/user/profile — get user profile by email
-router.get("/profile", verifyToken, async (req: Request, res: Response) => {
-  const { email } = req.query;
+function jwtUserId(req: any): number {
+  return Number(req.user?.userId);
+}
+
+function jwtEmail(req: any): string {
+  return String(req.user?.email || "").trim().toLowerCase();
+}
+
+// GET /api/user/profile — profile of the authenticated user only (JWT)
+router.get("/profile", verifyToken, async (req: any, res: Response) => {
+  const email = jwtEmail(req);
+  if (!email) {
+    return res.status(401).json({ message: "ไม่มีสิทธิ์เข้าถึง: กรุณาเข้าสู่ระบบ" });
+  }
   try {
     const result = await query(
-      "SELECT firstname, lastname, phone_number, profile_picture FROM users WHERE email = $1",
+      "SELECT firstname, lastname, phone_number, profile_picture, email, user_type FROM users WHERE email = $1",
       [email]
     );
     if (result.rows.length === 0) {
@@ -23,9 +34,13 @@ router.get("/profile", verifyToken, async (req: Request, res: Response) => {
   }
 });
 
-// PUT /api/user/profile — update user profile
-router.put("/profile", verifyToken, ...validateUpdateProfile, async (req: Request, res: Response) => {
-  const { email, firstname, lastname, phone_number } = req.body;
+// PUT /api/user/profile — update own profile only (JWT email)
+router.put("/profile", verifyToken, ...validateUpdateProfile, async (req: any, res: Response) => {
+  const email = jwtEmail(req);
+  if (!email) {
+    return res.status(401).json({ message: "ไม่มีสิทธิ์เข้าถึง: กรุณาเข้าสู่ระบบ" });
+  }
+  const { firstname, lastname, phone_number } = req.body;
   try {
     await query(
       "UPDATE users SET firstname = $1, lastname = $2, phone_number = $3 WHERE email = $4",
@@ -38,9 +53,15 @@ router.put("/profile", verifyToken, ...validateUpdateProfile, async (req: Reques
   }
 });
 
-// GET /api/user/bookings/:userId — get user's bookings
-router.get("/bookings/:userId", verifyToken, async (req: Request, res: Response) => {
-  const { userId } = req.params;
+// GET /api/user/bookings/:userId — own bookings only
+router.get("/bookings/:userId", verifyToken, async (req: any, res: Response) => {
+  const requestedId = Number(req.params.userId);
+  const tokenUserId = jwtUserId(req);
+
+  if (!Number.isFinite(requestedId) || requestedId !== tokenUserId) {
+    return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลการจองของผู้ใช้อื่น" });
+  }
+
   try {
     const result = await query(
       `SELECT b.*, r.name as room_name, r.location as room_location, r.image_url as room_image,
@@ -49,7 +70,7 @@ router.get("/bookings/:userId", verifyToken, async (req: Request, res: Response)
        JOIN rooms r ON b.room_id = r.id
        WHERE b.user_id = $1
        ORDER BY b.created_at DESC`,
-      [userId]
+      [tokenUserId]
     );
     res.json(result.rows);
   } catch (err) {
@@ -61,7 +82,7 @@ router.get("/bookings/:userId", verifyToken, async (req: Request, res: Response)
 // PUT /api/user/bookings/:id/cancel — cancel a pending booking
 router.put("/bookings/:id/cancel", verifyToken, async (req: any, res: Response) => {
   const { id } = req.params;
-  const userId = req.user!.userId;
+  const userId = jwtUserId(req);
   try {
     const check = await query(
       "SELECT id FROM bookings WHERE id = $1 AND user_id = $2 AND status = 'pending'",
@@ -80,10 +101,19 @@ router.put("/bookings/:id/cancel", verifyToken, async (req: any, res: Response) 
   }
 });
 
-// POST /api/user/feedback — submit feedback for a booking
-router.post("/feedback", verifyToken, ...validateFeedback, async (req: Request, res: Response) => {
+// POST /api/user/feedback — only for own bookings
+router.post("/feedback", verifyToken, ...validateFeedback, async (req: any, res: Response) => {
   const { bookingId, rating, comment } = req.body;
+  const userId = jwtUserId(req);
   try {
+    const ownership = await query(
+      "SELECT id FROM bookings WHERE id = $1 AND user_id = $2",
+      [bookingId, userId]
+    );
+    if (ownership.rows.length === 0) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์รีวิวการจองนี้" });
+    }
+
     await query(
       "INSERT INTO feedbacks (booking_id, rating, comment) VALUES ($1, $2, $3)",
       [bookingId, rating, comment]

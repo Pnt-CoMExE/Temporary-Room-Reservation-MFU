@@ -36,6 +36,27 @@ const upload = multer({
 });
 
 /**
+ * Ensure the authenticated user owns the booking (Authorization / anti-IDOR).
+ * Returns the booking row or sends 403/404 and null.
+ */
+async function requireBookingOwner(req: any, res: Response, bookingId: number) {
+  const bookingRes = await query(
+    "SELECT id, booking_no, total_price, status, user_id FROM bookings WHERE id = $1",
+    [bookingId]
+  );
+  if (bookingRes.rows.length === 0) {
+    res.status(404).json({ message: "ไม่พบข้อมูลการจอง" });
+    return null;
+  }
+  const booking = bookingRes.rows[0];
+  if (Number(booking.user_id) !== Number(req.user?.userId)) {
+    res.status(403).json({ message: "ไม่มีสิทธิ์ดำเนินการกับการจองนี้" });
+    return null;
+  }
+  return booking;
+}
+
+/**
  * GET /api/payment/providers
  * Returns list of available payment gateway adapters and active state
  */
@@ -63,23 +84,15 @@ router.post("/checkout", verifyToken, async (req: any, res: Response) => {
       return res.status(400).json({ message: "กรุณาระบุ bookingId" });
     }
 
-    const bookingRes = await query(
-      "SELECT id, booking_no, total_price, status FROM bookings WHERE id = $1",
-      [bookingId]
-    );
-
-    if (bookingRes.rows.length === 0) {
-      return res.status(404).json({ message: "ไม่พบข้อมูลการจอง" });
-    }
-
-    const booking = bookingRes.rows[0];
+    const booking = await requireBookingOwner(req, res, Number(bookingId));
+    if (!booking) return;
 
     const session = await paymentGateway.createPaymentSession({
       bookingId: booking.id,
       bookingNo: booking.booking_no,
       amount: Number(booking.total_price),
       customerEmail: req.user?.email,
-      customerName: req.user?.firstname ? `${req.user.firstname} ${req.user.lastname || ""}`.trim() : undefined,
+      customerName: req.user?.name || undefined,
     });
 
     res.json(session);
@@ -208,16 +221,9 @@ router.post("/promptpay/generate", verifyToken, async (req: any, res: Response) 
       return res.status(400).json({ message: "กรุณาระบุ bookingId" });
     }
 
-    const bookingRes = await query(
-      "SELECT id, booking_no, total_price, status FROM bookings WHERE id = $1",
-      [bookingId]
-    );
+    const booking = await requireBookingOwner(req, res, Number(bookingId));
+    if (!booking) return;
 
-    if (bookingRes.rows.length === 0) {
-      return res.status(404).json({ message: "ไม่พบข้อมูลการจอง" });
-    }
-
-    const booking = bookingRes.rows[0];
     const amount = Number(booking.total_price);
     const targetPromptPayId = process.env.PROMPTPAY_ID || "0575532000100"; // MFU Tax ID
 
@@ -255,14 +261,17 @@ router.post(
         return res.status(400).json({ message: "กรุณาแนบไฟล์สลิปการชำระเงิน" });
       }
 
+      const owned = await requireBookingOwner(req, res, Number(bookingId));
+      if (!owned) return;
+
       const slipUrl = `/uploads/${req.file.filename}`;
 
       const updateRes = await query(
         `UPDATE bookings
          SET payment_slip_url = $1, payment_status = 'pending_verification'
-         WHERE id = $2
+         WHERE id = $2 AND user_id = $3
          RETURNING id, booking_no, payment_status`,
-        [slipUrl, bookingId]
+        [slipUrl, bookingId, req.user.userId]
       );
 
       if (updateRes.rows.length === 0) {
