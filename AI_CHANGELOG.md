@@ -361,3 +361,12 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - **`docs/DEMO_SECURITY.md` [NEW]**: อธิบาย Token flow + สคริปต์ Demo สำหรับอาจารย์
 - **`docs/SECURITY_CHECKLIST.md`**, **`README.md`**: อัปเดตลิงก์และรายการ AuthZ
 
+## [2026-09-06 — Fix CI PostgreSQL env]
+
+### Root cause
+- CI ตั้ง `DATABASE_URL` แต่ `backend/db.ts` อ่าน `DB_HOST` / `DB_USER` / `DB_PASSWORD` / `DB_NAME`
+- `DB_PASSWORD` เป็น undefined → SASL error → API ตอบ 500 → tests fail
+
+### Fixes
+- **`.github/workflows/ci.yml`**: ตั้ง `DB_*` ให้ตรง postgres service + init schema จาก `scripts/init-schema.sql` ก่อน `npm test`
+

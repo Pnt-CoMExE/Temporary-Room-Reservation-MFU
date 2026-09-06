@@ -36,6 +36,7 @@ describe("AuthZ: profile uses JWT email only", () => {
       .set("Authorization", `Bearer ${userAToken}`);
 
     // 200 (own profile) or 404 (seed ไม่มี staff@mfu.ac.th) — ต้องไม่คืนข้อมูล victim
+    // 500 = DB misconfigured (should not happen when CI DB_* is set)
     expect([200, 404]).toContain(res.status);
     if (res.status === 200) {
       expect(res.body.email).not.toBe("victim@mfu.ac.th");

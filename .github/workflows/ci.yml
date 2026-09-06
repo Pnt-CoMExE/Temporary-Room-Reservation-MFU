@@ -17,6 +17,7 @@ jobs:
       postgres:
         image: postgres:16
         env:
+          POSTGRES_USER: postgres
           POSTGRES_DB: mfu_booking_test
           POSTGRES_PASSWORD: postgres
         ports:
@@ -30,6 +31,21 @@ jobs:
     defaults:
       run:
         working-directory: ./backend
+
+    env:
+      # App reads DB_* (not DATABASE_URL) — see backend/db.ts
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_NAME: mfu_booking_test
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PORT: 3000
+      JWT_SECRET: ci-test-secret
+      FRONTEND_URL: http://localhost:5173
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
+      NODE_ENV: test
 
     steps:
       - name: Checkout
@@ -45,6 +61,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Init test database schema
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client
+          PGPASSWORD=postgres psql -h localhost -U postgres -d mfu_booking_test -f scripts/init-schema.sql
+
       - name: TypeScript type-check
         run: npm run typecheck
 
@@ -53,14 +75,6 @@ jobs:
 
       - name: Run tests
         run: npm test
-        env:
-          PORT: 3000
-          JWT_SECRET: ci-test-secret
-          FRONTEND_URL: http://localhost:5173
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/mfu_booking_test
-          GOOGLE_CLIENT_ID: ci-google-client-id
-          GOOGLE_CLIENT_SECRET: ci-google-client-secret
-          GOOGLE_CALLBACK_URL: http://localhost:3000/auth/google/callback
 
   # ─── Frontend: Typecheck + Build ─────────────────────
   frontend:
