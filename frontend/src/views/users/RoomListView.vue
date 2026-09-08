@@ -122,7 +122,7 @@ const filteredRooms = computed(() => {
           {{ $t('room.all_rooms_heading') }}
         </h1>
         <p
-          class="text-lg text-gray-200 font-medium max-w-2xl mx-auto drop-shadow"
+          class="text-lg text-gray-200 font-medium max-w-2xl mx-auto drop-shadow text-pretty leading-relaxed"
         >
           {{ $t('hero.subtitle') }}
         </p>

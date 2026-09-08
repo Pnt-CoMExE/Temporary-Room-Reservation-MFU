@@ -370,3 +370,28 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 ### Fixes
 - **`.github/workflows/ci.yml`**: ตั้ง `DB_*` ให้ตรง postgres service + init schema จาก `scripts/init-schema.sql` ก่อน `npm test`
 
+## [2026-09-09 — Address CodeFlow findings]
+
+### Security (High)
+- **`docker-compose.prod.yml`**: ลบ default password/JWT/session — บังคับตั้งผ่าน env (`${VAR:?...}`)
+- **`backend/scripts/backup.sh`**: ลบ `PGPASSWORD` default; ต้องมี `POSTGRES_PASSWORD`
+
+### DRY / tests
+- **`middleware/__tests__/helpers.ts` [NEW]**: รวม `mockReq` / `mockRes` / `mockNext`
+- อัปเดต `auth.test.ts`, `validate.test.ts`, `errorHandler.test.ts` ให้ใช้ helpers ร่วม
+
+### ไม่แก้ในรอบนี้ (false positive / ขอบเขตใหญ่)
+- Architecture layer violations ของ static analyzer (Vue/Express ไม่ใช่ layered architecture แบบที่ tool สมมติ)
+- High-complexity files — ต้อง refactor แยก sprint
+- Partial analysis 71 files = GitHub API rate limit ของ CodeFlow ไม่ใช่ bug ในโค้ด
+
+## [2026-09-09 — Option A: expand AuthZ/env test coverage]
+
+เพิ่มเทสโดยไม่ refactor Vue / แยกไฟล์ใหญ่:
+
+- **`backend/src/__tests__/coverage_authz_a.test.ts` [NEW]**: payment ownership (checkout / PromptPay / slip / mock), feedback/cancel, profile JWT email, admin verify guards (mocked DB)
+- **`backend/src/config/__tests__/env.test.ts` [NEW]**: `cookieSecure` จาก `COOKIE_SECURE` / HTTPS, `smtpEnabled()`
+- **`resolveUserType.test.ts`**: เคส trim/lowercase, DEV_ADMIN_EMAILS ว่าง, existingType undefined
+
+Verify: `npm test` + `npm run typecheck` (backend)
+

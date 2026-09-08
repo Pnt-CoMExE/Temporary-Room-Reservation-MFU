@@ -15,7 +15,12 @@ DB_HOST="${DB_HOST:-postgres}"
 DB_PORT="${DB_PORT:-5432}"
 DB_NAME="${POSTGRES_DB:-mfu_reservation}"
 DB_USER="${POSTGRES_USER:-mfu_admin}"
-PGPASSWORD="${POSTGRES_PASSWORD:-mfu_secure_password_2026}"
+
+if [ -z "${POSTGRES_PASSWORD:-}" ]; then
+  echo "❌ POSTGRES_PASSWORD is required (do not hardcode passwords in scripts)"
+  exit 1
+fi
+PGPASSWORD="${POSTGRES_PASSWORD}"
 
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"  # เก็บ backup ไว้ 30 วัน

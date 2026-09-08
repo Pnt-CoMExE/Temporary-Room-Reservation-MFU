@@ -11,7 +11,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-mfu_reservation}
       POSTGRES_USER: ${POSTGRES_USER:-mfu_admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mfu_secure_password_2026}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -61,10 +61,10 @@ services:
       DB_PORT: 5432
       DB_NAME: ${POSTGRES_DB:-mfu_reservation}
       DB_USER: ${POSTGRES_USER:-mfu_admin}
-      DB_PASSWORD: ${POSTGRES_PASSWORD:-mfu_secure_password_2026}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env.production}
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: ${JWT_SECRET:-mfu_space_jwt_secret_key_production_2026}
-      SESSION_SECRET: ${SESSION_SECRET:-mfu_space_session_secret_production_2026}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env.production}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env.production}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}

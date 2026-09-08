@@ -265,7 +265,7 @@ const confirmLogout = () => {
           >
             MFU Property Admin
           </h1>
-          <p class="text-gray-200 text-lg font-medium">
+          <p class="text-gray-200 text-base md:text-lg font-medium text-pretty max-w-2xl">
             {{ $t('admin.dashboard_title') }}
           </p>
         </div>

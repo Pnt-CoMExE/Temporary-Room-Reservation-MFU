@@ -11,21 +11,10 @@ import {
   validateRoomStatus,
   validateBookingStatus,
 } from "../validate";
+import { mockReq as baseMockReq, mockRes, mockNext } from "./helpers";
 
-// ─── Mock helpers ──────────────────────────────────────
 function mockReq(body: any = {}, params: any = {}, query: any = {}) {
-  return { body, params, query } as any;
-}
-
-function mockRes() {
-  const res: Record<string, any> = {};
-  res.status = vi.fn().mockReturnValue(res);
-  res.json = vi.fn().mockReturnValue(res);
-  return res as any;
-}
-
-function mockNext() {
-  return vi.fn();
+  return baseMockReq({ body, params, query });
 }
 
 // Helper to run a validation chain and get the result

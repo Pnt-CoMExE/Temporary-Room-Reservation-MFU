@@ -1,22 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import multer from "multer";
 import { ApiError, errorHandler } from "../errorHandler";
-
-// ─── Mock helpers ──────────────────────────────────────
-function mockReq() {
-  return {} as any;
-}
-
-function mockRes() {
-  const res: Record<string, any> = {};
-  res.status = vi.fn().mockReturnValue(res);
-  res.json = vi.fn().mockReturnValue(res);
-  return res as any;
-}
-
-function mockNext() {
-  return vi.fn();
-}
+import { mockReq, mockRes, mockNext } from "./helpers";
 
 // ─── ApiError Class ────────────────────────────────────
 describe("ApiError class", () => {

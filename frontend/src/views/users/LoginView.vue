@@ -85,8 +85,9 @@ const loginWithGoogle = () => {
         >
           <span class="text-[#d4af37]">MFU</span> PROPERTY
         </h1>
-        <p class="text-gray-300 mt-2 text-sm font-medium">
-          {{ $t('hero.badge') }}
+        <p class="text-gray-300 mt-2 text-sm font-medium px-2 leading-relaxed">
+          <span class="block">{{ $t('hero.badge') }}</span>
+          <span class="block whitespace-nowrap text-[#d4af37]/90 mt-0.5">{{ $t('hero.badge_org') }}</span>
         </p>
       </div>
 

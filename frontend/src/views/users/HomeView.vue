@@ -138,17 +138,20 @@ onUnmounted(() => {
           />
         </div>
         <span
-          class="inline-block py-1.5 px-4 rounded-full bg-black/30 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/50 text-xs font-bold tracking-widest uppercase mb-6 shadow-lg"
+          class="inline-flex flex-col sm:flex-row sm:items-center sm:gap-2 py-1.5 px-4 rounded-full bg-black/30 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/50 text-xs font-bold tracking-widest uppercase mb-6 shadow-lg"
         >
-          {{ $t('hero.badge') }}
+          <span>{{ $t('hero.badge') }}</span>
+          <span class="hidden sm:inline opacity-50" aria-hidden="true">·</span>
+          <span class="whitespace-nowrap">{{ $t('hero.badge_org') }}</span>
         </span>
         <h1
-          class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-xl leading-tight"
+          class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-xl leading-snug max-w-4xl mx-auto"
         >
-          {{ $t('hero.title') }}
+          <span class="block">{{ $t('hero.title') }}</span>
+          <span class="block whitespace-nowrap mt-1 md:mt-2">{{ $t('hero.title_org') }}</span>
         </h1>
         <p
-          class="text-lg md:text-xl text-gray-100 mb-12 font-medium max-w-2xl mx-auto drop-shadow-md"
+          class="text-base md:text-xl text-gray-100 mb-12 font-medium max-w-2xl mx-auto drop-shadow-md text-pretty leading-relaxed"
         >
           {{ $t('hero.subtitle') }}
         </p>
@@ -330,7 +333,7 @@ onUnmounted(() => {
               <font-awesome-icon icon="star" />
             </span>
           </h2>
-          <p class="text-gray-500 mt-2 text-base">
+          <p class="text-gray-500 mt-2 text-base text-pretty max-w-xl">
             {{ $t('home.featured_subtitle') }}
           </p>
         </div>

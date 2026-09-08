@@ -1,23 +1,7 @@
 import { describe, it, expect, vi, beforeAll } from "vitest";
 import jwt from "jsonwebtoken";
 import { verifyToken, verifyAdmin } from "../auth";
-
-// ─── Mock helpers ──────────────────────────────────────
-function mockReq(overrides: Record<string, any> = {}) {
-  return {
-    headers: {},
-    cookies: {},
-    user: undefined,
-    ...overrides,
-  } as any;
-}
-
-function mockRes() {
-  const res: Record<string, any> = {};
-  res.status = vi.fn().mockReturnValue(res);
-  res.json = vi.fn().mockReturnValue(res);
-  return res as any;
-}
+import { mockReq, mockRes } from "./helpers";
 
 // ─── Constants ─────────────────────────────────────────
 const JWT_SECRET = process.env.JWT_SECRET || "my_super_secret_key";

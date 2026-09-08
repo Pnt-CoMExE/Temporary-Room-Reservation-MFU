@@ -38,4 +38,17 @@ describe("resolveUserType", () => {
   it("ไม่ใช้ @lamduan.mfu.ac.th เป็น admin อีกต่อไป", () => {
     expect(resolveUserType("piya.student@lamduan.mfu.ac.th")).toBe("external");
   });
+
+  it("trim + lowercase อีเมลก่อนเทียบโดเมน", () => {
+    expect(resolveUserType("  Staff@Property.MFU.ac.th  ")).toBe("admin");
+  });
+
+  it("DEV_ADMIN_EMAILS ว่างหรือมีช่องว่างเกิน → ไม่ promote", () => {
+    process.env.DEV_ADMIN_EMAILS = " ,  , ";
+    expect(resolveUserType("nobody@gmail.com")).toBe("external");
+  });
+
+  it("อีเมลภายนอกไม่มี existingType → external", () => {
+    expect(resolveUserType("guest@yahoo.com", undefined)).toBe("external");
+  });
 });
