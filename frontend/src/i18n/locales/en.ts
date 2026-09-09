@@ -18,8 +18,8 @@ export default {
     title: "Find & Reserve Spaces",
     title_org: "Mae Fah Luang University",
     subtitle: "Book meeting rooms, activity halls, and campus spaces 24/7 with real-time availability.",
-    search_placeholder: "Room name or building...",
-    all_types: "All Space Types",
+    search_placeholder: "Room or building",
+    all_types: "All types",
     search_btn: "Search Spaces",
   },
   home: {

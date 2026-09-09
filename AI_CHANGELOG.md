@@ -2,6 +2,9 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-09]
+- Adjusted Home page search bar in `HomeView.vue` so Thai labels/placeholders (`ค้นหาพื้นที่`, `ชื่อห้อง / อาคาร`, `ประเภทพื้นที่`) are not clipped; widened bar, relaxed line-height, and shortened `hero.search_placeholder` / `hero.all_types` in `th.ts` and `en.ts`.
+
 ## [2026-06-06]
 - Read the project proposal document: `Temporary Rental Space Management System of MFU.pdf`.
 - Extracted requirements and created `requirements.md` detailing system objectives, user roles, and functional scope.

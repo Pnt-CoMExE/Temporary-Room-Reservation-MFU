@@ -157,69 +157,69 @@ onUnmounted(() => {
         </p>
 
         <div
-          class="bg-white/90 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 flex flex-col md:flex-row items-center w-full max-w-4xl mx-auto transform translate-y-12"
+          class="bg-white/90 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 flex flex-col md:flex-row items-stretch md:items-center w-full max-w-5xl mx-auto transform translate-y-12 overflow-visible"
         >
           <form
             @submit.prevent="handleSearch"
-            class="w-full flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-200/60"
+            class="w-full flex flex-col md:flex-row divide-y md:divide-y-0 md:divide-x divide-gray-200/60 min-w-0"
           >
             <div
-              class="flex-1 px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 rounded-t-3xl md:rounded-l-full md:rounded-tr-none cursor-text transition-colors group"
+              class="flex-[1.4] min-w-0 px-5 md:px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 rounded-t-3xl md:rounded-l-full md:rounded-tr-none cursor-text transition-colors group"
             >
               <div
-                class="text-[#ba0b2f] mr-4 text-2xl group-hover:scale-110 transition-transform duration-300"
+                class="text-[#ba0b2f] mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
               >
                 <font-awesome-icon icon="search" />
               </div>
-              <div class="w-full text-left">
+              <div class="min-w-0 w-full text-left">
                 <label
-                  class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1"
+                  class="block text-xs font-bold text-gray-500 mb-1 leading-normal"
                   >{{ $t('hero.search_btn') }}</label
                 >
                 <input
                   type="text"
                   v-model="searchParams.query"
                   :placeholder="$t('hero.search_placeholder')"
-                  class="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-gray-800 font-semibold placeholder-gray-400 outline-none"
+                  class="w-full bg-transparent border-none p-0 focus:ring-0 text-sm md:text-[15px] text-gray-800 font-semibold placeholder-gray-400 outline-none leading-relaxed"
                 />
               </div>
             </div>
             <div
-              class="flex-1 px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-text transition-colors group"
+              class="flex-1 min-w-0 px-5 md:px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-text transition-colors group"
             >
               <div
-                class="text-[#ba0b2f] mr-4 text-2xl group-hover:scale-110 transition-transform duration-300"
+                class="text-[#ba0b2f] mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
               >
                 <font-awesome-icon :icon="['far', 'calendar-alt']" />
               </div>
-              <div class="w-full text-left">
+              <div class="min-w-0 w-full text-left">
                 <label
-                  class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1"
+                  class="block text-xs font-bold text-gray-500 mb-1 leading-normal"
                   >{{ $t('booking.booking_date') }}</label
                 >
                 <input
                   type="date"
                   v-model="searchParams.date"
-                  class="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-gray-800 font-semibold outline-none"
+                  class="w-full min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm md:text-[15px] text-gray-800 font-semibold outline-none leading-relaxed"
                 />
               </div>
             </div>
             <div
-              class="flex-1 px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-pointer transition-colors group relative"
+              class="flex-[1.2] min-w-0 px-5 md:px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-pointer transition-colors group relative"
             >
               <div
-                class="text-[#ba0b2f] mr-4 text-2xl group-hover:scale-110 transition-transform duration-300"
+                class="text-[#ba0b2f] mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
               >
                 <font-awesome-icon icon="layer-group" />
               </div>
-              <div class="w-full text-left pr-6">
+              <div class="min-w-0 w-full text-left pr-6">
                 <label
-                  class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1"
+                  class="block text-xs font-bold text-gray-500 mb-1 leading-normal"
                   >{{ $t('room.type') }}</label
                 >
                 <select
                   v-model="searchParams.location"
-                  class="w-full bg-transparent border-none p-0 focus:ring-0 text-base text-gray-800 font-semibold outline-none cursor-pointer appearance-none relative z-10"
+                  class="w-full min-w-0 bg-transparent border-none p-0 py-0.5 focus:ring-0 text-sm md:text-[15px] text-gray-800 font-semibold outline-none cursor-pointer appearance-none relative z-10 leading-relaxed"
                 >
                   <option value="">{{ $t('hero.all_types') }}</option>
                   <option value="ห้องประชุม">{{ $t('room.filter_meeting') }}</option>
@@ -230,7 +230,7 @@ onUnmounted(() => {
                   <option value="ศูนย์กีฬา">{{ $t('room.filter_sports') }}</option>
                   <option value="ลานกิจกรรม">{{ $t('room.filter_plaza') }}</option>
                   <option value="อาคารสถานที่">{{ $t('room.filter_building') }}</option>
-                </select><font-awesome-icon icon="chevron-down" class="absolute right-6 top-1/2 transform -translate-y-1 text-gray-400 text-xs z-0" />
+                </select><font-awesome-icon icon="chevron-down" class="absolute right-5 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs z-0 pointer-events-none" />
               </div>
             </div>
             <div class="p-2 w-full md:w-auto mt-2 md:mt-0">
