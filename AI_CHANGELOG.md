@@ -388,6 +388,16 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - High-complexity files — ต้อง refactor แยก sprint
 - Partial analysis 71 files = GitHub API rate limit ของ CodeFlow ไม่ใช่ bug ในโค้ด
 
+## [2026-09-10 — Advisor recording 1: Testing plan + demo prep update]
+
+- **`docs/TESTING_PLAN.md` [NEW]**: แผนทดสอบแยกโมดูล (Auth/AuthZ/Booking/Admin/Payment) + map sprint + ช่องผ่าน/ไม่ผ่าน + ประโยคพูด
+- **`docs/FRIDAY_DEMO_PREP.md`**: อัปเดตตาม Recording 1 — โฟลว์หลัก + อธิบาย FE↔BE Auth + ส่วนโชว์แผน Testing; ตอบคำถามเรื่อง “ต้องมีเว็บจริงไหม”
+
+## [2026-09-09 — Friday demo prep (basic flow + Security script)]
+
+- **`docs/FRIDAY_DEMO_PREP.md` [NEW]**: สคริปต์นำเสนอตามที่อาจารย์สรุป — Demo ฟังก์ชันพื้นฐาน (ไม่โฟกัส UAT) + อธิบาย AuthN/AuthZ/Token + งานถัดไป (Payment → Testing → Deploy)
+- **`docs/DEMO_SECURITY.md`**: ลิงก์ไปเอกสารเตรียมรอบ Demo
+
 ## [2026-09-09 — Option A: expand AuthZ/env test coverage]
 
 เพิ่มเทสโดยไม่ refactor Vue / แยกไฟล์ใหญ่:

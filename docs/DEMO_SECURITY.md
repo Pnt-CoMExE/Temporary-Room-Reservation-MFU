@@ -1,8 +1,10 @@
 # Demo Security — Authentication & Authorization
 
 **โครงการ:** MFU Space Booking  
-**อัปเดตล่าสุด:** 2026-09-06  
+**อัปเดตล่าสุด:** 2026-09-09  
 **จุดประสงค์:** สคริปต์และโน้ตอธิบาย AuthN/AuthZ ตามระบบที่ใช้งานจริง สำหรับ Demo หน้าอาจารย์
+
+> **ตรวจงานรอบถัดไป (Demo ฟังก์ชัน + พูด Security):** ใช้สคริปต์รวมใน [`FRIDAY_DEMO_PREP.md`](./FRIDAY_DEMO_PREP.md) — เอกสารนี้โฟกัสรายละเอียด Security/Token
 
 ---
 
