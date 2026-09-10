@@ -50,9 +50,10 @@
 
 - [ ] รันระบบพร้อมใช้ เช่น Docker ที่ `http://localhost:8080`  
   หรือ `npm run dev` (frontend :5173 / backend :3000)
-- [ ] มีบัญชี Google อย่างน้อย 2 แบบ (หรือใช้ `DEV_ADMIN_EMAILS` ให้ 1 บัญชีเป็น admin ได้)
-  - **User:** อีเมลทั่วไป / `@mfu.ac.th`
-  - **Admin:** `@property.mfu.ac.th` หรืออีเมลใน `DEV_ADMIN_EMAILS`
+- [ ] มีบัญชี Demo ตามตารางด้านล่าง (ตั้งใน `.env` แล้ว **login ใหม่** หลังเปลี่ยน env)
+  - **Admin:** `comza962@gmail.com` (`DEV_ADMIN_EMAILS`)
+  - **Internal:** `6631501071@lamduan.mfu.ac.th` (`DEV_INTERNAL_EMAILS`)
+  - หรือ `@property.mfu.ac.th` / `@mfu.ac.th` ตามโดเมนจริง
 - [ ] `PAYMENT_PROVIDER=mock_sandbox` (โชว์สั้นได้ ไม่ต้องเน้น)
 - [ ] เปิด Chrome DevTools: **Application** (Cookies / localStorage) + **Network**
 - [ ] เปิดแท็บ `docs/TESTING_PLAN.md` พร้อมโชว์
@@ -168,6 +169,8 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 | `@mfu.ac.th` | internal |
 | อื่นๆ | external |
 | `DEV_ADMIN_EMAILS` | admin (ทดสอบเท่านั้น) |
+| `DEV_INTERNAL_EMAILS` | internal (ทดสอบเท่านั้น) |
+| Demo รอบนี้ | `comza962@gmail.com` → admin · `6631501071@lamduan.mfu.ac.th` → internal |
 
 **สองชั้น**
 
@@ -242,7 +245,9 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 | มี testing แล้วยัง? | มีแผนแยกโมดูล + Vitest/Playwright/CI — โชว์ใน TESTING_PLAN |
 | Payment พร้อมยัง? | มี mock และเทส ownership แล้ว; gateway จริงทำหลัง core+test ตามลำดับที่อาจารย์แนะนำ |
 | UAT ทำแล้วหรือยัง? | เอกสารพร้อม แต่รอบนี้ไม่เน้นผู้ใช้จริง ตามที่คุยไว้ |
-| ใครเป็น admin? | `@property.mfu.ac.th` (+ `DEV_ADMIN_EMAILS` ตอนทดสอบ) |
+| ใครเป็น admin? | `@property.mfu.ac.th` หรือ Demo: `comza962@gmail.com` ผ่าน `DEV_ADMIN_EMAILS` |
+| ใครเป็น internal ตอน Demo? | `6631501071@lamduan.mfu.ac.th` ผ่าน `DEV_INTERNAL_EMAILS` (หรือ `@mfu.ac.th`) |
+| โปรเจกต์นี้เป็น MVC ไหม? | ไม่ใช่ MVC เซิร์ฟเวอร์แบบตำรา 100% — เป็น **SPA (Vue) + REST API (Express)** แต่แยกชั้นแนว MVC ได้ (ดู §10) |
 
 ---
 
@@ -264,3 +269,100 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 3. [`DEMO_SECURITY.md`](./DEMO_SECURITY.md) — ไดอะแกรม Token  
 4. โค้ด: `auth.routes.ts`, `auth.ts`, `resolveUserType.ts`, `router/index.ts`  
 5. ระบบที่รันอยู่: `http://localhost:8080` (หรือ dev ports)
+
+---
+
+## 10. MVC คืออะไร — กับโปรเจกต์นี้ (ถ้าอาจารย์ถาม)
+
+### คำตอบตรง ๆ
+
+> “โปรเจกต์นี้ **ไม่ได้ทำเป็น MVC แบบคลาสสิกบนเซิร์ฟเวอร์** ที่ View เรนเดอร์จาก Backend  
+> แต่เป็นสถาปัตยกรรม **SPA + API**: หน้าบ้าน Vue แยกจากหลังบ้าน Express  
+> ภายในยัง **แยกหน้าที่แนวเดียวกับ MVC** ได้ครับ/ค่ะ”
+
+### Map แบบเปรียบเทียบ (พูดชี้โฟลเดอร์ได้)
+
+| แนว MVC | ในระบบนี้ | ตัวอย่าง |
+|---------|-----------|----------|
+| **View** | Frontend Vue (หน้าจอ) | `frontend/src/views/...` |
+| **Controller** | Express routes + middleware | `backend/src/routes/*.ts`, `verifyToken` |
+| **Model** | ข้อมูล/ธุรกิจ + DB | PostgreSQL, `db.ts`, บางส่วนใน `services/` |
+
+ฝั่ง Vue เองใกล้แนว **MVVM** (View + state/reactivity) มากกว่า MVC แท้ — ไม่จำเป็นต้องย้ำถ้าอาจารย์ไม่ได้ถามลึก
+
+### สคริปต์พูด ~30–45 วินาที
+
+> “MVC คือการแยก Model ข้อมูล, View หน้าจอ, และ Controller ตัวรับคำขอ  
+> ระบบเราแยกหน้าบ้านกับหลังบ้านชัดเจน View อยู่ที่ Vue Controller หลักอยู่ที่ API routes  
+> ส่วน Model คือฐานข้อมูลและการทำงานกับข้อมูล  
+> ดังนั้นจึง **ใช้แนวคิดแยกชั้นแบบ MVC** แต่รูปแบบจริงคือ **Client–Server / SPA + REST API** ไม่ใช่ MVC ไฟล์เดียวแบบเฟรมเวิร์กเก่า  
+> ข้อดีคือทดสอบและคุม Security ที่ Controller/Backend ได้ชัด เช่น ตรวจ JWT ที่ `verifyToken` ไม่ให้ View เป็นคนกำหนดสิทธิ์”
+
+### อย่าพูดแบบนี้ (คลาดเคลื่อน)
+
+- “โปรเจกต์เราเป็น MVC 100%” → อาจารย์ที่เคร่งสถาปัตยกรรมอาจแก้ทันที  
+- “Vue คือ Controller” → หน้า Vue เป็น View เป็นหลัก; logic เรียก API เป็นชั้นประสาน ไม่ใช่ Controller ของทั้งระบบ
+
+### ถ้าอาจารย์ถามลึก — ตอบทีละชั้น
+
+#### Q1: MVC คลาสสิกต่างจากของเราอย่างไร?
+
+| MVC คลาสสิก (เช่น Laravel Blade / ASP.NET MVC เก่า) | ระบบเรา |
+|-----------------------------------------------------|---------|
+| Browser ขอหน้า → Server รวม Model+View ส่ง HTML กลับ | Browser โหลด Vue ครั้งเดียว แล้วเรียก API เป็น JSON |
+| Controller เลือกไฟล์ View บนเซิร์ฟเวอร์ | Express ส่งข้อมูลอย่างเดียว ไม่เรนเดอร์หน้าจอ |
+| State อยู่เซิร์ฟเวอร์/เซสชันหน้าเต็ม ๆ | UI state อยู่ฝั่ง Vue; สิทธิ์จริงอยู่ JWT ฝั่ง API |
+
+**พูด:**  
+> “MVC แบบตำรา View ถูกสร้างที่เซิร์ฟเวอร์ ของเรา View อยู่ที่ client และคุยกับ Backend ผ่าน REST API จึงเรียกว่า SPA + API หรือ Client–Server ชัดกว่าคำว่า MVC ล้วน ๆ”
+
+#### Q2: แล้วทำไมยังพูดถึง MVC ได้?
+
+> “เพราะหลักการเดียวกันคือแยกหน้าที่ — ไม่ให้หน้าจอไปยุ่งกับ SQL โดยตรง และไม่ให้ชั้นข้อมูลไปวาด HTML  
+> เรา map ได้ว่า View=Vue, Controller≈routes/middleware, Model≈DB+services  
+> แต่โครงสร้างโฟลเดอร์และ runtime ไม่ได้เป็นเฟรมเวิร์ก MVC เดียว”
+
+#### Q3: ฝั่ง Vue เป็นอะไร ถ้าไม่ใช่ MVC?
+
+> “ฝั่ง frontend ใกล้ **MVVM** มากกว่าครับ/ค่ะ — Template คือ View, ข้อมูล reactive/`ref` ทำหน้าที่คล้าย ViewModel, ส่วน Model จริง ๆ ของธุรกิจอยู่หลังบ้าน  
+> Router guard เป็นแค่ตัวช่วยนำทาง ไม่ใช่ Authorization จริง”
+
+#### Q4: Backend แยกชั้นยังไง ถ้าไม่ใช่ MVC เป๊ะ?
+
+พูดชี้โฟลเดอร์:
+
+1. **`routes/`** — รับ HTTP คล้าย Controller  
+2. **`middleware/`** — ตัดขวาง เช่น `verifyToken`, validate (ก่อนเข้า logic)  
+3. **`services/`** — ตรรกะที่ซับซ้อนขึ้น (อีเมล, PDF, payment adapter)  
+4. **`db.ts` + PostgreSQL** — ชั้นข้อมูล  
+
+> “บางจุดยังมี SQL ใน route โดยตรง ซึ่งในอุดมคติอาจดึงเข้า service/repository ให้บางลง แต่ภาพรวมยังแยก API ออกจาก UI ชัด”
+
+#### Q5: Security โยงกับ MVC/ชั้นอย่างไร? (มักถามต่อ)
+
+> “ถ้า View เป็นคนกำหนดสิทธิ์จะอันตราย  
+> เราให้ Controller/API เป็นคนตรวจ JWT (`verifyToken` / `verifyAdmin`)  
+> View มี route guard แค่กันหลงเข้าหน้า Admin  
+> นี่คือเหตุผลที่แยกชั้นสำคัญต่อ Security ไม่ใช่แค่จัดโค้ดสวย”
+
+#### Q6: ทำไมไม่ทำ MVC เต็มรูปแบบบนเซิร์ฟเวอร์?
+
+> “เพราะต้องการ UI โต้ตอบเร็ว สองภาษา และแยกทีมหน้าบ้าน–หลังบ้านได้  
+> SPA + API เป็นแบบที่นิยมกับ Vue/React ปัจจุบัน และยังทดสอบ API แยกด้วย Vitest ได้”
+
+#### Q7: ข้อเสีย / ข้อจำกัดที่ควรยอมรับตรง ๆ
+
+- บาง business logic ยังปนใน `routes` หรือในหน้า Vue → ยัง refactor ต่อได้  
+- มีทั้ง cookie (สิทธิ์จริง) กับ localStorage (UI) ต้องอธิบายให้ชัด  
+- ไม่มีชั้น Domain/Repository แยกเป๊ะแบบ Clean Architecture  
+
+> “เรายังปรับปรุงการแยกชั้นต่อได้ แต่ตอนนี้ขอบเขตชัดพอสำหรับโฟลว์หลักและ AuthZ”
+
+### สคริปต์สำรองถ้าถูกถามต่อเนื่อง (~1 นาที)
+
+> “ขยายนิดหนึ่งครับ/ค่ะ MVC แบบคลาสสิกเซิร์ฟเวอร์จะเรนเดอร์ HTML จาก Backend  
+> ของเราเป็น Single Page Application หน้า Vue คุยกับ Express ผ่าน JSON  
+> ดังนั้นชื่อที่ตรงที่สุดคือ Client–Server หรือ SPA + REST API  
+> แต่เรายังยึดหลักแยก View / ตัวควบคุมคำขอ / ข้อมูล เหมือนแนว MVC  
+> ฝั่ง Vue ใกล้ MVVM และฝั่ง Backend มี routes, middleware, services, database  
+> จุดที่เกี่ยวกับ Security คือสิทธิ์อยู่ที่ API ไม่ใช่ที่หน้าจอ — login แล้วได้ JWT ใน HttpOnly cookie ทุกคำขอที่สำคัญถูก `verifyToken` ตรวจก่อนเข้าถึงข้อมูล”

@@ -388,10 +388,17 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - High-complexity files — ต้อง refactor แยก sprint
 - Partial analysis 71 files = GitHub API rate limit ของ CodeFlow ไม่ใช่ bug ในโค้ด
 
+## [2026-09-10 — Demo role overrides for advisor session]
+
+- **`resolveUserType`**: เพิ่ม `DEV_INTERNAL_EMAILS` (คู่กับ `DEV_ADMIN_EMAILS`)
+- **Local env (ไม่ commit):** `comza962@gmail.com` → admin, `6631501071@lamduan.mfu.ac.th` → internal
+- อัปเดต `docker-compose.prod.yml`, `.env*.example`, เทส, สคริปต์ Demo
+
 ## [2026-09-10 — Advisor recording 1: Testing plan + demo prep update]
 
 - **`docs/TESTING_PLAN.md` [NEW]**: แผนทดสอบแยกโมดูล (Auth/AuthZ/Booking/Admin/Payment) + map sprint + ช่องผ่าน/ไม่ผ่าน + ประโยคพูด
 - **`docs/FRIDAY_DEMO_PREP.md`**: อัปเดตตาม Recording 1 — โฟลว์หลัก + อธิบาย FE↔BE Auth + ส่วนโชว์แผน Testing; ตอบคำถามเรื่อง “ต้องมีเว็บจริงไหม”
+- **`docs/FRIDAY_DEMO_PREP.md` §10**: สคริปต์ตอบ MVC — โปรเจกต์เป็น SPA+API ไม่ใช่ MVC คลาสสิก แต่แยกชั้นแนว MVC ได้
 
 ## [2026-09-09 — Friday demo prep (basic flow + Security script)]
 

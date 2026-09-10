@@ -7,6 +7,7 @@ describe("resolveUserType", () => {
   beforeEach(() => {
     process.env = { ...originalEnv };
     delete process.env.DEV_ADMIN_EMAILS;
+    delete process.env.DEV_INTERNAL_EMAILS;
   });
 
   afterEach(() => {
@@ -50,5 +51,17 @@ describe("resolveUserType", () => {
 
   it("อีเมลภายนอกไม่มี existingType → external", () => {
     expect(resolveUserType("guest@yahoo.com", undefined)).toBe("external");
+  });
+
+  it("รองรับ DEV_INTERNAL_EMAILS สำหรับ Demo/UAT", () => {
+    process.env.DEV_INTERNAL_EMAILS = "6631501071@lamduan.mfu.ac.th";
+    expect(resolveUserType("6631501071@lamduan.mfu.ac.th")).toBe("internal");
+    expect(resolveUserType("other@lamduan.mfu.ac.th")).toBe("external");
+  });
+
+  it("DEV_ADMIN_EMAILS มีลำดับสูงกว่า DEV_INTERNAL_EMAILS", () => {
+    process.env.DEV_ADMIN_EMAILS = "both@gmail.com";
+    process.env.DEV_INTERNAL_EMAILS = "both@gmail.com";
+    expect(resolveUserType("both@gmail.com")).toBe("admin");
   });
 });

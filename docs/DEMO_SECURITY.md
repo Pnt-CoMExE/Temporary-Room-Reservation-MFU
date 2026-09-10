@@ -73,7 +73,8 @@ sequenceDiagram
 | `@property.mfu.ac.th` | `admin` |
 | `@mfu.ac.th` | `internal` |
 | อื่นๆ | `external` |
-| อยู่ใน `DEV_ADMIN_EMAILS` | `admin` (UAT เท่านั้น) |
+| อยู่ใน `DEV_ADMIN_EMAILS` | `admin` (Demo/UAT เท่านั้น) |
+| อยู่ใน `DEV_INTERNAL_EMAILS` | `internal` (Demo/UAT เท่านั้น) |
 
 ### 3.2 ชั้นป้องกัน
 
