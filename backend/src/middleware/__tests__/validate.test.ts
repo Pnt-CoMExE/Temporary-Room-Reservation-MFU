@@ -309,6 +309,7 @@ describe("validateUpdateProfile", () => {
       email: "test@mfu.ac.th",
       firstname: "สมชาย",
       lastname: "ใจดี",
+      phone_number: "0812345678",
     })).toBe(200);
   });
 
@@ -326,6 +327,7 @@ describe("validateUpdateProfile", () => {
       email: "not-an-email",
       firstname: "สมชาย",
       lastname: "ใจดี",
+      phone_number: "0812345678",
     })).toBe(400);
   });
 
@@ -334,6 +336,7 @@ describe("validateUpdateProfile", () => {
       email: "test@mfu.ac.th",
       firstname: "",
       lastname: "ใจดี",
+      phone_number: "0812345678",
     })).toBe(400);
   });
 
@@ -342,6 +345,7 @@ describe("validateUpdateProfile", () => {
       email: "test@mfu.ac.th",
       firstname: "สมชาย",
       lastname: "",
+      phone_number: "0812345678",
     })).toBe(400);
   });
 
@@ -354,12 +358,12 @@ describe("validateUpdateProfile", () => {
     })).toBe(400);
   });
 
-  it("ผ่านเมื่อไม่ส่ง phone_number (optional)", async () => {
+  it("ไม่ผ่านเมื่อไม่ส่ง phone_number (บังคับแล้ว)", async () => {
     expect(await test({
       email: "test@mfu.ac.th",
       firstname: "สมชาย",
       lastname: "ใจดี",
-    })).toBe(200);
+    })).toBe(400);
   });
 });
 

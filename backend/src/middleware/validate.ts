@@ -70,8 +70,10 @@ export const validateUpdateProfile = [
   body("firstname").trim().notEmpty().withMessage("กรุณากรอกชื่อ"),
   body("lastname").trim().notEmpty().withMessage("กรุณากรอกนามสกุล"),
   body("phone_number")
-    .optional({ values: "falsy" })
-    .matches(/^[0-9\- ]{9,10}$/)
+    .trim()
+    .notEmpty()
+    .withMessage("กรุณากรอกเบอร์โทรศัพท์")
+    .matches(/^[0-9\- ]{9,15}$/)
     .withMessage("เบอร์โทรศัพท์ไม่ถูกต้อง"),
   handleValidationErrors,
 ];

@@ -76,16 +76,45 @@ const bookings = ref<BookingInfo[]>([]);
 const stats = ref<Record<string, number>>({
   pendingCount: 0,
   approvedToday: 0,
+  approvedCount: 0,
+  paidCount: 0,
   currentMonthRevenue: 0,
+  rangeRevenue: 0,
 });
+
+const filterFrom = ref("");
+const filterTo = ref("");
+const revenueYear = ref(new Date().getFullYear());
+
+const applyDashboardFilters = async () => {
+  await fetchAdminData();
+};
+
+const clearDashboardFilters = async () => {
+  filterFrom.value = "";
+  filterTo.value = "";
+  revenueYear.value = new Date().getFullYear();
+  await fetchAdminData();
+};
 
 const fetchAdminData = async () => {
   try {
-    const statsRes = await api.get("/api/admin/stats");
-    stats.value = statsRes.data;
+    const statsParams: Record<string, string> = {};
+    if (filterFrom.value && filterTo.value) {
+      statsParams.from = filterFrom.value;
+      statsParams.to = filterTo.value;
+    }
+    const statsRes = await api.get("/api/admin/stats", { params: statsParams });
+    stats.value = {
+      ...stats.value,
+      ...statsRes.data,
+      approvedCount: statsRes.data.approvedCount ?? statsRes.data.approvedToday ?? 0,
+      paidCount: statsRes.data.paidCount ?? 0,
+      rangeRevenue: statsRes.data.rangeRevenue ?? statsRes.data.currentMonthRevenue ?? 0,
+    };
 
     const bookingsRes = await api.get("/api/admin/bookings");
-    bookings.value = bookingsRes.data.map((b: any) => ({
+    let mapped = bookingsRes.data.map((b: any) => ({
       ...b,
       id: b.booking_no,
       dbId: b.id,
@@ -99,32 +128,74 @@ const fetchAdminData = async () => {
       feedbackData: { rating: b.feedback_rating, comment: b.feedback_comment }
     }));
 
-    // ✅ ดึงข้อมูลรายได้ย้อนหลัง 6 เดือนจาก API จริง
-    const revenueRes = await api.get("/api/admin/revenue-by-month");
-    if (revenueRes.data && revenueRes.data.length > 0) {
+    if (filterFrom.value && filterTo.value) {
+      mapped = mapped.filter(
+        (b: BookingInfo) => b.date >= filterFrom.value && b.date <= filterTo.value
+      );
+    }
+    bookings.value = mapped;
+
+    const revenueParams: Record<string, string | number> = {
+      year: revenueYear.value,
+    };
+    if (filterFrom.value && filterTo.value) {
+      revenueParams.from = filterFrom.value;
+      revenueParams.to = filterTo.value;
+    }
+    const revenueRes = await api.get("/api/admin/revenue-by-month", {
+      params: filterFrom.value && filterTo.value
+        ? { from: filterFrom.value, to: filterTo.value }
+        : { year: revenueYear.value },
+    });
+    // Prefer stats/revenue when range set
+    let revenueData = revenueRes.data;
+    if (filterFrom.value && filterTo.value) {
+      try {
+        const ranged = await api.get("/api/admin/stats/revenue", {
+          params: { from: filterFrom.value, to: filterTo.value },
+        });
+        revenueData = ranged.data;
+      } catch {
+        /* keep month endpoint */
+      }
+    } else {
+      try {
+        const byYear = await api.get("/api/admin/stats/revenue", {
+          params: { year: revenueYear.value },
+        });
+        if (Array.isArray(byYear.data) && byYear.data.length) revenueData = byYear.data;
+      } catch {
+        /* keep */
+      }
+    }
+
+    if (revenueData && revenueData.length > 0) {
       barChartData.value = {
-        labels: revenueRes.data.map((r: any) => r.label),
+        labels: revenueData.map((r: any) => r.label),
         datasets: [{
           label: "รายได้ (บาท)",
           backgroundColor: "#ba0b2f",
           borderRadius: 6,
-          data: revenueRes.data.map((r: any) => r.revenue),
+          data: revenueData.map((r: any) => r.revenue),
         }]
       };
-      // คำนวณรายได้เดือนที่ผ่านมาจากข้อมูล API (ข้อมูลเรียง ASC, ตัวสุดท้าย = เดือนปัจจุบัน)
-      if (revenueRes.data.length > 1) {
-        stats.value.lastMonthRevenue = revenueRes.data[revenueRes.data.length - 2].revenue;
+      if (revenueData.length > 1) {
+        stats.value.lastMonthRevenue = revenueData[revenueData.length - 2].revenue;
       } else {
         stats.value.lastMonthRevenue = 0;
       }
-      // เตรียมข้อมูลรายเดือนสำหรับแสดงในส่วนขยาย
-      revenueMonths.value = revenueRes.data.map((r: any) => ({
+      revenueMonths.value = revenueData.map((r: any) => ({
         label: r.label,
         revenue: r.revenue
       }));
+    } else {
+      barChartData.value = {
+        labels: [],
+        datasets: [{ label: "รายได้ (บาท)", backgroundColor: "#ba0b2f", borderRadius: 6, data: [] }],
+      };
+      revenueMonths.value = [];
     }
 
-    // คำนวณห้องยอดนิยม
     const roomCounts: Record<string, number> = {};
     bookings.value.forEach((b: BookingInfo) => {
       roomCounts[b.roomName] = (roomCounts[b.roomName] || 0) + 1;
@@ -142,7 +213,6 @@ const fetchAdminData = async () => {
       });
     if (sortedRooms.length > 0) popularRooms.value = sortedRooms;
 
-    // คำนวณ Doughnut Chart
     const typeCounts = { external: 0, internal: 0, co_op: 0 };
     bookings.value.forEach((b: BookingInfo) => {
       if (b.organization_type === 'internal') typeCounts.internal++;
@@ -411,19 +481,63 @@ const confirmLogout = () => {
             v-if="activeTab === 'overview'"
             class="space-y-8 animate-fade-up"
           >
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Date range + year filter -->
+            <div
+              class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-3 lg:items-end"
+            >
+              <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-black text-gray-400 uppercase">วันเริ่มต้น</label>
+                <input
+                  v-model="filterFrom"
+                  type="date"
+                  class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-black text-gray-400 uppercase">วันสิ้นสุด</label>
+                <input
+                  v-model="filterTo"
+                  type="date"
+                  class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                />
+              </div>
+              <div class="flex flex-col gap-1">
+                <label class="text-[10px] font-black text-gray-400 uppercase">ปีกราฟรายได้</label>
+                <input
+                  v-model.number="revenueYear"
+                  type="number"
+                  min="2020"
+                  max="2100"
+                  class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-28"
+                />
+              </div>
+              <button
+                @click="applyDashboardFilters"
+                class="bg-[#ba0b2f] text-white px-4 py-2.5 rounded-xl text-xs font-black hover:bg-[#8c0823] cursor-pointer"
+              >
+                ใช้ตัวกรอง
+              </button>
+              <button
+                @click="clearDashboardFilters"
+                class="bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-xs font-black hover:bg-gray-200 cursor-pointer"
+              >
+                ล้าง
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               <div
                 class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
               >
                 <div class="flex items-center gap-5">
                   <div
-                    class="w-16 h-16 rounded-full bg-yellow-50 text-yellow-500 flex items-center justify-center text-2xl shrink-0"
+                    class="w-16 h-16 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center text-2xl shrink-0"
                   >
                     <font-awesome-icon icon="clock" />
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      คำขอรออนุมัติ
+                      รออนุมัติ (Pending)
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.pendingCount }}
@@ -436,16 +550,35 @@ const confirmLogout = () => {
               >
                 <div class="flex items-center gap-5">
                   <div
-                    class="w-16 h-16 rounded-full bg-green-50 text-green-500 flex items-center justify-center text-2xl shrink-0"
+                    class="w-16 h-16 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center text-2xl shrink-0"
                   >
                     <font-awesome-icon icon="check-double" />
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      อนุมัติแล้ววันนี้
+                      อนุมัติแล้ว (Approved)
                     </p>
                     <p class="text-3xl font-black text-gray-900">
-                      {{ stats.approvedToday }}
+                      {{ stats.approvedCount || stats.approvedToday }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
+              >
+                <div class="flex items-center gap-5">
+                  <div
+                    class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shrink-0"
+                  >
+                    <font-awesome-icon icon="wallet" />
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-gray-500 mb-1">
+                      จ่ายเงินแล้ว (Paid)
+                    </p>
+                    <p class="text-3xl font-black text-gray-900">
+                      {{ stats.paidCount || 0 }}
                     </p>
                   </div>
                 </div>
@@ -464,10 +597,10 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      รายได้รวมเดือนนี้
+                      {{ filterFrom && filterTo ? "รายได้ตามช่วงที่เลือก" : "รายได้รวมเดือนนี้" }}
                     </p>
                     <p class="text-3xl font-black text-[#ba0b2f]">
-                      ฿{{ stats.currentMonthRevenue.toLocaleString() }}
+                      ฿{{ (stats.rangeRevenue || stats.currentMonthRevenue || 0).toLocaleString() }}
                     </p>
                   </div>
                 </div>

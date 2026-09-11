@@ -13,6 +13,8 @@ interface UserItem {
   created_at: string;
   total_bookings: number;
   approved_bookings: number;
+  paid_bookings?: number;
+  is_active: boolean;
 }
 
 const users = ref<UserItem[]>([]);
@@ -20,23 +22,15 @@ const loading = ref(true);
 const searchQuery = ref("");
 const filterRole = ref("all");
 
-const saveLog = async (action: string, details: string) => {
-  try {
-    await api.post("/api/admin/logs", {
-      adminName: localStorage.getItem("userName") || "เจ้าหน้าที่ จัดการทรัพย์สิน",
-      action,
-      details,
-    });
-  } catch (err) {
-    console.error("Failed to save log", err);
-  }
-};
-
 const fetchUsers = async () => {
   loading.value = true;
   try {
     const res = await api.get("/api/admin/users");
-    users.value = res.data;
+    users.value = res.data.map((u: any) => ({
+      ...u,
+      is_active: u.is_active !== false,
+      paid_bookings: Number(u.paid_bookings || 0),
+    }));
   } catch (err) {
     console.error("Error fetching users:", err);
   } finally {
@@ -46,7 +40,6 @@ const fetchUsers = async () => {
 
 onMounted(() => fetchUsers());
 
-// ─── Computed ───────────────────────────────────────────────
 const filteredUsers = computed(() => {
   let list = users.value;
   if (filterRole.value !== "all") {
@@ -65,14 +58,19 @@ const filteredUsers = computed(() => {
 });
 
 const roleCounts = computed(() => {
-  const counts: Record<string, number> = { all: users.value.length, admin: 0, internal: 0, co_op: 0, external: 0 };
+  const counts: Record<string, number> = {
+    all: users.value.length,
+    admin: 0,
+    internal: 0,
+    co_op: 0,
+    external: 0,
+  };
   users.value.forEach((u) => {
     if (counts[u.user_type] !== undefined) counts[u.user_type]++;
   });
   return counts;
 });
 
-// ─── Role display helper ─────────────────────────────────────
 const roleLabel: Record<string, string> = {
   admin: "ผู้ดูแลระบบ",
   internal: "บุคลากร MFU",
@@ -87,73 +85,104 @@ const roleBadgeClass: Record<string, string> = {
 };
 
 const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" });
-
-// ─── Change Role ─────────────────────────────────────────────
-const changeRole = async (user: UserItem) => {
-  const roleOptions = [
-    { value: "admin", label: "ผู้ดูแลระบบ (Admin)" },
-    { value: "internal", label: "บุคลากร MFU (Internal)" },
-    { value: "co_op", label: "หน่วยงานร่วมจัด (Co-op)" },
-    { value: "external", label: "บุคคลภายนอก (External)" },
-  ];
-
-  const { value: newRole } = await Swal.fire({
-    title: `<h3 class="text-xl font-black text-gray-900">เปลี่ยน Role ผู้ใช้</h3>`,
-    html: `
-      <p class="text-sm text-gray-500 mb-4">${user.firstname} ${user.lastname}<br><span class="font-bold text-gray-700">${user.email}</span></p>
-      <select id="role-select" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-[#ba0b2f]">
-        ${roleOptions.map((r) => `<option value="${r.value}" ${r.value === user.user_type ? "selected" : ""}>${r.label}</option>`).join("")}
-      </select>
-    `,
-    preConfirm: () => (document.getElementById("role-select") as HTMLSelectElement)?.value,
-    showCancelButton: true,
-    confirmButtonText: "บันทึก",
-    cancelButtonText: "ยกเลิก",
-    buttonsStyling: false,
-    customClass: {
-      popup: "rounded-[2rem] p-8 max-w-sm",
-      confirmButton: "bg-[#ba0b2f] text-white rounded-xl px-5 py-3 font-bold cursor-pointer",
-      cancelButton: "bg-gray-100 text-gray-600 rounded-xl px-5 py-3 font-bold ml-3 cursor-pointer",
-    },
+  new Date(d).toLocaleDateString("th-TH", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 
-  if (!newRole || newRole === user.user_type) return;
-
+const toggleActive = async (user: UserItem) => {
+  const next = !user.is_active;
+  const { isConfirmed } = await Swal.fire({
+    title: next ? "เปิดใช้งานบัญชี?" : "ปิดใช้งานบัญชี?",
+    html: `<p class="text-sm text-gray-600">${user.firstname} ${user.lastname}<br/><b>${user.email}</b></p>
+           <p class="text-xs text-gray-500 mt-2">${next ? "ผู้ใช้จะเข้าสู่ระบบได้ตามปกติ" : "ผู้ใช้จะไม่สามารถ Login ด้วย Google ได้"}</p>`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: next ? "เปิดใช้งาน" : "ปิดใช้งาน",
+    cancelButtonText: "ยกเลิก",
+    confirmButtonColor: next ? "#059669" : "#ba0b2f",
+  });
+  if (!isConfirmed) return;
   try {
-    await api.put(`/api/admin/users/${user.id}/role`, { userType: newRole });
-    user.user_type = newRole;
-    saveLog("เปลี่ยน Role ผู้ใช้", `เปลี่ยน ${user.email} จาก ${user.user_type} เป็น ${newRole}`);
-    Swal.fire({ icon: "success", title: "อัปเดตสำเร็จ", showConfirmButton: false, timer: 1200 });
-  } catch (err) {
-    Swal.fire({ icon: "error", title: "ผิดพลาด", text: "ไม่สามารถเปลี่ยน Role ได้" });
+    await api.put(`/api/admin/users/${user.id}/active`, { isActive: next });
+    user.is_active = next;
+    Swal.fire({
+      icon: "success",
+      title: next ? "เปิดใช้งานแล้ว" : "ปิดใช้งานแล้ว",
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  } catch (err: any) {
+    Swal.fire({
+      icon: "error",
+      title: "ไม่สำเร็จ",
+      text: err.response?.data?.message || "อัปเดตสถานะบัญชีไม่สำเร็จ",
+    });
+  }
+};
+
+/** Limited role change: promote to admin or demote admin → internal */
+const setAdminRole = async (user: UserItem) => {
+  const nextRole = user.user_type === "admin" ? "internal" : "admin";
+  const { isConfirmed } = await Swal.fire({
+    title: nextRole === "admin" ? "ตั้งเป็น Admin?" : "ถอดสิทธิ์ Admin?",
+    text: `${user.email} → ${nextRole}`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "ยืนยัน",
+    cancelButtonText: "ยกเลิก",
+    confirmButtonColor: "#ba0b2f",
+  });
+  if (!isConfirmed) return;
+  try {
+    await api.put(`/api/admin/users/${user.id}/role`, { userType: nextRole });
+    user.user_type = nextRole;
+    Swal.fire({
+      icon: "success",
+      title: "อัปเดตสิทธิ์แล้ว",
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  } catch (err: any) {
+    Swal.fire({
+      icon: "error",
+      title: "ไม่สำเร็จ",
+      text: err.response?.data?.message || "เปลี่ยนสิทธิ์ไม่สำเร็จ",
+    });
   }
 };
 </script>
 
 <template>
   <div class="space-y-6 animate-fade-up">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+    <div
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100"
+    >
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
           <font-awesome-icon icon="users" class="text-[#ba0b2f]" />
-          จัดการผู้ใช้ในระบบ
+          จัดการผู้ใช้ / แอดมิน
         </h2>
-        <p class="text-sm text-gray-500 mt-1 font-medium">ดูและจัดการบัญชีผู้ใช้ทั้งหมดที่ลงทะเบียนผ่าน Google OAuth</p>
+        <p class="text-sm text-gray-500 mt-1 font-medium">
+          เน้นสถิติการจอง และเปิด/ปิดบัญชีแอดมินโดยไม่ต้องแก้โค้ด
+        </p>
       </div>
-      <div class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200">
+      <div
+        class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200"
+      >
         <font-awesome-icon icon="users" class="text-gray-400 text-sm" />
         <span class="text-sm font-black text-gray-700">{{ users.length }} บัญชี</span>
       </div>
     </div>
 
-    <!-- Filter Bar -->
     <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
       <div class="flex flex-col sm:flex-row gap-3">
-        <!-- Search -->
         <div class="relative flex-1">
-          <font-awesome-icon icon="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+          <font-awesome-icon
+            icon="search"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+          />
           <input
             v-model="searchQuery"
             type="text"
@@ -161,13 +190,22 @@ const changeRole = async (user: UserItem) => {
             class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#ba0b2f]/30"
           />
         </div>
-        <!-- Role Filter Tabs -->
         <div class="flex gap-1.5 flex-wrap">
           <button
-            v-for="(label, role) in { all: 'ทั้งหมด', admin: 'Admin', internal: 'บุคลากร', co_op: 'Co-op', external: 'ภายนอก' }"
+            v-for="(label, role) in {
+              all: 'ทั้งหมด',
+              admin: 'Admin',
+              internal: 'บุคลากร',
+              co_op: 'Co-op',
+              external: 'ภายนอก',
+            }"
             :key="role"
             @click="filterRole = role"
-            :class="filterRole === role ? 'bg-[#ba0b2f] text-white shadow-sm' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            :class="
+              filterRole === role
+                ? 'bg-[#ba0b2f] text-white shadow-sm'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            "
             class="px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap"
           >
             {{ label }}
@@ -177,8 +215,10 @@ const changeRole = async (user: UserItem) => {
       </div>
     </div>
 
-    <!-- Loading Skeleton -->
-    <div v-if="loading" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    <div
+      v-if="loading"
+      class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+    >
       <div class="p-6 space-y-4">
         <div v-for="i in 6" :key="i" class="flex items-center gap-4 animate-pulse">
           <div class="w-10 h-10 rounded-full bg-gray-200 shrink-0"></div>
@@ -186,94 +226,117 @@ const changeRole = async (user: UserItem) => {
             <div class="h-3 bg-gray-200 rounded-full w-1/3"></div>
             <div class="h-3 bg-gray-100 rounded-full w-1/2"></div>
           </div>
-          <div class="w-20 h-6 bg-gray-200 rounded-full"></div>
-          <div class="w-24 h-8 bg-gray-100 rounded-xl"></div>
         </div>
       </div>
     </div>
 
-    <!-- Users Table -->
-    <div v-else-if="filteredUsers.length > 0" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    <div
+      v-else-if="filteredUsers.length > 0"
+      class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+    >
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[700px]">
+        <table class="w-full text-left border-collapse min-w-[800px]">
           <thead>
-            <tr class="bg-gray-50/80 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+            <tr
+              class="bg-slate-50 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
+            >
               <th class="px-4 py-4">ผู้ใช้</th>
               <th class="px-4 py-4">อีเมล</th>
-              <th class="px-4 py-4 text-center">Role</th>
+              <th class="px-4 py-4 text-center">ประเภท</th>
               <th class="px-4 py-4 text-center border-l border-gray-100">สถิติการจอง</th>
-              <th class="px-4 py-4 text-center border-l border-gray-100">วันที่สมัคร</th>
+              <th class="px-4 py-4 text-center border-l border-gray-100">สถานะบัญชี</th>
               <th class="px-4 py-4 text-center border-l border-gray-100">จัดการ</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr
-              v-for="user in filteredUsers"
+              v-for="(user, idx) in filteredUsers"
               :key="user.id"
-              class="hover:bg-gray-50/60 transition-colors"
+              class="transition-colors"
+              :class="[
+                idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50',
+                'hover:bg-amber-50/80',
+                !user.is_active ? 'opacity-70' : '',
+              ]"
             >
-              <!-- Avatar + Name -->
               <td class="px-4 py-3.5">
                 <div class="flex items-center gap-3">
-                  <div class="relative shrink-0">
-                    <img
-                      v-if="user.profile_picture"
-                      :src="user.profile_picture"
-                      :alt="`${user.firstname} ${user.lastname}`"
-                      class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
-                    />
-                    <div
-                      v-else
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-[#ba0b2f] to-[#8c0823] flex items-center justify-center text-white font-black text-sm shadow-sm"
-                    >
-                      {{ user.firstname.charAt(0) }}{{ user.lastname.charAt(0) }}
-                    </div>
-                    <!-- Online dot for admin -->
-                    <div v-if="user.user_type === 'admin'" class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 rounded-full border-2 border-white"></div>
+                  <img
+                    v-if="user.profile_picture"
+                    :src="user.profile_picture"
+                    class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                  />
+                  <div
+                    v-else
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-[#ba0b2f] to-[#8c0823] flex items-center justify-center text-white font-black text-sm"
+                  >
+                    {{ user.firstname.charAt(0) }}{{ user.lastname.charAt(0) }}
                   </div>
                   <div>
-                    <p class="font-bold text-gray-900 text-sm">{{ user.firstname }} {{ user.lastname }}</p>
-                    <p class="text-[11px] text-gray-400 font-medium">#{{ String(user.id).padStart(4, '0') }}</p>
+                    <p class="font-bold text-gray-900 text-sm">
+                      {{ user.firstname }} {{ user.lastname }}
+                    </p>
+                    <p class="text-[11px] text-gray-400 font-medium">
+                      สมัคร {{ formatDate(user.created_at) }}
+                    </p>
                   </div>
                 </div>
               </td>
-
-              <!-- Email -->
               <td class="px-4 py-3.5">
                 <span class="text-sm text-gray-600 font-medium">{{ user.email }}</span>
               </td>
-
-              <!-- Role Badge -->
               <td class="px-4 py-3.5 text-center">
                 <span
                   :class="roleBadgeClass[user.user_type] || 'bg-gray-100 text-gray-600 border-gray-200'"
-                  class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black border uppercase tracking-wide"
+                  class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black border"
                 >
                   {{ roleLabel[user.user_type] || user.user_type }}
                 </span>
               </td>
-
-              <!-- Booking Stats -->
               <td class="px-4 py-3.5 text-center border-l border-gray-100">
-                <div class="flex flex-col items-center">
-                  <span class="text-sm font-black text-gray-800">{{ user.total_bookings }}</span>
-                  <span class="text-[10px] text-gray-400 font-bold">ครั้ง ({{ user.approved_bookings }} อนุมัติ)</span>
+                <div class="flex flex-col items-center gap-0.5">
+                  <span class="text-base font-black text-gray-900">{{
+                    user.total_bookings
+                  }}</span>
+                  <span class="text-[10px] text-gray-500 font-bold"
+                    >ทั้งหมด · อนุมัติ {{ user.approved_bookings }} · ชำระแล้ว
+                    {{ user.paid_bookings || 0 }}</span
+                  >
                 </div>
               </td>
-
-              <!-- Join Date -->
               <td class="px-4 py-3.5 text-center border-l border-gray-100">
-                <span class="text-xs font-bold text-gray-500">{{ formatDate(user.created_at) }}</span>
-              </td>
-
-              <!-- Actions -->
-              <td class="px-4 py-3.5 text-center border-l border-gray-100">
-                <button
-                  @click="changeRole(user)"
-                  class="px-3 py-2 bg-gray-100 text-gray-700 text-xs font-bold rounded-xl hover:bg-[#ba0b2f] hover:text-white transition-all cursor-pointer whitespace-nowrap"
+                <span
+                  class="inline-flex px-2.5 py-1 rounded-lg text-[11px] font-black border"
+                  :class="
+                    user.is_active
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-slate-100 text-slate-500 border-slate-200'
+                  "
                 >
-                  <font-awesome-icon icon="user-edit" class="mr-1.5" />เปลี่ยน Role
-                </button>
+                  {{ user.is_active ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
+                </span>
+              </td>
+              <td class="px-4 py-3.5 text-center border-l border-gray-100">
+                <div class="flex flex-col gap-1.5 items-center">
+                  <button
+                    @click="toggleActive(user)"
+                    class="px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap border"
+                    :class="
+                      user.is_active
+                        ? 'bg-white text-rose-700 border-rose-200 hover:bg-rose-50'
+                        : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                    "
+                  >
+                    {{ user.is_active ? "ปิดใช้งาน" : "เปิดใช้งาน" }}
+                  </button>
+                  <button
+                    v-if="user.user_type === 'admin' || user.user_type === 'internal'"
+                    @click="setAdminRole(user)"
+                    class="px-3 py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
+                  >
+                    {{ user.user_type === "admin" ? "ถอด Admin" : "ตั้งเป็น Admin" }}
+                  </button>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -281,13 +344,14 @@ const changeRole = async (user: UserItem) => {
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-else class="bg-white rounded-3xl shadow-sm border border-gray-100 py-20 flex flex-col items-center justify-center text-center">
-      <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 text-3xl mb-5">
-        <font-awesome-icon icon="users" />
-      </div>
+    <div
+      v-else
+      class="bg-white rounded-3xl shadow-sm border border-gray-100 py-20 flex flex-col items-center justify-center text-center"
+    >
       <h3 class="text-xl font-black text-gray-700 mb-2">ไม่พบผู้ใช้</h3>
-      <p class="text-sm text-gray-400 font-medium max-w-xs">ลองเปลี่ยนคำค้นหา หรือ filter เป็น "ทั้งหมด"</p>
+      <p class="text-sm text-gray-400 font-medium max-w-xs">
+        ลองเปลี่ยนคำค้นหา หรือ filter เป็น "ทั้งหมด"
+      </p>
     </div>
   </div>
 </template>

@@ -190,12 +190,14 @@ export function translateStatus(status: string | undefined | null, locale: strin
   const statuses: Record<string, string> = {
     "รออนุมัติ": "Pending Approval",
     "รอชำระเงิน": "Awaiting Payment",
-    "สำเร็จแล้ว": "Completed",
+    "สำเร็จแล้ว": "Paid",
+    "ชำระแล้ว": "Paid",
+    "มีรีวิวแล้ว": "Reviewed",
     "ไม่อนุมัติ": "Disapproved",
     "ยกเลิกแล้ว": "Cancelled",
     "pending": "Pending Approval",
     "approved_pending_payment": "Awaiting Payment",
-    "approved_paid": "Completed",
+    "approved_paid": "Paid",
     "disapproved": "Disapproved",
   };
 

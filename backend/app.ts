@@ -11,7 +11,7 @@ import dotenv from "dotenv";
 import { query } from "./db";
 import { errorHandler } from "./src/middleware/errorHandler";
 import { verifyToken, verifyAdmin } from "./src/middleware/auth";
-import { getRevenueByMonth } from "./src/services/revenue.service";
+import { getRevenueByMonth, getRevenueInRange } from "./src/services/revenue.service";
 import { JwtPayload } from "./src/types";
 import { generalLimiter, authLimiter, bookingLimiter } from "./src/middleware/rateLimiter";
 import { resolveUserType } from "./src/utils/resolveUserType";
@@ -83,6 +83,11 @@ passport.use(
 
         if (res.rows.length > 0) {
           user = res.rows[0];
+          if (user.is_active === false) {
+            return done(null, false, {
+              message: "บัญชีถูกปิดใช้งาน กรุณาติดต่อผู้ดูแลระบบ",
+            } as any);
+          }
           const userType = resolveUserType(email, user.user_type);
           await query(
             "UPDATE users SET google_id = $1, profile_picture = $2, user_type = $3 WHERE email = $4",
@@ -112,10 +117,12 @@ passport.serializeUser((user: any, done) => {
 passport.deserializeUser(async (id: number, done) => {
   try {
     const res = await query(
-      "SELECT id, email, firstname, lastname, user_type, profile_picture FROM users WHERE id = $1",
+      "SELECT id, email, firstname, lastname, user_type, profile_picture, COALESCE(is_active, TRUE) AS is_active FROM users WHERE id = $1",
       [id]
     );
-    done(null, res.rows.length > 0 ? res.rows[0] : null);
+    if (res.rows.length === 0) return done(null, null);
+    if (res.rows[0].is_active === false) return done(null, null);
+    done(null, res.rows[0]);
   } catch (err) {
     done(err, null);
   }
@@ -154,6 +161,18 @@ query(
     ) THEN
       ALTER TABLE bookings ADD COLUMN approval_document_url TEXT;
     END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'users' AND column_name = 'is_active'
+    ) THEN
+      ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'admin_activity_logs' AND column_name = 'booking_id'
+    ) THEN
+      ALTER TABLE admin_activity_logs ADD COLUMN booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL;
+    END IF;
 
     -- Database Performance Indexes
     CREATE INDEX IF NOT EXISTS idx_bookings_date_slot ON bookings(booking_date, time_slot);
@@ -161,6 +180,7 @@ query(
     CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
     CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
     CREATE INDEX IF NOT EXISTS idx_room_pricing_room_id ON room_pricing(room_id);
+    CREATE INDEX IF NOT EXISTS idx_admin_logs_booking_id ON admin_activity_logs(booking_id);
   END $$;`
 )
   .then(() => console.log("✅ ตรวจสอบ/เพิ่มคอลัมน์ระบบ และสร้าง Database Indexes เรียบร้อยแล้ว"))
@@ -196,9 +216,16 @@ app.use("/api/user", userRoutes);
 app.use("/api/banners", bannerRoutes);
 app.use("/api/admin/stats", adminStatsRoutes);
 // Standalone revenue endpoint for frontend compatibility (frontend calls /api/admin/revenue-by-month)
-app.get("/api/admin/revenue-by-month", verifyToken, verifyAdmin, async (_req: any, res: Response) => {
+app.get("/api/admin/revenue-by-month", verifyToken, verifyAdmin, async (req: any, res: Response) => {
   try {
-    const data = await getRevenueByMonth();
+    const from = typeof req.query.from === "string" ? req.query.from : null;
+    const to = typeof req.query.to === "string" ? req.query.to : null;
+    if (from && to) {
+      const data = await getRevenueInRange(from, to);
+      return res.json(data);
+    }
+    const year = req.query.year ? Number(req.query.year) : undefined;
+    const data = await getRevenueByMonth(year);
     res.json(data);
   } catch (err) {
     console.error("[revenue-by-month] Error:", err);

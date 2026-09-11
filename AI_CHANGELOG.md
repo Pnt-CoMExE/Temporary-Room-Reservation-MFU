@@ -388,7 +388,24 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - High-complexity files — ต้อง refactor แยก sprint
 - Partial analysis 71 files = GitHub API rate limit ของ CodeFlow ไม่ใช่ bug ในโค้ด
 
+## [2026-09-11 — Recording 3 Phases 2–6]
+
+- **Phase 2:** `users.is_active`, enable/disable API + OAuth gate; AdminUsers เน้นสถิติ; บังคับเบอร์โทรโปรไฟล์
+- **Phase 3:** Admin stats/revenue date range + year; Dashboard filter UI (Pending/Approved/Paid/Revenue)
+- **Phase 4:** `admin_activity_logs.booking_id`, logs?bookingId=, ปุ่มดูประวัติใน AdminBookings
+- **Phase 5:** `scripts/auto-update-booking-status.ts` + `npm run jobs:booking-status`
+- **Phase 6:** TESTING_PLAN Postman/Manual; `PAYMENT_STRIPE_NOTES.md`; อัปเดต RECORDING3_ACTION_PLAN
+
+## [2026-09-11 — Recording 3 Phase 1: booking status UX]
+
+- **`frontend/src/utils/bookingStatus.ts` [NEW]**: normalize status, labels (ชำระแล้ว ≠ มีรีวิว), badge colors, SweetAlert button classes
+- **`AdminBookings.vue`**: สีสถานะร่วม, zebra rows + hover, แยก badge รีวิว, ปุ่ม approve/reject/pay สม่ำเสมอ
+- **`DashboardView.vue`**: ใช้ util เดียวกับ Admin; เก็บ status จาก API โดยตรง
+- **i18n** `status_*` ใน th/en; อัปเดต `translateStatus` EN เป็น Paid
+- **`docs/RECORDING3_ACTION_PLAN.md` [NEW]**: แผนเฟส 1–6 จาก Recording 3
+
 ## [2026-09-10 — Demo role overrides for advisor session]
+
 
 - **`resolveUserType`**: เพิ่ม `DEV_INTERNAL_EMAILS` (คู่กับ `DEV_ADMIN_EMAILS`)
 - **Local env (ไม่ commit):** `comza962@gmail.com` → admin, `6631501071@lamduan.mfu.ac.th` → internal

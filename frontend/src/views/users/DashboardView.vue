@@ -35,8 +35,15 @@ import { useI18n } from "vue-i18n";
 import {
   translateRoomName,
   translateDuration,
-  translateStatus,
 } from "@/utils/translator";
+import {
+  getAwaitingReviewLabel,
+  getBookingStatusBadgeClass,
+  getBookingStatusLabel,
+  getReviewedBadgeClass,
+  getReviewedLabel,
+  isBookingStatus,
+} from "@/utils/bookingStatus";
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -73,16 +80,7 @@ const fetchBookings = async () => {
           ? "ครึ่งวันเช้า"
           : "ครึ่งวันบ่าย",
     totalPrice: parseFloat(b.total_price),
-    status:
-      b.status === "pending"
-        ? "รออนุมัติ"
-        : b.status === "approved_pending_payment"
-          ? "รอชำระเงิน"
-          : b.status === "approved_paid"
-            ? "สำเร็จแล้ว"
-            : b.status === "disapproved"
-              ? "ไม่อนุมัติ"
-              : b.status,
+    status: b.status,
     hasFeedback: b.has_feedback,
     memoDocumentUrl: b.memo_document_url || null,
     addons: [],
@@ -134,6 +132,15 @@ const handleFileUpload = async (_event: Event) => {
 
 const saveProfile = async () => {
   try {
+    if (!userProfile.value.phone?.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณากรอกเบอร์โทรศัพท์",
+        text: "เบอร์โทรใช้สำหรับติดต่อประสานงานการจอง",
+        confirmButtonColor: "#ba0b2f",
+      });
+      return;
+    }
     // แยก firstname, lastname จาก fullName ง่ายๆ
     const parts = userProfile.value.fullName.split(' ');
     const firstname = parts[0];
@@ -507,27 +514,9 @@ const giveFeedback = (booking: BookingItem) => {
   });
 };
 
-const getStatusText = (status: string) => translateStatus(status, locale.value);
-const getStatusClass = (status: string) => {
-  switch (status) {
-    case "รออนุมัติ":
-    case "pending":
-      return "bg-yellow-50 text-yellow-700 border-yellow-200";
-    case "รอชำระเงิน":
-    case "approved_pending_payment":
-      return "bg-blue-50 text-blue-700 border-blue-200";
-    case "สำเร็จแล้ว":
-    case "approved_paid":
-      return "bg-green-50 text-green-700 border-green-200";
-    case "ไม่อนุมัติ":
-    case "disapproved":
-      return "bg-red-50 text-red-700 border-red-200";
-    case "ยกเลิกแล้ว":
-      return "bg-gray-100 text-gray-500 border-gray-200 line-through";
-    default:
-      return "bg-gray-100 text-gray-600 border-gray-200";
-  }
-};
+const getStatusText = (status: string) =>
+  getBookingStatusLabel(status, locale.value);
+const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
 
 const formatDate = (dateString: string) =>
   new Date(dateString).toLocaleDateString(locale.value === "en" ? "en-US" : "th-TH", {
@@ -702,22 +691,34 @@ const formatDate = (dateString: string) =>
               :key="booking.id"
               class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 group"
               :class="
-                booking.status === 'ยกเลิกแล้ว' ? 'opacity-60 grayscale-50' : ''
+                isBookingStatus(booking.status, 'cancelled') ? 'opacity-60 grayscale-50' : ''
               "
             >
               <div
-                class="bg-gray-50/80 px-6 py-4 border-b border-gray-100 flex justify-between items-center"
+                class="bg-gray-50/80 px-6 py-4 border-b border-gray-100 flex justify-between items-center gap-3 flex-wrap"
               >
                 <span
                   class="text-xs font-black text-gray-500 uppercase tracking-widest"
                   >Booking ID:
                   <span class="text-gray-900">{{ booking.id }}</span></span
                 >
-                <span
-                  :class="getStatusClass(booking.status)"
-                  class="px-4 py-1.5 rounded-xl text-xs font-bold border shadow-sm"
-                  >{{ getStatusText(booking.status) }}</span
-                >
+                <div class="flex items-center gap-2 flex-wrap justify-end">
+                  <span
+                    :class="getStatusClass(booking.status)"
+                    class="px-4 py-1.5 rounded-xl text-xs font-bold border shadow-sm"
+                    >{{ getStatusText(booking.status) }}</span
+                  >
+                  <span
+                    v-if="
+                      isBookingStatus(booking.status, 'approved_paid') &&
+                      booking.hasFeedback
+                    "
+                    :class="getReviewedBadgeClass()"
+                    class="px-3 py-1.5 rounded-xl text-xs font-bold border shadow-sm"
+                  >
+                    {{ getReviewedLabel(locale) }}
+                  </span>
+                </div>
               </div>
               <div
                 class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
@@ -769,7 +770,10 @@ const formatDate = (dateString: string) =>
                   </div>
 
                   <div
-                    v-if="['สำเร็จแล้ว', 'ไม่อนุมัติ', 'approved_paid', 'disapproved'].includes(booking.status)"
+                    v-if="
+                      isBookingStatus(booking.status, 'approved_paid') ||
+                      isBookingStatus(booking.status, 'disapproved')
+                    "
                     class="mt-4 pt-4 border-t border-gray-100"
                   >
                     <p
@@ -782,7 +786,7 @@ const formatDate = (dateString: string) =>
                       }}</span>
                     </p>
                     <div
-                      v-if="(booking.status === 'ไม่อนุมัติ' || booking.status === 'disapproved') && booking.remark"
+                      v-if="isBookingStatus(booking.status, 'disapproved') && booking.remark"
                       class="mt-2 bg-red-50 p-3 rounded-xl border border-red-100 flex items-start gap-2"
                     >
                       <font-awesome-icon icon="info-circle" class="text-red-500 mt-0.5" />
@@ -803,16 +807,16 @@ const formatDate = (dateString: string) =>
                   </p>
 
                   <button
-                    v-if="booking.status === 'รอชำระเงิน' || booking.status === 'approved_pending_payment'"
+                    v-if="isBookingStatus(booking.status, 'approved_pending_payment')"
                     @click="openPayment(booking)"
-                    class="bg-blue-600 text-white px-6 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all flex items-center gap-2 cursor-pointer"
+                    class="bg-sky-600 text-white px-6 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-sky-200 hover:bg-sky-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <font-awesome-icon :icon="activePaymentProvider === 'mock_sandbox' ? 'flask' : 'qrcode'" />
                     {{ activePaymentProvider === 'mock_sandbox' ? $t('dashboard.mock_pay') : $t('dashboard.scan_pay') }}
                   </button>
 
                   <button
-                    v-if="booking.status === 'รออนุมัติ' || booking.status === 'pending'"
+                    v-if="isBookingStatus(booking.status, 'pending')"
                     @click="cancelBooking(booking)"
                     class="bg-white text-gray-500 border border-gray-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-gray-50 hover:text-red-600 transition-all flex items-center gap-2 cursor-pointer"
                   >
@@ -821,21 +825,22 @@ const formatDate = (dateString: string) =>
 
                   <button
                     v-if="
-                      (booking.status === 'สำเร็จแล้ว' || booking.status === 'approved_paid') && !booking.hasFeedback
+                      isBookingStatus(booking.status, 'approved_paid') && !booking.hasFeedback
                     "
                     @click="giveFeedback(booking)"
-                    class="bg-yellow-50 text-yellow-600 border border-yellow-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-yellow-100 transition-all flex items-center gap-2 cursor-pointer"
+                    class="bg-violet-50 text-violet-700 border border-violet-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-violet-100 transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <font-awesome-icon icon="star" /> {{ $t('dashboard.give_review') }}
                   </button>
 
                   <div
                     v-if="
-                      (booking.status === 'สำเร็จแล้ว' || booking.status === 'approved_paid') && booking.hasFeedback
+                      isBookingStatus(booking.status, 'approved_paid') && booking.hasFeedback
                     "
-                    class="bg-green-50 text-green-600 border border-green-200 px-4 py-1.5 rounded-xl font-bold text-[10px] flex items-center gap-1.5 mt-1"
+                    :class="getReviewedBadgeClass()"
+                    class="px-4 py-1.5 rounded-xl font-bold text-[10px] flex items-center gap-1.5 mt-1 border"
                   >
-                    <font-awesome-icon icon="check-circle" /> {{ $t('dashboard.review_submitted') }}
+                    <font-awesome-icon icon="check-circle" /> {{ getReviewedLabel(locale) }}
                   </div>
                 </div>
               </div>
@@ -927,11 +932,12 @@ const formatDate = (dateString: string) =>
                   <div>
                     <label
                       class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-                      >{{ $t('dashboard.phone_number') }}</label
+                      >{{ $t('dashboard.phone_number') }} <span class="text-red-500">*</span></label
                     >
                     <input
                       type="tel"
                       v-model="userProfile.phone"
+                      required
                       class="w-full px-4 py-3.5 bg-white border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
                       :placeholder="$t('dashboard.phone_placeholder')"
                     />

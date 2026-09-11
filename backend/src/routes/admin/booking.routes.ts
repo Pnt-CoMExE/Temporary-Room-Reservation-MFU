@@ -97,7 +97,8 @@ router.put(
       await logAdminAction(
         adminNameFromReq(req),
         `อัปเดตสถานะการจอง #${id}`,
-        `สถานะ: ${status}${remarks ? ` | หมายเหตุ: ${remarks}` : ""}`
+        `สถานะ: ${status}${remarks ? ` | หมายเหตุ: ${remarks}` : ""}`,
+        Number(id)
       );
 
       res.json({ message: "อัปเดตสถานะการจองสำเร็จ", documentUrl });

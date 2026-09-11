@@ -15,6 +15,7 @@
     "predeploy:check": "node scripts/pre-deploy-check.js",
     "clear:db": "tsx scripts/clear-db.ts",
     "import:rooms": "tsx scripts/import-rooms-from-excel.ts",
+    "jobs:booking-status": "tsx scripts/auto-update-booking-status.ts",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],

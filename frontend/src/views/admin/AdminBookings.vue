@@ -3,6 +3,15 @@ import { ref, computed, watch, type PropType } from "vue";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { getStoredUserId } from "@/utils/auth";
+import {
+  getAwaitingReviewLabel,
+  getBookingStatusBadgeClass,
+  getBookingStatusLabel,
+  getReviewedBadgeClass,
+  getReviewedLabel,
+  isBookingStatus,
+  statusActionBtn,
+} from "@/utils/bookingStatus";
 
 interface BookingItem {
   id: string;
@@ -270,10 +279,8 @@ const importPermission = (id) => {
     customClass: {
       popup: "rounded-3xl p-8",
       actions: "flex gap-3 mt-6 w-full justify-center",
-      confirmButton:
-        "bg-[#ba0b2f] text-white rounded-xl px-4 py-3 font-bold hover:bg-[#8c0823] shadow-md transition-all flex-1 whitespace-nowrap cursor-pointer",
-      cancelButton:
-        "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-4 py-3 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
+      confirmButton: statusActionBtn.primary,
+      cancelButton: statusActionBtn.secondary,
     },
   }).then((result) => {
     if (result.value) {
@@ -290,7 +297,7 @@ const importPermission = (id) => {
         text: "กรุณากด 'อนุมัติ' เพื่อส่งข้อมูลเข้าสู่ระบบ",
         showConfirmButton: true,
         confirmButtonText: "ดำเนินการต่อ",
-        confirmButtonColor: "#16a34a"
+        confirmButtonColor: "#059669"
       }).then(() => {
         openConfirm(id, "manage_pending");
       });
@@ -328,12 +335,9 @@ const openConfirm = (id, type) => {
       customClass: {
         popup: "rounded-[2rem] p-6 max-w-md",
         actions: "flex flex-wrap gap-3 mt-4 w-full justify-center",
-        confirmButton:
-          "bg-green-600 text-white rounded-xl px-6 py-3 font-bold hover:bg-green-700 shadow-md transition-all cursor-pointer",
-        denyButton:
-          "bg-[#ba0b2f] text-white rounded-xl px-6 py-3 font-bold hover:bg-[#8c0823] shadow-md transition-all cursor-pointer",
-        cancelButton:
-          "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-6 py-3 font-bold hover:bg-gray-200 transition-all cursor-pointer",
+        confirmButton: statusActionBtn.approve,
+        denyButton: statusActionBtn.reject,
+        cancelButton: statusActionBtn.cancel,
       },
       didOpen: () => {
         const confirmBtn = Swal.getConfirmButton();
@@ -408,10 +412,8 @@ const openConfirm = (id, type) => {
       customClass: {
         popup: "rounded-[2rem] p-8",
         actions: "flex gap-3 mt-6 w-full justify-center",
-        confirmButton:
-          "bg-[#2563eb] text-white rounded-xl px-4 py-3 font-bold hover:bg-blue-700 shadow-md transition-all flex-1 whitespace-nowrap cursor-pointer",
-        cancelButton:
-          "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-4 py-3 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
+        confirmButton: statusActionBtn.confirmPayment,
+        cancelButton: statusActionBtn.secondary,
       },
     }).then((result) => {
       if (result.isConfirmed && item) {
@@ -448,47 +450,51 @@ const viewFeedback = (booking) => {
   }
 };
 
-const getStatusText = (status) => {
-  switch (status) {
-    case "pending":
-    case "รออนุมัติ":
-      return "⏳ รออนุมัติ";
-    case "approved_pending_payment":
-    case "รอชำระเงิน":
-      return "💳 รอชำระเงิน";
-    case "approved_paid":
-    case "สำเร็จแล้ว":
-      return "✅ สำเร็จแล้ว";
-    case "disapproved":
-    case "ไม่อนุมัติ":
-      return "❌ ไม่อนุมัติ";
-    case "ยกเลิกแล้ว":
-      return "⛔ ยกเลิกแล้ว";
-    default:
-      return status;
+const viewBookingHistory = async (booking: BookingItem) => {
+  try {
+    const res = await api.get("/api/admin/logs", {
+      params: { bookingId: booking.dbId },
+    });
+    const rows = res.data || [];
+    if (!rows.length) {
+      Swal.fire({
+        icon: "info",
+        title: "ยังไม่มีประวัติ",
+        text: `รายการ ${booking.id} ยังไม่มี activity log`,
+        confirmButtonColor: "#ba0b2f",
+      });
+      return;
+    }
+    const html = rows
+      .map(
+        (l: any) => `
+      <div class="text-left border border-gray-100 rounded-xl p-3 mb-2 bg-slate-50">
+        <p class="text-xs font-black text-gray-800">${l.action || "-"}</p>
+        <p class="text-[11px] text-gray-500 mt-1">${l.details || ""}</p>
+        <p class="text-[10px] text-gray-400 mt-1">${l.admin_name || ""} · ${
+          l.created_at ? new Date(l.created_at).toLocaleString("th-TH") : ""
+        }</p>
+      </div>`
+      )
+      .join("");
+    Swal.fire({
+      title: `ประวัติรายการ ${booking.id}`,
+      html: `<div class="max-h-80 overflow-y-auto">${html}</div>`,
+      width: 520,
+      confirmButtonText: "ปิด",
+      confirmButtonColor: "#ba0b2f",
+    });
+  } catch (err) {
+    Swal.fire({
+      icon: "error",
+      title: "โหลดประวัติไม่สำเร็จ",
+      confirmButtonColor: "#ba0b2f",
+    });
   }
 };
 
-const getStatusClass = (status) => {
-  switch (status) {
-    case "pending":
-    case "รออนุมัติ":
-      return "bg-yellow-50 text-yellow-700 border-yellow-200";
-    case "approved_pending_payment":
-    case "รอชำระเงิน":
-      return "bg-blue-50 text-blue-700 border-blue-200";
-    case "approved_paid":
-    case "สำเร็จแล้ว":
-      return "bg-green-50 text-green-700 border-green-200";
-    case "disapproved":
-    case "ไม่อนุมัติ":
-      return "bg-red-50 text-red-700 border-red-200";
-    case "ยกเลิกแล้ว":
-      return "bg-gray-100 text-gray-500 border-gray-200 line-through opacity-70";
-    default:
-      return "bg-gray-50 text-gray-500 border-gray-200";
-  }
-};
+const getStatusText = (status: string) => getBookingStatusLabel(status, "th");
+const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
 </script>
 
 <template>
@@ -600,16 +606,21 @@ const getStatusClass = (status) => {
               <th class="px-6 py-5 text-center">สถานะ / จัดการคำขอ</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-gray-100">
+          <tbody class="divide-y divide-slate-100">
             <tr
-              v-for="booking in filteredBookings"
+              v-for="(booking, rowIndex) in filteredBookings"
               :key="booking.id"
-              class="hover:bg-gray-50/80 transition-colors"
-              :class="
-                booking.status === 'ยกเลิกแล้ว'
-                  ? 'bg-gray-50/50 grayscale-20'
-                  : ''
-              "
+              class="transition-colors duration-150"
+              :class="[
+                isBookingStatus(booking.status, 'cancelled')
+                  ? 'bg-slate-50/80 grayscale-[0.25]'
+                  : rowIndex % 2 === 0
+                    ? 'bg-white'
+                    : 'bg-slate-50/60',
+                !isBookingStatus(booking.status, 'cancelled')
+                  ? 'hover:bg-amber-50/90'
+                  : 'hover:bg-slate-100',
+              ]"
             >
               <td class="px-4 py-6 w-12">
                 <input
@@ -627,7 +638,7 @@ const getStatusClass = (status) => {
                 <p
                   class="font-bold text-gray-800 text-base"
                   :class="
-                    booking.status === 'ยกเลิกแล้ว' ? 'text-gray-400' : ''
+                    isBookingStatus(booking.status, 'cancelled') ? 'text-gray-400' : ''
                   "
                 >
                   {{ booking.userName }}
@@ -637,7 +648,7 @@ const getStatusClass = (status) => {
                 <p
                   class="font-bold"
                   :class="
-                    booking.status === 'ยกเลิกแล้ว' ? 'text-gray-400' : ''
+                    isBookingStatus(booking.status, 'cancelled') ? 'text-gray-400' : ''
                   "
                 >
                   {{ booking.roomName }}
@@ -660,7 +671,7 @@ const getStatusClass = (status) => {
               <td
                 class="px-6 py-6 text-right font-black text-lg"
                 :class="
-                  booking.status === 'ยกเลิกแล้ว'
+                  isBookingStatus(booking.status, 'cancelled')
                     ? 'text-gray-400'
                     : 'text-[#ba0b2f]'
                 "
@@ -670,25 +681,19 @@ const getStatusClass = (status) => {
               <td class="px-6 py-6 text-center">
                 <div class="flex flex-col items-center justify-center gap-1.5">
                   <button
-                    v-if="
-                      booking.status === 'pending' ||
-                      booking.status === 'รออนุมัติ'
-                    "
+                    v-if="isBookingStatus(booking.status, 'pending')"
                     @click="openConfirm(booking.id, 'manage_pending')"
                     :class="getStatusClass(booking.status)"
-                    class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-80 transition-all cursor-pointer"
+                    class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-90 transition-all cursor-pointer"
                   >
                     {{ getStatusText(booking.status) }}
                     <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
                   </button>
                   <button
-                    v-else-if="
-                      booking.status === 'approved_pending_payment' ||
-                      booking.status === 'รอชำระเงิน'
-                    "
+                    v-else-if="isBookingStatus(booking.status, 'approved_pending_payment')"
                     @click="openConfirm(booking.id, 'payment')"
                     :class="getStatusClass(booking.status)"
-                    class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-80 transition-all cursor-pointer"
+                    class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-90 transition-all cursor-pointer"
                   >
                     {{ getStatusText(booking.status) }}
                     <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
@@ -702,41 +707,40 @@ const getStatusClass = (status) => {
                       {{ getStatusText(booking.status) }}
                     </span>
 
-                    <!-- ✨ เพิ่มปุ่มดูรีวิว สำหรับสถานะสำเร็จแล้ว ✨ -->
-                    <button
-                      v-if="
-                        (booking.status === 'approved_paid' ||
-                          booking.status === 'สำเร็จแล้ว') &&
-                        booking.hasFeedback
-                      "
-                      @click="viewFeedback(booking)"
-                      class="bg-yellow-50 text-yellow-600 border border-yellow-200 px-3 py-1.5 rounded-lg text-[11px] font-bold hover:bg-yellow-100 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
-                    >
-                      <font-awesome-icon icon="star" /> ดูรีวิว
-                    </button>
-                    <!-- โชว์ข้อความว่าไม่มีรีวิว ถ้าสำเร็จแล้วแต่ยังไม่รีวิว -->
-                    <span
-                      v-else-if="
-                        (booking.status === 'approved_paid' ||
-                          booking.status === 'สำเร็จแล้ว') &&
-                        !booking.hasFeedback
-                      "
-                      class="text-[10px] text-gray-400 font-bold"
-                    >
-                      (ไม่มีรีวิว)
-                    </span>
+                    <template v-if="isBookingStatus(booking.status, 'approved_paid')">
+                      <span
+                        v-if="booking.hasFeedback"
+                        :class="getReviewedBadgeClass()"
+                        class="px-3 py-1 rounded-lg text-[11px] font-bold border inline-flex items-center gap-1.5"
+                      >
+                        <font-awesome-icon icon="star" />
+                        {{ getReviewedLabel("th") }}
+                      </span>
+                      <button
+                        v-if="booking.hasFeedback"
+                        @click="viewFeedback(booking)"
+                        class="bg-violet-50 text-violet-700 border border-violet-200 px-3 py-1.5 rounded-lg text-[11px] font-bold hover:bg-violet-100 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                      >
+                        <font-awesome-icon icon="eye" /> ดูรีวิว
+                      </button>
+                      <span
+                        v-else
+                        class="text-[10px] text-slate-400 font-bold"
+                      >
+                        ({{ getAwaitingReviewLabel("th") }})
+                      </span>
+                    </template>
                   </div>
 
                   <div
                     v-if="
                       booking.actionBy &&
-                      booking.status !== 'pending' &&
-                      booking.status !== 'รออนุมัติ'
+                      !isBookingStatus(booking.status, 'pending')
                     "
                     class="text-[10px] text-gray-500 font-semibold bg-gray-50 px-2 py-0.5 rounded border border-gray-100 flex items-center gap-1 mt-1"
                   >
                     <font-awesome-icon
-                      v-if="booking.status === 'ยกเลิกแล้ว'"
+                      v-if="isBookingStatus(booking.status, 'cancelled')"
                       icon="user-times"
                       class="text-gray-400"
                     />
@@ -747,6 +751,14 @@ const getStatusClass = (status) => {
                     />
                     โดย: {{ booking.actionBy }}
                   </div>
+
+                  <button
+                    type="button"
+                    @click="viewBookingHistory(booking)"
+                    class="mt-1 text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-50 cursor-pointer"
+                  >
+                    <font-awesome-icon icon="history" class="mr-1" />ดูประวัติ
+                  </button>
                 </div>
               </td>
             </tr>

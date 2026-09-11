@@ -36,5 +36,6 @@
 ## หลัง Go-Live
 
 - [ ] ตั้ง cron backup (`backend/scripts/backup.sh`)
+- [ ] ตั้ง cron สถานะจอง (`cd backend && npm run jobs:booking-status` รายวัน)
 - [ ] มอบหมายผู้ดูแลระบบ @property.mfu.ac.th
 - [ ] แจ้งช่องทาง support ให้ผู้ใช้

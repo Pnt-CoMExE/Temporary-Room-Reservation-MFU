@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone_number VARCHAR(20),
   user_type VARCHAR(50) DEFAULT 'external',
   profile_picture TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT NOW()
 );
 
@@ -111,8 +112,11 @@ CREATE TABLE IF NOT EXISTS admin_activity_logs (
   admin_name VARCHAR(255),
   action VARCHAR(255),
   details TEXT,
+  booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
   created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_admin_logs_booking_id ON admin_activity_logs(booking_id);
 
 CREATE TABLE IF NOT EXISTS promo_codes (
   id SERIAL PRIMARY KEY,

@@ -1,11 +1,11 @@
 # แผนการทดสอบ (Testing Plan) — แยกตามโมดูล / Sprint
 
 **โครงการ:** MFU Space Reservation  
-**อัปเดต:** 2026-09-10  
-**ที่มา:** ข้อเสนอแนะอาจารย์ (Standard recording 1) — ให้วางแผน testing แยกออกมาให้ดู ว่าแต่ละโมดูลผ่าน/ไม่ผ่านอะไรบ้าง  
+**อัปเดต:** 2026-09-11  
+**ที่มา:** ข้อเสนอแนะอาจารย์ (Recording 1 + Recording 3) — แผน testing แยกโมดูล + AuthZ ข้าม Role + Manual/Postman  
 **หลักการ:** ทำฟังก์ชันหลัก → ทดสอบให้มั่นใจ → ค่อยขยายฟังก์ชันเสริม (เช่น Payment gateway จริง)
 
-เอกสารประกอบ Demo รอบถัดไป: [`FRIDAY_DEMO_PREP.md`](./FRIDAY_DEMO_PREP.md)
+เอกสารประกอบ: [`FRIDAY_DEMO_PREP.md`](./FRIDAY_DEMO_PREP.md) · [`DEMO_SECURITY.md`](./DEMO_SECURITY.md) · [`RECORDING3_ACTION_PLAN.md`](./RECORDING3_ACTION_PLAN.md)
 
 ---
 
@@ -181,3 +181,33 @@
 | Payment | `payment.test.ts`, `payment_adapter.test.ts` |
 | E2E | `frontend/e2e/booking-flow.spec.ts` |
 | CI | `.github/workflows/ci.yml` |
+
+---
+
+## 8. Manual + Postman (Recording 3)
+
+แบ่งงานทีม: คนหนึ่ง Manual UI · คนหนึ่งยิง API
+
+### Postman / API checklist (Bearer หรือ cookie `mfu_token`)
+
+| # | Request | ผู้ใช้ | คาดหวัง |
+|---|---------|--------|---------|
+| 1 | `GET /api/user/profile` | ไม่มี token | 401 |
+| 2 | `GET /api/admin/bookings` | internal JWT | 403 |
+| 3 | `GET /api/admin/bookings` | admin JWT | 200 |
+| 4 | `GET /api/user/bookings/{otherId}` | user A | 403 |
+| 5 | `POST /api/payment/checkout` `{bookingId ของคนอื่น}` | user A | 403 |
+| 6 | `PUT /api/admin/users/:id/active` `{isActive:false}` | admin | 200 แล้ว login บัญชีนั้นไม่ได้ |
+| 7 | `GET /api/admin/stats?from=YYYY-MM-DD&to=YYYY-MM-DD` | admin | 200 + pending/approved/paid |
+| 8 | `GET /api/admin/logs?bookingId=` | admin | 200 เฉพาะรายการนั้น |
+
+### Frontend Manual
+
+| # | เคส | ผ่าน? |
+|---|-----|-------|
+| F1 | User ไม่สามารถเปิด `/admin` ได้ | ☐ |
+| F2 | Badge สถานะ User/Admin ตรงกัน (ชำระแล้ว ≠ มีรีวิว) | ☐ |
+| F3 | ตาราง Admin zebra + hover | ☐ |
+| F4 | Dashboard กรองช่วงวันแล้วตัวเลขเปลี่ยน | ☐ |
+| F5 | ปุ่มดูประวัติบนรายการจอง | ☐ |
+| F6 | โปรไฟล์บังคับเบอร์โทร | ☐ |
