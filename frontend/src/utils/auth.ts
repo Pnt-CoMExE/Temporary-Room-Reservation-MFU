@@ -20,4 +20,5 @@ export function clearAuthSession(): void {
   localStorage.removeItem("userName");
   localStorage.removeItem("userEmail");
   localStorage.removeItem("userId");
+  localStorage.removeItem("e2e_bearer");
 }

@@ -35,5 +35,11 @@ coverage
 # Vitest
 __screenshots__/
 
+# Playwright
+/playwright-report/
+/test-results/
+/blob-report/
+/playwright/.cache/
+
 # Vite
 *.timestamp-*-*.mjs

@@ -2,6 +2,16 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-16 — QA Playwright E2E core + guide]
+
+- JWT auth fixtures (`asUser`/`asAdmin`) + `jsonwebtoken` (frontend devDependency)
+- Specs: `public-smoke`, `user-booking`, `admin-approve` (แนบใบอนุมัติก่อนอนุมัติ) — **7/7 passed** Chromium
+- E2E auth: `localStorage.e2e_bearer` → axios Authorization (cookie ผ่าน Vite proxy ไม่เสถียร)
+- Helpers + `memo.pdf` / `approval.pdf`; Playwright default = Chromium only (`E2E_FULL=1` สำหรับ mobile)
+- `backend/db.ts`: `dotenv.config({ override: true })` กัน shell ทับรหัส DB ผิด
+- Docs: `QA_AUTOMATION_GUIDE.md` + อัปเดต `TESTING_PLAN.md`
+- Published branches: `ForCCC`, `ForJJ`, `ForParttime` → origin
+
 ## [2026-09-16 — Presentation script post-Friday]
 
 - เพิ่ม `docs/PRESENTATION_SCRIPT_POST_FRIDAY.md` — สคริปต์นำเสนอ 4 คน (คอม/ซี/พาร์ท/เจ)

@@ -1,6 +1,7 @@
 import { Pool } from "pg";
 import dotenv from "dotenv";
-dotenv.config();
+// Prefer project .env over inherited shell/CI vars that may point at the wrong DB
+dotenv.config({ override: true });
 
 const pool = new Pool({
   user: process.env.DB_USER,

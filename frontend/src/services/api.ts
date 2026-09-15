@@ -21,6 +21,13 @@ api.interceptors.request.use(
     if (config.data instanceof FormData) {
       config.headers.setContentType(false);
     }
+    // E2E only: Playwright seeds localStorage.e2e_bearer (see frontend/e2e/fixtures/auth.ts)
+    if (typeof localStorage !== "undefined") {
+      const e2eBearer = localStorage.getItem("e2e_bearer");
+      if (e2eBearer) {
+        config.headers.set("Authorization", `Bearer ${e2eBearer}`);
+      }
+    }
     return config;
   },
   (error: unknown) => Promise.reject(error)

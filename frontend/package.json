@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",
@@ -30,10 +31,12 @@
   "devDependencies": {
     "@playwright/test": "^1.62.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^26.3.0",
     "@types/qrcode": "^1.5.6",
     "@vitejs/plugin-vue": "^5.2.4",
     "autoprefixer": "^10.5.4",
+    "jsonwebtoken": "^9.0.3",
     "postcss": "^8.5.13",
     "tailwindcss": "^4.3.3",
     "typescript": "~5.7.3",

@@ -12,18 +12,13 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
   },
-  projects: [
-    {
-      name: "chromium-desktop",
-      use: { ...devices["Desktop Chrome"] },
-    },
-    {
-      name: "mobile-chrome-pixel",
-      use: { ...devices["Pixel 5"] },
-    },
-    {
-      name: "mobile-safari-iphone",
-      use: { ...devices["iPhone 13"] },
-    },
-  ],
+  // Default: desktop Chromium only (fast/stable for local QA).
+  // Full matrix: E2E_FULL=1 npm run test:e2e
+  projects: process.env.E2E_FULL
+    ? [
+        { name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } },
+        { name: "mobile-chrome-pixel", use: { ...devices["Pixel 5"] } },
+        { name: "mobile-safari-iphone", use: { ...devices["iPhone 13"] } },
+      ]
+    : [{ name: "chromium-desktop", use: { ...devices["Desktop Chrome"] } }],
 });

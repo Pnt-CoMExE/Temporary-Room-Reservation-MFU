@@ -63,7 +63,7 @@
 | Validation ฟอร์มจอง | Unit | `validate.test.ts`, `bookings.test.ts` | ✅ |
 | สร้างจอง / กฎสถานะ | API tests | `bookings.test.ts` | ✅ |
 | ป้องกันจองชนกัน (advisory lock) | โค้ด + integration | `booking.routes.ts` | 🔄 |
-| E2E: public / auth / admin guard | E2E | `frontend/e2e/booking-flow.spec.ts` | ✅ |
+| E2E: public / จอง / admin อนุมัติ | E2E | `public-smoke`, `user-booking`, `admin-approve` + [`QA_AUTOMATION_GUIDE.md`](./QA_AUTOMATION_GUIDE.md) | ✅ |
 | Manual: Login → จอง → Admin อนุมัติ | Demo | สคริปต์ Demo | 🔄 โชว์สด |
 
 **เกณฑ์ผ่านโมดูล:** โฟลว์หลักจบได้บนระบบที่รันอยู่ + automated ที่เกี่ยวข้องเขียว
@@ -75,7 +75,7 @@
 | สิ่งที่ต้องพิสูจน์ | ประเภท | หลักฐาน | สถานะ |
 |-------------------|--------|---------|--------|
 | API rooms / health | Integration | `api-healthcheck.test.ts`, `integration.test.ts` | ✅ |
-| หน้า list/detail ใช้งานได้ | Manual / E2E | Playwright + Demo | 🔄 |
+| หน้า list/detail ใช้งานได้ | Manual / E2E | `public-smoke.spec.ts` | ✅ |
 
 ---
 
@@ -85,7 +85,7 @@
 |-------------------|--------|---------|--------|
 | Admin-only endpoints | AuthZ tests | `verifyAdmin`, integration | ✅ |
 | Audit log | Unit | `auditLog.service.test.ts` | ✅ |
-| อนุมัติจองบน UI | Manual Demo | Admin bookings | 🔄 |
+| อนุมัติจองบน UI | E2E + Manual | `admin-approve.spec.ts` (แนบใบอนุมัติก่อน) | ✅ |
 
 ---
 
