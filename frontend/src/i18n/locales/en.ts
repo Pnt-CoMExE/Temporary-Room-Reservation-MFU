@@ -48,6 +48,18 @@ export default {
     footer_copyright: "© 2026 Mae Fah Luang University Property Management. All rights reserved.",
     footer_dev_team: "Developed by CE Senior Project Team",
   },
+  info: {
+    back_home: "Back to home",
+    manual_title: "System User Manual",
+    manual_body:
+      "1) Sign in with your authorized Google account.\n2) Search and select a room/space, then choose date and time slot.\n3) Enter the purpose, optional add-ons, and attach the memorandum (PDF).\n4) Submit the request, wait for staff approval, then pay via the shown channel.\n5) After payment verification, receive the permit by email and track status under My Bookings.",
+    rates_title: "Service Rates",
+    rates_body:
+      "Rates depend on user type (internal / co-organizer / external) and duration (half day / full day).\nLive prices are shown on each room detail page from the database.\nFor an official quotation, contact Property Management at property@mfu.ac.th or 053-916-000.",
+    privacy_title: "Privacy Policy",
+    privacy_body:
+      "We store data needed for booking and contact: name, email, phone, booking history, and attachments.\nData is used for approval, payment, notifications, and service improvement only.\nWe do not disclose data except when required by law or with consent.\nYou may view/update your profile, or contact an administrator.",
+  },
   room: {
     capacity: "Capacity",
     people: "people",

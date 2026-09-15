@@ -25,8 +25,9 @@ export function resolveUserType(email: string, existingType?: string): string {
   const devInternals = parseList(process.env.DEV_INTERNAL_EMAILS);
   if (devInternals.includes(lower)) return "internal";
 
-  // Admin ที่ถูก promote ไว้แล้วต้องไม่ถูกทับตอน login
+  // Admin / co_op ที่ถูกตั้งใน Admin UI ต้องไม่ถูกทับตอน login
   if (existingType === "admin") return "admin";
+  if (existingType === "co_op") return "co_op";
 
   // บุคลากร: เฉพาะ @mfu.ac.th ตรงๆ (ไม่รวม lamduan.mfu / property.mfu)
   if (domain === "mfu.ac.th") return "internal";

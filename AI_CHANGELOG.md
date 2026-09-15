@@ -2,6 +2,25 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-16 — Presentation script post-Friday]
+
+- เพิ่ม `docs/PRESENTATION_SCRIPT_POST_FRIDAY.md` — สคริปต์นำเสนอ 4 คน (คอม/ซี/พาร์ท/เจ)
+- ครอบคลุมงานหลัง Recording 3 (ศุกร์ 11 ก.ย.): Role, UX สถานะ, Admin Dashboard/Log, Testing/Cron/Payment
+
+## [2026-09-15 — Wire mock features (except Stripe)]
+
+- Broadcast จริง → `notifications` + `POST /api/admin/broadcast` + Navbar ดึง API
+- แจ้งเตือนเมื่อจอง / เปลี่ยนสถานะ / ยืนยันชำระเงิน
+- Dashboard แสดง add-ons จาก `booking_addons`
+- Footer คู่มือ/อัตรา/privacy → `/info/:page` + ลิงก์ MFU จริง
+- Featured room ใช้ `location` จริง; Admin ตั้ง/ถอน `co_op`; ลบ promo; แก้ไขห้อง inline
+- คง mock_sandbox / Stripe รอตามเดิม
+
+## [2026-09-15 — Connect admin banners to homepage]
+
+- เพิ่ม Admin Banner CRUD: `GET/POST/PUT/DELETE /api/admin/banners`
+- ผูก `AdminBanners.vue` ให้โหลด/อัปโหลด/ซ่อน/ลบจริง → สะท้อนบน `GET /api/banners` หน้าแรก
+
 ## [2026-09-15 — Fix admin booking ZIP checkbox]
 
 - Map `memoDocumentUrl` / `approvalDocumentUrl` / `hasDoc` ใน AdminDashboardView

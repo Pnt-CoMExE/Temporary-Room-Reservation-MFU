@@ -70,6 +70,15 @@ const routes: RouteRecordRaw[] = [
             "จัดการการจองของฉัน ดูประวัติการจอง และข้อมูลส่วนตัว - ระบบจองพื้นที่อาคารและสถานที่ มฟล.",
         },
       },
+      {
+        path: "/info/:page",
+        name: "info",
+        component: () => import("@/views/users/InfoView.vue"),
+        meta: {
+          title: "ข้อมูลระบบ",
+          description: "คู่มือ อัตราค่าบริการ และนโยบายความเป็นส่วนตัว",
+        },
+      },
     ],
   },
   // 3. กลุ่มหน้า Admin (ทุกหน้าในนี้จะถูกสวมหน้ากาก AdminLayout)

@@ -14,7 +14,7 @@ router.get("/", async (_req: Request, res: Response) => {
         id: b.id,
         title: b.title,
         image: b.image_url,
-        link: b.link,
+        link: b.link || "/rooms",
       }))
     );
   } catch (err) {

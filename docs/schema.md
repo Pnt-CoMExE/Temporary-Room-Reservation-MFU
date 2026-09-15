@@ -116,9 +116,17 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 ### 11. `banners`
 - `id` (serial, PK): Banner ID.
 - `title` (varchar 255): Banner headline or title.
-- `image_url` (text): Image URL for the promo banner.
+- `image_url` (text): Image URL for the promo banner (seed URL หรือ `/uploads/...`).
 - `link` (varchar 255): Target destination route link.
 - `is_active` (boolean): Active status flag.
+- Admin CRUD: `GET/POST/PUT/DELETE /api/admin/banners` — public carousel ใช้ `GET /api/banners` (เฉพาะ `is_active`).
+
+### 12. `notifications`
+- `id` (serial, PK)
+- `user_id` (FK → users): ผู้รับ
+- `type` (varchar): `broadcast` | `booking_status` | `system`
+- `title`, `body`, `link`, `is_read`, `created_at`
+- User: `GET/PUT /api/user/notifications*` — Admin broadcast: `POST /api/admin/broadcast`
 
 ## Database Indexes
 

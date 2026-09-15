@@ -80,10 +80,10 @@ router.put("/:id/active", verifyToken, verifyAdmin, async (req: any, res: Respon
 router.put("/:id/role", verifyToken, verifyAdmin, async (req: any, res: Response) => {
   const { id } = req.params;
   const { userType } = req.body;
-  const validRoles = ["admin", "internal", "external"];
+  const validRoles = ["admin", "internal", "external", "co_op"];
   if (!validRoles.includes(userType)) {
     return res.status(400).json({
-      message: "อนุญาตเฉพาะ admin / internal / external",
+      message: "อนุญาตเฉพาะ admin / internal / external / co_op",
     });
   }
   if (Number(id) === Number(req.user?.userId) && userType !== "admin") {

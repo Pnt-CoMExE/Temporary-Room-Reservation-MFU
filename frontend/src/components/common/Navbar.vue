@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import api from "@/services/api";
@@ -13,6 +13,7 @@ interface Notification {
   desc: string;
   time: string;
   read: boolean;
+  link?: string;
 }
 
 import { useI18n } from "vue-i18n";
@@ -22,6 +23,8 @@ const isMenuOpen = ref(false);
 const isNotifOpen = ref(false);
 const userName = ref(localStorage.getItem("userName") || "ผู้ใช้งาน");
 const profileImage = ref<string | null>(null);
+const notifications = ref<Notification[]>([]);
+let notifPoll: ReturnType<typeof setInterval> | null = null;
 
 // โหลดรูปโปรไฟล์จาก Google (profile_picture ใน DB) — identity จาก JWT cookie
 const loadProfileImage = async () => {
@@ -36,75 +39,55 @@ const loadProfileImage = async () => {
   }
 };
 
-onMounted(loadProfileImage);
-
-const NOTIF_STORAGE_KEY = "mfu_notif_read_ids";
-
-const ALL_NOTIFICATIONS: Omit<Notification, "read">[] = [
-  {
-    id: 1,
-    type: "promo",
-    title: "โปรโมชั่นใหม่!",
-    desc: "รับส่วนลด 20% ทันทีเมื่อกรอกโค้ด MFU2026",
-    time: "10 นาทีที่แล้ว",
-  },
-  {
-    id: 2,
-    type: "status",
-    title: "การจองสำเร็จ",
-    desc: "การจองห้องประชุมคำมอกหลวง ได้รับการอนุมัติแล้ว",
-    time: "2 ชั่วโมงที่แล้ว",
-  },
-];
-
-const loadReadIds = (): Set<number> => {
+const loadNotifications = async () => {
+  if (localStorage.getItem("isLoggedIn") !== "true") {
+    notifications.value = [];
+    return;
+  }
   try {
-    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return new Set(
-      Array.isArray(parsed)
-        ? parsed.map(Number).filter((n) => Number.isFinite(n))
-        : []
-    );
+    const res = await api.get("/api/user/notifications");
+    notifications.value = (res.data || []).filter((n: Notification) => !n.read);
   } catch {
-    return new Set();
+    // keep previous list on transient errors
   }
 };
 
-const saveReadIds = (ids: Set<number>) => {
-  localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify([...ids]));
-};
+onMounted(() => {
+  loadProfileImage();
+  loadNotifications();
+  notifPoll = setInterval(loadNotifications, 60000);
+});
 
-const buildNotifications = (): Notification[] => {
-  const readIds = loadReadIds();
-  return ALL_NOTIFICATIONS.filter((n) => !readIds.has(n.id)).map((n) => ({
-    ...n,
-    read: false,
-  }));
-};
-
-const notifications = ref<Notification[]>(buildNotifications());
+onUnmounted(() => {
+  if (notifPoll) clearInterval(notifPoll);
+});
 
 const closeMenu = () => {
   isMenuOpen.value = false;
 };
 const toggleNotif = () => {
   isNotifOpen.value = !isNotifOpen.value;
+  if (isNotifOpen.value) loadNotifications();
 };
 
-const dismissNotifications = (ids: number[]) => {
-  const readIds = loadReadIds();
-  ids.forEach((id) => readIds.add(id));
-  saveReadIds(readIds);
-  notifications.value = buildNotifications();
+const markAllAsRead = async () => {
+  try {
+    await api.put("/api/user/notifications/read-all");
+    notifications.value = [];
+  } catch {
+    /* ignore */
+  }
 };
 
-const markAllAsRead = () => {
-  dismissNotifications(notifications.value.map((n) => n.id));
-};
-
-const markOneAsRead = (id: number) => {
-  dismissNotifications([id]);
+const markOneAsRead = async (id: number) => {
+  try {
+    await api.put(`/api/user/notifications/${id}/read`);
+    const item = notifications.value.find((n) => n.id === id);
+    notifications.value = notifications.value.filter((n) => n.id !== id);
+    if (item?.link) router.push(item.link);
+  } catch {
+    /* ignore */
+  }
 };
 
 const confirmLogout = () => {

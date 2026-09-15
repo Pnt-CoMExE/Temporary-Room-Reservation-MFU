@@ -158,6 +158,44 @@ const setAdminRole = async (user: UserItem) => {
     });
   }
 };
+
+const setCoOpRole = async (user: UserItem) => {
+  if (user.user_type === "admin") {
+    Swal.fire({
+      icon: "info",
+      title: "ถอด Admin ก่อน",
+      text: "ต้องถอดสิทธิ์ Admin ก่อนจึงตั้งเป็นหน่วยงานร่วมจัดได้",
+    });
+    return;
+  }
+  const nextRole = user.user_type === "co_op" ? baseRoleForEmail(user.email) : "co_op";
+  const { isConfirmed } = await Swal.fire({
+    title: nextRole === "co_op" ? "ตั้งเป็นหน่วยงานร่วมจัด?" : "ถอนสถานะร่วมจัด?",
+    text: `${user.email} → ${roleLabel[nextRole] || nextRole}`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "ยืนยัน",
+    cancelButtonText: "ยกเลิก",
+    confirmButtonColor: "#d4af37",
+  });
+  if (!isConfirmed) return;
+  try {
+    await api.put(`/api/admin/users/${user.id}/role`, { userType: nextRole });
+    user.user_type = nextRole;
+    Swal.fire({
+      icon: "success",
+      title: "อัปเดตสิทธิ์แล้ว",
+      timer: 1200,
+      showConfirmButton: false,
+    });
+  } catch (err: any) {
+    Swal.fire({
+      icon: "error",
+      title: "ไม่สำเร็จ",
+      text: err.response?.data?.message || "เปลี่ยนสิทธิ์ไม่สำเร็จ",
+    });
+  }
+};
 </script>
 
 <template>
@@ -340,6 +378,13 @@ const setAdminRole = async (user: UserItem) => {
                     class="px-3 py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
                   >
                     {{ user.user_type === "admin" ? "ถอด Admin" : "ตั้งเป็น Admin" }}
+                  </button>
+                  <button
+                    v-if="user.user_type !== 'admin'"
+                    @click="setCoOpRole(user)"
+                    class="px-3 py-1.5 bg-yellow-50 text-yellow-800 text-[10px] font-bold rounded-lg hover:bg-yellow-100 transition-all cursor-pointer border border-yellow-200"
+                  >
+                    {{ user.user_type === "co_op" ? "ถอน Co-op" : "ตั้งเป็น Co-op" }}
                   </button>
                 </div>
               </td>

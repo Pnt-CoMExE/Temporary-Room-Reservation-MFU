@@ -293,6 +293,7 @@ router.post(
 import { generateBookingPDFReceipt } from "../services/pdf.service";
 import { sendPaymentApprovedWithPermitEmail } from "../services/email.service";
 import { adminNameFromReq, logAdminAction } from "../services/auditLog.service";
+import { createNotification } from "../services/notification.service";
 
 /**
  * POST /api/payment/verify
@@ -360,6 +361,16 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
         console.error("[payment/verify] PDF generation/email error:", pdfErr);
       }
     }
+
+    await createNotification({
+      userId: Number(booking.user_id),
+      type: "booking_status",
+      title: isVerified ? "ยืนยันการชำระเงินแล้ว" : "ปฏิเสธการชำระเงิน",
+      body: isVerified
+        ? `รายการ ${booking.booking_no} ชำระเงินสำเร็จ — ตรวจสอบใบอนุญาตในอีเมล`
+        : `รายการ ${booking.booking_no} การชำระเงินไม่ผ่าน${remark ? `: ${remark}` : ""}`,
+      link: "/dashboard",
+    });
 
     await logAdminAction(
       adminNameFromReq(req),

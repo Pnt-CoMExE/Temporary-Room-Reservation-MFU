@@ -8,38 +8,35 @@ interface Banner {
   title: string;
   image: string;
   isActive: boolean;
+  link?: string;
 }
 
-interface PromoCode {
-  id: number;
-  code: string;
-  discount: number;
-  limit: number;
-  used: number;
-  isActive: boolean;
-}
-
-// ข้อมูลแบนเนอร์จาก Database
 const banners = ref<Banner[]>([]);
 
-// ข้อมูลโค้ดส่วนลดจาก Database
-const promoCodes = ref<PromoCode[]>([]);
-
 onMounted(async () => {
+  await loadBanners();
+});
+
+const loadBanners = async () => {
   try {
-    const res = await api.get("/api/admin/promocodes");
-    promoCodes.value = res.data.map((p: any) => ({
-      id: p.id,
-      code: p.code,
-      discount: parseFloat(p.discount),
-      limit: p.limit_count,
-      used: p.used_count,
-      isActive: p.is_active
+    const res = await api.get("/api/admin/banners");
+    banners.value = (res.data || []).map((b: any) => ({
+      id: b.id,
+      title: b.title,
+      image: b.image,
+      isActive: !!b.isActive,
+      link: b.link || "/rooms",
     }));
   } catch (err) {
-    console.error("Error fetching promo codes:", err);
+    console.error("Error fetching banners:", err);
+    Swal.fire({
+      icon: "error",
+      title: "โหลดแบนเนอร์ไม่สำเร็จ",
+      text: "ไม่สามารถดึงรายการแบนเนอร์ได้",
+      customClass: { popup: "rounded-3xl" },
+    });
   }
-});
+};
 
 const saveLog = async (action: string, details: string) => {
   try {
@@ -62,6 +59,9 @@ const handleAddBanner = () => {
         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">หัวข้อแบนเนอร์</label>
         <input id="swal-input-title" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-medium mb-4" placeholder="เช่น โปรโมชั่นต้อนรับเปิดเทอม">
         
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">ลิงก์เมื่อคลิก (ไม่บังคับ)</label>
+        <input id="swal-input-link" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-medium mb-4" placeholder="/rooms" value="/rooms">
+
         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">อัปโหลดรูปภาพ</label>
       </div>
     `,
@@ -85,96 +85,44 @@ const handleAddBanner = () => {
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-2xl px-6 py-3.5 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
     preConfirm: (file) => {
-      const title = document.getElementById("swal-input-title").value;
-      if (!title || !file)
+      const titleEl = document.getElementById("swal-input-title") as HTMLInputElement | null;
+      const linkEl = document.getElementById("swal-input-link") as HTMLInputElement | null;
+      const title = titleEl?.value?.trim() || "";
+      const link = linkEl?.value?.trim() || "/rooms";
+      if (!title || !file) {
         Swal.showValidationMessage("กรุณากรอกหัวข้อและเลือกรูปภาพ");
-      return { title, file };
+        return false;
+      }
+      return { title, link, file };
     },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      saveLog(
-        "เพิ่มแบนเนอร์",
-        `อัปโหลดแบนเนอร์ใหม่หัวข้อ: ${result.value.title}`,
-      );
+  }).then(async (result) => {
+    if (!result.isConfirmed || !result.value) return;
+
+    const { title, link, file } = result.value;
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("link", link);
+    formData.append("bannerImage", file);
+
+    try {
+      const res = await api.post("/api/admin/banners", formData);
+      banners.value = [res.data, ...banners.value];
+      saveLog("เพิ่มแบนเนอร์", `อัปโหลดแบนเนอร์ใหม่หัวข้อ: ${title}`);
       Swal.fire({
         icon: "success",
         title: "อัปโหลดสำเร็จ!",
+        text: "แบนเนอร์จะแสดงบนหน้าแรกทันที",
         showConfirmButton: false,
         timer: 1500,
         customClass: { popup: "rounded-3xl" },
       });
-    }
-  });
-};
-
-const handleAddPromoCode = () => {
-  Swal.fire({
-    title:
-      '<h3 class="text-2xl font-black text-gray-900 mb-2">สร้างรหัสส่วนลด</h3>',
-    html: `
-      <div class="text-left mt-4 space-y-4">
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">รหัสโปรโมชั่น (Code)</label>
-          <input id="swal-code" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none transition-all font-black tracking-widest uppercase text-lg" placeholder="เช่น SAVE50">
-        </div>
-        <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">มูลค่าส่วนลด</label>
-          <input id="swal-discount" class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-[#ba0b2f] rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none transition-all font-bold" placeholder="เช่น 20% หรือ ฿500">
-        </div>
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: "บันทึกรหัส",
-    cancelButtonText: "ยกเลิก",
-    reverseButtons: true,
-    buttonsStyling: false,
-    customClass: {
-      popup: "rounded-[2.5rem] p-8 max-w-sm",
-      actions: "flex flex-row gap-3 mt-8 w-full justify-center",
-      confirmButton:
-        "bg-[#d4af37] text-white rounded-2xl px-6 py-3.5 font-bold shadow-lg shadow-yellow-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
-      cancelButton:
-        "bg-gray-100 text-gray-700 border border-gray-200 rounded-2xl px-6 py-3.5 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
-    },
-    preConfirm: () => {
-      const code = document.getElementById("swal-code").value.toUpperCase();
-      const discount = document.getElementById("swal-discount").value;
-      if (!code || !discount)
-        Swal.showValidationMessage("กรุณากรอกข้อมูลให้ครบถ้วน");
-      return { code, discount };
-    },
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        const res = await api.post("/api/admin/promocodes", {
-          code: result.value.code,
-          discount: result.value.discount,
-          limit_count: 100
-        });
-
-        promoCodes.value.unshift({
-          id: res.data.id,
-          code: res.data.code,
-          discount: parseFloat(res.data.discount),
-          limit: res.data.limit_count,
-          used: 0,
-          isActive: res.data.is_active,
-        });
-
-        saveLog(
-          "สร้างรหัสส่วนลด",
-          `สร้างรหัสโปรโมชั่นใหม่: ${result.value.code}`,
-        );
-        Swal.fire({
-          icon: "success",
-          title: "สร้างรหัสสำเร็จ!",
-          showConfirmButton: false,
-          timer: 1500,
-          customClass: { popup: "rounded-3xl" },
-        });
-      } catch (err) {
-        Swal.fire("ข้อผิดพลาด", "ไม่สามารถสร้างรหัสได้ (รหัสอาจซ้ำ)", "error");
-      }
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "อัปโหลดไม่สำเร็จ",
+        text: err?.message || "ไม่สามารถอัปโหลดแบนเนอร์ได้",
+        customClass: { popup: "rounded-3xl" },
+      });
     }
   });
 };
@@ -184,7 +132,7 @@ const handleBroadcast = () => {
     title:
       '<h3 class="text-2xl font-black text-gray-900 mb-1">ส่งประกาศแจ้งเตือน</h3>',
     html: `
-      <p class="text-sm text-gray-500 mb-6 font-medium">ส่งข้อความแจ้งเตือน (Push Notification) ไปยังผู้ใช้งานทุกคน</p>
+      <p class="text-sm text-gray-500 mb-6 font-medium">ส่งข้อความแจ้งเตือนในแอปไปยังผู้ใช้งานที่เปิดใช้งานทุกคน (กระดิ่งแจ้งเตือน)</p>
       <div class="text-left space-y-4">
         <div>
           <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">หัวข้อประกาศ</label>
@@ -209,15 +157,36 @@ const handleBroadcast = () => {
       cancelButton:
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-2xl px-6 py-3.5 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
-  }).then((result) => {
-    if (result.isConfirmed) {
-      const title = document.getElementById("swal-b-title").value;
-      saveLog("ส่งประกาศ (Broadcast)", `ส่งแจ้งเตือนหัวข้อ: ${title}`);
+  }).then(async (result) => {
+    if (!result.isConfirmed) return;
+    const titleEl = document.getElementById("swal-b-title") as HTMLInputElement | null;
+    const descEl = document.getElementById("swal-b-desc") as HTMLTextAreaElement | null;
+    const title = titleEl?.value?.trim() || "";
+    const body = descEl?.value?.trim() || "";
+    if (!title || !body) {
+      Swal.fire({
+        icon: "warning",
+        title: "กรุณากรอกข้อมูลให้ครบ",
+        customClass: { popup: "rounded-3xl" },
+      });
+      return;
+    }
+    try {
+      const res = await api.post("/api/admin/broadcast", { title, body, link: "/home" });
+      const count = res.data?.recipientCount ?? 0;
       Swal.fire({
         icon: "success",
         title: "ส่งแจ้งเตือนเรียบร้อย",
+        text: `ส่งถึงผู้ใช้ ${count} คน — แสดงที่กระดิ่งแจ้งเตือน`,
         showConfirmButton: false,
-        timer: 1500,
+        timer: 2000,
+        customClass: { popup: "rounded-3xl" },
+      });
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "ส่งไม่สำเร็จ",
+        text: err?.message || "ไม่สามารถส่งประกาศได้",
         customClass: { popup: "rounded-3xl" },
       });
     }
@@ -242,8 +211,10 @@ const deleteBanner = (id, title) => {
       cancelButton:
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-4 py-3 font-bold hover:bg-gray-200 transition-all flex-1 cursor-pointer",
     },
-  }).then((result) => {
-    if (result.isConfirmed) {
+  }).then(async (result) => {
+    if (!result.isConfirmed) return;
+    try {
+      await api.delete(`/api/admin/banners/${id}`);
       banners.value = banners.value.filter((b) => b.id !== id);
       saveLog("ลบแบนเนอร์", `ลบแบนเนอร์หัวข้อ: ${title}`);
       Swal.fire({
@@ -252,75 +223,38 @@ const deleteBanner = (id, title) => {
         showConfirmButton: false,
         timer: 1500,
       });
+    } catch (err: any) {
+      Swal.fire({
+        icon: "error",
+        title: "ลบไม่สำเร็จ",
+        text: err?.message || "ไม่สามารถลบแบนเนอร์ได้",
+        customClass: { popup: "rounded-3xl" },
+      });
     }
   });
 };
 
-const toggleBannerStatus = (banner) => {
-  banner.isActive = !banner.isActive;
-  saveLog(
-    "เปิด/ปิดแบนเนอร์",
-    `เปลี่ยนสถานะแบนเนอร์ "${banner.title}" เป็น ${banner.isActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}`,
-  );
+const toggleBannerStatus = async (banner) => {
+  const nextActive = !banner.isActive;
+  try {
+    await api.put(`/api/admin/banners/${banner.id}/status`, {
+      isActive: nextActive,
+    });
+    banner.isActive = nextActive;
+    saveLog(
+      "เปิด/ปิดแบนเนอร์",
+      `เปลี่ยนสถานะแบนเนอร์ "${banner.title}" เป็น ${nextActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}`,
+    );
+  } catch (err: any) {
+    Swal.fire({
+      icon: "error",
+      title: "อัปเดตไม่สำเร็จ",
+      text: err?.message || "ไม่สามารถเปลี่ยนสถานะแบนเนอร์ได้",
+      customClass: { popup: "rounded-3xl" },
+    });
+  }
 };
 
-// ✨ ฟังก์ชันสลับสถานะ Promo Code ผ่าน SweetAlert2
-const togglePromoStatus = (promo) => {
-  const isEnable = !promo.isActive;
-
-  Swal.fire({
-    html: `
-      <div class="absolute top-0 left-0 w-full h-2 ${isEnable ? "bg-green-600" : "bg-gray-400"}"></div>
-      <h3 class="text-2xl font-black text-gray-900 mb-3 mt-4 tracking-tight">
-        ${isEnable ? "เปิดใช้งานโค้ด" : "ปิดใช้งานโค้ด"}
-      </h3>
-      <p class="text-gray-500 mb-4 font-medium leading-relaxed px-4">
-        ${
-          isEnable
-            ? `คุณต้องการเปิดใช้งานโค้ด <span class="font-bold text-gray-900">${promo.code}</span> กลับมาใช่หรือไม่?`
-            : `คุณต้องการระงับการใช้งานโค้ด <span class="font-bold text-gray-900">${promo.code}</span> ชั่วคราวใช่หรือไม่?`
-        }
-      </p>
-    `,
-    showCancelButton: true,
-    confirmButtonText: "ยืนยัน",
-    cancelButtonText: "ยกเลิก",
-    reverseButtons: false,
-    buttonsStyling: false,
-    customClass: {
-      popup: "rounded-[2rem] p-8 max-w-md relative overflow-hidden",
-      actions: "flex gap-3 mt-6 w-full justify-center",
-      confirmButton: `${isEnable ? "bg-green-600 hover:bg-green-700" : "bg-gray-800 hover:bg-gray-900"} text-white rounded-xl px-4 py-3 font-bold shadow-md transition-all flex-1 whitespace-nowrap cursor-pointer`,
-      cancelButton:
-        "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-4 py-3 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
-    },
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        await api.put(`/api/admin/promocodes/${promo.id}/status`, {
-          isActive: isEnable
-        });
-
-        promo.isActive = isEnable;
-        const actionText = isEnable ? "เปิดใช้งาน" : "ระงับการใช้งาน";
-        saveLog(
-          "เปิด/ปิดโค้ดส่วนลด",
-          `เปลี่ยนสถานะโค้ด "${promo.code}" เป็น ${actionText}`,
-        );
-
-        Swal.fire({
-          icon: "success",
-          title: "อัปเดตสถานะสำเร็จ!",
-          showConfirmButton: false,
-          timer: 1500,
-          customClass: { popup: "rounded-3xl" },
-        });
-      } catch (err) {
-        Swal.fire("ข้อผิดพลาด", "ไม่สามารถอัปเดตสถานะได้", "error");
-      }
-    }
-  });
-};
 </script>
 
 <template>
@@ -362,6 +296,14 @@ const togglePromoStatus = (promo) => {
         >
           <font-awesome-icon icon="plus" class="mr-1" /> อัปโหลด
         </button>
+      </div>
+
+      <div
+        v-if="banners.length === 0"
+        class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-12 text-center"
+      >
+        <p class="text-sm font-semibold text-gray-500">ยังไม่มีแบนเนอร์</p>
+        <p class="text-xs text-gray-400 mt-1">กด “อัปโหลด” เพื่อเพิ่มภาพที่แสดงบนหน้าแรก</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

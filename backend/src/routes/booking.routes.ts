@@ -6,6 +6,7 @@ import { query, pool } from "../../db";
 import { verifyToken } from "../middleware/auth";
 import { validateCreateBooking } from "../middleware/validate";
 import { sendBookingSubmittedEmail } from "../services/email.service";
+import { createNotification } from "../services/notification.service";
 
 const router = Router();
 
@@ -156,7 +157,7 @@ router.post(
 
       await client.query("COMMIT");
 
-      // Trigger email notification
+      // Trigger email + in-app notification
       (async () => {
         try {
           const userRes = await query("SELECT email FROM users WHERE id = $1", [userId]);
@@ -164,8 +165,15 @@ router.post(
           const userEmail = userRes.rows[0]?.email || "user@mfu.ac.th";
           const roomName = roomRes.rows[0]?.name || "ห้องประชุม";
           await sendBookingSubmittedEmail(userEmail, bookingNo, roomName, String(bookingDate));
+          await createNotification({
+            userId: Number(userId),
+            type: "booking_status",
+            title: "ส่งคำขอจองสำเร็จ",
+            body: `${bookingNo} · ${roomName} รอเจ้าหน้าที่ตรวจสอบ`,
+            link: "/dashboard",
+          });
         } catch (e) {
-          console.error("[bookings] Email dispatch error:", e);
+          console.error("[bookings] Email/notification dispatch error:", e);
         }
       })();
 

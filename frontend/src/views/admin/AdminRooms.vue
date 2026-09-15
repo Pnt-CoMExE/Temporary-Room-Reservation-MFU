@@ -195,6 +195,86 @@ const handleManageImages = (room) => {
     }
   });
 };
+
+const handleEditRoom = (room: RoomItem) => {
+  Swal.fire({
+    title: `<h3 class="text-xl font-black text-gray-900">แก้ไขห้อง #${room.id}</h3>`,
+    html: `
+      <div class="text-left space-y-3 mt-2">
+        <div>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">ชื่อห้อง</label>
+          <input id="edit-name" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold" value="${String(room.name).replace(/"/g, "&quot;")}">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">ประเภท</label>
+            <input id="edit-type" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold" value="${String(room.type).replace(/"/g, "&quot;")}">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">ความจุ</label>
+            <input id="edit-cap" type="number" min="1" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold" value="${Number(room.capacity) || 1}">
+          </div>
+        </div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase pt-1">ราคาครึ่งวัน / เต็มวัน</p>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+          <input id="edit-hi" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายใน ครึ่ง" value="${Number(room.price_half_day_internal || 0)}">
+          <input id="edit-fi" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายใน เต็ม" value="${Number(room.price_full_day_internal || 0)}">
+          <input id="edit-hc" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ร่วมจัด ครึ่ง" value="${Number(room.price_half_day_co_organizer || 0)}">
+          <input id="edit-fc" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ร่วมจัด เต็ม" value="${Number(room.price_full_day_co_organizer || 0)}">
+          <input id="edit-he" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายนอก ครึ่ง" value="${Number(room.price_half_day_external || 0)}">
+          <input id="edit-fe" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายนอก เต็ม" value="${Number(room.price_full_day_external || 0)}">
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "บันทึก",
+    cancelButtonText: "ยกเลิก",
+    showLoaderOnConfirm: true,
+    customClass: {
+      popup: "rounded-[2rem] p-6 max-w-lg",
+      confirmButton: "bg-[#ba0b2f] text-white rounded-xl px-5 py-3 font-bold cursor-pointer",
+      cancelButton: "bg-gray-100 text-gray-700 rounded-xl px-5 py-3 font-bold cursor-pointer",
+    },
+    preConfirm: async () => {
+      const name = (document.getElementById("edit-name") as HTMLInputElement)?.value?.trim();
+      const type = (document.getElementById("edit-type") as HTMLInputElement)?.value?.trim();
+      const capacity = Number((document.getElementById("edit-cap") as HTMLInputElement)?.value);
+      if (!name || !type || !capacity) {
+        Swal.showValidationMessage("กรุณากรอกชื่อ ประเภท และความจุ");
+        return false;
+      }
+      const prices = {
+        halfInternal: Number((document.getElementById("edit-hi") as HTMLInputElement)?.value) || 0,
+        fullInternal: Number((document.getElementById("edit-fi") as HTMLInputElement)?.value) || 0,
+        halfCoop: Number((document.getElementById("edit-hc") as HTMLInputElement)?.value) || 0,
+        fullCoop: Number((document.getElementById("edit-fc") as HTMLInputElement)?.value) || 0,
+        halfExternal: Number((document.getElementById("edit-he") as HTMLInputElement)?.value) || 0,
+        fullExternal: Number((document.getElementById("edit-fe") as HTMLInputElement)?.value) || 0,
+      };
+      try {
+        await api.put(`/api/admin/rooms/${room.id}`, { name, type, capacity, prices });
+        return { name, type, capacity, prices };
+      } catch (err: any) {
+        Swal.showValidationMessage(err?.message || "บันทึกไม่สำเร็จ");
+        return false;
+      }
+    },
+  }).then((result) => {
+    if (!result.isConfirmed || !result.value) return;
+    const { name, type, capacity, prices } = result.value;
+    room.name = name;
+    room.type = type;
+    room.capacity = capacity;
+    room.price_half_day_internal = prices.halfInternal;
+    room.price_full_day_internal = prices.fullInternal;
+    room.price_half_day_co_organizer = prices.halfCoop;
+    room.price_full_day_co_organizer = prices.fullCoop;
+    room.price_half_day_external = prices.halfExternal;
+    room.price_full_day_external = prices.fullExternal;
+    saveLog("แก้ไขห้อง", `อัปเดตห้อง: ${name}`);
+    Swal.fire({ icon: "success", title: "บันทึกสำเร็จ", showConfirmButton: false, timer: 1200 });
+  });
+};
 </script>
 
 <template>
@@ -210,7 +290,7 @@ const handleManageImages = (room) => {
           <font-awesome-icon icon="building" class="text-[#ba0b2f]" /> จัดการข้อมูลห้องและพื้นที่
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          เพิ่มหรืออัปเดตข้อมูลห้องและราคาผ่านการนำเข้าไฟล์ Excel เท่านั้น
+          นำเข้า Excel หรือแก้ไขชื่อ/ราคา/ความจุในตารางได้โดยตรง
         </p>
       </div>
       <button
@@ -270,9 +350,18 @@ const handleManageImages = (room) => {
                   </button>
 
                   <div class="flex-1">
-                    <p class="font-bold text-gray-900 text-sm mb-0.5" :title="room.name">
-                      {{ room.name }}
-                    </p>
+                    <div class="flex items-center gap-2 mb-0.5">
+                      <p class="font-bold text-gray-900 text-sm" :title="room.name">
+                        {{ room.name }}
+                      </p>
+                      <button
+                        type="button"
+                        @click="handleEditRoom(room)"
+                        class="text-[10px] font-bold text-[#ba0b2f] bg-red-50 border border-red-100 px-2 py-0.5 rounded-md hover:bg-red-100 cursor-pointer"
+                      >
+                        แก้ไข
+                      </button>
+                    </div>
                     <span
                       class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wider"
                       >{{ room.type }}</span

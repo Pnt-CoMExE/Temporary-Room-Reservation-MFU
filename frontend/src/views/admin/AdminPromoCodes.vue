@@ -140,6 +140,27 @@ const togglePromoStatus = async (promo: PromoCode) => {
   }
 };
 
+const deletePromoCode = async (promo: PromoCode) => {
+  const result = await Swal.fire({
+    title: "ลบรหัสส่วนลด?",
+    html: `โค้ด <strong>${promo.code}</strong> จะถูกลบถาวร`,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "ลบทิ้ง",
+    cancelButtonText: "ยกเลิก",
+    confirmButtonColor: "#ba0b2f",
+  });
+  if (!result.isConfirmed) return;
+  try {
+    await api.delete(`/api/admin/promocodes/${promo.id}`);
+    promoCodes.value = promoCodes.value.filter((p) => p.id !== promo.id);
+    saveLog("ลบรหัสส่วนลด", `ลบโค้ด: ${promo.code}`);
+    Swal.fire({ icon: "success", title: "ลบสำเร็จ", showConfirmButton: false, timer: 1000 });
+  } catch {
+    Swal.fire("ผิดพลาด", "ไม่สามารถลบรหัสได้", "error");
+  }
+};
+
 // ─── Format helpers ───────────────────────────────────────────
 const usagePercent = (promo: PromoCode) => {
   if (!promo.limit_count) return 0;
@@ -228,6 +249,7 @@ const usagePercent = (promo: PromoCode) => {
               <th class="px-6 py-4 text-center">ส่วนลด</th>
               <th class="px-6 py-4 text-center">การใช้งาน</th>
               <th class="px-6 py-4 text-center border-l border-gray-100">สถานะ</th>
+              <th class="px-4 py-4 text-center border-l border-gray-100">จัดการ</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -278,6 +300,15 @@ const usagePercent = (promo: PromoCode) => {
                   :title="promo.is_active ? 'คลิกเพื่อปิดใช้งาน' : 'คลิกเพื่อเปิดใช้งาน'"
                 >
                   <font-awesome-icon :icon="promo.is_active ? 'toggle-on' : 'toggle-off'" />
+                </button>
+              </td>
+              <td class="px-4 py-4 text-center border-l border-gray-100">
+                <button
+                  @click="deletePromoCode(promo)"
+                  class="w-8 h-8 rounded-lg bg-red-50 text-red-500 border border-red-100 hover:bg-red-500 hover:text-white transition-colors inline-flex items-center justify-center cursor-pointer"
+                  title="ลบรหัส"
+                >
+                  <font-awesome-icon icon="trash-alt" class="text-xs" />
                 </button>
               </td>
             </tr>

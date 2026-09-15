@@ -29,6 +29,10 @@ export const errorHandler = (
     return res.status(400).json({ message: "กรุณาเลือกไฟล์ PDF เท่านั้น" });
   }
 
+  if (err.message === "รองรับเฉพาะไฟล์รูปภาพ") {
+    return res.status(400).json({ message: "กรุณาเลือกไฟล์รูปภาพเท่านั้น" });
+  }
+
   // Custom API errors
   if (err instanceof ApiError) {
     return res.status(err.statusCode).json({ message: err.message });

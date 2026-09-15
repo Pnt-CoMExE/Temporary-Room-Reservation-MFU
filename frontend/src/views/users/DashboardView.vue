@@ -88,7 +88,12 @@ const fetchBookings = async () => {
     memoDocumentUrl: b.memo_document_url || null,
     adminName: (b.admin_name || "").trim() || undefined,
     remark: b.remarks || b.remark || undefined,
-    addons: [],
+    addons: Array.isArray(b.addons)
+      ? b.addons.map((a: any) => ({
+          name: a.name,
+          qty: a.quantity ?? a.qty ?? 1,
+        }))
+      : [],
   }));
 };
 

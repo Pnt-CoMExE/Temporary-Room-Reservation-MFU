@@ -7,6 +7,7 @@ import { query, pool } from "../../../db";
 import { verifyToken, verifyAdmin } from "../../middleware/auth";
 import { sendBookingStatusEmail } from "../../services/email.service";
 import { adminNameFromReq, logAdminAction } from "../../services/auditLog.service";
+import { createNotification } from "../../services/notification.service";
 
 const STATUS_LABEL_TH: Record<string, string> = {
   pending: "รออนุมัติ",
@@ -97,11 +98,11 @@ router.put(
         );
       }
 
-      // Trigger status email notification
+      // Trigger status email + in-app notification
       (async () => {
         try {
           const detailRes = await query(
-            `SELECT b.booking_no, u.email, r.name as room_name
+            `SELECT b.booking_no, b.user_id, u.email, r.name as room_name
              FROM bookings b
              JOIN users u ON b.user_id = u.id
              JOIN rooms r ON b.room_id = r.id
@@ -109,11 +110,20 @@ router.put(
             [id]
           );
           if (detailRes.rows.length > 0) {
-            const { booking_no, email, room_name } = detailRes.rows[0];
+            const { booking_no, user_id, email, room_name } = detailRes.rows[0];
             await sendBookingStatusEmail(email, booking_no, room_name, status, remarks);
+            await createNotification({
+              userId: Number(user_id),
+              type: "booking_status",
+              title: `อัปเดตสถานะการจอง`,
+              body: `${booking_no} · ${room_name} → ${statusLabelTh(String(status))}${
+                remarks ? ` (${remarks})` : ""
+              }`,
+              link: "/dashboard",
+            });
           }
         } catch (e) {
-          console.error("[admin/bookings] Email status notification error:", e);
+          console.error("[admin/bookings] Email/notification status error:", e);
         }
       })();
 

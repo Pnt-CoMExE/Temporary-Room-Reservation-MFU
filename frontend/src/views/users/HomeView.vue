@@ -87,7 +87,7 @@ onMounted(async () => {
         name: room.name,
         type: room.type,
         capacity: room.capacity,
-        location: room.type, // ใช้ type เป็น location ชั่วคราว หรือเพิ่ม location ใน DB
+        location: room.location || room.type,
         image: resolveRoomImage(room.image_url, room.id ?? room.name),
         isAvailable: room.is_active,
         priceHalfDayInternal: parseFloat(room.price_half_day_internal) || 0
@@ -269,7 +269,7 @@ onUnmounted(() => {
               v-for="banner in banners"
               :key="banner.id"
               class="w-full h-full shrink-0 relative cursor-pointer"
-              @click="router.push(banner.link)"
+              @click="banner.link && router.push(banner.link)"
             >
               <img
                 :src="banner.image"
@@ -457,12 +457,16 @@ onUnmounted(() => {
           </p>
           <div class="flex gap-4">
             <a
-              href="#"
+              href="https://www.facebook.com/MaeFahLuangUniversity"
+              target="_blank"
+              rel="noopener noreferrer"
               class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#ba0b2f] transition-colors"
               ><font-awesome-icon :icon="['fab', 'facebook-f']" />
             </a>
             <a
-              href="#"
+              href="https://www.mfu.ac.th"
+              target="_blank"
+              rel="noopener noreferrer"
               class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#ba0b2f] transition-colors"
               ><font-awesome-icon icon="globe" />
             </a>
@@ -509,27 +513,27 @@ onUnmounted(() => {
               >
             </li>
             <li>
-              <a
-                href="#"
+              <router-link
+                to="/info/manual"
                 class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
-                {{ $t('home.footer_menu_manual') }}</a
+                {{ $t('home.footer_menu_manual') }}</router-link
               >
             </li>
             <li>
-              <a
-                href="#"
+              <router-link
+                to="/info/rates"
                 class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
-                {{ $t('home.footer_menu_rates') }}</a
+                {{ $t('home.footer_menu_rates') }}</router-link
               >
             </li>
             <li>
-              <a
-                href="#"
+              <router-link
+                to="/info/privacy"
                 class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
-                {{ $t('home.footer_menu_privacy') }}</a
+                {{ $t('home.footer_menu_privacy') }}</router-link
               >
             </li>
           </ul>

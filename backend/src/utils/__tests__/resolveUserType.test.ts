@@ -32,6 +32,11 @@ describe("resolveUserType", () => {
     expect(resolveUserType("piya.student@lamduan.mfu.ac.th", "admin")).toBe("admin");
   });
 
+  it("รักษา co_op ที่ถูกตั้งใน Admin UI", () => {
+    expect(resolveUserType("partner@company.com", "co_op")).toBe("co_op");
+    expect(resolveUserType("staff@mfu.ac.th", "co_op")).toBe("co_op");
+  });
+
   it("บุคลากร @mfu.ac.th ที่ยังไม่ใช่ admin → internal (ไม่ทับด้วย existing อื่น)", () => {
     expect(resolveUserType("staff@mfu.ac.th", "external")).toBe("internal");
   });
