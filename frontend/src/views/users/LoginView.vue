@@ -93,7 +93,7 @@ const loginWithGoogle = () => {
 
       <!-- 📦 กล่อง Login Card -->
       <div
-        class="bg-white/95 backdrop-blur-xl rounded-4xl shadow-2xl p-8 sm:p-10 border border-white/20 transform transition-all hover:scale-[1.01] animate-fade-up min-h-80 flex flex-col justify-center"
+        class="bg-white/95 backdrop-blur-xl rounded-4xl shadow-card-float p-8 sm:p-10 border border-gray-200/90 transform transition-all hover:scale-[1.01] animate-fade-up min-h-80 flex flex-col justify-center"
       >
         <div class="text-center mb-8">
           <div
@@ -111,7 +111,7 @@ const loginWithGoogle = () => {
           <div class="space-y-4 animate-fade-up">
             <button
               @click="loginWithGoogle"
-              class="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm group cursor-pointer"
+              class="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-card group cursor-pointer"
             >
               <img
                 class="h-5 w-5 transition-transform group-hover:scale-110"

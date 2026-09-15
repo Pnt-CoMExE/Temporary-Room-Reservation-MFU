@@ -15,8 +15,16 @@ describe("auditLog.service", () => {
   it("บันทึก admin activity log ลงฐานข้อมูล", async () => {
     await logAdminAction("Admin User", "อนุมัติคำขอจอง", "Booking #12");
     expect(query).toHaveBeenCalledWith(
-      "INSERT INTO admin_activity_logs (admin_name, action, details) VALUES ($1, $2, $3)",
-      ["Admin User", "อนุมัติคำขอจอง", "Booking #12"]
+      "INSERT INTO admin_activity_logs (admin_name, action, details, booking_id) VALUES ($1, $2, $3, $4)",
+      ["Admin User", "อนุมัติคำขอจอง", "Booking #12", null]
+    );
+  });
+
+  it("บันทึกพร้อม booking_id เมื่อส่งมา", async () => {
+    await logAdminAction("Admin User", "ดูประวัติ", "detail", 42);
+    expect(query).toHaveBeenCalledWith(
+      "INSERT INTO admin_activity_logs (admin_name, action, details, booking_id) VALUES ($1, $2, $3, $4)",
+      ["Admin User", "ดูประวัติ", "detail", 42]
     );
   });
 });

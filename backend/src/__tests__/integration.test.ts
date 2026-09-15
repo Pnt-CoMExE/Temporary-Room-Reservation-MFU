@@ -145,6 +145,7 @@ describe("Integration: Booking Creation — Validation", () => {
       .field("bookingDate", "2026-12-25")
       .field("timeSlot", "full")
       .field("objective", "ทดสอบระบบ Integration Test")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000");
@@ -153,7 +154,7 @@ describe("Integration: Booking Creation — Validation", () => {
     expect(res.body.message).toContain("หนังสือบันทึกข้อความ");
   });
 
-  it("ควร reject เมื่อ userType ไม่ถูกต้อง", async () => {
+  it("ควรบังคับ userType จาก JWT — ไม่ยอมรับค่าปลอมจาก client", async () => {
     const pdfBuffer = createMinimalPDF();
 
     const res = await request(app)
@@ -163,16 +164,23 @@ describe("Integration: Booking Creation — Validation", () => {
       .field("roomId", "1")
       .field("userType", "invalid_type")
       .field("partnerName", "ทดสอบ")
-      .field("bookingDate", "2026-12-26")
+      .field("bookingDate", "2099-12-26")
       .field("timeSlot", "full")
       .field("objective", "ทดสอบ")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000")
       .attach("memoDocument", pdfBuffer, { filename: "test.pdf", contentType: "application/pdf" });
 
-    expect(res.status).toBe(400);
-    expect(res.body.message).toContain("ประเภทผู้ใช้");
+    // Middleware เขียนทับ userType จาก JWT ก่อน validate → ไม่ควร fail เพราะประเภทผู้ใช้
+    // อาจ 201 (สร้างได้) หรือ 400 (ชนคิว/เหตุผลอื่น) แต่ต้องไม่ใช่ข้อความประเภทผู้ใช้
+    expect(res.status).not.toBe(500);
+    if (res.status === 400) {
+      expect(String(res.body.message || "")).not.toContain("ประเภทผู้ใช้");
+    } else {
+      expect([201, 200]).toContain(res.status);
+    }
   });
 
   it("ควร reject เมื่อ timeSlot ไม่ถูกต้อง", async () => {
@@ -188,6 +196,7 @@ describe("Integration: Booking Creation — Validation", () => {
       .field("bookingDate", "2026-12-27")
       .field("timeSlot", "midnight")
       .field("objective", "ทดสอบ")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000")
@@ -210,6 +219,7 @@ describe("Integration: Booking Creation — Validation", () => {
       .field("bookingDate", "25-12-2026")
       .field("timeSlot", "full")
       .field("objective", "ทดสอบ")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000")
@@ -230,6 +240,7 @@ describe("Integration: Booking Creation — Validation", () => {
       .field("bookingDate", "2026-12-28")
       .field("timeSlot", "full")
       .field("objective", "ทดสอบ")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000")

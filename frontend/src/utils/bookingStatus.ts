@@ -1,12 +1,13 @@
 /**
  * Shared booking status labels / badge colors (User + Admin).
- * Distinguishes "paid" vs "reviewed" without a new DB status.
+ * Distinguishes paid vs completed (หลังใช้งาน) vs reviewed (badge แยก).
  */
 
 export type BookingStatusKey =
   | "pending"
   | "approved_pending_payment"
   | "approved_paid"
+  | "completed"
   | "disapproved"
   | "cancelled"
   | "unknown";
@@ -34,10 +35,11 @@ export function normalizeBookingStatus(
   if (s === "pending" || s === "รออนุมัติ") return "pending";
   if (s === "approved_pending_payment" || s === "รอชำระเงิน")
     return "approved_pending_payment";
+  if (s === "completed" || s === "สำเร็จแล้ว") return "completed";
   if (
     s === "approved_paid" ||
     s === "approved" ||
-    s === "สำเร็จแล้ว" ||
+    s === "ชำระเงินแล้ว" ||
     s === "ชำระแล้ว"
   )
     return "approved_paid";
@@ -54,7 +56,7 @@ export function isBookingStatus(
   return normalizeBookingStatus(status) === key;
 }
 
-/** Primary status label — paid is NOT the same wording as "reviewed" */
+/** Primary status label — human-readable, no IT jargon */
 export function getBookingStatusLabel(
   status: string | null | undefined,
   locale: string = "th"
@@ -67,7 +69,9 @@ export function getBookingStatusLabel(
     case "approved_pending_payment":
       return en ? "Awaiting payment" : "รอชำระเงิน";
     case "approved_paid":
-      return en ? "Paid" : "ชำระแล้ว";
+      return en ? "Payment completed" : "ชำระเงินแล้ว";
+    case "completed":
+      return en ? "Completed" : "สำเร็จแล้ว";
     case "disapproved":
       return en ? "Disapproved" : "ไม่อนุมัติ";
     case "cancelled":
@@ -75,6 +79,21 @@ export function getBookingStatusLabel(
     default:
       return String(status || "");
   }
+}
+
+/** Replace raw status codes inside log detail strings */
+export function humanizeStatusInText(
+  text: string | null | undefined,
+  locale: string = "th"
+): string {
+  if (!text) return "";
+  return String(text)
+    .replace(/approved_pending_payment/g, getBookingStatusLabel("approved_pending_payment", locale))
+    .replace(/approved_paid/g, getBookingStatusLabel("approved_paid", locale))
+    .replace(/\bcompleted\b/g, getBookingStatusLabel("completed", locale))
+    .replace(/\bpending\b/g, getBookingStatusLabel("pending", locale))
+    .replace(/disapproved/g, getBookingStatusLabel("disapproved", locale))
+    .replace(/cancelled|canceled/g, getBookingStatusLabel("cancelled", locale));
 }
 
 export function getReviewedLabel(locale: string = "th"): string {
@@ -92,9 +111,11 @@ export function getBookingStatusBadgeClass(
     case "pending":
       return "bg-amber-50 text-amber-800 border-amber-200";
     case "approved_pending_payment":
-      return "bg-sky-50 text-sky-800 border-sky-200";
+      return "bg-sky-100 text-sky-900 border-sky-300 shadow-sm whitespace-nowrap tracking-wide";
     case "approved_paid":
       return "bg-emerald-50 text-emerald-800 border-emerald-200";
+    case "completed":
+      return "bg-teal-50 text-teal-800 border-teal-200";
     case "disapproved":
       return "bg-rose-50 text-rose-800 border-rose-200";
     case "cancelled":
@@ -106,4 +127,15 @@ export function getBookingStatusBadgeClass(
 
 export function getReviewedBadgeClass(): string {
   return "bg-violet-50 text-violet-800 border-violet-200";
+}
+
+/** Parse promo discount stored as number or "50%" → percent number */
+export function parsePromoPercent(raw: unknown): number {
+  const n = parseFloat(String(raw ?? "").replace(/%/g, "").trim());
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  return Math.min(100, n);
+}
+
+export function formatPromoPercent(raw: unknown): string {
+  return `${parsePromoPercent(raw)}%`;
 }

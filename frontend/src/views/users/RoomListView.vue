@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/services/api";
 import RoomCard from "@/components/room/RoomCard.vue";
+import { resolveRoomImage } from "@/utils/roomImage";
 
 interface RoomItem {
   id: number;
@@ -42,7 +43,7 @@ const fetchRooms = async () => {
         type: room.type,
         capacity: room.capacity,
         location: room.type,
-        image: room.image_url,
+        image: resolveRoomImage(room.image_url),
         isAvailable: room.is_active,
         priceHalfDayInternal: parseFloat(room.price_half_day_internal) || 0
     }));
@@ -96,7 +97,7 @@ const filteredRooms = computed(() => {
 </script>
 
 <template>
-  <div class="bg-[#f8f9fa] min-h-screen font-sans flex flex-col">
+  <div class="bg-canvas min-h-screen font-sans flex flex-col">
     <div
       class="relative pt-24 pb-40 lg:pt-32 lg:pb-48 flex items-center justify-center overflow-hidden"
     >
@@ -117,21 +118,23 @@ const filteredRooms = computed(() => {
         class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto animate-fade-up"
       >
         <h1
-          class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg"
+          class="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight leading-[1.35]"
+          style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45)"
         >
           {{ $t('room.all_rooms_heading') }}
         </h1>
         <p
-          class="text-lg text-gray-200 font-medium max-w-2xl mx-auto drop-shadow text-pretty leading-relaxed"
+          class="text-base md:text-lg text-white/95 font-medium max-w-3xl mx-auto leading-[1.85]"
+          style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5)"
         >
-          {{ $t('hero.subtitle') }}
+          {{ $t('hero.subtitle') }} {{ $t('hero.subtitle_line2') }}
         </p>
       </div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 w-full grow">
       <div
-        class="bg-white/90 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 mb-12 -mt-24 relative z-20"
+        class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-card-float border border-gray-200/80 mb-12 -mt-24 relative z-20"
       >
         <!-- ✨ เปลี่ยนเป็น Grid 5 คอลัมน์สำหรับเพิ่มช่องวันที่ -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -277,7 +280,7 @@ const filteredRooms = computed(() => {
 
         <div
           v-if="filteredRooms.length === 0"
-          class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-200 mt-8 shadow-sm"
+          class="text-center py-24 bg-white rounded-3xl border-2 border-dashed border-gray-300 mt-8 shadow-card"
         >
           <div
             class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center text-4xl text-gray-300 mx-auto mb-6"

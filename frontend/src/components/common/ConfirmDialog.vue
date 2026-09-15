@@ -6,7 +6,7 @@
         class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40 backdrop-blur-sm"
         @click.self="$emit('cancel')"
       >
-        <div class="bg-white rounded-2xl shadow-2xl p-6 mx-4 w-full max-w-md">
+        <div class="bg-white rounded-2xl shadow-card-lg border border-gray-200 p-6 mx-4 w-full max-w-md">
           <div class="flex items-center gap-3 mb-4">
             <span class="text-2xl">{{ icon }}</span>
             <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>

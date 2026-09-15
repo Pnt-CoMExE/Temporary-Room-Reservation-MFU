@@ -17,7 +17,8 @@
 |---------|--------------|----------|
 | `pending` | รออนุมัติ | |
 | `approved_pending_payment` | รอชำระเงิน | |
-| `approved_paid` | **ชำระแล้ว** | ไม่ใช้คำว่า “สำเร็จแล้ว” รวมรีวิว |
+| `approved_paid` | **ชำระเงินแล้ว** | |
+| `completed` | **สำเร็จแล้ว** | Cron: หลังเลยวัน/เวลาใช้งาน |
 | (+ `has_feedback`) | **มีรีวิวแล้ว** (badge แยก) | ตาราง `feedbacks` ไม่ใช่ status ใหม่ |
 | `disapproved` | ไม่อนุมัติ | |
 | cancelled / `ยกเลิกแล้ว` | ยกเลิกแล้ว | Cron อาจตั้งให้อัตโนมัติเมื่อเลยวัน |
@@ -35,7 +36,7 @@ Shared util: `frontend/src/utils/bookingStatus.ts`
 | **3** | Dashboard date range + กล่องสถานะ/รายได้ตามช่วง | **Done** |
 | **4** | Log ผูก booking_id + คอลัมน์ดูประวัติใน AdminBookings | **Done** |
 | **5** | Cron อัปเดตสถานะอัตโนมัติ | **Done** (`npm run jobs:booking-status`) |
-| **6** | Testing ขยาย + Payment Stripe notes | **Done** |
+| **7** | UX feedback: featured by frequency, date TZ, admin reason, logout unify | **Done** (2026-09-15) |
 
 ---
 
@@ -71,3 +72,9 @@ Shared util: `frontend/src/utils/bookingStatus.ts`
 
 - TESTING_PLAN §8 Postman + Manual
 - PAYMENT_STRIPE_NOTES.md
+
+## UX polish (2026-09-11)
+
+- Card contrast: canvas `#f1f3f5`, border `gray-200`, shared `shadow-card*` tokens ใน `main.css`
+- ครอบคลุม Home / Rooms / Booking / Dashboard / Admin shells + Login / Navbar
+- Room images: ใช้ `/images/room-placeholder.jpg` ร่วมกันชั่วคราว (`resolveRoomImage`)

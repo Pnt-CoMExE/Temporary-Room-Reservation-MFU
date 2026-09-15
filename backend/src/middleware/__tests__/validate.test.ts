@@ -98,6 +98,8 @@ describe("validateCreateBooking", () => {
         userType: "internal",
         bookingDate: "2026-06-15",
         timeSlot: "full",
+        objective: "ประชุม",
+        phoneNumber: "0812345678",
         roomPrice: 1500,
         totalPrice: 2000,
       },

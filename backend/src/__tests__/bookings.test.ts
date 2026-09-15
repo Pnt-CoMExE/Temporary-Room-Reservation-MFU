@@ -32,6 +32,7 @@ describe("POST /api/bookings — การตรวจสอบไฟล์แ�
       .field("bookingDate", "2026-06-01")
       .field("timeSlot", "full")
       .field("objective", "ประชุม")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000");
@@ -52,6 +53,7 @@ describe("POST /api/bookings — การตรวจสอบไฟล์แ�
       .field("bookingDate", "2026-06-01")
       .field("timeSlot", "full")
       .field("objective", "ประชุม")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000")
@@ -76,6 +78,7 @@ describe("POST /api/bookings — การตรวจสอบไฟล์แ�
       .field("bookingDate", "2026-06-01")
       .field("timeSlot", "full")
       .field("objective", "ประชุม")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000")

@@ -2,6 +2,32 @@
 
 @theme {
   --font-sans: "IBM Plex Sans Thai Looped", ui-sans-serif, system-ui, sans-serif;
+  --color-mfu-red: #ba0b2f;
+  --color-mfu-gold: #d4af37;
+  --color-canvas: #f1f3f5;
+  --color-surface: #ffffff;
+  --shadow-card: 0 8px 28px rgba(17, 24, 39, 0.10);
+  --shadow-card-lg: 0 12px 36px rgba(17, 24, 39, 0.12);
+  --shadow-card-float: 0 16px 48px rgba(17, 24, 39, 0.14);
+  --shadow-card-hover: 0 24px 52px rgba(17, 24, 39, 0.16);
+}
+
+@layer components {
+  .ui-card {
+    @apply bg-white rounded-3xl border border-gray-200 shadow-card;
+  }
+
+  .ui-card-md {
+    @apply bg-white rounded-2xl border border-gray-200 shadow-card;
+  }
+
+  .ui-card-elevated {
+    @apply bg-white rounded-3xl border border-gray-200 shadow-card-lg;
+  }
+
+  .ui-card-glass {
+    @apply bg-white/95 backdrop-blur-xl border border-gray-200/80 shadow-card-float;
+  }
 }
 
 body {

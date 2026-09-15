@@ -5,12 +5,12 @@ import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import AdminBookings from "./AdminBookings.vue";
 import AdminRooms from "./AdminRooms.vue";
-import AdminActivityLog from "./AdminActivityLog.vue";
 import AdminBanners from "./AdminBanners.vue";
 import AdminUsers from "./AdminUsers.vue";
 import AdminPromoCodes from "./AdminPromoCodes.vue";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
+locale.value = "th";
 
 // ✨ นำเข้า Chart.js
 import { Bar, Doughnut } from "vue-chartjs";
@@ -36,7 +36,7 @@ ChartJS.register(
 );
 
 import api from "@/services/api";
-import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
+import { toDateKey } from "@/utils/dateKey";
 
 interface BookingInfo {
   id: string;
@@ -85,24 +85,57 @@ const stats = ref<Record<string, number>>({
 const filterFrom = ref("");
 const filterTo = ref("");
 const revenueYear = ref(new Date().getFullYear());
+const filterMonth = ref(
+  `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
+);
+/** latest = เดือนปัจจุบัน | month = เลือกเดือน | year = ทั้งปี | range = ช่วงวัน */
+const filterMode = ref<"latest" | "month" | "year" | "range">("latest");
+
+const resolveFilterRange = (): { from?: string; to?: string; year: number } => {
+  const year = revenueYear.value || new Date().getFullYear();
+  if (filterMode.value === "range" && filterFrom.value && filterTo.value) {
+    return { from: filterFrom.value, to: filterTo.value, year };
+  }
+  if (filterMode.value === "month" && filterMonth.value) {
+    const [y, m] = filterMonth.value.split("-").map(Number);
+    const from = `${y}-${String(m).padStart(2, "0")}-01`;
+    const last = new Date(y, m, 0).getDate();
+    const to = `${y}-${String(m).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+    return { from, to, year: y };
+  }
+  if (filterMode.value === "year") {
+    return { from: `${year}-01-01`, to: `${year}-12-31`, year };
+  }
+  // latest — current month (backend also defaults)
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth() + 1;
+  const from = `${y}-${String(m).padStart(2, "0")}-01`;
+  const last = new Date(y, m, 0).getDate();
+  const to = `${y}-${String(m).padStart(2, "0")}-${String(last).padStart(2, "0")}`;
+  return { from, to, year: y };
+};
 
 const applyDashboardFilters = async () => {
   await fetchAdminData();
 };
 
 const clearDashboardFilters = async () => {
+  filterMode.value = "latest";
   filterFrom.value = "";
   filterTo.value = "";
   revenueYear.value = new Date().getFullYear();
+  filterMonth.value = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
   await fetchAdminData();
 };
 
 const fetchAdminData = async () => {
   try {
+    const range = resolveFilterRange();
     const statsParams: Record<string, string> = {};
-    if (filterFrom.value && filterTo.value) {
-      statsParams.from = filterFrom.value;
-      statsParams.to = filterTo.value;
+    if (range.from && range.to) {
+      statsParams.from = range.from;
+      statsParams.to = range.to;
     }
     const statsRes = await api.get("/api/admin/stats", { params: statsParams });
     stats.value = {
@@ -111,6 +144,7 @@ const fetchAdminData = async () => {
       approvedCount: statsRes.data.approvedCount ?? statsRes.data.approvedToday ?? 0,
       paidCount: statsRes.data.paidCount ?? 0,
       rangeRevenue: statsRes.data.rangeRevenue ?? statsRes.data.currentMonthRevenue ?? 0,
+      lastMonthRevenue: 0,
     };
 
     const bookingsRes = await api.get("/api/admin/bookings");
@@ -120,53 +154,37 @@ const fetchAdminData = async () => {
       dbId: b.id,
       userName: b.partner_name || `${b.firstname} ${b.lastname}`,
       roomName: b.room_name,
-      date: b.booking_date ? new Date(b.booking_date).toISOString().split('T')[0] : 'N/A',
+      date: toDateKey(b.booking_date) || "N/A",
       duration: b.time_slot === 'full' ? 'เต็มวัน' : b.time_slot === 'half_morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย',
       totalPrice: parseFloat(b.total_price),
       status: b.status,
       hasFeedback: b.feedback_rating != null,
-      feedbackData: { rating: b.feedback_rating, comment: b.feedback_comment }
+      feedbackData: { rating: b.feedback_rating, comment: b.feedback_comment },
+      actionBy: (b.admin_name || "").trim() || undefined,
     }));
 
-    if (filterFrom.value && filterTo.value) {
+    if (range.from && range.to) {
       mapped = mapped.filter(
-        (b: BookingInfo) => b.date >= filterFrom.value && b.date <= filterTo.value
+        (b: BookingInfo) => b.date >= range.from! && b.date <= range.to!
       );
     }
     bookings.value = mapped;
 
-    const revenueParams: Record<string, string | number> = {
-      year: revenueYear.value,
-    };
-    if (filterFrom.value && filterTo.value) {
-      revenueParams.from = filterFrom.value;
-      revenueParams.to = filterTo.value;
-    }
-    const revenueRes = await api.get("/api/admin/revenue-by-month", {
-      params: filterFrom.value && filterTo.value
-        ? { from: filterFrom.value, to: filterTo.value }
-        : { year: revenueYear.value },
-    });
-    // Prefer stats/revenue when range set
-    let revenueData = revenueRes.data;
-    if (filterFrom.value && filterTo.value) {
-      try {
-        const ranged = await api.get("/api/admin/stats/revenue", {
-          params: { from: filterFrom.value, to: filterTo.value },
-        });
-        revenueData = ranged.data;
-      } catch {
-        /* keep month endpoint */
-      }
-    } else {
-      try {
-        const byYear = await api.get("/api/admin/stats/revenue", {
-          params: { year: revenueYear.value },
-        });
-        if (Array.isArray(byYear.data) && byYear.data.length) revenueData = byYear.data;
-      } catch {
-        /* keep */
-      }
+    let revenueData: any[] = [];
+    try {
+      const revenueParams =
+        filterMode.value === "year"
+          ? { year: range.year }
+          : range.from && range.to
+            ? { from: range.from, to: range.to }
+            : { year: range.year };
+      const ranged = await api.get("/api/admin/stats/revenue", { params: revenueParams });
+      if (Array.isArray(ranged.data)) revenueData = ranged.data;
+    } catch {
+      const fallback = await api.get("/api/admin/revenue-by-month", {
+        params: { year: range.year },
+      });
+      revenueData = fallback.data || [];
     }
 
     if (revenueData && revenueData.length > 0) {
@@ -179,11 +197,6 @@ const fetchAdminData = async () => {
           data: revenueData.map((r: any) => r.revenue),
         }]
       };
-      if (revenueData.length > 1) {
-        stats.value.lastMonthRevenue = revenueData[revenueData.length - 2].revenue;
-      } else {
-        stats.value.lastMonthRevenue = 0;
-      }
       revenueMonths.value = revenueData.map((r: any) => ({
         label: r.label,
         revenue: r.revenue
@@ -307,7 +320,7 @@ const confirmLogout = () => {
 </script>
 
 <template>
-  <div class="bg-[#f8f9fa] min-h-screen pb-20 font-sans">
+  <div class="bg-canvas min-h-screen pb-20 font-sans">
     <div class="relative pt-16 pb-32 flex items-center overflow-hidden">
       <div class="absolute inset-0 z-0">
         <picture>
@@ -339,10 +352,6 @@ const confirmLogout = () => {
             {{ $t('admin.dashboard_title') }}
           </p>
         </div>
-
-        <div class="bg-white/20 backdrop-blur-md p-2 rounded-full border border-white/30 shadow-lg">
-          <LanguageSwitcher />
-        </div>
       </div>
     </div>
 
@@ -351,7 +360,7 @@ const confirmLogout = () => {
         <!-- Sidebar -->
         <div class="w-full xl:w-1/4">
           <div
-            class="bg-white rounded-3xl shadow-sm border border-white/50 p-6 sticky top-8"
+            class="bg-white rounded-3xl shadow-card border border-gray-200 p-6 sticky top-8"
           >
             <div class="text-center mb-8 border-b border-gray-100 pb-6">
               <div
@@ -443,17 +452,6 @@ const confirmLogout = () => {
               >
                 <font-awesome-icon icon="bullhorn" class="w-5" /> การประกาศ
               </button>
-              <button
-                @click="activeTab = 'logs'"
-                :class="
-                  activeTab === 'logs'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
-                "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
-              >
-                <font-awesome-icon icon="history" class="w-5" /> ประวัติการทำงาน
-              </button>
 
               <div class="pt-6 mt-6 border-t border-gray-100">
                 <button
@@ -481,53 +479,91 @@ const confirmLogout = () => {
             v-if="activeTab === 'overview'"
             class="space-y-8 animate-fade-up"
           >
-            <!-- Date range + year filter -->
+            <!-- ตัวกรองรายได้: ล่าสุด / เดือน / ปี / ช่วงวัน -->
             <div
-              class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-3 lg:items-end"
+              class="bg-white rounded-2xl p-4 shadow-card border border-gray-200 space-y-3"
             >
-              <div class="flex flex-col gap-1">
-                <label class="text-[10px] font-black text-gray-400 uppercase">วันเริ่มต้น</label>
-                <input
-                  v-model="filterFrom"
-                  type="date"
-                  class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
-                />
+              <div class="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  @click="filterMode = 'latest'"
+                  class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
+                  :class="filterMode === 'latest' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                >เดือนล่าสุด</button>
+                <button
+                  type="button"
+                  @click="filterMode = 'month'"
+                  class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
+                  :class="filterMode === 'month' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                >เลือกเดือน</button>
+                <button
+                  type="button"
+                  @click="filterMode = 'year'"
+                  class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
+                  :class="filterMode === 'year' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                >รายปี</button>
+                <button
+                  type="button"
+                  @click="filterMode = 'range'"
+                  class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
+                  :class="filterMode === 'range' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                >ช่วงวัน (เช่น รายสัปดาห์)</button>
               </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-[10px] font-black text-gray-400 uppercase">วันสิ้นสุด</label>
-                <input
-                  v-model="filterTo"
-                  type="date"
-                  class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
-                />
+              <div class="flex flex-col lg:flex-row gap-3 lg:items-end">
+                <div v-if="filterMode === 'month'" class="flex flex-col gap-1">
+                  <label class="text-[10px] font-black text-gray-400 uppercase">เดือน</label>
+                  <input
+                    v-model="filterMonth"
+                    type="month"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                  />
+                </div>
+                <div v-if="filterMode === 'year'" class="flex flex-col gap-1">
+                  <label class="text-[10px] font-black text-gray-400 uppercase">ปี</label>
+                  <input
+                    v-model.number="revenueYear"
+                    type="number"
+                    min="2020"
+                    max="2100"
+                    class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-28"
+                  />
+                </div>
+                <template v-if="filterMode === 'range'">
+                  <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-black text-gray-400 uppercase">วันเริ่มต้น</label>
+                    <input
+                      v-model="filterFrom"
+                      type="date"
+                      class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                    />
+                  </div>
+                  <div class="flex flex-col gap-1">
+                    <label class="text-[10px] font-black text-gray-400 uppercase">วันสิ้นสุด</label>
+                    <input
+                      v-model="filterTo"
+                      type="date"
+                      class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                    />
+                  </div>
+                </template>
+                <button
+                  @click="applyDashboardFilters"
+                  class="bg-[#ba0b2f] text-white px-4 py-2.5 rounded-xl text-xs font-black hover:bg-[#8c0823] cursor-pointer"
+                >
+                  ใช้ตัวกรอง
+                </button>
+                <button
+                  @click="clearDashboardFilters"
+                  class="bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-xs font-black hover:bg-gray-200 cursor-pointer"
+                >
+                  ดูข้อมูลล่าสุด
+                </button>
               </div>
-              <div class="flex flex-col gap-1">
-                <label class="text-[10px] font-black text-gray-400 uppercase">ปีกราฟรายได้</label>
-                <input
-                  v-model.number="revenueYear"
-                  type="number"
-                  min="2020"
-                  max="2100"
-                  class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-28"
-                />
-              </div>
-              <button
-                @click="applyDashboardFilters"
-                class="bg-[#ba0b2f] text-white px-4 py-2.5 rounded-xl text-xs font-black hover:bg-[#8c0823] cursor-pointer"
-              >
-                ใช้ตัวกรอง
-              </button>
-              <button
-                @click="clearDashboardFilters"
-                class="bg-gray-100 text-gray-600 px-4 py-2.5 rounded-xl text-xs font-black hover:bg-gray-200 cursor-pointer"
-              >
-                ล้าง
-              </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               <div
-                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
+                class="bg-white rounded-3xl p-6 shadow-card border border-gray-200 flex flex-col justify-center relative"
               >
                 <div class="flex items-center gap-5">
                   <div
@@ -537,7 +573,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      รออนุมัติ (Pending)
+                      รออนุมัติ
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.pendingCount }}
@@ -546,7 +582,7 @@ const confirmLogout = () => {
                 </div>
               </div>
               <div
-                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
+                class="bg-white rounded-3xl p-6 shadow-card border border-gray-200 flex flex-col justify-center relative"
               >
                 <div class="flex items-center gap-5">
                   <div
@@ -556,7 +592,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      อนุมัติแล้ว (Approved)
+                      อนุมัติแล้ว
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.approvedCount || stats.approvedToday }}
@@ -565,7 +601,7 @@ const confirmLogout = () => {
                 </div>
               </div>
               <div
-                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 flex flex-col justify-center relative"
+                class="bg-white rounded-3xl p-6 shadow-card border border-gray-200 flex flex-col justify-center relative"
               >
                 <div class="flex items-center gap-5">
                   <div
@@ -575,7 +611,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      จ่ายเงินแล้ว (Paid)
+                      ชำระเงินแล้ว
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.paidCount || 0 }}
@@ -584,12 +620,12 @@ const confirmLogout = () => {
                 </div>
               </div>
               <div
-                class="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 relative overflow-hidden flex flex-col justify-center transition-all duration-300"
+                class="bg-white rounded-3xl p-6 shadow-card border border-gray-200 relative overflow-hidden flex flex-col justify-center transition-all duration-300"
               >
                 <div
                   class="absolute right-0 top-0 w-2 h-full bg-linear-to-b from-[#d4af37] to-yellow-500"
                 ></div>
-                <div class="flex items-center gap-5 mb-4">
+                <div class="flex items-center gap-5">
                   <div
                     class="w-16 h-16 rounded-full bg-red-50 text-[#ba0b2f] flex items-center justify-center text-2xl shrink-0"
                   >
@@ -597,51 +633,11 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      {{ filterFrom && filterTo ? "รายได้ตามช่วงที่เลือก" : "รายได้รวมเดือนนี้" }}
+                      {{ filterMode === 'latest' ? 'รายได้รวมเดือนนี้' : 'รายได้ตามตัวกรอง' }}
                     </p>
                     <p class="text-3xl font-black text-[#ba0b2f]">
                       ฿{{ (stats.rangeRevenue || stats.currentMonthRevenue || 0).toLocaleString() }}
                     </p>
-                  </div>
-                </div>
-                <div
-                  @click="isRevenueExpanded = !isRevenueExpanded"
-                  class="pt-3 border-t border-gray-100 cursor-pointer group select-none"
-                >
-                  <div class="flex justify-between items-center">
-                    <span
-                      class="text-sm text-gray-500 font-bold group-hover:text-[#ba0b2f] transition-colors flex items-center gap-1.5"
-                      >รายได้เดือนที่ผ่านมา
-                      <font-awesome-icon
-                        v-if="isRevenueExpanded"
-                        icon="chevron-up"
-                        class="text-[10px] text-[#ba0b2f] transition-transform duration-300"
-                      />
-                      <font-awesome-icon
-                        v-else
-                        icon="chevron-down"
-                        class="text-[10px] opacity-50 transition-transform duration-300"
-                      /></span
-                    ><span
-                      class="text-sm font-black text-gray-700 group-hover:text-[#ba0b2f] transition-colors"
-                      >฿{{ (stats.lastMonthRevenue || 0).toLocaleString() }}</span
-                    >
-                  </div>
-                  <div
-                    v-show="isRevenueExpanded"
-                    class="mt-3 flex flex-col gap-2 pt-3 border-t border-dashed border-gray-100"
-                  >
-                    <div
-                      v-for="(month, idx) in revenueMonths.slice().reverse()"
-                      :key="idx"
-                      class="flex justify-between items-center"
-                    >
-                      <span class="text-xs text-gray-400 font-bold"
-                        ><font-awesome-icon :icon="['far', 'calendar-alt']" class="mr-1" /> {{ month.label }}</span
-                      ><span class="text-xs font-black text-gray-500"
-                        >฿{{ month.revenue.toLocaleString() }}</span
-                      >
-                    </div>
                   </div>
                 </div>
               </div>
@@ -650,7 +646,7 @@ const confirmLogout = () => {
             <!-- กราฟ Chart.js -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div
-                class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+                class="bg-white p-8 rounded-3xl border border-gray-200 shadow-card"
               >
                 <h3
                   class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
@@ -662,7 +658,7 @@ const confirmLogout = () => {
                 </div>
               </div>
               <div
-                class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+                class="bg-white p-8 rounded-3xl border border-gray-200 shadow-card"
               >
                 <h3
                   class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
@@ -681,7 +677,7 @@ const confirmLogout = () => {
 
             <!-- ความนิยม -->
             <div
-              class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm"
+              class="bg-white p-8 rounded-3xl border border-gray-200 shadow-card"
             >
               <h3
                 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
@@ -722,7 +718,6 @@ const confirmLogout = () => {
           <AdminUsers v-if="activeTab === 'users'" />
           <AdminPromoCodes v-if="activeTab === 'promos'" />
           <AdminBanners v-if="activeTab === 'banners'" />
-          <AdminActivityLog v-if="activeTab === 'logs'" />
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import Swal from "sweetalert2";
 import api from "@/services/api";
+import { formatPromoPercent } from "@/utils/bookingStatus";
 
 interface PromoCode {
   id: number;
@@ -33,7 +34,10 @@ const fetchPromoCodes = async () => {
   loading.value = true;
   try {
     const res = await api.get("/api/admin/promocodes");
-    promoCodes.value = res.data;
+    promoCodes.value = res.data.map((p: any) => ({
+      ...p,
+      discount: parseFloat(String(p.discount ?? "0").replace(/%/g, "")) || 0,
+    }));
   } catch (err) {
     console.error("Error fetching promo codes:", err);
   } finally {
@@ -70,8 +74,8 @@ const handleAddPromoCode = () => {
           <input id="swal-code" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none font-black tracking-widest uppercase text-lg" placeholder="เช่น SAVE50">
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">มูลค่าส่วนลด (เช่น 20% หรือ 500)</label>
-          <input id="swal-discount" type="number" min="1" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-[#ba0b2f] rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none font-bold" placeholder="เช่น 20">
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">ส่วนลดเป็นเปอร์เซ็นต์ (เช่น 10, 50, 100)</label>
+          <input id="swal-discount" type="number" min="1" max="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-[#ba0b2f] rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none font-bold" placeholder="เช่น 100 = ลด 100%">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">จำนวนสิทธิ์สูงสุด</label>
@@ -146,7 +150,7 @@ const usagePercent = (promo: PromoCode) => {
 <template>
   <div class="space-y-6 animate-fade-up">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200">
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
           <font-awesome-icon icon="ticket-alt" class="text-[#d4af37]" />
@@ -164,22 +168,22 @@ const usagePercent = (promo: PromoCode) => {
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-3 gap-4">
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-center">
+      <div class="bg-white rounded-2xl p-5 shadow-card border border-gray-200 text-center">
         <p class="text-2xl font-black text-gray-900">{{ promoCodes.length }}</p>
         <p class="text-xs font-bold text-gray-500 mt-1">โค้ดทั้งหมด</p>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-green-100 text-center">
+      <div class="bg-white rounded-2xl p-5 shadow-card border border-green-200 text-center">
         <p class="text-2xl font-black text-green-600">{{ activeCount }}</p>
         <p class="text-xs font-bold text-gray-500 mt-1">กำลังใช้งาน</p>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-[#d4af37]/20 text-center">
+      <div class="bg-white rounded-2xl p-5 shadow-card border border-[#d4af37]/40 text-center">
         <p class="text-2xl font-black text-[#d4af37]">{{ totalUsed }}</p>
         <p class="text-xs font-bold text-gray-500 mt-1">ครั้งที่ใช้ไป</p>
       </div>
     </div>
 
     <!-- Filter Bar -->
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-3">
+    <div class="bg-white p-4 rounded-2xl shadow-card border border-gray-200 flex flex-col sm:flex-row gap-3">
       <div class="relative flex-1">
         <font-awesome-icon icon="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
         <input
@@ -203,7 +207,7 @@ const usagePercent = (promo: PromoCode) => {
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-if="loading" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    <div v-if="loading" class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden">
       <div class="p-6 space-y-4">
         <div v-for="i in 4" :key="i" class="flex items-center gap-4 animate-pulse">
           <div class="h-8 bg-gray-200 rounded-lg w-24 shrink-0"></div>
@@ -215,7 +219,7 @@ const usagePercent = (promo: PromoCode) => {
     </div>
 
     <!-- Table -->
-    <div v-else-if="filteredCodes.length > 0" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+    <div v-else-if="filteredCodes.length > 0" class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden">
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-[600px]">
           <thead>
@@ -246,7 +250,7 @@ const usagePercent = (promo: PromoCode) => {
               <!-- Discount -->
               <td class="px-6 py-4 text-center">
                 <span class="inline-flex items-center px-3 py-1 rounded-lg bg-red-50 border border-red-100 text-[#ba0b2f] font-black text-sm">
-                  {{ promo.discount }}%
+                  {{ formatPromoPercent(promo.discount) }}
                 </span>
               </td>
 
@@ -283,7 +287,7 @@ const usagePercent = (promo: PromoCode) => {
     </div>
 
     <!-- Empty State -->
-    <div v-else class="bg-white rounded-3xl shadow-sm border border-gray-100 py-20 flex flex-col items-center justify-center text-center">
+    <div v-else class="bg-white rounded-3xl shadow-card border border-gray-200 py-20 flex flex-col items-center justify-center text-center">
       <div class="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center text-3xl mb-5 border border-yellow-100">
         <font-awesome-icon icon="ticket-alt" class="text-[#d4af37]" />
       </div>

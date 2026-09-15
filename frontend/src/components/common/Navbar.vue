@@ -38,15 +38,15 @@ const loadProfileImage = async () => {
 
 onMounted(loadProfileImage);
 
-// ✨ ข้อมูลแจ้งเตือนจำลอง
-const notifications = ref<Notification[]>([
+const NOTIF_STORAGE_KEY = "mfu_notif_read_ids";
+
+const ALL_NOTIFICATIONS: Omit<Notification, "read">[] = [
   {
     id: 1,
     type: "promo",
     title: "โปรโมชั่นใหม่!",
     desc: "รับส่วนลด 20% ทันทีเมื่อกรอกโค้ด MFU2026",
     time: "10 นาทีที่แล้ว",
-    read: false,
   },
   {
     id: 2,
@@ -54,9 +54,36 @@ const notifications = ref<Notification[]>([
     title: "การจองสำเร็จ",
     desc: "การจองห้องประชุมคำมอกหลวง ได้รับการอนุมัติแล้ว",
     time: "2 ชั่วโมงที่แล้ว",
-    read: true,
   },
-]);
+];
+
+const loadReadIds = (): Set<number> => {
+  try {
+    const raw = localStorage.getItem(NOTIF_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(
+      Array.isArray(parsed)
+        ? parsed.map(Number).filter((n) => Number.isFinite(n))
+        : []
+    );
+  } catch {
+    return new Set();
+  }
+};
+
+const saveReadIds = (ids: Set<number>) => {
+  localStorage.setItem(NOTIF_STORAGE_KEY, JSON.stringify([...ids]));
+};
+
+const buildNotifications = (): Notification[] => {
+  const readIds = loadReadIds();
+  return ALL_NOTIFICATIONS.filter((n) => !readIds.has(n.id)).map((n) => ({
+    ...n,
+    read: false,
+  }));
+};
+
+const notifications = ref<Notification[]>(buildNotifications());
 
 const closeMenu = () => {
   isMenuOpen.value = false;
@@ -64,8 +91,20 @@ const closeMenu = () => {
 const toggleNotif = () => {
   isNotifOpen.value = !isNotifOpen.value;
 };
+
+const dismissNotifications = (ids: number[]) => {
+  const readIds = loadReadIds();
+  ids.forEach((id) => readIds.add(id));
+  saveReadIds(readIds);
+  notifications.value = buildNotifications();
+};
+
 const markAllAsRead = () => {
-  notifications.value.forEach((n) => (n.read = true));
+  dismissNotifications(notifications.value.map((n) => n.id));
+};
+
+const markOneAsRead = (id: number) => {
+  dismissNotifications([id]);
 };
 
 const confirmLogout = () => {
@@ -75,7 +114,7 @@ const confirmLogout = () => {
       <div class="relative w-24 h-24 mx-auto mb-6">
         <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
         <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
-          <FontAwesomeIcon :icon="['fas', 'sign-out-alt']" class="ml-1 translate-x-0.5" />
+          🚪
         </div>
       </div>
       <h3 class="text-2xl font-black text-gray-900 tracking-tight mb-2">${t('nav.logout_confirm_title')}</h3>
@@ -112,7 +151,7 @@ const confirmLogout = () => {
 <template>
   <div>
     <nav
-      class="bg-white/90 backdrop-blur-xl shadow-sm sticky top-0 z-40 border-b border-gray-100 transition-all duration-300"
+      class="bg-white/95 backdrop-blur-xl shadow-card sticky top-0 z-40 border-b border-gray-200 transition-all duration-300"
     >
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20">
@@ -193,13 +232,14 @@ const confirmLogout = () => {
                 <!-- กล่อง Popup แจ้งเตือน -->
                 <div
                   v-if="isNotifOpen"
-                  class="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden animate-fade-down z-50"
+                  class="absolute right-0 mt-3 w-80 bg-white rounded-3xl shadow-card-lg border border-gray-200 overflow-hidden animate-fade-down z-50"
                 >
                   <div
                     class="flex justify-between items-center p-4 border-b border-gray-50 bg-gray-50/50"
                   >
                     <h3 class="font-bold text-gray-900">{{ $t('nav.notifications') }}</h3>
                     <button
+                      v-if="notifications.length > 0"
                       @click="markAllAsRead"
                       class="text-[10px] font-bold text-[#ba0b2f] hover:underline cursor-pointer"
                     >
@@ -208,10 +248,16 @@ const confirmLogout = () => {
                   </div>
                   <div class="max-h-80 overflow-y-auto">
                     <div
+                      v-if="notifications.length === 0"
+                      class="p-8 text-center text-sm text-gray-400 font-medium"
+                    >
+                      {{ $t('nav.no_notifications') }}
+                    </div>
+                    <div
                       v-for="notif in notifications"
                       :key="notif.id"
-                      class="p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors"
-                      :class="!notif.read ? 'bg-red-50/30' : ''"
+                      class="p-4 border-b border-gray-50 hover:bg-gray-50 cursor-pointer transition-colors bg-red-50/30"
+                      @click="markOneAsRead(notif.id)"
                     >
                       <div class="flex gap-3">
                         <div
@@ -285,7 +331,7 @@ const confirmLogout = () => {
       <!-- เมนูมือถือ -->
       <div
         v-if="isMenuOpen"
-        class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-xl absolute w-full left-0 animate-fade-down z-50"
+        class="md:hidden bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-card-lg absolute w-full left-0 animate-fade-down z-50"
       >
         <div class="px-4 pt-4 pb-6 space-y-2">
           <RouterLink

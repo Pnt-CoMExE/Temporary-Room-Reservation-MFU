@@ -338,7 +338,8 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
           organizationType: booking.organization_type || "internal",
           roomName: room.name || "พื้นที่อเนกประสงค์",
           location: room.location,
-          bookingDate: String(booking.booking_date).split("T")[0],
+          bookingDate: String(booking.booking_date).match(/^(\d{4}-\d{2}-\d{2})/)?.[1]
+            || String(booking.booking_date).split("T")[0],
           timeSlot: booking.time_slot,
           roomPrice: Number(booking.room_price || 0),
           addonsPrice: Number(booking.addons_price || 0),
@@ -363,7 +364,10 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
     await logAdminAction(
       adminNameFromReq(req),
       isVerified ? "ยืนยันการชำระเงิน" : "ปฏิเสธการชำระเงิน",
-      `Booking #${bookingId} (${booking.booking_no})${remark ? ` | ${remark}` : ""}`
+      isVerified
+        ? `เปลี่ยนจาก「รอชำระเงิน」เป็น「ชำระเงินแล้ว」 (รายการ ${booking.booking_no})${remark ? ` | ${remark}` : ""}`
+        : `ปฏิเสธการชำระเงินของรายการ ${booking.booking_no}${remark ? ` | ${remark}` : ""}`,
+      Number(bookingId)
     );
 
     res.json({

@@ -4,6 +4,7 @@ import { useRouter } from "vue-router";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { clearAuthSession, getStoredUserId } from "@/utils/auth";
+import { formatDateKey, toDateKey } from "@/utils/dateKey";
 import QRCode from "qrcode";
 import { generatePromptPayPayload } from "@/services/promptpay";
 
@@ -72,7 +73,7 @@ const fetchBookings = async () => {
     id: b.booking_no,
     dbId: b.id,
     roomName: b.room_name,
-    bookingDate: b.booking_date,
+    bookingDate: toDateKey(b.booking_date),
     durationText:
       b.time_slot === "full"
         ? "เต็มวัน"
@@ -83,6 +84,8 @@ const fetchBookings = async () => {
     status: b.status,
     hasFeedback: b.has_feedback,
     memoDocumentUrl: b.memo_document_url || null,
+    adminName: (b.admin_name || "").trim() || undefined,
+    remark: b.remarks || b.remark || undefined,
     addons: [],
   }));
 };
@@ -199,9 +202,12 @@ const openMockPayment = async (booking: BookingItem) => {
     await fetchBookings();
     Swal.fire({
       icon: "success",
-      title: t("dashboard.mock_pay_success"),
+      title: `<div class="px-2 leading-relaxed">
+        <p class="text-xl font-extrabold text-gray-900 mb-2">${t("dashboard.mock_pay_success")}</p>
+        <p class="text-base font-semibold text-gray-500">${t("dashboard.mock_pay_success_sub")}</p>
+      </div>`,
       confirmButtonColor: "#ba0b2f",
-      customClass: { popup: "rounded-[2rem]" },
+      customClass: { popup: "rounded-[2rem] max-w-md", title: "w-full" },
     });
   } catch (err: any) {
     Swal.fire({
@@ -315,9 +321,9 @@ const confirmLogout = () => {
       popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
       actions: "flex flex-row gap-3 mt-8 w-full justify-center",
       confirmButton:
-        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
       cancelButton:
-        "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 transition-all flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
     },
   }).then(async (result) => {
     if (result.isConfirmed) {
@@ -519,15 +525,11 @@ const getStatusText = (status: string) =>
 const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
 
 const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString(locale.value === "en" ? "en-US" : "th-TH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  formatDateKey(dateString, locale.value === "en" ? "en-US" : "th-TH");
 </script>
 
 <template>
-  <div class="bg-[#f8f9fa] min-h-screen pb-20 font-sans">
+  <div class="bg-canvas min-h-screen pb-20 font-sans">
     <div class="relative pt-20 pb-32 flex items-center overflow-hidden">
       <div class="absolute inset-0 z-0">
         <picture>
@@ -569,7 +571,7 @@ const formatDate = (dateString: string) =>
         <!-- Sidebar Menu -->
         <div class="w-full md:w-1/3 lg:w-1/4">
           <div
-            class="bg-white rounded-3xl shadow-xl border border-white/50 p-6 sticky top-24"
+            class="bg-white rounded-3xl shadow-card-lg border border-gray-200 p-6 sticky top-24"
           >
             <div class="relative w-32 h-32 mx-auto mb-6">
               <div
@@ -618,9 +620,10 @@ const formatDate = (dateString: string) =>
               <div class="pt-6 mt-6 border-t border-gray-100">
                 <button
                   @click="confirmLogout"
-                  class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl text-gray-500 hover:bg-red-50 transition-all font-bold text-sm cursor-pointer"
+                  class="group w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-gray-600 bg-white border border-gray-200 hover:bg-red-50 hover:text-[#ba0b2f] hover:border-red-100 transition-all duration-300 font-bold text-sm shadow-sm hover:shadow-md cursor-pointer"
                 >
-                  <font-awesome-icon icon="sign-out-alt" /> {{ $t('nav.logout') }}
+                  <font-awesome-icon icon="sign-out-alt" class="text-gray-400 group-hover:text-[#ba0b2f] transition-colors" />
+                  {{ $t('nav.logout') }}
                 </button>
               </div>
             </nav>
@@ -643,7 +646,7 @@ const formatDate = (dateString: string) =>
             </div>
 
             <div
-              class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 mb-6"
+              class="bg-white p-5 rounded-2xl shadow-card border border-gray-200 flex flex-col md:flex-row gap-4 mb-6"
             >
               <div class="flex-1">
                 <label
@@ -689,7 +692,7 @@ const formatDate = (dateString: string) =>
             <div
               v-for="booking in filteredBookings"
               :key="booking.id"
-              class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 group"
+              class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden hover:shadow-card-hover transition-all duration-300 group"
               :class="
                 isBookingStatus(booking.status, 'cancelled') ? 'opacity-60 grayscale-50' : ''
               "
@@ -793,7 +796,7 @@ const formatDate = (dateString: string) =>
                       <p
                         class="text-xs text-red-700 font-medium leading-relaxed"
                       >
-                        Remark: {{ booking.remark }}
+                        {{ $t('dashboard.disapproval_reason') }}: {{ booking.remark }}
                       </p>
                     </div>
                   </div>
@@ -858,7 +861,7 @@ const formatDate = (dateString: string) =>
           <!-- Tab 2: Profile -->
           <div
             v-if="activeTab === 'profile'"
-            class="bg-white rounded-3xl shadow-xl border border-white/50 p-8 md:p-10 animate-fade-up"
+            class="bg-white rounded-3xl shadow-card-lg border border-gray-200 p-8 md:p-10 animate-fade-up"
           >
             <h2
               class="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-3 border-b border-gray-100 pb-4"

@@ -2,6 +2,7 @@
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
 import api from "@/services/api";
+import { resolveRoomImage } from "@/utils/roomImage";
 
 interface RoomItem {
   id: number;
@@ -42,7 +43,7 @@ const fetchRooms = async () => {
       ...r,
       isActive: r.is_active,
       priceInternal: r.price_half_day_internal,
-      image: r.image_url
+      image: resolveRoomImage(r.image_url)
     }));
   } catch (err) {
     console.error("Error fetching rooms:", err);
@@ -148,7 +149,7 @@ const handleManageImages = (room) => {
     html: `
       <div class="space-y-4">
         <div class="relative w-full h-48 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center group shadow-inner">
-          <img id="room-preview" src="${room.image || '/images/no-image.svg'}" class="w-full h-full object-cover" />
+          <img id="room-preview" src="${resolveRoomImage(room.image)}" class="w-full h-full object-cover" />
         </div>
         <div class="text-left">
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">อัปโหลดไฟล์ภาพใหม่ (.jpg, .png)</label>
@@ -200,7 +201,7 @@ const handleManageImages = (room) => {
   <div class="space-y-6 animate-fade-up">
     <!-- Header -->
     <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100"
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200"
     >
       <div>
         <h2
@@ -222,7 +223,7 @@ const handleManageImages = (room) => {
 
     <!-- Table -->
     <div
-      class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
     >
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-[700px]">
@@ -257,17 +258,10 @@ const handleManageImages = (room) => {
                     class="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 group/img cursor-pointer shrink-0"
                   >
                     <img
-                      v-if="room.image"
-                      :src="room.image"
+                      :src="room.image || '/images/room-placeholder.jpg'"
                       loading="lazy"
                       class="w-full h-full object-cover transition-transform group-hover/img:scale-110"
                     />
-                    <div
-                      v-else
-                      class="w-full h-full flex items-center justify-center text-gray-400"
-                    >
-                      <font-awesome-icon icon="image" class="text-sm" />
-                    </div>
                     <div
                       class="absolute inset-0 bg-[#ba0b2f]/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold"
                     >

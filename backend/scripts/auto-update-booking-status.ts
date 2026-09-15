@@ -4,14 +4,10 @@
  * Rules:
  * 1) approved_pending_payment + booking_date < today → ยกเลิกแล้ว (หมดเวลาชำระ)
  * 2) pending + booking_date < today → ยกเลิกแล้ว (ไม่ได้อนุมัติทันวันใช้งาน)
- *
- * Does NOT invent a new "สำเร็จแล้ว" DB status — paid stays approved_paid;
- * review remains in feedbacks. This keeps dashboard queries simple (Recording 3).
+ * 3) approved_paid + เลยวัน/เวลาใช้งานแล้ว → completed (สำเร็จแล้ว)
  *
  * Usage:
  *   cd backend && npx tsx scripts/auto-update-booking-status.ts
- * Cron example (daily 01:15):
- *   15 1 * * * cd /path/to/backend && npx tsx scripts/auto-update-booking-status.ts >> /var/log/mfu-booking-cron.log 2>&1
  */
 import dotenv from "dotenv";
 dotenv.config();
@@ -37,6 +33,25 @@ async function run() {
      RETURNING id, booking_no`
   );
 
+  // ชำระเงินแล้ว + เลยวัน/เวลาใช้งาน → สำเร็จแล้ว
+  const completed = await query(
+    `UPDATE bookings
+     SET status = 'completed',
+         updated_at = NOW()
+     WHERE status = 'approved_paid'
+       AND (
+         booking_date::date < CURRENT_DATE
+         OR (
+           booking_date::date = CURRENT_DATE
+           AND (
+             (time_slot = 'half_morning' AND CURRENT_TIME > TIME '12:00')
+             OR (time_slot IN ('half_afternoon', 'full') AND CURRENT_TIME > TIME '17:00')
+           )
+         )
+       )
+     RETURNING id, booking_no`
+  );
+
   for (const row of unpaid.rows) {
     try {
       await query(
@@ -50,7 +65,7 @@ async function run() {
         ]
       );
     } catch {
-      /* column may not exist on very old DB — ignore */
+      /* ignore */
     }
   }
 
@@ -71,8 +86,25 @@ async function run() {
     }
   }
 
+  for (const row of completed.rows) {
+    try {
+      await query(
+        `INSERT INTO admin_activity_logs (admin_name, action, details, booking_id)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          "System Cron",
+          `อัปเดตสถานะการจอง #${row.id}`,
+          `สถานะ: สำเร็จแล้ว (เลยวันใช้งาน — booking_no=${row.booking_no})`,
+          row.id,
+        ]
+      );
+    } catch {
+      /* ignore */
+    }
+  }
+
   console.log(
-    `[cron] cancelled unpaid-after-date=${unpaid.rows.length}, stale-pending=${stalePending.rows.length}`
+    `[cron] cancelled unpaid=${unpaid.rows.length}, stale-pending=${stalePending.rows.length}, completed=${completed.rows.length}`
   );
   process.exit(0);
 }

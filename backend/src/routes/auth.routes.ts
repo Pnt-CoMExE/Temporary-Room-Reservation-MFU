@@ -25,7 +25,7 @@ router.get(
         userId: user.id,
         email: user.email,
         role: user.user_type,
-        name: user.firstname,
+        name: [user.firstname, user.lastname].filter(Boolean).join(" ").trim() || user.email,
       },
       JWT_SECRET,
       { expiresIn: "8h" }

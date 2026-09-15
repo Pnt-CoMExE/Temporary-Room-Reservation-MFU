@@ -104,7 +104,7 @@ describe("getRevenueByMonth", () => {
     const sql = mockQuery.mock.calls[0][0] as string;
     expect(sql).toContain("SELECT");
     expect(sql).toContain("FROM bookings");
-    expect(sql).toContain("status = 'approved_paid'");
+    expect(sql).toContain("approved_paid");
     expect(sql).toContain("SUM(total_price)");
     expect(sql).toContain("ORDER BY month_date ASC");
   });

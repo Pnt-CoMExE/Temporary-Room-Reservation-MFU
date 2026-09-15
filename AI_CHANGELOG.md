@@ -2,6 +2,63 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-15 — Persist navbar notification read state]
+
+- แจ้งเตือน Navbar เป็น mock ใน memory → กดอ่านแล้วรีเฟรชกลับมา
+- เก็บ id ที่อ่านแล้วใน `localStorage` (`mfu_notif_read_ids`) แล้วเอาออกจากรายการ
+- คลิกรายการเดียว / อ่านทั้งหมด + empty state เมื่อไม่มีรายการ
+
+## [2026-09-15 — Featured rooms / date TZ / admin reason / logout]
+
+- พื้นที่แนะนำ: เรียงจากจำนวนการจองจริงใน DB (ไม่ใช่ UNION ตามประเภท)
+- Card ชัดขึ้น: เงาแรงขึ้น + RoomCard ขอบ `border-2`
+- แก้บัควันที่เลื่อน (15↔16): `to_char` + `dateKey.ts` เลี่ยง timezone shift
+- ผู้จองเห็นชื่อ admin จริง + เหตุผลไม่อนุมัติ; log ใช้คำว่า **เหตุผล**
+- Badge รอชำระเงินชัดขึ้น; Navbar/Dashboard logout modal + ปุ่มให้ตรงกัน
+
+## [2026-09-15 — Admin/UX polish: promo %, status, dashboard filters]
+
+- ส่วนลดเป็น **เปอร์เซ็นต์** (ข้อความ + คำนวณ) แก้บัค `%%` ด้วย `formatPromoPercent`
+- สถานะ: **ชำระเงินแล้ว** / **สำเร็จแล้ว** (`completed` หลังเลยวัน-เวลาใช้งาน — cron)
+- ประวัติการจอง / mock pay: ข้อความอ่านง่าย ไม่โชว์รหัส IT
+- เอา Promo ออกจากหน้าการประกาศ; เอาแท็บประวัติการทำงานออก
+- Dashboard: กรองเดือน/ปี/ช่วงวัน + ปุ่มดูข้อมูลล่าสุด; เอา “รายได้เดือนที่ผ่านมา” ออก
+- Admin บังคับภาษาไทยอย่างเดียว (ไม่มีสวิตช์ภาษา)
+
+## [2026-09-15 — Fix failing tests + local DB for npm run dev]
+
+- สาเหตุ fail ส่วนใหญ่: Docker Desktop ปิด → backend `.env` ชี้ `:5433` แล้วได้ 500
+- สลับ `.env` กลับ local Postgres `:5432` / `room_booking_db`
+- อัปเดต `auditLog.service.test.ts` ให้ตรง SQL ที่มี `booking_id`
+- ปรับ integration เคส userType: JWT บังคับทับค่าปลอมจาก client
+- Verify: `npm test` → **200/200 passed**
+
+## [2026-09-11 — Booking form: profile name/type + required phone]
+
+- ชื่อผู้จอง / ประเภทหน่วยงาน: ดึงจากโปรไฟล์ + Google Auth (อ่านอย่างเดียว)
+- บังคับเบอร์โทร (ดึงจากโปรไฟล์ถ้ามี) + sync กลับ `users.phone_number`
+- ป้าย "จำเป็น" ชัดขึ้นที่วัตถุประสงค์/แนบเอกสาร; หัวข้อ Optional ฟอนต์ใหญ่ขึ้น
+- Backend บังคับ `userType` จาก JWT + validate `phoneNumber`/`objective`
+
+## [2026-09-11 — Fix missing room images]
+
+- สาเหตุ: DB ชี้ `/images/rooms/*.jpg` ที่ไม่มีไฟล์ + fallback `room1.jpg` เป็นรูปแดงเสีย
+- เพิ่ม `frontend/src/utils/roomImage.ts` (`resolveRoomImage` → `/images/room-placeholder.jpg`)
+- อัปเดต RoomCard / Home / RoomList / RoomDetail / Booking / AdminRooms
+- อัปเดต Docker DB `rooms.image_url` ทั้ง 104 ห้องเป็น placeholder ร่วม
+- `seed-demo.ts` ใช้ placeholder เดียวกัน
+
+## [2026-09-11 — UX: clearer cards site-wide]
+
+ทำให้ card ทั้งเว็บแยกจากพื้นหลังชัดขึ้น โดยไม่เปลี่ยน layout หลัก:
+
+- **`frontend/src/assets/main.css`**: design tokens (`canvas`, `mfu-red/gold`, `shadow-card*`) + utilities `.ui-card` / `.ui-card-elevated` / `.ui-card-glass`
+- Canvas `#f8f9fa` → `#f1f3f5` (`bg-canvas`) ใน layouts + user/admin views
+- ขอบอ่อน `gray-100` / `white/50` → `gray-200`; เงาพัก `shadow-card` / elevated `shadow-card-lg`
+- อัปเดต `RoomCard`, Home (search + how-it-works cards), RoomList/Detail/Booking/Dashboard, Navbar, Login, ConfirmDialog, และหน้า Admin หลัก
+
+Verify: hot reload ที่ http://localhost:5173
+
 ## [2026-09-09]
 - Adjusted Home page search bar in `HomeView.vue` so Thai labels/placeholders (`ค้นหาพื้นที่`, `ชื่อห้อง / อาคาร`, `ประเภทพื้นที่`) are not clipped; widened bar, relaxed line-height, and shortened `hero.search_placeholder` / `hero.all_types` in `th.ts` and `en.ts`.
 

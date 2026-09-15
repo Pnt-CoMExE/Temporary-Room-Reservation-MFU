@@ -157,7 +157,7 @@ const setAdminRole = async (user: UserItem) => {
 <template>
   <div class="space-y-6 animate-fade-up">
     <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100"
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200"
     >
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
@@ -176,7 +176,7 @@ const setAdminRole = async (user: UserItem) => {
       </div>
     </div>
 
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+    <div class="bg-white p-4 rounded-2xl shadow-card border border-gray-200">
       <div class="flex flex-col sm:flex-row gap-3">
         <div class="relative flex-1">
           <font-awesome-icon
@@ -217,7 +217,7 @@ const setAdminRole = async (user: UserItem) => {
 
     <div
       v-if="loading"
-      class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
     >
       <div class="p-6 space-y-4">
         <div v-for="i in 6" :key="i" class="flex items-center gap-4 animate-pulse">
@@ -232,7 +232,7 @@ const setAdminRole = async (user: UserItem) => {
 
     <div
       v-else-if="filteredUsers.length > 0"
-      class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
     >
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-[800px]">
@@ -346,7 +346,7 @@ const setAdminRole = async (user: UserItem) => {
 
     <div
       v-else
-      class="bg-white rounded-3xl shadow-sm border border-gray-100 py-20 flex flex-col items-center justify-center text-center"
+      class="bg-white rounded-3xl shadow-card border border-gray-200 py-20 flex flex-col items-center justify-center text-center"
     >
       <h3 class="text-xl font-black text-gray-700 mb-2">ไม่พบผู้ใช้</h3>
       <p class="text-sm text-gray-400 font-medium max-w-xs">

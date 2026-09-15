@@ -5,6 +5,8 @@ import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { getStoredUserId } from "@/utils/auth";
+import { resolveRoomImage } from "@/utils/roomImage";
+import { toDateKey } from "@/utils/dateKey";
 
 const { t, locale } = useI18n();
 
@@ -54,12 +56,48 @@ const existingBookings = ref<BookingRecord[]>([]);
 const bookingForm = ref({
   userName: "",
   userType: "",
+  phone: "",
   objective: "",
   date: "",
   duration: "",
   promoCode: "",
   acceptTerms: false,
 });
+
+/** Map JWT/DB role → pricing tier used by booking form */
+const toPricingUserType = (role: string | null | undefined): string => {
+  if (role === "co_op" || role === "co_organizer") return "co_op";
+  if (role === "external") return "external";
+  // admin + internal (+ unknown) → internal rates
+  return "internal";
+};
+
+const orgTypeLabel = computed(() => {
+  const key = bookingForm.value.userType;
+  if (key === "co_op") return "booking.org_coop";
+  if (key === "external") return "booking.org_external";
+  return "booking.org_internal";
+});
+
+const loadProfileIntoForm = async () => {
+  try {
+    const storedName = localStorage.getItem("userName") || "";
+    const storedRole = localStorage.getItem("userRole") || "external";
+    bookingForm.value.userName = storedName;
+    bookingForm.value.userType = toPricingUserType(storedRole);
+
+    const profileRes = await api.get("/api/user/profile");
+    const p = profileRes.data;
+    if (p) {
+      const fullName = [p.firstname, p.lastname].filter(Boolean).join(" ").trim();
+      if (fullName) bookingForm.value.userName = fullName;
+      bookingForm.value.phone = p.phone_number || "";
+      if (p.user_type) bookingForm.value.userType = toPricingUserType(p.user_type);
+    }
+  } catch (err) {
+    console.error("Error loading profile for booking:", err);
+  }
+};
 
 const memoFile = ref<File | null>(null);
 const memoFileName = ref("");
@@ -121,7 +159,7 @@ const fetchRoomData = async () => {
     room.value = {
       ...r,
       location: r.type,
-      image: r.image_url,
+      image: resolveRoomImage(r.image_url),
       priceHalfDayInternal: parseFloat(r.price_half_day_internal) || 0,
       priceFullDayInternal: parseFloat(r.price_full_day_internal) || 0,
       priceHalfDayCoop: parseFloat(r.price_half_day_co_organizer) || 0,
@@ -144,7 +182,7 @@ const fetchRoomData = async () => {
     // ดึงคิวการจองที่มีอยู่แล้วของห้องนี้เพื่อล็อควันที่
     const bookingsResponse = await api.get(`/api/rooms/${roomId}/bookings`);
     existingBookings.value = bookingsResponse.data.map((b: any) => ({
-      date: b.booking_date.split('T')[0],
+      date: toDateKey(b.booking_date),
       duration: b.time_slot
     }));
     
@@ -155,7 +193,9 @@ const fetchRoomData = async () => {
   }
 };
 
-onMounted(() => fetchRoomData());
+onMounted(async () => {
+  await Promise.all([fetchRoomData(), loadProfileIntoForm()]);
+});
 
 const dateStatus = computed(() => {
   if (!bookingForm.value.date) return null;
@@ -242,10 +282,13 @@ const applyPromoCode = async () => {
   try {
     const res = await api.post("/api/promo-codes/validate", { code });
     const promo = res.data;
-    discountPercent.value = promo.discount;
-    discountAmount.value = Math.round(subTotalPrice.value * (promo.discount / 100));
+    discountPercent.value = Math.min(
+      100,
+      parseFloat(String(promo.discount ?? 0).toString().replace(/%/g, "")) || 0
+    );
+    discountAmount.value = Math.round(subTotalPrice.value * (discountPercent.value / 100));
     isPromoApplied.value = true;
-    promoMessage.value = `✅ ${promo.message}`;
+    promoMessage.value = `✅ ใช้ส่วนลด ${discountPercent.value}% สำเร็จ!`;
   } catch (err: any) {
     discountAmount.value = 0;
     discountPercent.value = 0;
@@ -264,6 +307,27 @@ const submitBooking = async () => {
       icon: "warning",
       title: "คำเตือน",
       text: "กรุณายอมรับเงื่อนไขการใช้บริการ",
+      confirmButtonColor: "#ba0b2f",
+    });
+    return;
+  }
+
+  const phone = bookingForm.value.phone.trim();
+  if (!phone || !/^[0-9\- ]{9,15}$/.test(phone)) {
+    Swal.fire({
+      icon: "warning",
+      title: t("booking.phone_required_title"),
+      text: t("booking.phone_required_text"),
+      confirmButtonColor: "#ba0b2f",
+    });
+    return;
+  }
+
+  if (!bookingForm.value.objective.trim()) {
+    Swal.fire({
+      icon: "warning",
+      title: t("booking.required_fields_title"),
+      text: t("booking.objective_required_text"),
       confirmButtonColor: "#ba0b2f",
     });
     return;
@@ -291,15 +355,34 @@ const submitBooking = async () => {
     return;
   }
 
+  // Sync phone to profile so Dashboard stays consistent
+  try {
+    const profileRes = await api.get("/api/user/profile");
+    const p = profileRes.data || {};
+    const firstname = (p.firstname || "").trim() || bookingForm.value.userName.split(" ")[0] || "-";
+    const lastname =
+      (p.lastname || "").trim() ||
+      bookingForm.value.userName.split(" ").slice(1).join(" ") ||
+      "-";
+    await api.put("/api/user/profile", {
+      firstname,
+      lastname,
+      phone_number: phone,
+    });
+  } catch (err) {
+    console.warn("Could not sync phone to profile before booking:", err);
+  }
+
   const formData = new FormData();
   formData.append("memoDocument", memoFile.value);
   formData.append("userId", String(userId));
   formData.append("roomId", roomId);
   formData.append("userType", bookingForm.value.userType);
   formData.append("partnerName", bookingForm.value.userName);
+  formData.append("phoneNumber", phone);
   formData.append("bookingDate", bookingForm.value.date);
   formData.append("timeSlot", bookingForm.value.duration);
-  formData.append("objective", bookingForm.value.objective || "การจัดกิจกรรม/ประชุม");
+  formData.append("objective", bookingForm.value.objective.trim());
   formData.append("roomPrice", String(bookingForm.value.duration === 'full' ? currentPriceFullDay.value : currentPriceHalfDay.value));
   formData.append("addonsPrice", String(addOns.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)));
   formData.append("totalPrice", String(finalPrice.value));
@@ -338,7 +421,7 @@ const submitBooking = async () => {
 </script>
 
 <template>
-  <div class="bg-[#f8f9fa] min-h-screen relative font-sans">
+  <div class="bg-canvas min-h-screen relative font-sans">
     <!-- Header -->
     <div class="relative pt-20 pb-32 flex items-center overflow-hidden">
       <div class="absolute inset-0 z-0">
@@ -390,7 +473,7 @@ const submitBooking = async () => {
         <!-- Sidebar Summary -->
         <div class="lg:col-span-1">
           <div
-            class="bg-white rounded-3xl shadow-xl border border-white/50 overflow-hidden sticky top-24"
+            class="bg-white rounded-3xl shadow-card-lg border border-gray-200 overflow-hidden sticky top-24"
           >
             <div class="relative h-48 bg-gray-200">
               <img :src="room?.image" loading="lazy" class="w-full h-full object-cover" />
@@ -454,7 +537,7 @@ const submitBooking = async () => {
         <!-- Main Form -->
         <div class="lg:col-span-2 space-y-8">
           <div
-            class="bg-white p-8 md:p-10 rounded-3xl shadow-xl border border-white/50"
+            class="bg-white p-8 md:p-10 rounded-3xl shadow-card-lg border border-gray-200"
           >
             <h2
               class="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-4 border-b border-gray-100 pb-4"
@@ -471,13 +554,47 @@ const submitBooking = async () => {
                 <div class="md:col-span-2">
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >{{ $t('booking.applicant_name') }} *</label
-                  >
+                    >{{ $t('booking.applicant_name') }}
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                  </label>
                   <input
                     type="text"
                     v-model="bookingForm.userName"
+                    readonly
                     required
                     :placeholder="$t('booking.applicant_name')"
+                    class="w-full px-4 py-3.5 bg-gray-100 border border-gray-200 text-gray-900 font-semibold rounded-xl outline-none shadow-sm cursor-not-allowed"
+                  />
+                  <p class="text-[11px] text-gray-400 mt-1.5 font-medium">{{ $t('booking.name_from_profile_hint') }}</p>
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-bold text-gray-500 mb-2 uppercase"
+                    >{{ $t('booking.organization_type') }}
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                  </label>
+                  <input
+                    type="text"
+                    :value="$t(orgTypeLabel)"
+                    readonly
+                    class="w-full px-4 py-3.5 bg-gray-100 border border-gray-200 text-gray-900 font-semibold rounded-xl outline-none shadow-sm cursor-not-allowed"
+                  />
+                  <p class="text-[11px] text-gray-400 mt-1.5 font-medium">{{ $t('booking.org_from_auth_hint') }}</p>
+                </div>
+
+                <div>
+                  <label
+                    class="block text-xs font-bold text-gray-500 mb-2 uppercase"
+                    >{{ $t('booking.phone_number') }}
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                  </label>
+                  <input
+                    type="tel"
+                    v-model="bookingForm.phone"
+                    required
+                    inputmode="tel"
+                    :placeholder="$t('booking.phone_placeholder')"
                     class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
                   />
                 </div>
@@ -485,25 +602,9 @@ const submitBooking = async () => {
                 <div>
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >{{ $t('booking.organization_type') }} *</label
-                  >
-                  <select
-                    v-model="bookingForm.userType"
-                    required
-                    class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
-                  >
-                    <option value="" disabled>{{ $t('booking.select_org') }}</option>
-                    <option value="internal">{{ $t('booking.org_internal') }}</option>
-                    <option value="co_op">{{ $t('booking.org_coop') }}</option>
-                    <option value="external">{{ $t('booking.org_external') }}</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label
-                    class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >{{ $t('booking.booking_date') }} *</label
-                  >
+                    >{{ $t('booking.booking_date') }}
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                  </label>
                   <input
                     type="date"
                     v-model="bookingForm.date"
@@ -513,9 +614,9 @@ const submitBooking = async () => {
                   />
                   <p
                     v-if="dateStatus === 'full'"
-                    class="text-red-500 text-[10px] font-bold mt-1 animate-pulse"
+                    class="text-red-600 text-sm font-bold mt-2 px-3 py-2 rounded-xl bg-red-50 border border-red-100 flex items-center gap-2"
                   >
-                    <font-awesome-icon icon="exclamation-triangle" />
+                    <font-awesome-icon icon="exclamation-triangle" class="text-base shrink-0" />
                     {{ $t('booking.date_full_notice') }}
                   </p>
                 </div>
@@ -523,8 +624,9 @@ const submitBooking = async () => {
                 <div class="md:col-span-2">
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >{{ $t('booking.duration') }} *</label
-                  >
+                    >{{ $t('booking.duration') }}
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                  </label>
                   <select
                     v-model="bookingForm.duration"
                     :disabled="dateStatus === 'full'"
@@ -560,32 +662,35 @@ const submitBooking = async () => {
                 <!-- ✅ ฟิลด์วัตถุประสงค์ -->
                 <div class="md:col-span-2">
                   <label
-                    class="block text-xs font-bold text-gray-500 mb-2 uppercase"
-                    >{{ $t('booking.objective') }} *</label
-                  >
+                    class="block text-sm font-bold text-gray-800 mb-2"
+                    >{{ $t('booking.objective') }}
+                    <span class="ml-2 inline-flex items-center rounded-md bg-red-100 px-2 py-0.5 text-xs font-black text-[#ba0b2f]">{{ $t('booking.required_badge') }}</span>
+                  </label>
                   <textarea
                     v-model="bookingForm.objective"
                     required
                     rows="3"
                     :placeholder="$t('booking.objective_placeholder')"
-                    class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm resize-none"
+                    class="w-full px-4 py-3.5 bg-gray-50 border-2 border-red-100 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] focus:border-[#ba0b2f] outline-none transition-all shadow-sm resize-none"
                   ></textarea>
+                  <p class="text-xs font-semibold text-[#ba0b2f]/80 mt-1.5">{{ $t('booking.required_field_hint') }}</p>
                 </div>
               </div>
 
               <!-- ✅ ฟิลด์แนบหนังสือบันทึกข้อความ -->
               <div class="md:col-span-2">
                 <label
-                  class="block text-xs font-bold text-gray-500 mb-2 uppercase"
+                  class="block text-sm font-bold text-gray-800 mb-2"
                 >
-                  {{ $t('booking.memo_title') }} *
+                  {{ $t('booking.memo_title') }}
+                  <span class="ml-2 inline-flex items-center rounded-md bg-red-100 px-2 py-0.5 text-xs font-black text-[#ba0b2f]">{{ $t('booking.required_badge') }}</span>
                 </label>
                 <div
                   class="relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer hover:border-[#ba0b2f] hover:bg-red-50/30"
                   :class="
                     memoFileName
                       ? 'border-green-400 bg-green-50/50'
-                      : 'border-gray-300 bg-gray-50'
+                      : 'border-red-200 bg-red-50/40'
                   "
                   @click="triggerFileInput"
                 >
@@ -614,10 +719,11 @@ const submitBooking = async () => {
                       <font-awesome-icon icon="times" class="mr-1" />{{ $t('booking.change_file') }}
                     </button>
                   </template>
-                  <template v-else><font-awesome-icon icon="cloud-upload-alt" class="text-3xl text-gray-300 mb-2" />
-                    <p class="font-bold text-gray-600 text-sm">
+                  <template v-else><font-awesome-icon icon="cloud-upload-alt" class="text-3xl text-[#ba0b2f]/50 mb-2" />
+                    <p class="font-bold text-gray-700 text-sm">
                       {{ $t('booking.memo_hint') }}
                     </p>
+                    <p class="text-xs font-semibold text-[#ba0b2f] mt-2">{{ $t('booking.required_field_hint') }}</p>
                   </template>
                 </div>
               </div>
@@ -625,29 +731,30 @@ const submitBooking = async () => {
               <!-- อุปกรณ์เสริม -->
               <div class="pt-4">
                 <h2
-                  class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4 border-b border-gray-100 pb-4"
+                  class="text-3xl font-extrabold text-gray-900 mb-2 flex items-center gap-4"
                 >
                   <span
-                    class="w-10 h-10 bg-[#d4af37] text-white rounded-full flex items-center justify-center text-lg"
+                    class="w-11 h-11 bg-[#d4af37] text-white rounded-full flex items-center justify-center text-lg shrink-0"
                     >2</span
                   >
-                  {{ $t('booking.step_2') }}
+                  <span class="leading-tight">{{ $t('booking.step_2') }}</span>
                 </h2>
+                <p class="text-base font-semibold text-gray-500 mb-6 pl-14">{{ $t('booking.step_2_hint') }}</p>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div
                     v-for="item in addOns"
                     :key="item.id"
-                    class="p-5 bg-gray-50 rounded-2xl border border-gray-100 text-center transition-all hover:shadow-md"
+                    class="p-5 bg-gray-50 rounded-2xl border border-gray-200 text-center transition-all hover:shadow-card"
                   >
                     <div
-                      class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#ba0b2f] mx-auto mb-2 border border-gray-100 shadow-sm"
+                      class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#ba0b2f] mx-auto mb-2 border border-gray-200 shadow-card"
                     >
                       <font-awesome-icon :icon="item.iconName" />
                     </div>
-                    <p class="font-bold text-gray-800 text-xs mb-1">
+                    <p class="font-bold text-gray-800 text-sm mb-1 leading-snug">
                       {{ item.name }}
                     </p>
-                    <p class="text-[10px] text-gray-400 mb-3">
+                    <p class="text-xs text-gray-500 mb-3 font-medium">
                       ฿{{ item.price }} / {{ item.unit }}
                     </p>
                     <div class="flex items-center justify-center gap-3">

@@ -79,7 +79,8 @@ router.get(
     const { id } = req.params;
     try {
       const result = await query(
-        `SELECT booking_date, time_slot, status, memo_document_url
+        `SELECT to_char(booking_date, 'YYYY-MM-DD') AS booking_date,
+                time_slot, status, memo_document_url
          FROM bookings
          WHERE room_id = $1 AND booking_date >= CURRENT_DATE AND status NOT IN ('disapproved', 'ยกเลิกแล้ว')
          ORDER BY booking_date ASC`,

@@ -9,6 +9,7 @@ import {
   getBookingStatusLabel,
   getReviewedBadgeClass,
   getReviewedLabel,
+  humanizeStatusInText,
   isBookingStatus,
   statusActionBtn,
 } from "@/utils/bookingStatus";
@@ -455,7 +456,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
     const res = await api.get("/api/admin/logs", {
       params: { bookingId: booking.dbId },
     });
-    const rows = res.data || [];
+    const rows = [...(res.data || [])];
     if (!rows.length) {
       Swal.fire({
         icon: "info",
@@ -465,24 +466,113 @@ const viewBookingHistory = async (booking: BookingItem) => {
       });
       return;
     }
-    const html = rows
+
+    // เรียงเก่า → ใหม่ เพื่อเดาสถานะก่อนหน้าจาก log เก่าได้
+    const chronological = rows
+      .slice()
+      .sort(
+        (a: any, b: any) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+
+    const extractStatusLabel = (details: string): string | null => {
+      const text = humanizeStatusInText(details || "", "th");
+      const fromTo = text.match(/เปลี่ยนจาก「([^」]+)」เป็น「([^」]+)」/);
+      if (fromTo) return fromTo[2];
+      const single = text.match(/สถานะ:\s*(.+?)(?:\s*\||$)/);
+      return single ? single[1].trim() : null;
+    };
+
+    let previousStatusLabel: string | null = null;
+    /** เมื่อ log แรกไม่มีสถานะก่อนหน้า — เดาจาก flow ปกติของระบบ */
+    const defaultPreviousFor = (toLabel: string): string | null => {
+      const map: Record<string, string> = {
+        รอชำระเงิน: "รออนุมัติ",
+        ชำระเงินแล้ว: "รอชำระเงิน",
+        สำเร็จแล้ว: "ชำระเงินแล้ว",
+        ไม่อนุมัติ: "รออนุมัติ",
+        ยกเลิกแล้ว: "รออนุมัติ",
+      };
+      return map[toLabel] || null;
+    };
+
+    const enriched = chronological.map((l: any) => {
+      const rawDetails = humanizeStatusInText(l.details || "", "th");
+      const alreadyTransition = /เปลี่ยนจาก「/.test(rawDetails);
+      const currentLabel = extractStatusLabel(rawDetails);
+      let displayDetails = rawDetails;
+
+      if (!alreadyTransition && currentLabel) {
+        const fromLabel = previousStatusLabel || defaultPreviousFor(currentLabel);
+        const remarkMatch = rawDetails.match(/\|\s*(?:เหตุผล|หมายเหตุ):\s*(.+)$/);
+        const remark = remarkMatch ? ` | เหตุผล: ${remarkMatch[1]}` : "";
+        if (fromLabel && fromLabel !== currentLabel) {
+          displayDetails = `เปลี่ยนจาก「${fromLabel}」เป็น「${currentLabel}」${remark}`;
+        } else if (!fromLabel) {
+          displayDetails = `ตั้งสถานะเป็น「${currentLabel}」${remark}`;
+        }
+      }
+
+      if (currentLabel) previousStatusLabel = currentLabel;
+
+      return { ...l, displayDetails };
+    });
+
+    const renderTransitionHtml = (details: string): string => {
+      const fromTo = details.match(/เปลี่ยนจาก「([^」]+)」เป็น「([^」]+)」(.*)$/);
+      if (fromTo) {
+        const from = fromTo[1];
+        const to = fromTo[2];
+        const extra = (fromTo[3] || "").trim();
+        return `
+          <div class="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+            <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(from)}">${from}</span>
+            <span class="text-[#ba0b2f] font-black text-lg sm:text-xl px-1">→</span>
+            <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(to)}">${to}</span>
+          </div>
+          ${extra ? `<p class="text-sm text-gray-700 font-semibold mt-3 px-3 py-2 rounded-xl bg-rose-50 border border-rose-100"><span class="text-rose-700 font-black">เหตุผล:</span> ${extra.replace(/^\|\s*(?:เหตุผล|หมายเหตุ):\s*/, "")}</p>` : ""}
+        `;
+      }
+      const setOnly = details.match(/ตั้งสถานะเป็น「([^」]+)」(.*)$/);
+      if (setOnly) {
+        return `
+          <div class="mt-3">
+            <span class="inline-flex px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(setOnly[1])}">${setOnly[1]}</span>
+          </div>
+        `;
+      }
+      return `<p class="text-base text-gray-800 mt-3 leading-relaxed font-bold">${details || "-"}</p>`;
+    };
+
+    // แสดงใหม่สุดบนสุด
+    const html = enriched
+      .slice()
+      .reverse()
       .map(
         (l: any) => `
-      <div class="text-left border border-gray-100 rounded-xl p-3 mb-2 bg-slate-50">
-        <p class="text-xs font-black text-gray-800">${l.action || "-"}</p>
-        <p class="text-[11px] text-gray-500 mt-1">${l.details || ""}</p>
-        <p class="text-[10px] text-gray-400 mt-1">${l.admin_name || ""} · ${
-          l.created_at ? new Date(l.created_at).toLocaleString("th-TH") : ""
-        }</p>
+      <div class="text-left rounded-2xl p-5 mb-4 bg-white border-2 border-gray-300 shadow-[0_4px_16px_rgba(17,24,39,0.08)]">
+        <p class="text-base font-black text-gray-900 leading-snug">${l.action || "-"}</p>
+        ${renderTransitionHtml(l.displayDetails || "")}
+        <div class="mt-4 pt-3 border-t-2 border-gray-200 flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-gray-600">
+          <span class="inline-flex items-center gap-1.5"><span class="text-gray-400 font-semibold">โดย</span> ${l.admin_name || "ระบบ"}</span>
+          <span>${l.created_at ? new Date(l.created_at).toLocaleString("th-TH") : ""}</span>
+        </div>
       </div>`
       )
       .join("");
+
     Swal.fire({
-      title: `ประวัติรายการ ${booking.id}`,
-      html: `<div class="max-h-80 overflow-y-auto">${html}</div>`,
-      width: 520,
+      title: `<span class="text-xl font-black text-gray-900 tracking-tight">ประวัติรายการ ${booking.id}</span>`,
+      html: `<div class="max-h-[28rem] overflow-y-auto px-1 py-1 text-left bg-[#f1f3f5] rounded-2xl p-3">${html}</div>`,
+      width: 560,
       confirmButtonText: "ปิด",
       confirmButtonColor: "#ba0b2f",
+      customClass: {
+        popup: "rounded-3xl p-7",
+        title: "w-full mb-3",
+        confirmButton:
+          "rounded-xl w-full mt-3 py-3 text-base font-black cursor-pointer",
+      },
     });
   } catch (err) {
     Swal.fire({
@@ -500,7 +590,7 @@ const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
 <template>
   <div class="space-y-6 animate-fade-up">
     <div
-      class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col justify-between gap-6"
+      class="bg-white p-6 rounded-3xl shadow-card border border-gray-200 flex flex-col justify-between gap-6"
     >
       <div>
         <h2
@@ -515,7 +605,7 @@ const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
       </div>
     </div>
 
-    <div          class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-4"
+    <div          class="bg-white p-5 rounded-2xl shadow-card border border-gray-200 flex flex-col lg:flex-row gap-4"
     >
       <div class="flex-1 flex items-start gap-3">
         <button
@@ -581,7 +671,7 @@ const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
     </div>
 
     <div
-      class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden"
+      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
     >
       <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse min-w-225">
@@ -693,7 +783,7 @@ const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
                     v-else-if="isBookingStatus(booking.status, 'approved_pending_payment')"
                     @click="openConfirm(booking.id, 'payment')"
                     :class="getStatusClass(booking.status)"
-                    class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-90 transition-all cursor-pointer"
+                    class="min-w-[7.5rem] px-4 py-2.5 rounded-xl text-sm font-black border-2 shadow-sm flex items-center justify-center gap-2 hover:shadow-md hover:opacity-95 transition-all cursor-pointer whitespace-nowrap"
                   >
                     {{ getStatusText(booking.status) }}
                     <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />

@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import api from "@/services/api";
+import { resolveRoomImage } from "@/utils/roomImage";
+import { formatDateKey, toDateKey } from "@/utils/dateKey";
 
 interface RoomDetail {
   id: number;
@@ -48,7 +50,7 @@ const fetchRoomDetail = async () => {
     // Fetch real bookings
     const bookingsRes = await api.get(`/api/rooms/${roomId}/bookings`);
     bookedSlots.value = bookingsRes.data.map((b: any) => ({
-      date: b.booking_date.split('T')[0],
+      date: toDateKey(b.booking_date),
       time: b.time_slot === 'full' ? 'เต็มวัน' : b.time_slot === 'half_morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย',
       status: b.status === 'pending' ? 'รออนุมัติ' : 'จองแล้ว',
       memoDocumentUrl: b.memo_document_url || undefined
@@ -88,6 +90,8 @@ import {
 
 const { locale } = useI18n();
 
+const displayRoomImage = computed(() => resolveRoomImage(room.value?.image_url));
+
 const displayRoomName = computed(() => translateRoomName(room.value?.name, locale.value));
 const displayRoomType = computed(() => translateRoomType(room.value?.type, locale.value));
 const displayRoomLocation = computed(() => translateLocation(room.value?.location, locale.value));
@@ -95,11 +99,7 @@ const displayRoomLocation = computed(() => translateLocation(room.value?.locatio
 const goBack = () => router.push("/rooms");
 const goToBooking = () => router.push(`/booking/${roomId}`);
 const formatDate = (dateString: string) =>
-  new Date(dateString).toLocaleDateString(locale.value === "en" ? "en-US" : "th-TH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  formatDateKey(dateString, locale.value === "en" ? "en-US" : "th-TH");
 
 const amenities = [
   "โปรเจคเตอร์ / จอทีวี",
@@ -112,7 +112,7 @@ const amenities = [
 </script>
 
 <template>
-  <div class="bg-[#f8f9fa] min-h-screen pb-24 font-sans">
+  <div class="bg-canvas min-h-screen pb-24 font-sans">
     <div
       v-if="loading"
       class="flex flex-col justify-center items-center h-screen"
@@ -157,7 +157,7 @@ const amenities = [
         class="w-full h-100 md:h-125 rounded-3xl overflow-hidden mb-10 shadow-2xl relative"
       >
         <img
-          :src="room.image_url"
+          :src="displayRoomImage"
           :alt="room.name"
           loading="lazy"
           class="w-full h-full object-cover"
@@ -198,9 +198,9 @@ const amenities = [
               <font-awesome-icon icon="info-circle" class="text-[#ba0b2f]" /> {{ $t('room.details') }}
             </h3>
             <p
-              class="text-gray-600 leading-relaxed text-lg bg-white p-6 rounded-2xl border border-gray-100 shadow-sm"
+              class="text-gray-600 leading-relaxed text-lg bg-white p-6 rounded-2xl border border-gray-200 shadow-card"
             >
-              {{ room.description || 'Modern multi-purpose facility equipped with full audiovisual systems.' }}
+              {{ room.description || $t('room.default_description') }}
             </p>
           </section>
 
@@ -213,12 +213,12 @@ const amenities = [
             </h3>
             <div
               v-if="bookedSlots.length > 0"
-              class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
+              class="bg-white rounded-2xl border border-gray-200 shadow-card overflow-hidden"
             >
               <div
                 v-for="(slot, index) in bookedSlots"
                 :key="index"
-                class="px-6 py-4 border-b border-gray-50 flex justify-between items-center hover:bg-gray-50 transition-colors"
+                class="px-6 py-4 border-b border-gray-100 flex justify-between items-center hover:bg-gray-50 transition-colors"
               >
                 <div class="flex items-center gap-4">
                   <div
@@ -253,7 +253,7 @@ const amenities = [
 
         <div class="lg:col-span-1">
           <div
-            class="bg-white p-8 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-gray-100 sticky top-24"
+            class="bg-white p-8 rounded-3xl shadow-card-lg border border-gray-200 sticky top-24"
           >
             <h3
               class="text-sm font-bold text-gray-500 uppercase tracking-widest mb-6"
@@ -263,7 +263,7 @@ const amenities = [
 
             <div class="space-y-4 mb-8">
               <div
-                class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100"
+                class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-200"
               >
                 <span class="text-gray-600 font-medium"
                   >{{ $t('room.half_day') }}</span
@@ -273,7 +273,7 @@ const amenities = [
                 >
               </div>
               <div
-                class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-100"
+                class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-200"
               >
                 <span class="text-gray-600 font-medium">{{ $t('room.full_day') }}</span>
                 <span class="text-xl font-black text-[#ba0b2f]"

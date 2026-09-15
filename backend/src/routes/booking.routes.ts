@@ -40,13 +40,17 @@ router.post(
   verifyToken,
   upload.single("memoDocument"),
   (req: any, _res: Response, next: any) => {
-    // Identity from JWT only — never trust client userId
+    // Identity from JWT only — never trust client userId / userType for pricing
     if (!req.body) req.body = {};
     req.body.userId = String(req.user?.userId);
-    // Prevent external users from spoofing internal pricing tier
     const role = req.user?.role;
     if (role === "external") {
       req.body.userType = "external";
+    } else if (role === "co_op" || role === "co_organizer") {
+      req.body.userType = "co_op";
+    } else {
+      // admin + internal → internal pricing tier
+      req.body.userType = "internal";
     }
     next();
   },
@@ -60,7 +64,17 @@ router.post(
     const {
       userId, roomId, userType, partnerName, bookingDate,
       timeSlot, objective, roomPrice, addonsPrice, totalPrice, addons, promoCode,
+      phoneNumber,
     } = req.body;
+
+    const bookingDateKey =
+      String(bookingDate || "").match(/^(\d{4}-\d{2}-\d{2})/)?.[1] ||
+      String(bookingDate || "").slice(0, 10);
+
+    const phone = String(phoneNumber || "").trim();
+    if (!phone || !/^[0-9\- ]{9,15}$/.test(phone)) {
+      return res.status(400).json({ message: "กรุณาระบุเบอร์โทรศัพท์ให้ถูกต้อง" });
+    }
 
     let parsedAddons: any[] = [];
     if (addons) {
@@ -74,7 +88,7 @@ router.post(
     try {
       await client.query("BEGIN");
 
-      const dateKey = Math.floor(new Date(bookingDate).getTime() / 86400000);
+      const dateKey = Math.floor(Date.parse(`${bookingDateKey}T00:00:00Z`) / 86400000);
       await client.query("SELECT pg_advisory_xact_lock($1::int, $2::int)", [
         Number(roomId),
         dateKey,
@@ -91,12 +105,12 @@ router.post(
 
       const checkOverlap = await client.query(
         `SELECT id FROM bookings
-         WHERE room_id = $1 AND booking_date = $2
+         WHERE room_id = $1 AND booking_date = $2::date
            AND status NOT IN ('disapproved', 'ยกเลิกแล้ว')
            ${conflictCondition}
          FOR UPDATE
          LIMIT 1`,
-        [roomId, bookingDate]
+        [roomId, bookingDateKey]
       );
 
       if (checkOverlap.rows.length > 0) {
@@ -115,13 +129,18 @@ router.post(
           booking_no, user_id, room_id, organization_type, partner_name,
           booking_date, time_slot, objective, room_price, addons_price,
           total_price, status, memo_document_url, promo_code
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'pending', $12, $13)
+        ) VALUES ($1, $2, $3, $4, $5, $6::date, $7, $8, $9, $10, $11, 'pending', $12, $13)
         RETURNING id`,
-        [bookingNo, userId, roomId, userType, partnerName, bookingDate,
+        [bookingNo, userId, roomId, userType, partnerName, bookingDateKey,
          timeSlot, objective, roomPrice, addonsPrice, totalPrice, memoDocumentUrl, promoCode || null]
       );
 
       const bookingId = bookingResult.rows[0].id;
+
+      await client.query(
+        "UPDATE users SET phone_number = $1 WHERE id = $2",
+        [phone, userId]
+      );
 
       if (parsedAddons.length > 0) {
         for (const item of parsedAddons) {

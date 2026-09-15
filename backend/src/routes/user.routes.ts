@@ -64,10 +64,14 @@ router.get("/bookings/:userId", verifyToken, async (req: any, res: Response) => 
 
   try {
     const result = await query(
-      `SELECT b.*, r.name as room_name, r.location as room_location, r.image_url as room_image,
-              EXISTS(SELECT 1 FROM feedbacks f WHERE f.booking_id = b.id) as has_feedback
+      `SELECT b.*,
+              to_char(b.booking_date, 'YYYY-MM-DD') AS booking_date,
+              r.name as room_name, r.location as room_location, r.image_url as room_image,
+              EXISTS(SELECT 1 FROM feedbacks f WHERE f.booking_id = b.id) as has_feedback,
+              TRIM(CONCAT(COALESCE(admin_u.firstname, ''), ' ', COALESCE(admin_u.lastname, ''))) AS admin_name
        FROM bookings b
        JOIN rooms r ON b.room_id = r.id
+       LEFT JOIN users admin_u ON b.approved_by = admin_u.id
        WHERE b.user_id = $1
        ORDER BY b.created_at DESC`,
       [tokenUserId]

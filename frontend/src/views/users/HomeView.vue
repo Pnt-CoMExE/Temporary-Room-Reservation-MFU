@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import RoomCard from "@/components/room/RoomCard.vue";
 import api from "@/services/api";
+import { resolveRoomImage } from "@/utils/roomImage";
 
 interface Banner {
   id: number;
@@ -87,7 +88,7 @@ onMounted(async () => {
         type: room.type,
         capacity: room.capacity,
         location: room.type, // ใช้ type เป็น location ชั่วคราว หรือเพิ่ม location ใน DB
-        image: room.image_url || "/images/room1.jpg",
+        image: resolveRoomImage(room.image_url),
         isAvailable: room.is_active,
         priceHalfDayInternal: parseFloat(room.price_half_day_internal) || 0
       }));
@@ -106,7 +107,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f8f9fa] flex flex-col font-sans">
+  <div class="min-h-screen bg-canvas flex flex-col font-sans">
     <!-- Hero Section -->
     <div
       class="relative pt-32 pb-48 lg:pt-40 lg:pb-56 flex items-center justify-center overflow-hidden"
@@ -118,11 +119,13 @@ onUnmounted(() => {
           <img
             src="/images/mfu-bg.jpg"
             alt="MFU Background"
-            class="w-full h-full object-cover object-center filter brightness-[0.6]"
+            class="w-full h-full object-cover object-center scale-105"
           />
         </picture>
+        <!-- Darker scrim so seal/logo behind text doesn't fight the copy -->
+        <div class="absolute inset-0 bg-black/55"></div>
         <div
-          class="absolute inset-0 bg-linear-to-b from-black/40 via-[#ba0b2f]/20 to-[#f8f9fa]"
+          class="absolute inset-0 bg-linear-to-b from-[#ba0b2f]/25 via-transparent to-[#f8f9fa]"
         ></div>
       </div>
 
@@ -134,30 +137,32 @@ onUnmounted(() => {
           <img
             src="/images/mfu-logo.png"
             alt="Mae Fah Luang University"
-            class="h-24 md:h-32 w-auto object-contain filter drop-shadow-[0_0_25px_rgba(212,175,55,0.6)]"
+            class="h-20 md:h-28 w-auto object-contain drop-shadow-md"
           />
         </div>
         <span
-          class="inline-flex flex-col sm:flex-row sm:items-center sm:gap-2 py-1.5 px-4 rounded-full bg-black/30 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/50 text-xs font-bold tracking-widest uppercase mb-6 shadow-lg"
+          class="inline-flex flex-col sm:flex-row sm:items-center sm:gap-2 py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-sm text-[#d4af37] border border-[#d4af37]/40 text-xs font-bold tracking-widest uppercase mb-6"
         >
           <span>{{ $t('hero.badge') }}</span>
           <span class="hidden sm:inline opacity-50" aria-hidden="true">·</span>
           <span class="whitespace-nowrap">{{ $t('hero.badge_org') }}</span>
         </span>
         <h1
-          class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-6 tracking-tight drop-shadow-xl leading-snug max-w-4xl mx-auto"
+          class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight leading-[1.35] max-w-4xl mx-auto"
+          style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45)"
         >
           <span class="block">{{ $t('hero.title') }}</span>
           <span class="block whitespace-nowrap mt-1 md:mt-2">{{ $t('hero.title_org') }}</span>
         </h1>
         <p
-          class="text-base md:text-xl text-gray-100 mb-12 font-medium max-w-2xl mx-auto drop-shadow-md text-pretty leading-relaxed"
+          class="text-base md:text-lg text-white/95 mb-12 font-medium max-w-3xl mx-auto leading-[1.85] px-2"
+          style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5)"
         >
-          {{ $t('hero.subtitle') }}
+          {{ $t('hero.subtitle') }} {{ $t('hero.subtitle_line2') }}
         </p>
 
         <div
-          class="bg-white/90 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-white/50 flex flex-col md:flex-row items-stretch md:items-center w-full max-w-5xl mx-auto transform translate-y-12 overflow-visible"
+          class="bg-white/95 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-card-float border border-gray-200/80 flex flex-col md:flex-row items-stretch md:items-center w-full max-w-5xl mx-auto transform translate-y-12 overflow-visible"
         >
           <form
             @submit.prevent="handleSearch"
@@ -348,7 +353,7 @@ onUnmounted(() => {
 
       <!-- Loading Skeleton for Featured Rooms -->
       <div v-if="loadingFeatured" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <div v-for="i in 3" :key="i" class="bg-white rounded-3xl overflow-hidden border border-gray-100 shadow-sm animate-pulse">
+        <div v-for="i in 3" :key="i" class="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-card animate-pulse">
           <div class="h-52 bg-gray-200"></div>
           <div class="p-6 space-y-3">
             <div class="h-4 bg-gray-200 rounded-full w-3/4"></div>
@@ -376,7 +381,7 @@ onUnmounted(() => {
     </div>
 
     <!-- ✨ ขั้นตอนการทำงาน (How it works) ✨ -->
-    <div class="bg-white py-24 border-t border-gray-100">
+    <div class="bg-canvas py-24 border-t border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <span
           class="text-[#ba0b2f] font-bold tracking-wider text-sm uppercase mb-2 block"
@@ -389,14 +394,11 @@ onUnmounted(() => {
           {{ $t('home.how_it_works_subtitle') }}
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
-          <div
-            class="hidden md:block absolute top-12 left-[16%] right-[16%] h-0.5 bg-linear-to-r from-transparent via-gray-200 to-transparent"
-          ></div>
-
-          <div class="flex flex-col items-center relative z-10 group">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          <!-- step cards -->
+          <div class="flex flex-col items-center relative z-10 group bg-white rounded-3xl border border-gray-200 shadow-card px-6 py-10 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
             <div
-              class="w-24 h-24 bg-white border-4 border-gray-50 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:border-red-100 group-hover:bg-red-50"
+              class="w-24 h-24 bg-white border-4 border-gray-200 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
             >
               <font-awesome-icon icon="search" />
             </div>
@@ -408,9 +410,9 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <div class="flex flex-col items-center relative z-10 group">
+          <div class="flex flex-col items-center relative z-10 group bg-white rounded-3xl border border-gray-200 shadow-card px-6 py-10 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
             <div
-              class="w-24 h-24 bg-white border-4 border-gray-50 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:border-red-100 group-hover:bg-red-50"
+              class="w-24 h-24 bg-white border-4 border-gray-200 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
             >
               <font-awesome-icon icon="file-signature" />
             </div>
@@ -422,9 +424,9 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <div class="flex flex-col items-center relative z-10 group">
+          <div class="flex flex-col items-center relative z-10 group bg-white rounded-3xl border border-gray-200 shadow-card px-6 py-10 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
             <div
-              class="w-24 h-24 bg-white border-4 border-gray-50 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-xl transition-all duration-300 group-hover:scale-110 group-hover:border-red-100 group-hover:bg-red-50"
+              class="w-24 h-24 bg-white border-4 border-gray-200 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
             >
               <font-awesome-icon icon="qrcode" />
             </div>

@@ -21,14 +21,21 @@ router.get("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
     const from = parseDateParam(req.query.from);
     const to = parseDateParam(req.query.to);
     const hasRange = Boolean(from && to);
+    // Default to current calendar month when no range — "ข้อมูลล่าสุด"
+    const effectiveFrom = hasRange
+      ? from
+      : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+          .toISOString()
+          .slice(0, 10);
+    const effectiveTo = hasRange
+      ? to
+      : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+          .toISOString()
+          .slice(0, 10);
 
-    const dateFilterBookings = hasRange
-      ? `AND booking_date::date BETWEEN $1::date AND $2::date`
-      : "";
-    const dateFilterCreated = hasRange
-      ? `AND created_at::date BETWEEN $1::date AND $2::date`
-      : "";
-    const params = hasRange ? [from, to] : [];
+    const dateFilterBookings = `AND booking_date::date BETWEEN $1::date AND $2::date`;
+    const dateFilterCreated = `AND created_at::date BETWEEN $1::date AND $2::date`;
+    const params = [effectiveFrom, effectiveTo];
 
     const pendingCount = await query(
       `SELECT COUNT(*) FROM bookings WHERE status = 'pending' ${dateFilterBookings}`,
@@ -36,17 +43,17 @@ router.get("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
     );
     const approvedCount = await query(
       `SELECT COUNT(*) FROM bookings
-       WHERE status IN ('approved_pending_payment', 'approved_paid', 'approved')
+       WHERE status IN ('approved_pending_payment', 'approved_paid', 'approved', 'completed')
        ${dateFilterBookings}`,
       params
     );
     const paidCount = await query(
-      `SELECT COUNT(*) FROM bookings WHERE status = 'approved_paid' ${dateFilterBookings}`,
+      `SELECT COUNT(*) FROM bookings WHERE status IN ('approved_paid', 'completed') ${dateFilterBookings}`,
       params
     );
     const revenue = await query(
       `SELECT COALESCE(SUM(total_price), 0) AS sum FROM bookings
-       WHERE status = 'approved_paid' ${dateFilterCreated}`,
+       WHERE status IN ('approved_paid', 'completed') ${dateFilterCreated}`,
       params
     );
 
@@ -71,8 +78,9 @@ router.get("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
         : approvedToday,
       currentMonthRevenue: rangeRevenue,
       rangeRevenue,
-      from: from || null,
-      to: to || null,
+      from: effectiveFrom,
+      to: effectiveTo,
+      filtered: hasRange,
     });
   } catch (err) {
     console.error("[admin/stats] Error:", err);

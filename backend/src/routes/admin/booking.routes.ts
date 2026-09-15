@@ -8,6 +8,20 @@ import { verifyToken, verifyAdmin } from "../../middleware/auth";
 import { sendBookingStatusEmail } from "../../services/email.service";
 import { adminNameFromReq, logAdminAction } from "../../services/auditLog.service";
 
+const STATUS_LABEL_TH: Record<string, string> = {
+  pending: "รออนุมัติ",
+  approved_pending_payment: "รอชำระเงิน",
+  approved_paid: "ชำระเงินแล้ว",
+  completed: "สำเร็จแล้ว",
+  disapproved: "ไม่อนุมัติ",
+  ยกเลิกแล้ว: "ยกเลิกแล้ว",
+  approved: "อนุมัติแล้ว",
+};
+
+function statusLabelTh(status: string): string {
+  return STATUS_LABEL_TH[status] || status;
+}
+
 const router = Router();
 
 const uploadsDir = path.join(__dirname, "..", "..", "..", "uploads");
@@ -34,11 +48,13 @@ router.get("/", verifyToken, verifyAdmin, async (_req: any, res: Response) => {
     const result = await query(`
       SELECT b.*, u.firstname, u.lastname, u.email as user_email,
              r.name as room_name, r.location as room_location,
-             f.rating as feedback_rating, f.comment as feedback_comment
+             f.rating as feedback_rating, f.comment as feedback_comment,
+             TRIM(CONCAT(COALESCE(admin_u.firstname, ''), ' ', COALESCE(admin_u.lastname, ''))) AS admin_name
       FROM bookings b
       JOIN users u ON b.user_id = u.id
       JOIN rooms r ON b.room_id = r.id
       LEFT JOIN feedbacks f ON b.id = f.booking_id
+      LEFT JOIN users admin_u ON b.approved_by = admin_u.id
       ORDER BY b.created_at DESC
     `);
     res.json(result.rows);
@@ -57,20 +73,27 @@ router.put(
   async (req: any, res: Response) => {
     const { id } = req.params;
     const { status, remarks, adminId } = req.body;
+    const resolvedAdminId = Number(adminId) || Number(req.user?.userId) || null;
     const documentUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
+      const prevRes = await query("SELECT status FROM bookings WHERE id = $1", [id]);
+      if (prevRes.rows.length === 0) {
+        return res.status(404).json({ message: "ไม่พบรายการจอง" });
+      }
+      const previousStatus = String(prevRes.rows[0].status || "");
+
       if (documentUrl) {
         await query(
           `UPDATE bookings SET status = $1, remarks = $2, approved_by = $3,
            approved_at = NOW(), approval_document_url = $4 WHERE id = $5`,
-          [status, remarks, adminId, documentUrl, id]
+          [status, remarks, resolvedAdminId, documentUrl, id]
         );
       } else {
         await query(
           `UPDATE bookings SET status = $1, remarks = $2, approved_by = $3,
            approved_at = NOW() WHERE id = $4`,
-          [status, remarks, adminId, id]
+          [status, remarks, resolvedAdminId, id]
         );
       }
 
@@ -94,10 +117,17 @@ router.put(
         }
       })();
 
+      const fromLabel = statusLabelTh(previousStatus);
+      const toLabel = statusLabelTh(String(status));
+      const transition =
+        previousStatus === status
+          ? `สถานะ: ${toLabel}`
+          : `เปลี่ยนจาก「${fromLabel}」เป็น「${toLabel}」`;
+
       await logAdminAction(
         adminNameFromReq(req),
         `อัปเดตสถานะการจอง #${id}`,
-        `สถานะ: ${status}${remarks ? ` | หมายเหตุ: ${remarks}` : ""}`,
+        `${transition}${remarks ? ` | เหตุผล: ${remarks}` : ""}`,
         Number(id)
       );
 

@@ -36,10 +36,14 @@ router.post(
           .json({ message: "รหัสโปรโมชั่นนี้ถูกใช้งานครบจำนวนแล้ว" });
       }
 
+      const percent = Math.min(
+        100,
+        parseFloat(String(promo.discount ?? "0").replace(/%/g, "")) || 0
+      );
       res.json({
         code: promo.code,
-        discount: parseFloat(promo.discount),
-        message: `ใช้ส่วนลด ${parseFloat(promo.discount).toLocaleString()} บาท สำเร็จ!`,
+        discount: percent,
+        message: `ใช้ส่วนลด ${percent}% สำเร็จ!`,
       });
     } catch (err) {
       console.error("[promo] Error validating promo code:", err);

@@ -52,7 +52,7 @@ const getIcon = (action: string) => {
   <div class="space-y-6 animate-fade-up">
     <!-- Header -->
     <div
-      class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
+      class="bg-white p-6 rounded-3xl shadow-card border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
     >
       <div>
         <h2
@@ -70,7 +70,7 @@ const getIcon = (action: string) => {
     <!-- รายการ Activity Log -->
     <!-- ✨ เพิ่ม max-h-[65vh] และ overflow-y-auto พร้อม custom-scrollbar เพื่อให้เลื่อนได้ -->
     <div
-      class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6 max-h-[65vh] overflow-y-auto custom-scrollbar"
+      class="bg-white rounded-3xl shadow-card border border-gray-200 p-6 max-h-[65vh] overflow-y-auto custom-scrollbar"
     >
       <div
         v-if="logs.length === 0"

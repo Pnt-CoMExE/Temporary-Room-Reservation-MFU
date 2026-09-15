@@ -15,7 +15,7 @@ export async function getRevenueByMonth(year?: number): Promise<RevenueItem[]> {
         DATE_TRUNC('month', created_at) AS month_date,
         COALESCE(SUM(total_price), 0) AS revenue
       FROM bookings
-      WHERE status = 'approved_paid'
+      WHERE status IN ('approved_paid', 'completed')
         AND EXTRACT(YEAR FROM created_at) = $1
       GROUP BY month_date, month_label
       ORDER BY month_date ASC
@@ -34,7 +34,7 @@ export async function getRevenueByMonth(year?: number): Promise<RevenueItem[]> {
       DATE_TRUNC('month', created_at) AS month_date,
       COALESCE(SUM(total_price), 0) AS revenue
     FROM bookings
-    WHERE status = 'approved_paid'
+    WHERE status IN ('approved_paid', 'completed')
       AND created_at >= DATE_TRUNC('month', NOW()) - INTERVAL '5 months'
     GROUP BY month_date, month_label
     ORDER BY month_date ASC
@@ -57,7 +57,7 @@ export async function getRevenueInRange(
       DATE_TRUNC('month', created_at) AS month_date,
       COALESCE(SUM(total_price), 0) AS revenue
     FROM bookings
-    WHERE status = 'approved_paid'
+    WHERE status IN ('approved_paid', 'completed')
       AND created_at::date BETWEEN $1::date AND $2::date
     GROUP BY month_date, month_label
     ORDER BY month_date ASC

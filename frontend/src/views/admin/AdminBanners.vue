@@ -327,17 +327,17 @@ const togglePromoStatus = (promo) => {
   <div class="space-y-6 animate-fade-up">
     <!-- Header ภาพรวม -->
     <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100"
+      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200"
     >
       <div>
         <!-- ✨ เปลี่ยนหัวข้อเป็น การประกาศและโปรโมชั่น -->
         <h2
           class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
         >
-          <font-awesome-icon icon="bullhorn" class="text-[#ba0b2f]" /> การประกาศและโปรโมชั่น
+          <font-awesome-icon icon="bullhorn" class="text-[#ba0b2f]" />           การประกาศ
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          ควบคุมแบนเนอร์หน้าแรก รหัสส่วนลด และส่งการแจ้งเตือน (Broadcast)
+          ควบคุมแบนเนอร์หน้าแรก และส่งการแจ้งเตือน (Broadcast)
         </p>
       </div>
       <button
@@ -350,7 +350,7 @@ const togglePromoStatus = (promo) => {
 
     <!-- โซน 1: แบนเนอร์ -->
     <div
-      class="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm"
+      class="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-card"
     >
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-bold text-gray-900">
@@ -368,7 +368,7 @@ const togglePromoStatus = (promo) => {
         <div
           v-for="banner in banners"
           :key="banner.id"
-          class="bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden group"
+          class="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden group shadow-sm"
         >
           <div
             class="relative h-40 overflow-hidden bg-gray-200"
@@ -420,93 +420,6 @@ const togglePromoStatus = (promo) => {
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- โซน 2: รหัสส่วนลด (Promo Codes) -->
-    <div
-      class="bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-sm"
-    >
-      <div class="flex justify-between items-center mb-6">
-        <h3 class="text-lg font-bold text-gray-900">
-          <font-awesome-icon icon="ticket-alt" class="text-[#d4af37] mr-2" /> รหัสส่วนลด
-          (Promo Codes)
-        </h3>
-        <button
-          @click="handleAddPromoCode"
-          class="text-xs font-bold bg-[#d4af37] text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors cursor-pointer"
-        >
-          <font-awesome-icon icon="plus" class="mr-1" /> สร้างรหัส
-        </button>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr
-              class="bg-gray-50/80 text-xs font-bold text-gray-500 uppercase tracking-wider"
-            >
-              <th class="px-6 py-5 rounded-tl-xl">Code</th>
-              <th class="px-6 py-5 text-center">ส่วนลด</th>
-              <th class="px-6 py-5 text-center w-1/3">การใช้งาน</th>
-              <th class="px-6 py-5 text-center rounded-tr-xl">
-                สถานะ (เปิด/ปิด)
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            <!-- ✨ เพิ่มลูกเล่น grayscale ถ้าโค้ดปิดใช้งานอยู่ -->
-            <tr
-              v-for="promo in promoCodes"
-              :key="promo.id"
-              class="hover:bg-gray-50 transition-colors"
-              :class="
-                !promo.isActive ? 'opacity-50 grayscale bg-gray-50/50' : ''
-              "
-            >
-              <td
-                class="px-6 py-5 font-black text-gray-900 tracking-widest text-lg"
-              >
-                {{ promo.code }}
-              </td>
-              <td class="px-6 py-5 text-center font-bold text-[#ba0b2f]">
-                {{ promo.discount }}
-              </td>
-              <td class="px-6 py-5 text-center">
-                <div class="w-full bg-gray-200 rounded-full h-2 mb-2">
-                  <!-- ✨ ถ้าใช้เต็มโควตาแล้ว ให้หลอดเป็นสีแดง -->
-                  <div
-                    :class="
-                      promo.used >= promo.limit ? 'bg-red-500' : 'bg-blue-500'
-                    "
-                    class="h-2 rounded-full transition-all"
-                    :style="`width: ${(promo.used / promo.limit) * 100}%`"
-                  ></div>
-                </div>
-                <span
-                  class="text-[10px] text-gray-500 font-bold uppercase tracking-wider"
-                  >ใช้งานแล้ว {{ promo.used }} / {{ promo.limit }} สิทธิ์</span
-                >
-              </td>
-              <td class="px-6 py-5 text-center">
-                <!-- ✨ เพิ่มสวิตช์เปิด-ปิด ตรงนี้ -->
-                <button
-                  @click="togglePromoStatus(promo)"
-                  class="text-3xl transition-colors outline-none cursor-pointer"
-                  :class="
-                    promo.isActive
-                      ? 'text-green-500 hover:text-green-600'
-                      : 'text-gray-300 hover:text-gray-400'
-                  "
-                >
-                  <font-awesome-icon
-                    :icon="promo.isActive ? 'toggle-on' : 'toggle-off'"
-                  />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
       </div>
     </div>
   </div>

@@ -102,56 +102,56 @@ async function seedDemo() {
         type: "Meeting Room",
         capacity: 50,
         location: "อาคาร C3 ชั้น 1 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/c3-101.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
       {
         name: "ห้องบรรยาย C5-301 (Lecture Hall C5-301)",
         type: "Lecture Hall",
         capacity: 120,
         location: "อาคาร C5 ชั้น 3 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/c5-301.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
       {
         name: "ห้องสัมมนา E3A-201 (E3A Seminar Room)",
         type: "Seminar Room",
         capacity: 80,
         location: "อาคาร E3A ชั้น 2 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/e3a-201.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
       {
         name: "ห้องประชุมใหญ่ C3-Auditorium (C3 Grand Hall)",
         type: "Auditorium",
         capacity: 300,
         location: "อาคาร C3 ชั้น 2 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/c3-auditorium.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
       {
         name: "ห้องปฏิบัติการคอมพิวเตอร์ S2-401 (Computer Lab S2-401)",
         type: "Laboratory",
         capacity: 40,
         location: "อาคาร S2 ชั้น 4 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/s2-401.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
       {
         name: "อาคารกีฬาเฉลิมพระเกียรติ (MFU Sports Complex)",
         type: "Sports Center",
         capacity: 500,
         location: "อาคารกีฬาเฉลิมพระเกียรติ มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/sports-complex.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
       {
         name: "ลานกิจกรรม M-Complex (M-Complex Multipurpose Plaza)",
         type: "Event Plaza",
         capacity: 500,
         location: "อาคาร M-Complex ชั้น 1 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/m-complex-plaza.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
       {
         name: "อาคาร D1 ห้องจัดเลี้ยง (D1 Banquet Hall)",
         type: "Building",
         capacity: 200,
         location: "อาคาร D1 ชั้น 1 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/rooms/d1-banquet.jpg",
+        image_url: "/images/room-placeholder.jpg",
       },
     ];
 
@@ -236,8 +236,9 @@ async function seedDemo() {
     console.log("\n🏷️  Seeding Promo Codes...");
     const promos = [
       { code: "MFUWELCOME", discount: 100, limit: 200 },
-      { code: "PROMO2026", discount: 200, limit: 100 },
-      { code: "STUDENT10", discount: 50, limit: 500 },
+      { code: "PROMO2026", discount: 20, limit: 100 },
+      { code: "STUDENT10", discount: 10, limit: 500 },
+      { code: "TEST2026", discount: 50, limit: 100 },
     ];
 
     for (const p of promos) {
@@ -247,7 +248,7 @@ async function seedDemo() {
           "INSERT INTO promo_codes (code, discount, limit_count, is_active) VALUES ($1, $2, $3, true)",
           [p.code, p.discount, p.limit]
         );
-        console.log(`  ✅ Added Promo: ${p.code} (ลด ฿${p.discount}, limit ${p.limit})`);
+        console.log(`  ✅ Added Promo: ${p.code} (ลด ${p.discount}%, limit ${p.limit})`);
       } else {
         console.log(`  ℹ️  Promo exists: ${p.code}`);
       }

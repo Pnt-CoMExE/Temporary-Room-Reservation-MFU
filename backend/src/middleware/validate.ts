@@ -24,6 +24,13 @@ export const validateCreateBooking = [
   body("timeSlot")
     .isIn(["full", "half_morning", "half_afternoon"])
     .withMessage("ช่วงเวลาไม่ถูกต้อง"),
+  body("objective").trim().notEmpty().withMessage("กรุณาระบุวัตถุประสงค์การใช้งาน"),
+  body("phoneNumber")
+    .trim()
+    .notEmpty()
+    .withMessage("กรุณาระบุเบอร์โทรศัพท์")
+    .matches(/^[0-9\- ]{9,15}$/)
+    .withMessage("เบอร์โทรศัพท์ไม่ถูกต้อง"),
   body("roomPrice").isFloat({ min: 0 }).withMessage("ราคาห้องไม่ถูกต้อง"),
   body("totalPrice").isFloat({ min: 0 }).withMessage("ราคารวมไม่ถูกต้อง"),
   handleValidationErrors,
@@ -99,7 +106,15 @@ export const validateRoomStatus = [
 export const validateBookingStatus = [
   param("id").isInt({ min: 1 }).withMessage("ID การจองไม่ถูกต้อง"),
   body("status")
-    .isIn(["approved", "approved_paid", "disapproved", "pending"])
+    .isIn([
+      "approved",
+      "approved_paid",
+      "approved_pending_payment",
+      "completed",
+      "disapproved",
+      "pending",
+      "ยกเลิกแล้ว",
+    ])
     .withMessage("สถานะไม่ถูกต้อง"),
   handleValidationErrors,
 ];

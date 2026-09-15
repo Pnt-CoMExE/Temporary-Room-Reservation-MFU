@@ -124,6 +124,7 @@ describe("AuthZ: create booking identity from JWT", () => {
       .field("bookingDate", "2099-06-15")
       .field("timeSlot", "half_morning")
       .field("objective", "AuthZ test")
+      .field("phoneNumber", "0812345678")
       .field("roomPrice", "1000")
       .field("addonsPrice", "0")
       .field("totalPrice", "1000")

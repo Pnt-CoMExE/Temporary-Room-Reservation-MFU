@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { computed } from "vue";
+import { resolveRoomImage } from "@/utils/roomImage";
 
 interface RoomData {
   id: number;
@@ -31,22 +32,7 @@ const { locale } = useI18n();
 const displayType = computed(() => translateRoomType(props.room.type, locale.value));
 const displayLocation = computed(() => translateLocation(props.room.location, locale.value));
 const displayName = computed(() => translateRoomName(props.room.name, locale.value));
-
-/**
- * Determine which AVIF/WebP fallback source to use based on the current room.image.
- * If the image is from the API (external URL), return null so no <source> is rendered.
- */
-const fallbackAvif = computed(() => {
-  if (!props.room.image) return "/images/room-placeholder.avif";
-  if (props.room.image === "/images/room1.jpg") return "/images/room1.avif";
-  return null; // API image — no known fallback source
-});
-
-const fallbackWebp = computed(() => {
-  if (!props.room.image) return "/images/room-placeholder.webp";
-  if (props.room.image === "/images/room1.jpg") return "/images/room1.webp";
-  return null; // API image — no known fallback source
-});
+const displayImage = computed(() => resolveRoomImage(props.room.image));
 
 const goToRoom = () => {
   router.push(`/rooms/${props.room.id}`);
@@ -55,23 +41,16 @@ const goToRoom = () => {
 
 <template>
   <div
-    class="group bg-white rounded-4xl shadow-sm hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 overflow-hidden border border-gray-100 flex flex-col h-full cursor-pointer transform hover:-translate-y-2"
+    class="group bg-white rounded-4xl shadow-card-lg hover:shadow-card-hover transition-all duration-500 overflow-hidden border-2 border-gray-300/80 flex flex-col h-full cursor-pointer transform hover:-translate-y-2"
     @click="goToRoom"
   >
     <div class="relative h-56 md:h-64 overflow-hidden bg-gray-100">
-      <picture>
-        <source v-if="fallbackAvif" :srcset="fallbackAvif" type="image/avif">
-        <source v-if="fallbackWebp" :srcset="fallbackWebp" type="image/webp">
-        <img
-          :src="
-            room.image ||
-            '/images/room-placeholder.jpg'
-          "
-          :alt="displayName"
-          loading="lazy"
-          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-        />
-      </picture>
+      <img
+        :src="displayImage"
+        :alt="displayName"
+        loading="lazy"
+        class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+      />
 
       <div
         class="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500"
@@ -134,7 +113,7 @@ const goToRoom = () => {
       </div>
 
       <div
-        class="mt-auto pt-5 border-t border-gray-100 flex items-center justify-between"
+        class="mt-auto pt-5 border-t border-gray-200 flex items-center justify-between"
       >
         <div>
           <p
