@@ -46,5 +46,5 @@ export function resolveRoomImage(
     return value;
   }
   // Prefer seed (id/name) so each room stays visually distinct
-  return roomImageVariant(seed ?? value || "room");
+  return roomImageVariant(seed ?? value ?? "room");
 }
