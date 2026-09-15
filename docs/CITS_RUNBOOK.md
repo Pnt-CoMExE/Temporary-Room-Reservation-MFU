@@ -63,4 +63,4 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 - **Payment:** ตั้ง `PAYMENT_PROVIDER=mock_sandbox` สำหรับ UAT; เปลี่ยนเป็น `promptpay_manual` เมื่อพร้อม
 - **Email:** ตั้ง `SMTP_*` เมื่อได้เมลเซิร์ฟเวอร์จาก มฟล.
-- **Admin UAT:** ตั้ง `DEV_ADMIN_EMAILS` สำหรับทดสอบโดยไม่มีอีเมล @property.mfu.ac.th
+- **Admin UAT / bootstrap:** ตั้ง `DEV_ADMIN_EMAILS` แล้ว login — จากนั้น promote คนอื่นใน Admin Users (ไม่ใช้ auto-admin จากโดเมน)

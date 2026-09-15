@@ -61,6 +61,7 @@ interface RevenueMonth {
 interface PopularRoom {
   name: string;
   usage: number;
+  count: number;
   color: string;
 }
 
@@ -88,11 +89,19 @@ const revenueYear = ref(new Date().getFullYear());
 const filterMonth = ref(
   `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`
 );
-/** latest = เดือนปัจจุบัน | month = เลือกเดือน | year = ทั้งปี | range = ช่วงวัน */
-const filterMode = ref<"latest" | "month" | "year" | "range">("latest");
+/** latest = เดือนปัจจุบัน | month | year | range | all = ทั้งระบบ */
+const filterMode = ref<"latest" | "month" | "year" | "range" | "all">("latest");
 
-const resolveFilterRange = (): { from?: string; to?: string; year: number } => {
+const resolveFilterRange = (): {
+  from?: string;
+  to?: string;
+  year: number;
+  scopeAll?: boolean;
+} => {
   const year = revenueYear.value || new Date().getFullYear();
+  if (filterMode.value === "all") {
+    return { year, scopeAll: true };
+  }
   if (filterMode.value === "range" && filterFrom.value && filterTo.value) {
     return { from: filterFrom.value, to: filterTo.value, year };
   }
@@ -106,7 +115,7 @@ const resolveFilterRange = (): { from?: string; to?: string; year: number } => {
   if (filterMode.value === "year") {
     return { from: `${year}-01-01`, to: `${year}-12-31`, year };
   }
-  // latest — current month (backend also defaults)
+  // latest — current month
   const now = new Date();
   const y = now.getFullYear();
   const m = now.getMonth() + 1;
@@ -133,7 +142,9 @@ const fetchAdminData = async () => {
   try {
     const range = resolveFilterRange();
     const statsParams: Record<string, string> = {};
-    if (range.from && range.to) {
+    if (range.scopeAll) {
+      statsParams.scope = "all";
+    } else if (range.from && range.to) {
       statsParams.from = range.from;
       statsParams.to = range.to;
     }
@@ -163,7 +174,7 @@ const fetchAdminData = async () => {
       actionBy: (b.admin_name || "").trim() || undefined,
     }));
 
-    if (range.from && range.to) {
+    if (!range.scopeAll && range.from && range.to) {
       mapped = mapped.filter(
         (b: BookingInfo) => b.date >= range.from! && b.date <= range.to!
       );
@@ -172,8 +183,9 @@ const fetchAdminData = async () => {
 
     let revenueData: any[] = [];
     try {
-      const revenueParams =
-        filterMode.value === "year"
+      const revenueParams = range.scopeAll
+        ? { from: "2020-01-01", to: "2099-12-31" }
+        : filterMode.value === "year"
           ? { year: range.year }
           : range.from && range.to
             ? { from: range.from, to: range.to }
@@ -213,18 +225,18 @@ const fetchAdminData = async () => {
     bookings.value.forEach((b: BookingInfo) => {
       roomCounts[b.roomName] = (roomCounts[b.roomName] || 0) + 1;
     });
+    const totalInFilter = bookings.value.length || 1;
+    const colors = ["bg-green-500", "bg-blue-500", "bg-yellow-500", "bg-orange-500", "bg-purple-500"];
     const sortedRooms = Object.entries(roomCounts)
       .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
-      .slice(0, 3)
-      .map((entry, index) => {
-        const colors = ["bg-green-500", "bg-blue-500", "bg-yellow-500"];
-        return {
-          name: entry[0],
-          usage: Math.min(100, entry[1] * 10),
-          color: colors[index % colors.length]
-        };
-      });
-    if (sortedRooms.length > 0) popularRooms.value = sortedRooms;
+      .slice(0, 5)
+      .map((entry, index) => ({
+        name: entry[0],
+        count: entry[1],
+        usage: Math.round((entry[1] / totalInFilter) * 100),
+        color: colors[index % colors.length],
+      }));
+    popularRooms.value = sortedRooms.length > 0 ? sortedRooms : [];
 
     const typeCounts = { external: 0, internal: 0, co_op: 0 };
     bookings.value.forEach((b: BookingInfo) => {
@@ -492,6 +504,12 @@ const confirmLogout = () => {
                 >เดือนล่าสุด</button>
                 <button
                   type="button"
+                  @click="filterMode = 'all'"
+                  class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
+                  :class="filterMode === 'all' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                >ทั้งหมด</button>
+                <button
+                  type="button"
                   @click="filterMode = 'month'"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
                   :class="filterMode === 'month' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
@@ -633,7 +651,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      {{ filterMode === 'latest' ? 'รายได้รวมเดือนนี้' : 'รายได้ตามตัวกรอง' }}
+                      {{ filterMode === 'all' ? 'รายได้รวมทั้งหมด' : filterMode === 'latest' ? 'รายได้รวมเดือนนี้' : 'รายได้ตามตัวกรอง' }}
                     </p>
                     <p class="text-3xl font-black text-[#ba0b2f]">
                       ฿{{ (stats.rangeRevenue || stats.currentMonthRevenue || 0).toLocaleString() }}
@@ -692,7 +710,8 @@ const confirmLogout = () => {
                       room.name
                     }}</span
                     ><span class="text-sm font-bold text-gray-900"
-                      >{{ room.usage }}%</span
+                      >{{ room.usage }}%
+                      <span class="text-gray-400 font-semibold text-xs">({{ room.count }} จอง)</span></span
                     >
                   </div>
                   <div
@@ -705,6 +724,12 @@ const confirmLogout = () => {
                     ></div>
                   </div>
                 </div>
+                <p
+                  v-if="popularRooms.length === 0"
+                  class="text-sm text-gray-400 font-medium text-center py-4"
+                >
+                  ไม่มีข้อมูลการจองในช่วงที่เลือก
+                </p>
               </div>
             </div>
           </div>

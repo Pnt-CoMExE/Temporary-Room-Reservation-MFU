@@ -32,7 +32,7 @@ async function seedDemo() {
         google_id: "demo_admin_001",
         firstname: "สมชาย",
         lastname: "จัดการทรัพย์สิน",
-        email: "admin.demo@property.mfu.ac.th",
+        email: "admin.demo@mfu.ac.th",
         phone_number: "053-916-000",
         user_type: "admin",
         profile_picture: "https://ui-avatars.com/api/?name=Admin&background=dc2626&color=fff&size=128",
@@ -102,56 +102,56 @@ async function seedDemo() {
         type: "Meeting Room",
         capacity: 50,
         location: "อาคาร C3 ชั้น 1 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-01.svg",
       },
       {
         name: "ห้องบรรยาย C5-301 (Lecture Hall C5-301)",
         type: "Lecture Hall",
         capacity: 120,
         location: "อาคาร C5 ชั้น 3 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-05.svg",
       },
       {
         name: "ห้องสัมมนา E3A-201 (E3A Seminar Room)",
         type: "Seminar Room",
         capacity: 80,
         location: "อาคาร E3A ชั้น 2 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-01.svg",
       },
       {
         name: "ห้องประชุมใหญ่ C3-Auditorium (C3 Grand Hall)",
         type: "Auditorium",
         capacity: 300,
         location: "อาคาร C3 ชั้น 2 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-04.svg",
       },
       {
         name: "ห้องปฏิบัติการคอมพิวเตอร์ S2-401 (Computer Lab S2-401)",
         type: "Laboratory",
         capacity: 40,
         location: "อาคาร S2 ชั้น 4 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-03.svg",
       },
       {
         name: "อาคารกีฬาเฉลิมพระเกียรติ (MFU Sports Complex)",
         type: "Sports Center",
         capacity: 500,
         location: "อาคารกีฬาเฉลิมพระเกียรติ มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-06.svg",
       },
       {
         name: "ลานกิจกรรม M-Complex (M-Complex Multipurpose Plaza)",
         type: "Event Plaza",
         capacity: 500,
         location: "อาคาร M-Complex ชั้น 1 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-02.svg",
       },
       {
         name: "อาคาร D1 ห้องจัดเลี้ยง (D1 Banquet Hall)",
         type: "Building",
         capacity: 200,
         location: "อาคาร D1 ชั้น 1 มหาวิทยาลัยแม่ฟ้าหลวง",
-        image_url: "/images/room-placeholder.jpg",
+        image_url: "/images/rooms/room-06.svg",
       },
     ];
 
@@ -463,9 +463,9 @@ async function seedDemo() {
     console.log(`   📝 Activity Logs:  ${counts.logs}`);
 
     console.log(`\n🔑 Demo Login Accounts:`);
-    console.log(`   Admin:    admin.demo@property.mfu.ac.th`);
+    console.log(`   Admin:    admin.demo@mfu.ac.th (seed user_type=admin; production ใช้ promote / DEV_ADMIN_EMAILS)`);
     console.log(`   Staff:    wichai.staff@mfu.ac.th / suda.staff@mfu.ac.th`);
-    console.log(`   Student:  piya.student@lamduan.mfu.ac.th`);
+    console.log(`   Student:  piya.student@lamduan.mfu.ac.th (external)`);
     console.log(`   External: john.external@company.com`);
 
     console.log(`\n🏷️  Demo Promo Codes:`);

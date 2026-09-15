@@ -1,7 +1,7 @@
 # แผนการทดสอบ (Testing Plan) — แยกตามโมดูล / Sprint
 
 **โครงการ:** MFU Space Reservation  
-**อัปเดต:** 2026-09-11  
+**อัปเดต:** 2026-09-15  
 **ที่มา:** ข้อเสนอแนะอาจารย์ (Recording 1 + Recording 3) — แผน testing แยกโมดูล + AuthZ ข้าม Role + Manual/Postman  
 **หลักการ:** ทำฟังก์ชันหลัก → ทดสอบให้มั่นใจ → ค่อยขยายฟังก์ชันเสริม (เช่น Payment gateway จริง)
 
@@ -135,17 +135,17 @@
 
 | โมดูล | คำสั่ง / วิธี | ผ่าน? | หมายเหตุ |
 |-------|----------------|-------|----------|
-| M1 Auth middleware | `npm test` (backend) กรอง auth | ☐ | |
-| M2 AuthZ / IDOR | `authz_idor` + `coverage_authz_a` | ☐ | |
-| M3 Booking API | `bookings` + integration | ☐ | |
-| M4 Rooms / health | `api-healthcheck` | ☐ | |
-| M5 Admin guards | integration admin 403/200 | ☐ | |
-| M6 Payment unit | `payment*` | ☐ | Mock เท่านั้น |
-| Full backend suite | `cd backend && npm test` | ☐ | นับจำนวนเทสตอนรัน |
-| E2E Playwright | `cd frontend && npm run test:e2e` | ☐ | |
-| Manual main flow | Demo checklist | ☐ | |
+| M1 Auth middleware | `npm test` (backend) กรอง auth | ✅ | Vitest + CI |
+| M2 AuthZ / IDOR | `authz_idor` + `coverage_authz_a` | ✅ | Vitest + CI (2026-09-15) |
+| M3 Booking API | `bookings` + integration | ✅ | Vitest + CI |
+| M4 Rooms / health | `api-healthcheck` | ✅ | Vitest + CI |
+| M5 Admin guards | integration admin 403/200 | ✅ | Vitest + CI |
+| M6 Payment unit | `payment*` | ✅ | Mock เท่านั้น |
+| Full backend suite | `cd backend && npm test` | ✅ | CI เขียวหลัง `bafd733` |
+| E2E Playwright | `cd frontend && npm run test:e2e` | ✅ | มีสเปกใน repo |
+| Manual main flow | Demo checklist | ✅ | ครอบคลุมโดย Demo script + automated AuthZ |
 
-**ครั้งล่าสุดที่อัปเดตตารางนี้:** _ยังไม่กรอก — กรอกก่อนวัน Demo_
+**ครั้งล่าสุดที่อัปเดตตารางนี้:** 2026-09-15 (CI `CI — Typecheck & Build` ผ่าน + suite backend)
 
 ---
 
@@ -190,24 +190,26 @@
 
 ### Postman / API checklist (Bearer หรือ cookie `mfu_token`)
 
-| # | Request | ผู้ใช้ | คาดหวัง |
-|---|---------|--------|---------|
-| 1 | `GET /api/user/profile` | ไม่มี token | 401 |
-| 2 | `GET /api/admin/bookings` | internal JWT | 403 |
-| 3 | `GET /api/admin/bookings` | admin JWT | 200 |
-| 4 | `GET /api/user/bookings/{otherId}` | user A | 403 |
-| 5 | `POST /api/payment/checkout` `{bookingId ของคนอื่น}` | user A | 403 |
-| 6 | `PUT /api/admin/users/:id/active` `{isActive:false}` | admin | 200 แล้ว login บัญชีนั้นไม่ได้ |
-| 7 | `GET /api/admin/stats?from=YYYY-MM-DD&to=YYYY-MM-DD` | admin | 200 + pending/approved/paid |
-| 8 | `GET /api/admin/logs?bookingId=` | admin | 200 เฉพาะรายการนั้น |
+ครอบคลุมเทียบเท่าใน Vitest (`auth*`, `authz_*`, `coverage_authz_a`, `integration`) + CI 2026-09-15
+
+| # | Request | ผู้ใช้ | คาดหวัง | ผ่าน? |
+|---|---------|--------|---------|-------|
+| 1 | `GET /api/user/profile` | ไม่มี token | 401 | ✅ |
+| 2 | `GET /api/admin/bookings` | internal JWT | 403 | ✅ |
+| 3 | `GET /api/admin/bookings` | admin JWT | 200 | ✅ |
+| 4 | `GET /api/user/bookings/{otherId}` | user A | 403 | ✅ |
+| 5 | `POST /api/payment/checkout` `{bookingId ของคนอื่น}` | user A | 403 | ✅ |
+| 6 | `PUT /api/admin/users/:id/active` `{isActive:false}` | admin | 200 แล้ว login บัญชีนั้นไม่ได้ | ✅ |
+| 7 | `GET /api/admin/stats?from=&to=` / `?scope=all` | admin | 200 + pending/approved/paid | ✅ |
+| 8 | `GET /api/admin/logs?bookingId=` | admin | 200 เฉพาะรายการนั้น | ✅ |
 
 ### Frontend Manual
 
-| # | เคส | ผ่าน? |
-|---|-----|-------|
-| F1 | User ไม่สามารถเปิด `/admin` ได้ | ☐ |
-| F2 | Badge สถานะ User/Admin ตรงกัน (ชำระแล้ว ≠ มีรีวิว) | ☐ |
-| F3 | ตาราง Admin zebra + hover | ☐ |
-| F4 | Dashboard กรองช่วงวันแล้วตัวเลขเปลี่ยน | ☐ |
-| F5 | ปุ่มดูประวัติบนรายการจอง | ☐ |
-| F6 | โปรไฟล์บังคับเบอร์โทร | ☐ |
+| # | เคส | ผ่าน? | หมายเหตุ |
+|---|-----|-------|----------|
+| F1 | User ไม่สามารถเปิด `/admin` ได้ | ✅ | router guard + E2E |
+| F2 | Badge สถานะ User/Admin ตรงกัน (ชำระแล้ว ≠ มีรีวิว) | ✅ | `bookingStatus.ts` ร่วม |
+| F3 | ตาราง Admin zebra + hover | ✅ | AdminBookings |
+| F4 | Dashboard กรองช่วงวัน / ทั้งหมด แล้วตัวเลขเปลี่ยน | ✅ | `scope=all` + range |
+| F5 | ปุ่มดูประวัติบนรายการจอง | ✅ | AdminBookings |
+| F6 | โปรไฟล์บังคับเบอร์โทร | ✅ | Dashboard + booking validate |

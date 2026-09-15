@@ -19,7 +19,7 @@ alwaysApply: true
 - **ห้าม commit** `.env`, secrets, `uploads/` — commit เฉพาะเมื่อ user สั่ง
 - **Backend:** parameterized SQL, `resolveUserType()`, `auditLog.service.ts`, `src/config/env.ts`
 - **Frontend:** i18n TH+EN (`th.ts` + `en.ts`), `translator.ts`, admin `requiresAdmin` guard
-- **Role:** `@property.mfu.ac.th` → admin | `@mfu.ac.th` → internal | อื่นๆ → external | UAT: `DEV_ADMIN_EMAILS`
+- **Role:** `@mfu.ac.th` → internal | `@lamduan.mfu.ac.th` / อื่นๆ → external | admin = promote ในระบบ | UAT: `DEV_ADMIN_EMAILS`
 - **Payment UAT:** `PAYMENT_PROVIDER=mock_sandbox`
 - **Tests:** `npm test` + `npm run typecheck` หลังแก้โค้ดสำคัญ
 - **Scope:** แก้เฉพาะที่ขอ ไม่ over-engineer

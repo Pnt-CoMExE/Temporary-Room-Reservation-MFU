@@ -51,9 +51,9 @@
 - [ ] รันระบบพร้อมใช้ เช่น Docker ที่ `http://localhost:8080`  
   หรือ `npm run dev` (frontend :5173 / backend :3000)
 - [ ] มีบัญชี Demo ตามตารางด้านล่าง (ตั้งใน `.env` แล้ว **login ใหม่** หลังเปลี่ยน env)
-  - **Admin:** `comza962@gmail.com` (`DEV_ADMIN_EMAILS`)
-  - **Internal:** `6631501071@lamduan.mfu.ac.th` (`DEV_INTERNAL_EMAILS`)
-  - หรือ `@property.mfu.ac.th` / `@mfu.ac.th` ตามโดเมนจริง
+  - **Admin:** `comza962@gmail.com` (`DEV_ADMIN_EMAILS`) แล้ว promote คนอื่นใน Admin Users
+  - **Internal:** `@mfu.ac.th` หรือ `6631501071@lamduan.mfu.ac.th` (`DEV_INTERNAL_EMAILS`)
+  - **External:** `@lamduan.mfu.ac.th` (นักศึกษา) / โดเมนอื่น (ถ้าไม่มี DEV override)
 - [ ] `PAYMENT_PROVIDER=mock_sandbox` (โชว์สั้นได้ ไม่ต้องเน้น)
 - [ ] เปิด Chrome DevTools: **Application** (Cookies / localStorage) + **Network**
 - [ ] เปิดแท็บ `docs/TESTING_PLAN.md` พร้อมโชว์
@@ -165,12 +165,12 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 
 | อีเมล | Role |
 |--------|------|
-| `@property.mfu.ac.th` | admin |
-| `@mfu.ac.th` | internal |
-| อื่นๆ | external |
-| `DEV_ADMIN_EMAILS` | admin (ทดสอบเท่านั้น) |
+| `@mfu.ac.th` (โดเมนตรงๆ) | internal |
+| `@lamduan.mfu.ac.th` / อื่นๆ | external |
+| promote ใน Admin Users | admin |
+| `DEV_ADMIN_EMAILS` | admin (ทดสอบ/bootstrap) |
 | `DEV_INTERNAL_EMAILS` | internal (ทดสอบเท่านั้น) |
-| Demo รอบนี้ | `comza962@gmail.com` → admin · `6631501071@lamduan.mfu.ac.th` → internal |
+| Demo รอบนี้ | `comza962@gmail.com` → admin · `6631501071@lamduan.mfu.ac.th` → internal (via DEV) |
 
 **สองชั้น**
 
@@ -245,7 +245,7 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 | มี testing แล้วยัง? | มีแผนแยกโมดูล + Vitest/Playwright/CI — โชว์ใน TESTING_PLAN |
 | Payment พร้อมยัง? | มี mock และเทส ownership แล้ว; gateway จริงทำหลัง core+test ตามลำดับที่อาจารย์แนะนำ |
 | UAT ทำแล้วหรือยัง? | เอกสารพร้อม แต่รอบนี้ไม่เน้นผู้ใช้จริง ตามที่คุยไว้ |
-| ใครเป็น admin? | `@property.mfu.ac.th` หรือ Demo: `comza962@gmail.com` ผ่าน `DEV_ADMIN_EMAILS` |
+| ใครเป็น admin? | Promote ใน Admin Users หรือ Demo: `comza962@gmail.com` ผ่าน `DEV_ADMIN_EMAILS` |
 | ใครเป็น internal ตอน Demo? | `6631501071@lamduan.mfu.ac.th` ผ่าน `DEV_INTERNAL_EMAILS` (หรือ `@mfu.ac.th`) |
 | โปรเจกต์นี้เป็น MVC ไหม? | ไม่ใช่ MVC เซิร์ฟเวอร์แบบตำรา 100% — เป็น **SPA (Vue) + REST API (Express)** แต่แยกชั้นแนว MVC ได้ (ดู §10) |
 

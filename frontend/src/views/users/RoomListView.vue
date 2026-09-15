@@ -43,7 +43,7 @@ const fetchRooms = async () => {
         type: room.type,
         capacity: room.capacity,
         location: room.type,
-        image: resolveRoomImage(room.image_url),
+        image: resolveRoomImage(room.image_url, room.id ?? room.name),
         isAvailable: room.is_active,
         priceHalfDayInternal: parseFloat(room.price_half_day_internal) || 0
     }));

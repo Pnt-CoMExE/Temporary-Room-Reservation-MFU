@@ -43,7 +43,7 @@ const fetchRooms = async () => {
       ...r,
       isActive: r.is_active,
       priceInternal: r.price_half_day_internal,
-      image: resolveRoomImage(r.image_url)
+      image: resolveRoomImage(r.image_url, r.id ?? r.name)
     }));
   } catch (err) {
     console.error("Error fetching rooms:", err);
@@ -149,7 +149,7 @@ const handleManageImages = (room) => {
     html: `
       <div class="space-y-4">
         <div class="relative w-full h-48 bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 flex items-center justify-center group shadow-inner">
-          <img id="room-preview" src="${resolveRoomImage(room.image)}" class="w-full h-full object-cover" />
+          <img id="room-preview" src="${resolveRoomImage(room.image, room.id ?? room.name)}" class="w-full h-full object-cover" />
         </div>
         <div class="text-left">
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">อัปโหลดไฟล์ภาพใหม่ (.jpg, .png)</label>

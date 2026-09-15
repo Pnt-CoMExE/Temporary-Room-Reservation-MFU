@@ -125,6 +125,34 @@ export function getBookingStatusBadgeClass(
   }
 }
 
+/** Font Awesome solid icon name paired with each status badge */
+export function getBookingStatusIcon(
+  status: string | null | undefined
+): string {
+  switch (normalizeBookingStatus(status)) {
+    case "pending":
+      return "clock";
+    case "approved_pending_payment":
+      return "qrcode";
+    case "approved_paid":
+      return "check-circle";
+    case "completed":
+      return "check-double";
+    case "disapproved":
+      return "times-circle";
+    case "cancelled":
+      return "ban";
+    default:
+      return "info-circle";
+  }
+}
+
+/** User may leave a review after payment or after cron marks completed */
+export function canLeaveReview(status: string | null | undefined): boolean {
+  const key = normalizeBookingStatus(status);
+  return key === "approved_paid" || key === "completed";
+}
+
 export function getReviewedBadgeClass(): string {
   return "bg-violet-50 text-violet-800 border-violet-200";
 }

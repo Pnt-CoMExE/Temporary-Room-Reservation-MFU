@@ -1,0 +1,9 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1e3a8a"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <rect x="100" y="80" width="160" height="120" rx="12" fill="#fff" opacity=".18"/>
+  <rect x="300" y="80" width="160" height="120" rx="12" fill="#fff" opacity=".14"/>
+  <rect x="500" y="80" width="160" height="120" rx="12" fill="#fff" opacity=".1"/>
+  <rect x="100" y="240" width="560" height="140" rx="16" fill="#d4af37" opacity=".2"/>
+  <text x="40" y="460" fill="#fff" font-family="Arial,sans-serif" font-size="28" font-weight="700" opacity=".9">Computer Lab</text>
+</svg>

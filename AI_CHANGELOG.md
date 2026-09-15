@@ -2,6 +2,25 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-15 — Close Recording 3 gaps]
+
+- รูปห้อง: SVG 6 แบบ ตาม room id (`resolveRoomImage`)
+- Dashboard: โหมด **ทั้งหมด** + `stats?scope=all`; อัตราใช้งาน = % จริงในช่วงกรอง
+- สถานะมีไอคอนครบ; รีวิวได้หลัง `completed`
+- TESTING_PLAN checklist ติ๊กแล้ว; อัปเดต RECORDING3 matrix
+
+## [2026-09-15 — RECORDING3 status matrix]
+
+- อัปเดต `docs/RECORDING3_ACTION_PLAN.md`: ตาราง Done / Partial / Gap เทียบ meeting 2026-09-11
+- บันทึก drift (สถานะจอง, role, cron) + รายการ gap ที่ยังเปิด
+
+## [2026-09-15 — Role policy: admin via promote only]
+
+- เลิกใช้ `@property.mfu.ac.th` → admin อัตโนมัติ
+- `@mfu.ac.th` (โดเมนตรงๆ) → internal; `@lamduan.mfu.ac.th` + อื่นๆ → external
+- คง `admin` ที่ promote ใน DB ตอน login; bootstrap ยังใช้ `DEV_ADMIN_EMAILS`
+- อัปเดต RULES / UAT / seed / cursor rules
+
 ## [2026-09-15 — Fix CI backend test failures]
 
 - `coverage_authz_a`: `mockReset` ใน beforeEach กัน once-queue ค้างจากเทสก่อนหน้า

@@ -3,7 +3,8 @@
  * รัน: npm run seed:production
  *
  * นำเข้า: ห้อง/พื้นที่, อัตราค่าบริการ, อุปกรณ์เสริม, แบนเนอร์เริ่มต้น
- * ไม่สร้างผู้ใช้ demo — Admin มาจาก Google OAuth (@property.mfu.ac.th)
+ * ไม่สร้างผู้ใช้ demo — Admin คนแรก: ตั้ง DEV_ADMIN_EMAILS แล้ว login
+ * จากนั้น promote คนอื่นผ่านหน้า Admin Users (ไม่ใช้ @property.mfu.ac.th)
  */
 import dotenv from "dotenv";
 dotenv.config();
@@ -51,8 +52,8 @@ async function seedProduction() {
     }
 
     console.log("\n✨ Production seed completed.");
-    console.log("ℹ️  Admin users are created on first Google OAuth login (@property.mfu.ac.th)");
-    console.log("ℹ️  For UAT without institutional email, set DEV_ADMIN_EMAILS in .env\n");
+    console.log("ℹ️  Bootstrap admin: set DEV_ADMIN_EMAILS then Google login");
+    console.log("ℹ️  Promote additional admins via Admin → Users (no @property.mfu.ac.th auto-admin)\n");
   } catch (err) {
     console.error("❌ Production seed failed:", err);
     process.exit(1);

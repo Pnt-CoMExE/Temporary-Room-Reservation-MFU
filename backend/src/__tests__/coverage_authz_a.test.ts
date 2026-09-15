@@ -35,7 +35,7 @@ beforeAll(() => {
     JWT_SECRET
   );
   adminToken = jwt.sign(
-    { userId: 1, email: "admin@property.mfu.ac.th", role: "admin", name: "Admin" },
+    { userId: 1, email: "admin@mfu.ac.th", role: "admin", name: "Admin" },
     JWT_SECRET
   );
 });

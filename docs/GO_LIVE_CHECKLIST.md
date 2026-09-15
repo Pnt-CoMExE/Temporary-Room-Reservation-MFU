@@ -37,5 +37,5 @@
 
 - [ ] ตั้ง cron backup (`backend/scripts/backup.sh`)
 - [ ] ตั้ง cron สถานะจอง (`cd backend && npm run jobs:booking-status` รายวัน)
-- [ ] มอบหมายผู้ดูแลระบบ @property.mfu.ac.th
+- [ ] มอบหมายผู้ดูแลระบบ (promote ในหน้า Admin Users หรือตั้ง `DEV_ADMIN_EMAILS` สำหรับ bootstrap)
 - [ ] แจ้งช่องทาง support ให้ผู้ใช้

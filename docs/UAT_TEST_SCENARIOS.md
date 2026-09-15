@@ -47,13 +47,13 @@
 
 | บทบาท | อีเมล | ประเภท |
 |--------|--------|--------|
-| **ผู้ดูแลระบบ (Admin)** | admin.demo@property.mfu.ac.th | admin |
+| **ผู้ดูแลระบบ (Admin)** | admin.demo@mfu.ac.th | admin (seed / promote ในระบบ) |
 | **บุคลากรภายใน (Staff 1)** | wichai.staff@mfu.ac.th | internal |
 | **บุคลากรภายใน (Staff 2)** | suda.staff@mfu.ac.th | internal |
 | **นักศึกษา** | piya.student@lamduan.mfu.ac.th | external |
 | **บุคคลภายนอก** | john.external@company.com | external |
 
-> **หมายเหตุ:** การ Login จริงใช้ Google OAuth ด้วยบัญชีของคุณ ระบบกำหนด Role จากโดเมนอีเมล: `@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal, อื่นๆ → external. หากไม่มีอีเมลหน่วยงาน ให้ตั้ง `DEV_ADMIN_EMAILS` ใน `.env`
+> **หมายเหตุ:** Login จริงใช้ Google OAuth — Role จากโดเมน: `@mfu.ac.th` → internal, `@lamduan.mfu.ac.th` และโดเมนอื่น → external. **Admin** ได้จากการที่ Admin คนก่อนหน้า promote ในหน้า Users (ไม่ใช้ `@property.mfu.ac.th`). Bootstrap/UAT ตั้ง `DEV_ADMIN_EMAILS` ใน `.env`
 
 ## 📌 รหัสส่วนลดทดสอบ
 
@@ -72,7 +72,8 @@
 | # | Test Case | ขั้นตอนทดสอบ | ผลลัพธ์ที่คาดหวัง | สถานะ |
 |---|-----------|-------------|------------------|-------|
 | U-01 | เข้าสู่ระบบด้วย Google OAuth (@mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = internal, redirect ไปหน้า /home | ⬜ |
-| U-02 | เข้าสู่ระบบด้วย Google OAuth (@property.mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @property.mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = admin, redirect ไปหน้า /admin/dashboard | ⬜ |
+| U-02 | เข้าสู่ระบบด้วย Google OAuth (@lamduan.mfu.ac.th) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @lamduan.mfu.ac.th | ✅ เข้าสู่ระบบสำเร็จ, Role = external, redirect ไปหน้า /home | ⬜ |
+| U-02b | Admin promote ผู้ใช้เป็น admin | 1. Login เป็น Admin → 2. Users → 3. ตั้ง Role เป็น admin ให้เมลที่ต้องการ | ✅ ผู้ใช้นั้น login แล้วได้ Role = admin | ⬜ |
 | U-03 | เข้าสู่ระบบด้วย Google OAuth (โดเมนอื่น) | 1. เปิดหน้าหลัก → 2. กดปุ่ม "Sign in with Google" → 3. เลือกบัญชี @gmail.com | ✅ เข้าสู่ระบบสำเร็จ, Role = external, redirect ไปหน้า /home | ⬜ |
 | U-04 | ออกจากระบบ | 1. กดเมนู Navbar → 2. กดปุ่ม "ออกจากระบบ" → 3. ยืนยันใน SweetAlert | ✅ Redirect ไปหน้า Login, ลบ localStorage + cookie ผ่าน `POST /api/auth/logout` | ⬜ |
 | U-05 | เข้าหน้าที่ต้อง login โดยไม่ login | 1. เปิด URL /home โดยตรง (ไม่ได้ login) | ✅ Redirect ไปหน้า Login | ⬜ |

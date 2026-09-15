@@ -185,15 +185,15 @@ cd frontend && npm run build
 
 | บทบาท | อีเมล | สิทธิ์ในระบบ |
 |---|---|---|
-| **ผู้ดูแลระบบ (Admin)** | `admin.demo@property.mfu.ac.th` | เข้าถึง Admin Dashboard & จัดการคำขอ |
+| **ผู้ดูแลระบบ (Admin)** | `admin.demo@mfu.ac.th` (seed) / promote ในระบบ | เข้าถึง Admin Dashboard & จัดการคำขอ |
 | **บุคลากรภายใน (Staff)** | `wichai.staff@mfu.ac.th` | จองพื้นที่ในอัตราบุคลากรภายใน |
-| **นักศึกษา (Student)** | `piya.student@lamduan.mfu.ac.th` | จองพื้นที่ในอัตรานักศึกษา (external ในระบบจริง) |
+| **นักศึกษา (Student)** | `piya.student@lamduan.mfu.ac.th` | จองพื้นที่ในอัตราภายนอก (external) |
 | **บุคคลภายนอก (External)** | `john.external@company.com` | จองพื้นที่ในอัตราบุคคลภายนอก |
 
 **การกำหนด Role จากอีเมลจริง:**
-- `@property.mfu.ac.th` → Admin (ส่วนทรัพย์สิน)
-- `@mfu.ac.th` → Internal (บุคลากรภายใน)
-- อื่นๆ → External
+- `@mfu.ac.th` (โดเมนตรงๆ) → Internal (บุคลากร)
+- `@lamduan.mfu.ac.th` และโดเมนอื่น → External
+- Admin → Admin คนก่อนหน้า promote ในหน้า Users (bootstrap/UAT: `DEV_ADMIN_EMAILS`)
 
 **สำหรับ UAT โดยไม่มีอีเมลหน่วยงาน:** ตั้ง `DEV_ADMIN_EMAILS=your@gmail.com` ใน `backend/.env`
 

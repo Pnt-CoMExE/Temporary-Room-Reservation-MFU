@@ -40,10 +40,12 @@ import {
 import {
   getAwaitingReviewLabel,
   getBookingStatusBadgeClass,
+  getBookingStatusIcon,
   getBookingStatusLabel,
   getReviewedBadgeClass,
   getReviewedLabel,
   isBookingStatus,
+  canLeaveReview,
 } from "@/utils/bookingStatus";
 
 const { t, locale } = useI18n();
@@ -708,12 +710,12 @@ const formatDate = (dateString: string) =>
                 <div class="flex items-center gap-2 flex-wrap justify-end">
                   <span
                     :class="getStatusClass(booking.status)"
-                    class="px-4 py-1.5 rounded-xl text-xs font-bold border shadow-sm"
-                    >{{ getStatusText(booking.status) }}</span
+                    class="px-4 py-1.5 rounded-xl text-xs font-bold border shadow-sm inline-flex items-center gap-1.5"
+                    ><font-awesome-icon :icon="getBookingStatusIcon(booking.status)" class="text-[11px]" />{{ getStatusText(booking.status) }}</span
                   >
                   <span
                     v-if="
-                      isBookingStatus(booking.status, 'approved_paid') &&
+                      canLeaveReview(booking.status) &&
                       booking.hasFeedback
                     "
                     :class="getReviewedBadgeClass()"
@@ -828,7 +830,7 @@ const formatDate = (dateString: string) =>
 
                   <button
                     v-if="
-                      isBookingStatus(booking.status, 'approved_paid') && !booking.hasFeedback
+                      canLeaveReview(booking.status) && !booking.hasFeedback
                     "
                     @click="giveFeedback(booking)"
                     class="bg-violet-50 text-violet-700 border border-violet-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-violet-100 transition-all flex items-center gap-2 cursor-pointer"
@@ -838,7 +840,7 @@ const formatDate = (dateString: string) =>
 
                   <div
                     v-if="
-                      isBookingStatus(booking.status, 'approved_paid') && booking.hasFeedback
+                      canLeaveReview(booking.status) && booking.hasFeedback
                     "
                     :class="getReviewedBadgeClass()"
                     class="px-4 py-1.5 rounded-xl font-bold text-[10px] flex items-center gap-1.5 mt-1 border"

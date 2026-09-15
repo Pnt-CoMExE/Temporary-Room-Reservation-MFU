@@ -7,6 +7,7 @@ import {
   faAngleRight,
   faArrowLeft,
   faArrowRight,
+  faBan,
   faBars,
   faBell,
   faBuilding,
@@ -99,6 +100,7 @@ export function registerFontAwesome(app: App) {
     /* solid */
     faArrowLeft,
     faArrowRight,
+    faBan,
     faBars,
     faBell,
     faBuilding,

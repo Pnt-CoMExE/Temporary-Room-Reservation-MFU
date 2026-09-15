@@ -159,7 +159,7 @@ const fetchRoomData = async () => {
     room.value = {
       ...r,
       location: r.type,
-      image: resolveRoomImage(r.image_url),
+      image: resolveRoomImage(r.image_url, r.id ?? r.name),
       priceHalfDayInternal: parseFloat(r.price_half_day_internal) || 0,
       priceFullDayInternal: parseFloat(r.price_full_day_internal) || 0,
       priceHalfDayCoop: parseFloat(r.price_half_day_co_organizer) || 0,

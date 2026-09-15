@@ -117,10 +117,11 @@ data/        → ข้อมูลอ้างอิง (ห้ามลบ)
 ### ตัวอย่าง Role Policy
 
 ```text
-@property.mfu.ac.th  → admin
-@mfu.ac.th           → internal
-อื่นๆ                → external
-UAT override         → DEV_ADMIN_EMAILS ใน .env
+@mfu.ac.th (โดเมนตรงๆ)     → internal (บุคลากร)
+@lamduan.mfu.ac.th / อื่นๆ → external
+admin                       → เฉพาะที่ Admin promote ในระบบ (เก็บใน DB)
+UAT bootstrap               → DEV_ADMIN_EMAILS / DEV_INTERNAL_EMAILS ใน .env
+(ไม่ใช้ @property.mfu.ac.th เป็น admin อัตโนมัติ)
 ```
 
 ---

@@ -90,7 +90,9 @@ import {
 
 const { locale } = useI18n();
 
-const displayRoomImage = computed(() => resolveRoomImage(room.value?.image_url));
+const displayRoomImage = computed(() =>
+  resolveRoomImage(room.value?.image_url, room.value?.id ?? room.value?.name)
+);
 
 const displayRoomName = computed(() => translateRoomName(room.value?.name, locale.value));
 const displayRoomType = computed(() => translateRoomType(room.value?.type, locale.value));

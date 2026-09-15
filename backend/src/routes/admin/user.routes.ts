@@ -76,16 +76,18 @@ router.put("/:id/active", verifyToken, verifyAdmin, async (req: any, res: Respon
   }
 });
 
-// PUT /api/admin/users/:id/role — limited: promote/demote admin only
+// PUT /api/admin/users/:id/role — promote to admin or demote to domain-based role
 router.put("/:id/role", verifyToken, verifyAdmin, async (req: any, res: Response) => {
   const { id } = req.params;
   const { userType } = req.body;
-  // Recording 3: role change is secondary — only admin promote/demote via UI
-  const validRoles = ["admin", "internal"];
+  const validRoles = ["admin", "internal", "external"];
   if (!validRoles.includes(userType)) {
     return res.status(400).json({
-      message: "อนุญาตเฉพาะการตั้งเป็น admin หรือคืนเป็น internal",
+      message: "อนุญาตเฉพาะ admin / internal / external",
     });
+  }
+  if (Number(id) === Number(req.user?.userId) && userType !== "admin") {
+    return res.status(400).json({ message: "ไม่สามารถถอดสิทธิ์ Admin ของตนเองได้" });
   }
   try {
     const existing = await query("SELECT id, email, user_type FROM users WHERE id = $1", [id]);

@@ -122,9 +122,15 @@ const toggleActive = async (user: UserItem) => {
   }
 };
 
-/** Limited role change: promote to admin or demote admin → internal */
+/** Promote → admin; demote → internal (@mfu.ac.th) หรือ external (โดเมนอื่น) */
+const baseRoleForEmail = (email: string): "internal" | "external" => {
+  const domain = email.trim().toLowerCase().split("@").pop() || "";
+  return domain === "mfu.ac.th" ? "internal" : "external";
+};
+
 const setAdminRole = async (user: UserItem) => {
-  const nextRole = user.user_type === "admin" ? "internal" : "admin";
+  const nextRole =
+    user.user_type === "admin" ? baseRoleForEmail(user.email) : "admin";
   const { isConfirmed } = await Swal.fire({
     title: nextRole === "admin" ? "ตั้งเป็น Admin?" : "ถอดสิทธิ์ Admin?",
     text: `${user.email} → ${nextRole}`,
@@ -330,7 +336,6 @@ const setAdminRole = async (user: UserItem) => {
                     {{ user.is_active ? "ปิดใช้งาน" : "เปิดใช้งาน" }}
                   </button>
                   <button
-                    v-if="user.user_type === 'admin' || user.user_type === 'internal'"
                     @click="setAdminRole(user)"
                     class="px-3 py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
                   >

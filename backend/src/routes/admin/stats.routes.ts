@@ -15,27 +15,40 @@ function parseDateParam(value: unknown): string | null {
   return d;
 }
 
-// GET /api/admin/stats — dashboard statistics (optional ?from=&to= YYYY-MM-DD)
+// GET /api/admin/stats — dashboard statistics
+// ?from=&to= YYYY-MM-DD | ?scope=all (all-time, no date filter)
 router.get("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
   try {
     const from = parseDateParam(req.query.from);
     const to = parseDateParam(req.query.to);
-    const hasRange = Boolean(from && to);
-    // Default to current calendar month when no range — "ข้อมูลล่าสุด"
-    const effectiveFrom = hasRange
-      ? from
-      : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
-          .toISOString()
-          .slice(0, 10);
-    const effectiveTo = hasRange
-      ? to
-      : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
-          .toISOString()
-          .slice(0, 10);
+    const scopeAll =
+      String(req.query.scope || "").toLowerCase() === "all" ||
+      req.query.all === "1" ||
+      req.query.all === "true";
+    const hasRange = Boolean(from && to) && !scopeAll;
 
-    const dateFilterBookings = `AND booking_date::date BETWEEN $1::date AND $2::date`;
-    const dateFilterCreated = `AND created_at::date BETWEEN $1::date AND $2::date`;
-    const params = [effectiveFrom, effectiveTo];
+    const effectiveFrom = scopeAll
+      ? null
+      : hasRange
+        ? from
+        : new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+            .toISOString()
+            .slice(0, 10);
+    const effectiveTo = scopeAll
+      ? null
+      : hasRange
+        ? to
+        : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+            .toISOString()
+            .slice(0, 10);
+
+    const dateFilterBookings = scopeAll
+      ? ""
+      : `AND booking_date::date BETWEEN $1::date AND $2::date`;
+    const dateFilterCreated = scopeAll
+      ? ""
+      : `AND created_at::date BETWEEN $1::date AND $2::date`;
+    const params = scopeAll ? [] : [effectiveFrom, effectiveTo];
 
     const pendingCount = await query(
       `SELECT COUNT(*) FROM bookings WHERE status = 'pending' ${dateFilterBookings}`,
@@ -57,9 +70,8 @@ router.get("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
       params
     );
 
-    // Keep approvedToday for backward compat when no range
     let approvedToday = 0;
-    if (!hasRange) {
+    if (!hasRange && !scopeAll) {
       const todayRes = await query(
         `SELECT COUNT(*) FROM bookings
          WHERE status LIKE 'approved%' AND DATE(COALESCE(approved_at, created_at)) = CURRENT_DATE`
@@ -73,14 +85,15 @@ router.get("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
       pendingCount: parseInt(pendingCount.rows[0].count as string, 10),
       approvedCount: parseInt(approvedCount.rows[0].count as string, 10),
       paidCount: parseInt(paidCount.rows[0].count as string, 10),
-      approvedToday: hasRange
+      approvedToday: hasRange || scopeAll
         ? parseInt(approvedCount.rows[0].count as string, 10)
         : approvedToday,
       currentMonthRevenue: rangeRevenue,
       rangeRevenue,
       from: effectiveFrom,
       to: effectiveTo,
-      filtered: hasRange,
+      filtered: hasRange || scopeAll,
+      scope: scopeAll ? "all" : hasRange ? "range" : "latest",
     });
   } catch (err) {
     console.error("[admin/stats] Error:", err);

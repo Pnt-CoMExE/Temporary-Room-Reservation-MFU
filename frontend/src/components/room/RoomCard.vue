@@ -32,7 +32,9 @@ const { locale } = useI18n();
 const displayType = computed(() => translateRoomType(props.room.type, locale.value));
 const displayLocation = computed(() => translateLocation(props.room.location, locale.value));
 const displayName = computed(() => translateRoomName(props.room.name, locale.value));
-const displayImage = computed(() => resolveRoomImage(props.room.image));
+const displayImage = computed(() =>
+  resolveRoomImage(props.room.image, props.room.id ?? props.room.name)
+);
 
 const goToRoom = () => {
   router.push(`/rooms/${props.room.id}`);

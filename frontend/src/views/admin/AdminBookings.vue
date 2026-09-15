@@ -6,6 +6,7 @@ import { getStoredUserId } from "@/utils/auth";
 import {
   getAwaitingReviewLabel,
   getBookingStatusBadgeClass,
+  getBookingStatusIcon,
   getBookingStatusLabel,
   getReviewedBadgeClass,
   getReviewedLabel,
@@ -585,6 +586,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
 
 const getStatusText = (status: string) => getBookingStatusLabel(status, "th");
 const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
+const getStatusIcon = (status: string) => getBookingStatusIcon(status);
 </script>
 
 <template>
@@ -776,6 +778,7 @@ const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
                     :class="getStatusClass(booking.status)"
                     class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-90 transition-all cursor-pointer"
                   >
+                    <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
                     {{ getStatusText(booking.status) }}
                     <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
                   </button>
@@ -785,6 +788,7 @@ const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
                     :class="getStatusClass(booking.status)"
                     class="min-w-[7.5rem] px-4 py-2.5 rounded-xl text-sm font-black border-2 shadow-sm flex items-center justify-center gap-2 hover:shadow-md hover:opacity-95 transition-all cursor-pointer whitespace-nowrap"
                   >
+                    <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
                     {{ getStatusText(booking.status) }}
                     <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
                   </button>
@@ -794,10 +798,11 @@ const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
                       :class="getStatusClass(booking.status)"
                       class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm inline-flex items-center gap-2"
                     >
+                      <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
                       {{ getStatusText(booking.status) }}
                     </span>
 
-                    <template v-if="isBookingStatus(booking.status, 'approved_paid')">
+                    <template v-if="isBookingStatus(booking.status, 'approved_paid') || isBookingStatus(booking.status, 'completed')">
                       <span
                         v-if="booking.hasFeedback"
                         :class="getReviewedBadgeClass()"

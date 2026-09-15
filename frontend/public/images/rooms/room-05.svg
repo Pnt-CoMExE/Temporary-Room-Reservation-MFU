@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9a3412"/><stop offset="100%" stop-color="#ea580c"/></linearGradient></defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <path d="M0,360 Q200,280 400,340 T800,300 L800,500 L0,500 Z" fill="#fff" opacity=".12"/>
+  <rect x="90" y="90" width="200" height="200" rx="24" fill="#fff" opacity=".15"/>
+  <text x="40" y="460" fill="#fff" font-family="Arial,sans-serif" font-size="28" font-weight="700" opacity=".9">Classroom</text>
+</svg>

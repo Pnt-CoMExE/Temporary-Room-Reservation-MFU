@@ -1,0 +1,7 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="800" height="500" viewBox="0 0 800 500">
+  <defs><linearGradient id="g" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#581c87"/><stop offset="100%" stop-color="#a855f7"/></linearGradient></defs>
+  <rect width="800" height="500" fill="url(#g)"/>
+  <ellipse cx="400" cy="250" rx="260" ry="140" fill="#fff" opacity=".12"/>
+  <rect x="220" y="180" width="360" height="140" rx="8" fill="#fff" opacity=".1"/>
+  <text x="40" y="460" fill="#fff" font-family="Arial,sans-serif" font-size="28" font-weight="700" opacity=".9">Auditorium</text>
+</svg>

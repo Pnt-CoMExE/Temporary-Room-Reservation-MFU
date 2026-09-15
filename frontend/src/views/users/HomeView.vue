@@ -88,7 +88,7 @@ onMounted(async () => {
         type: room.type,
         capacity: room.capacity,
         location: room.type, // ใช้ type เป็น location ชั่วคราว หรือเพิ่ม location ใน DB
-        image: resolveRoomImage(room.image_url),
+        image: resolveRoomImage(room.image_url, room.id ?? room.name),
         isAvailable: room.is_active,
         priceHalfDayInternal: parseFloat(room.price_half_day_internal) || 0
       }));

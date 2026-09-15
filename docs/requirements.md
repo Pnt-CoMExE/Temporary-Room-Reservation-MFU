@@ -15,7 +15,7 @@ The system categorizes users into distinct authorization levels with different p
 ## 3. User Functional Scope
 - **Availability Search & Advanced Booking:** Check real-time room availability and submit advance reservation requests.
 - **Service Customization (Add-ons):** Select supplementary services or equipment (e.g., tables, chairs) with automated cost calculation.
-- **Secure Authentication:** Log in securely via Google OAuth. Roles are automatically assigned based on email domains: `@property.mfu.ac.th` → Admin, `@mfu.ac.th` → Internal, others → External. For UAT without institutional email, set `DEV_ADMIN_EMAILS` in `.env`.
+- **Secure Authentication:** Google OAuth. Roles: exact `@mfu.ac.th` → Internal; `@lamduan.mfu.ac.th` and other domains → External; Admin only via promote in Admin Users (or `DEV_ADMIN_EMAILS` for UAT bootstrap).
 - **Secure Payment Integration:** Process instant online payments securely via a third-party gateway using dynamic PromptPay QR Codes (Opn Payments).
 - **Promotions and Incentives:** Apply promotional discounts or special offers during booking.
 - **Reservation Management & History:** Access booking logs, track statuses, and cancel existing bookings.

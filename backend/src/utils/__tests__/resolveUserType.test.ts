@@ -14,11 +14,11 @@ describe("resolveUserType", () => {
     process.env = originalEnv;
   });
 
-  it("กำหนด admin สำหรับ @property.mfu.ac.th", () => {
-    expect(resolveUserType("staff@property.mfu.ac.th")).toBe("admin");
+  it("ไม่ใช้ @property.mfu.ac.th เป็น admin อัตโนมัติ", () => {
+    expect(resolveUserType("staff@property.mfu.ac.th")).toBe("external");
   });
 
-  it("กำหนด internal สำหรับ @mfu.ac.th", () => {
+  it("กำหนด internal สำหรับโดเมนตรงๆ @mfu.ac.th", () => {
     expect(resolveUserType("wichai.staff@mfu.ac.th")).toBe("internal");
   });
 
@@ -26,22 +26,29 @@ describe("resolveUserType", () => {
     expect(resolveUserType("john@company.com")).toBe("external");
   });
 
-  it("คงค่า existingType สำหรับอีเมลภายนอกที่ถูก promote แล้ว", () => {
+  it("คงค่า admin ที่ถูก promote แล้ว (ทุกโดเมน)", () => {
     expect(resolveUserType("john@company.com", "admin")).toBe("admin");
+    expect(resolveUserType("staff@mfu.ac.th", "admin")).toBe("admin");
+    expect(resolveUserType("piya.student@lamduan.mfu.ac.th", "admin")).toBe("admin");
   });
 
-  it("รองรับ DEV_ADMIN_EMAILS สำหรับ UAT", () => {
+  it("บุคลากร @mfu.ac.th ที่ยังไม่ใช่ admin → internal (ไม่ทับด้วย existing อื่น)", () => {
+    expect(resolveUserType("staff@mfu.ac.th", "external")).toBe("internal");
+  });
+
+  it("รองรับ DEV_ADMIN_EMAILS สำหรับ UAT / bootstrap", () => {
     process.env.DEV_ADMIN_EMAILS = "student@gmail.com, tester@outlook.com";
     expect(resolveUserType("student@gmail.com")).toBe("admin");
     expect(resolveUserType("tester@outlook.com")).toBe("admin");
   });
 
-  it("ไม่ใช้ @lamduan.mfu.ac.th เป็น admin อีกต่อไป", () => {
+  it("@lamduan.mfu.ac.th เป็นนักศึกษา → external", () => {
     expect(resolveUserType("piya.student@lamduan.mfu.ac.th")).toBe("external");
+    expect(resolveUserType("6631501071@lamduan.mfu.ac.th")).toBe("external");
   });
 
   it("trim + lowercase อีเมลก่อนเทียบโดเมน", () => {
-    expect(resolveUserType("  Staff@Property.MFU.ac.th  ")).toBe("admin");
+    expect(resolveUserType("  Wichai.Staff@MFU.ac.th  ")).toBe("internal");
   });
 
   it("DEV_ADMIN_EMAILS ว่างหรือมีช่องว่างเกิน → ไม่ promote", () => {
@@ -63,5 +70,9 @@ describe("resolveUserType", () => {
     process.env.DEV_ADMIN_EMAILS = "both@gmail.com";
     process.env.DEV_INTERNAL_EMAILS = "both@gmail.com";
     expect(resolveUserType("both@gmail.com")).toBe("admin");
+  });
+
+  it("คง internal ที่ถูกตั้งไว้สำหรับเมลนอก @mfu.ac.th", () => {
+    expect(resolveUserType("guest@gmail.com", "internal")).toBe("internal");
   });
 });
