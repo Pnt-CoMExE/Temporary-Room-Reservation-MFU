@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-15 — Fix room Excel import 404]
+
+- Frontend ยิงผิด path `/api/admin/import-rooms` → แก้เป็น `/api/admin/rooms/import`
+- เพิ่ม alias เดิมใน `app.ts` กัน client เก่า
+
 ## [2026-09-15 — Close Recording 3 gaps]
 
 - รูปห้อง: SVG 6 แบบ ตาม room id (`resolveRoomImage`)

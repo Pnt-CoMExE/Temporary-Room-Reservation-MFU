@@ -134,7 +134,7 @@ router.post(
   }
 );
 
-// POST /api/admin/import-rooms — import rooms from Excel
+// POST /api/admin/rooms/import — import rooms from Excel
 router.post(
   "/import",
   verifyToken,
@@ -151,9 +151,11 @@ router.post(
         message: `นำเข้าข้อมูลสำเร็จทั้งหมด ${count} รายการ (จากทุก Sheet)`,
         count,
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("[admin/rooms/import] Error:", err);
-      res.status(500).json({ message: "เกิดข้อผิดพลาดในการประมวลผลไฟล์" });
+      res.status(500).json({
+        message: err?.message || "เกิดข้อผิดพลาดในการประมวลผลไฟล์",
+      });
     } finally {
       if (req.file && fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);

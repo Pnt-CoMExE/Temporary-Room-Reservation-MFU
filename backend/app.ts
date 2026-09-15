@@ -234,6 +234,11 @@ app.get("/api/admin/revenue-by-month", verifyToken, verifyAdmin, async (req: any
 });
 app.use("/api/admin/bookings", adminBookingRoutes);
 app.use("/api/admin/rooms", adminRoomRoutes);
+// Legacy alias — older Admin UI posted to /api/admin/import-rooms
+app.use("/api/admin/import-rooms", (req, res, next) => {
+  req.url = "/import" + (req.url === "/" ? "" : req.url);
+  return adminRoomRoutes(req, res, next);
+});
 app.use("/api/admin/promocodes", adminPromoRoutes);
 app.use("/api/admin/logs", adminLogRoutes);
 app.use("/api/admin/users", adminUserRoutes);

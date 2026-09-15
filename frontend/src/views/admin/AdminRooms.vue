@@ -80,7 +80,7 @@ const handleAddNewRoom = () => {
       formData.append("file", file);
 
       try {
-        const response = await api.post("/api/admin/import-rooms", formData, {
+        const response = await api.post("/api/admin/rooms/import", formData, {
           headers: { "Content-Type": "multipart/form-data" }
         });
         return response.data;
