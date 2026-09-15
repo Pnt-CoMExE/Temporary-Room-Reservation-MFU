@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-15 — Fix CI backend test failures]
+
+- `coverage_authz_a`: `mockReset` ใน beforeEach กัน once-queue ค้างจากเทสก่อนหน้า
+- เพิ่ม `scripts/seed-ci.sql` + รันใน GitHub Actions กัน FK `bookings_user_id_fkey` (500)
+
 ## [2026-09-15 — Persist navbar notification read state]
 
 - แจ้งเตือน Navbar เป็น mock ใน memory → กดอ่านแล้วรีเฟรชกลับมา

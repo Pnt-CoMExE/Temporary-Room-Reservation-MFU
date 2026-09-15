@@ -41,7 +41,10 @@ beforeAll(() => {
 });
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  // mockReset ล้าง once-queue ด้วย — กันเทสก่อนหน้าทิ้ง mockResolvedValueOnce ค้าง
+  // (เช่น mock/simulate คืน 400 ก่อนแตะ DB) แล้วเทสถัดไปได้ rows ปลอม → 201 แทน 403
+  mockedQuery.mockReset();
+  mockedQuery.mockResolvedValue({ rows: [] });
 });
 
 const ownedBooking = {

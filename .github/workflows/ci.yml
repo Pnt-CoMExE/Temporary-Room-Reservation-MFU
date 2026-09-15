@@ -66,6 +66,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq postgresql-client
           PGPASSWORD=postgres psql -h localhost -U postgres -d mfu_booking_test -f scripts/init-schema.sql
+          PGPASSWORD=postgres psql -h localhost -U postgres -d mfu_booking_test -f scripts/seed-ci.sql
 
       - name: TypeScript type-check
         run: npm run typecheck
