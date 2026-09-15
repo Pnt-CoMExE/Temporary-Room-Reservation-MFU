@@ -30,7 +30,11 @@ interface BookingItem {
   hasDoc?: boolean;
   tempDocFile?: File;
   memoDocumentUrl?: string;
+  approvalDocumentUrl?: string;
 }
+
+const hasDownloadableDoc = (b: BookingItem) =>
+  !!(b.memoDocumentUrl || b.approvalDocumentUrl || b.hasDoc);
 
 const getAdminId = (): number | null => getStoredUserId();
 
@@ -103,7 +107,7 @@ const filterEndDate = ref("");
 // เลือกเฉพาะรายการที่ต้องการ
 const selectedIds = ref<Set<string>>(new Set());
 const selectableCount = computed(() =>
-  filteredBookings.value.filter(b => b.memoDocumentUrl || b.hasDoc).length
+  filteredBookings.value.filter(hasDownloadableDoc).length
 );
 const selectedCount = computed(() => selectedIds.value.size);
 const hasSelection = computed(() => selectedIds.value.size > 0);
@@ -127,7 +131,7 @@ const toggleSelectAll = () => {
   } else {
     const ids = new Set<string>();
     filteredBookings.value
-      .filter(b => b.memoDocumentUrl || b.hasDoc)
+      .filter(hasDownloadableDoc)
       .forEach(b => ids.add(b.id));
     selectedIds.value = ids;
   }
@@ -720,7 +724,7 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                   :checked="selectedIds.has(booking.id)"
                   @change="toggleSelect(booking.id)"
                   class="w-4 h-4 rounded accent-[#ba0b2f] cursor-pointer"
-                  :disabled="!(booking.memoDocumentUrl || booking.hasDoc)"
+                  :disabled="!hasDownloadableDoc(booking)"
                 />
               </td>
               <td class="px-6 py-6 font-bold text-gray-900 text-sm">

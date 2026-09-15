@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-09-15 — Fix admin booking ZIP checkbox]
+
+- Map `memoDocumentUrl` / `approvalDocumentUrl` / `hasDoc` ใน AdminDashboardView
+- Checkbox + ดาวน์โหลด ZIP เปิดได้เมื่อมีเอกสารแนบ
+
 ## [2026-09-15 — Fix room Excel import 404]
 
 - Frontend ยิงผิด path `/api/admin/import-rooms` → แก้เป็น `/api/admin/rooms/import`

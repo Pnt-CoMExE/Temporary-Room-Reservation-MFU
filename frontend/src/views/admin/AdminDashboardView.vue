@@ -51,6 +51,9 @@ interface BookingInfo {
   feedbackData?: { rating: number; comment: string };
   actionBy?: string;
   organization_type?: string;
+  memoDocumentUrl?: string;
+  approvalDocumentUrl?: string;
+  hasDoc?: boolean;
 }
 
 interface RevenueMonth {
@@ -172,6 +175,9 @@ const fetchAdminData = async () => {
       hasFeedback: b.feedback_rating != null,
       feedbackData: { rating: b.feedback_rating, comment: b.feedback_comment },
       actionBy: (b.admin_name || "").trim() || undefined,
+      memoDocumentUrl: b.memo_document_url || undefined,
+      approvalDocumentUrl: b.approval_document_url || undefined,
+      hasDoc: !!(b.approval_document_url || b.memo_document_url),
     }));
 
     if (!range.scopeAll && range.from && range.to) {
