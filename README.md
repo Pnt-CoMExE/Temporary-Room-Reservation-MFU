@@ -46,17 +46,17 @@ MFU-Space-Reservation/
 │   ├── Dockerfile                    # Production Nginx Container
 │   └── package.json
 │
-├── docs/                             # เอกสารข้อกำหนดและการออกแบบระบบ
-│   ├── planning.md                   # แผนงานโครงการ 8 Sprints (Agile UAT-First Strategy)
-│   ├── requirements.md               # ข้อกำหนดระบบและบทบาทผู้ใช้
-│   ├── schema.md                     # Database Schema Design & Indexes
-│   ├── features.md                   # รายการฟีเจอร์และฟังก์ชันการทำงาน
-│   ├── payment_gateway.md            # คู่มือระบบ Modular Payment Gateway
-│   ├── UAT_TEST_SCENARIOS.md         # เอกสารสถานการณ์ทดสอบ UAT 65 Test Cases
-│   ├── proposals/                    # เอกสารข้อเสนอและรายงานโครงการ (.docx / .pdf)
+├── docs/                             # เอกสาร — ดู docs/README.md
+│   ├── README.md                     # แผนที่เอกสาร (เริ่มที่นี่)
+│   ├── product/                      # requirements, features, planning, schema
+│   ├── payment/STRIPE.md             # Stripe (gateway ที่ทีมเลือก)
+│   ├── testing/                      # Test cases, UAT, E2E, evidence
+│   ├── meetings/                     # Recording 3–4, demo / presentation
+│   ├── ops/                          # CITS, go-live, backup, security
+│   ├── proposals/                    # ข้อเสนอ / รายงาน (.docx / .pdf)
 │   ├── presentations/                # สคริปต์นำเสนอ (.docx / .pdf)
 │   ├── diagrams/                     # ER Diagram & Data Dictionary
-│   └── drafts/                       # เอกสารร่างประกอบการพัฒนา
+│   └── drafts/                       # เอกสารร่าง
 │
 ├── data/                             # ชุดข้อมูลอ้างอิง
 │   └── room-pricing-rates.xlsx       # ตารางอัตราค่าบริการพื้นที่ มฟล.
@@ -77,7 +77,7 @@ MFU-Space-Reservation/
 | **Frontend** | Vue 3 (Composition API), Vite, TypeScript, TailwindCSS, FontAwesome, Chart.js, SweetAlert2, Vue-i18n |
 | **Backend** | Node.js, Express 5, TypeScript, PostgreSQL (pg pool), Redis (ioredis), Multer, PDFKit, Archiver |
 | **Authentication** | Google OAuth 2.0 (Passport.js), JWT, HttpOnly Cookies |
-| **Payment Engine** | Modular Gateway (PromptPay EMVCo, Opn/Omise, SCB, KBank, KTB, Mock Sandbox) |
+| **Payment Engine** | **Stripe** (demo/test) + Mock Sandbox UAT · PromptPay สำรองในโค้ด |
 | **Testing** | Vitest, Supertest, Playwright E2E, k6 Load Testing |
 | **DevOps & Deploy** | Docker, Docker Compose, Nginx (Reverse Proxy & SSL), Let's Encrypt Certbot, GitHub Actions |
 
@@ -160,7 +160,7 @@ npm run seed:demo
 
 - **Frontend (Docker):** [http://localhost:8080](http://localhost:8080)
 - **API:** [http://localhost:8080/api/rooms](http://localhost:8080/api/rooms)
-- **UAT Checklist:** [docs/UAT_DOCKER_CHECKLIST.md](docs/UAT_DOCKER_CHECKLIST.md)
+- **UAT Checklist:** [docs/testing/UAT_DOCKER_CHECKLIST.md](docs/testing/UAT_DOCKER_CHECKLIST.md)
 
 ---
 
@@ -206,14 +206,16 @@ cd frontend && npm run build
 
 ## 📚 เอกสารประกอบ (Documentation)
 
-- [แผนการดำเนินงาน 8 Sprints (planning.md)](docs/planning.md)
-- [ข้อกำหนดระบบ (requirements.md)](docs/requirements.md)
-- [โครงสร้างฐานข้อมูล (schema.md)](docs/schema.md)
-- [สถาปัตยกรรม Payment Gateway (payment_gateway.md)](docs/payment_gateway.md)
-- [สถานการณ์ทดสอบ UAT 65 Test Cases (UAT_TEST_SCENARIOS.md)](docs/UAT_TEST_SCENARIOS.md)
-- [UAT Docker Checklist — E2E local (UAT_DOCKER_CHECKLIST.md)](docs/UAT_DOCKER_CHECKLIST.md)
-- [ผลทดสอบ UAT Docker รอบล่าสุด (UAT_DOCKER_ROUND_RESULTS.md)](docs/UAT_DOCKER_ROUND_RESULTS.md)
-- [CITS Runbook & Docker Deploy (CITS_RUNBOOK.md)](docs/CITS_RUNBOOK.md)
-- [Go-Live Checklist (GO_LIVE_CHECKLIST.md)](docs/GO_LIVE_CHECKLIST.md)
-- [Security Checklist (SECURITY_CHECKLIST.md)](docs/SECURITY_CHECKLIST.md)
-- [Demo Security — AuthN/AuthZ script (DEMO_SECURITY.md)](docs/DEMO_SECURITY.md)
+- [แผนที่เอกสารทั้งหมด](docs/README.md)
+- [แผนการดำเนินงาน 8 Sprints](docs/product/planning.md)
+- [ข้อกำหนดระบบ](docs/product/requirements.md)
+- [โครงสร้างฐานข้อมูล](docs/product/schema.md)
+- [Payment — Stripe](docs/payment/STRIPE.md)
+- [Test Case Tracker](docs/testing/TEST_CASE_TRACKER.md)
+- [Test Cases รายบุคคล](docs/testing/test-cases/)
+- [UAT Docker Checklist](docs/testing/UAT_DOCKER_CHECKLIST.md)
+- [CITS Runbook](docs/ops/CITS_RUNBOOK.md)
+- [Go-Live Checklist](docs/ops/GO_LIVE_CHECKLIST.md)
+- [Security Checklist](docs/ops/SECURITY_CHECKLIST.md)
+- [Demo Security](docs/meetings/DEMO_SECURITY.md)
+- [Recording 4 Action Plan](docs/meetings/RECORDING4_ACTION_PLAN.md)

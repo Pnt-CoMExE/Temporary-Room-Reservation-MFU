@@ -27,7 +27,7 @@ describe("Modular Payment Gateway System", () => {
 
     it("should list all registered payment providers with state", () => {
       const providers = paymentGateway.listAvailableProviders();
-      expect(providers.length).toBeGreaterThanOrEqual(6);
+      expect(providers.length).toBeGreaterThanOrEqual(7);
 
       const providerIds = providers.map((p) => p.id);
       expect(providerIds).toContain("promptpay_manual");
@@ -36,6 +36,7 @@ describe("Modular Payment Gateway System", () => {
       expect(providerIds).toContain("kbank");
       expect(providerIds).toContain("ktb");
       expect(providerIds).toContain("mock_sandbox");
+      expect(providerIds).toContain("stripe");
     });
   });
 
@@ -113,6 +114,40 @@ describe("Modular Payment Gateway System", () => {
       expect(webhookRes.success).toBe(true);
       expect(webhookRes.status).toBe("verified");
       expect(webhookRes.bookingNo).toBe("BK-MOCK-201");
+    });
+  });
+
+  describe("Stripe Adapter", () => {
+    it("should create demo checkout session when secret key is missing", async () => {
+      process.env.PAYMENT_PROVIDER = "stripe";
+      delete process.env.STRIPE_SECRET_KEY;
+
+      const { StripePaymentAdapter } = await import("../services/payment/stripe.adapter");
+      const adapter = new StripePaymentAdapter();
+      expect(adapter.isEnabled()).toBe(true);
+
+      const session = await adapter.createPaymentSession({
+        bookingId: 301,
+        bookingNo: "BK-STRIPE-301",
+        amount: 1200,
+      });
+
+      expect(session.success).toBe(true);
+      expect(session.providerId).toBe("stripe");
+      expect(session.transactionId).toMatch(/^stripe_demo_/);
+      expect(session.checkoutUrl).toContain("/api/payment/stripe/demo-checkout");
+
+      const webhookRes = await adapter.handleWebhook({
+        source: "stripe_demo",
+        simulateStatus: "success",
+        bookingId: 301,
+        bookingNo: "BK-STRIPE-301",
+        transactionId: session.transactionId,
+        amount: 1200,
+      });
+      expect(webhookRes.success).toBe(true);
+      expect(webhookRes.status).toBe("verified");
+      expect(webhookRes.transactionId).toBe(session.transactionId);
     });
   });
 });

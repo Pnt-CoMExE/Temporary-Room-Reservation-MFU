@@ -11,7 +11,7 @@
 
 เอกสารคู่:
 - Security ละเอียด: [`DEMO_SECURITY.md`](./DEMO_SECURITY.md)
-- แผนทดสอบแยกโมดูล: [`TESTING_PLAN.md`](./TESTING_PLAN.md)
+- แผนทดสอบแยกโมดูล: [`TESTING_PLAN.md`](../testing/TESTING_PLAN.md)
 
 ---
 
@@ -206,7 +206,7 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 
 ## 5. ส่วนที่ 3 — แผน Testing (≈ 4–5 นาที) ★ ของใหม่จาก Recording 1
 
-เปิดไฟล์ [`TESTING_PLAN.md`](./TESTING_PLAN.md) บนจอ
+เปิดไฟล์ [`TESTING_PLAN.md`](../testing/TESTING_PLAN.md) บนจอ
 
 **สคริปต์**
 
@@ -265,7 +265,7 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 ## 9. ไฟล์ที่ควรเปิดไว้
 
 1. เอกสารนี้ — สคริปต์พูด  
-2. [`TESTING_PLAN.md`](./TESTING_PLAN.md) — แผนทดสอบแยกโมดูล  
+2. [`TESTING_PLAN.md`](../testing/TESTING_PLAN.md) — แผนทดสอบแยกโมดูล  
 3. [`DEMO_SECURITY.md`](./DEMO_SECURITY.md) — ไดอะแกรม Token  
 4. โค้ด: `auth.routes.ts`, `auth.ts`, `resolveUserType.ts`, `router/index.ts`  
 5. ระบบที่รันอยู่: `http://localhost:8080` (หรือ dev ports)

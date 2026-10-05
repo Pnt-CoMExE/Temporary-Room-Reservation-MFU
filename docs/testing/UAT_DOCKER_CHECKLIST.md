@@ -105,12 +105,12 @@ npm run seed:demo
 | Google Callback | `http://localhost:8080/api/auth/google/callback` | `https://<domain>/api/auth/google/callback` |
 | `DEV_ADMIN_EMAILS` | ใช้ได้สำหรับ UAT | ลบหรือเว้นว่าง |
 
-อ้างอิงเพิ่มเติม: [GO_LIVE_CHECKLIST.md](GO_LIVE_CHECKLIST.md), [CITS_RUNBOOK.md](CITS_RUNBOOK.md)
+อ้างอิงเพิ่มเติม: [GO_LIVE_CHECKLIST.md](../ops/GO_LIVE_CHECKLIST.md), [CITS_RUNBOOK.md](../ops/CITS_RUNBOOK.md)
 
 ---
 
 ## 7. เอกสารที่เกี่ยวข้อง
 
-- [UAT_TEST_SCENARIOS.md](UAT_TEST_SCENARIOS.md) — 65 test cases แยกตามโมดูล
+- [TEST_CASE_TRACKER.md](TEST_CASE_TRACKER.md) → ดู [TEST_CASE_TRACKER.md](TEST_CASE_TRACKER.md) (รวมแล้ว)
 - [UAT_DOCKER_ROUND_RESULTS.md](UAT_DOCKER_ROUND_RESULTS.md) — บันทึกผลรอบ Docker
 - [UAT_SIGNOFF.md](UAT_SIGNOFF.md) — แบบฟอร์มลงนามรับ UAT

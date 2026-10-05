@@ -166,4 +166,4 @@ sequenceDiagram
 | Ownership ชำระเงิน | `backend/src/routes/payment.routes.ts` |
 | UI guard | `frontend/src/router/index.ts` |
 | Tests AuthZ | `backend/src/__tests__/authz_idor.test.ts` |
-| Checklist ความปลอดภัย | `docs/SECURITY_CHECKLIST.md` |
+| Checklist ความปลอดภัย | `docs/ops/SECURITY_CHECKLIST.md` |

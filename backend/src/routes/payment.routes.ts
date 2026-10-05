@@ -87,6 +87,10 @@ router.post("/checkout", verifyToken, async (req: any, res: Response) => {
     const booking = await requireBookingOwner(req, res, Number(bookingId));
     if (!booking) return;
 
+    if (booking.status !== "approved_pending_payment") {
+      return res.status(400).json({ message: "การจองนี้ยังไม่พร้อมสำหรับการชำระเงิน" });
+    }
+
     const session = await paymentGateway.createPaymentSession({
       bookingId: booking.id,
       bookingNo: booking.booking_no,
@@ -103,31 +107,266 @@ router.post("/checkout", verifyToken, async (req: any, res: Response) => {
 });
 
 /**
+ * Apply verified payment callback → bookings + payments row (Transaction ID)
+ */
+async function applyVerifiedPayment(
+  result: {
+    bookingId?: number;
+    bookingNo?: string;
+    transactionId?: string;
+    amount?: number;
+  },
+  providerId: string
+) {
+  let booking: { id: number; booking_no: string; total_price: number } | null = null;
+
+  if (result.bookingId) {
+    const byId = await query(
+      "SELECT id, booking_no, total_price FROM bookings WHERE id = $1",
+      [result.bookingId]
+    );
+    booking = byId.rows[0] || null;
+  }
+  if (!booking && result.bookingNo) {
+    const byNo = await query(
+      "SELECT id, booking_no, total_price FROM bookings WHERE booking_no = $1",
+      [result.bookingNo]
+    );
+    booking = byNo.rows[0] || null;
+  }
+  if (!booking) return null;
+
+  await query(
+    `UPDATE bookings
+     SET payment_status = 'verified', status = 'approved_paid'
+     WHERE id = $1`,
+    [booking.id]
+  );
+
+  const txId = result.transactionId || `${providerId}_${Date.now()}`;
+  const amount = result.amount != null ? Number(result.amount) : Number(booking.total_price);
+
+  await query(
+    `INSERT INTO payments (booking_id, transaction_id, amount, payment_method, payment_gateway_ref, status, paid_at)
+     VALUES ($1, $2, $3, $4, $5, 'verified', NOW())
+     ON CONFLICT (transaction_id) DO UPDATE
+       SET status = 'verified', paid_at = COALESCE(payments.paid_at, NOW())`,
+    [booking.id, txId, amount, providerId, txId]
+  );
+
+  return {
+    bookingId: booking.id,
+    bookingNo: booking.booking_no,
+    transactionId: txId,
+    amount,
+  };
+}
+
+/**
  * POST /api/payment/webhook/:provider
- * Webhook handler for external payment gateways (Opn, SCB, KBank, KTB, Mock Sandbox)
+ * Webhook / callback handler (Opn, SCB, KBank, KTB, Mock, Stripe)
  */
 router.post("/webhook/:provider", async (req: any, res: Response) => {
   try {
     const providerId = req.params.provider;
     const result = await paymentGateway.handleWebhook(providerId, req.body, req.headers);
 
-    if (result.success && result.bookingNo && result.status === "verified") {
-      await query(
-        `UPDATE bookings
-         SET payment_status = 'verified', status = 'approved'
-         WHERE booking_no = $1`,
-        [result.bookingNo]
-      );
+    let applied = null;
+    if (
+      result.success &&
+      result.status === "verified" &&
+      (result.bookingNo || result.bookingId)
+    ) {
+      applied = await applyVerifiedPayment(result, providerId);
     }
 
     res.json({
       received: true,
       result,
+      applied,
     });
   } catch (err: any) {
     console.error(`[payment/webhook/${req.params.provider}] Error:`, err);
     res.status(500).json({ message: "Webhook processing error" });
   }
+});
+
+/**
+ * POST /api/payment/stripe/confirm
+ * After Stripe Checkout redirect — retrieve session by ID and mark paid.
+ * Needed on localhost (Stripe cloud webhook cannot reach your PC).
+ */
+router.post("/stripe/confirm", verifyToken, async (req: any, res: Response) => {
+  try {
+    const sessionId = String(req.body?.sessionId || req.body?.session_id || "").trim();
+    if (!sessionId.startsWith("cs_")) {
+      return res.status(400).json({ message: "กรุณาระบุ sessionId จาก Stripe Checkout" });
+    }
+
+    const secret = process.env.STRIPE_SECRET_KEY || "";
+    if (!secret.startsWith("sk_test_") && !secret.startsWith("sk_live_")) {
+      return res.status(400).json({
+        message: "ยังไม่ได้ตั้ง STRIPE_SECRET_KEY (sk_test_...)",
+      });
+    }
+
+    const stripeRes = await fetch(
+      `https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(sessionId)}`,
+      {
+        headers: { Authorization: `Bearer ${secret}` },
+      }
+    );
+    const session: any = await stripeRes.json();
+    if (!stripeRes.ok) {
+      return res.status(502).json({
+        message: session?.error?.message || "ดึง Checkout Session จาก Stripe ไม่สำเร็จ",
+        raw: session,
+      });
+    }
+
+    const paid =
+      session.payment_status === "paid" ||
+      session.status === "complete";
+    if (!paid) {
+      return res.status(400).json({
+        message: "ยังชำระไม่สำเร็จ",
+        paymentStatus: session.payment_status,
+        status: session.status,
+      });
+    }
+
+    const bookingId = session.metadata?.bookingId
+      ? Number(session.metadata.bookingId)
+      : undefined;
+    const bookingNo =
+      session.client_reference_id || session.metadata?.bookingNo || undefined;
+
+    if (!bookingId && !bookingNo) {
+      return res.status(400).json({ message: "Session ไม่มี metadata การจอง" });
+    }
+
+    // Ownership: user may only confirm their own booking
+    const lookup = bookingId
+      ? await query("SELECT id, booking_no, user_id, total_price, status FROM bookings WHERE id = $1", [
+          bookingId,
+        ])
+      : await query(
+          "SELECT id, booking_no, user_id, total_price, status FROM bookings WHERE booking_no = $1",
+          [bookingNo]
+        );
+    if (lookup.rows.length === 0) {
+      return res.status(404).json({ message: "ไม่พบการจอง" });
+    }
+    const booking = lookup.rows[0];
+    if (Number(booking.user_id) !== Number(req.user?.userId)) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์ยืนยันการชำระนี้" });
+    }
+
+    const applied = await applyVerifiedPayment(
+      {
+        bookingId: booking.id,
+        bookingNo: booking.booking_no,
+        transactionId: session.payment_intent || session.id,
+        amount:
+          session.amount_total != null
+            ? Number(session.amount_total) / 100
+            : Number(booking.total_price),
+      },
+      "stripe"
+    );
+
+    res.json({
+      message: "ยืนยันการชำระเงินจาก Stripe สำเร็จ",
+      applied,
+      sessionId: session.id,
+      transactionId: applied?.transactionId,
+    });
+  } catch (err: any) {
+    console.error("[payment/stripe/confirm] Error:", err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการยืนยัน Stripe" });
+  }
+});
+
+/**
+ * GET /api/payment/stripe/demo-checkout
+ * Local Stripe demo UI (when STRIPE_SECRET_KEY is not set)
+ */
+router.get("/stripe/demo-checkout", async (req: any, res: Response) => {
+  const tx = String(req.query.tx || "");
+  const bookingId = String(req.query.bookingId || "");
+  const bookingNo = String(req.query.bookingNo || "");
+  const amount = String(req.query.amount || "0");
+  const frontend = (process.env.FRONTEND_URL || "http://localhost:5173")
+    .split(",")[0]
+    .trim();
+
+  if (!tx || !bookingNo) {
+    return res.status(400).send("Missing checkout parameters");
+  }
+
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.send(`<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stripe Demo Checkout — MFU</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #f8fafc; margin: 0; padding: 2rem; }
+    .card { max-width: 420px; margin: 2rem auto; background: #fff; border-radius: 1.25rem;
+            padding: 1.75rem; box-shadow: 0 10px 30px rgba(15,23,42,.08); border: 1px solid #e2e8f0; }
+    h1 { font-size: 1.25rem; margin: 0 0 .5rem; color: #0f172a; }
+    .muted { color: #64748b; font-size: .875rem; }
+    .row { display: flex; justify-content: space-between; margin: .6rem 0; font-size: .95rem; }
+    .amount { font-size: 1.75rem; font-weight: 800; color: #ba0b2f; }
+    button { width: 100%; margin-top: 1.25rem; background: #635bff; color: #fff; border: 0;
+             border-radius: .75rem; padding: .9rem 1rem; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .5; cursor: wait; }
+    .ok { color: #059669; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Stripe Demo Checkout</h1>
+    <p class="muted">โหมดทดสอบท้องถิ่น — ไม่เรียก Stripe จริง (ใส่ STRIPE_SECRET_KEY=sk_test_... เพื่อใช้ test mode จริง)</p>
+    <div class="row"><span>Booking</span><strong>${bookingNo}</strong></div>
+    <div class="row"><span>Transaction ID</span><strong style="font-size:.75rem">${tx}</strong></div>
+    <div class="row"><span>Amount</span><span class="amount">฿${Number(amount).toLocaleString()}</span></div>
+    <button id="pay">จำลองชำระเงิน (Callback)</button>
+    <p id="msg" class="muted" style="margin-top:1rem"></p>
+  </div>
+  <script>
+    const btn = document.getElementById('pay');
+    const msg = document.getElementById('msg');
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      msg.textContent = 'กำลังส่ง callback...';
+      try {
+        const res = await fetch('/api/payment/webhook/stripe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'stripe_demo',
+            simulateStatus: 'success',
+            bookingId: Number('${bookingId}') || undefined,
+            bookingNo: '${bookingNo}',
+            transactionId: '${tx}',
+            amount: Number('${amount}')
+          })
+        });
+        const data = await res.json();
+        if (!res.ok || !data?.applied) throw new Error(data?.message || 'callback failed');
+        msg.innerHTML = '<span class="ok">ชำระแล้ว</span><br/>Transaction ID: <code>' +
+          (data.applied.transactionId || '${tx}') + '</code>';
+        setTimeout(() => { location.href = '${frontend}/dashboard?stripe=success&tx=${encodeURIComponent(tx)}'; }, 1200);
+      } catch (e) {
+        msg.textContent = 'ล้มเหลว: ' + (e && e.message ? e.message : e);
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>`);
 });
 
 

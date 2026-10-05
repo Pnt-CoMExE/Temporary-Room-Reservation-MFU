@@ -44,11 +44,12 @@ After each work session, update relevant `.md` files:
 | เมื่อทำอะไร | อัปเดตไฟล์ |
 |-------------|------------|
 | แก้ฟีเจอร์ / bug | `AI_CHANGELOG.md` |
-| เปลี่ยนแผน sprint | `docs/planning.md` |
-| เปลี่ยน API / schema | `docs/schema.md`, `README.md` (ถ้าจำเป็น) |
-| เปลี่ยน payment / env | `docs/payment_gateway.md`, `backend/.env.example` |
-| UAT / testing | `docs/UAT_TEST_SCENARIOS.md` หรือ `docs/UAT_ROUND1_RESULTS.md` |
-| security / deploy | `docs/SECURITY_CHECKLIST.md`, `docs/CITS_RUNBOOK.md` |
+| เปลี่ยนแผน sprint | `docs/product/planning.md` |
+| เปลี่ยน API / schema | `docs/product/schema.md`, `README.md` (ถ้าจำเป็น) |
+| เปลี่ยน payment / env | `docs/payment/STRIPE.md`, `backend/.env.example` |
+| UAT / testing | `docs/testing/TEST_CASE_TRACKER.md` (+ ไฟล์ใน `docs/testing/test-cases/` ถ้ารายบุคคล) |
+| security / deploy | `docs/ops/SECURITY_CHECKLIST.md`, `docs/ops/CITS_RUNBOOK.md` |
+| แผนที่เอกสาร | `docs/README.md` |
 
 - **อย่าสร้าง `.md` ใหม่โดยไม่จำเป็น** — อัปเดตไฟล์ที่มีอยู่ก่อน
 - **Do not create new `.md` files unless necessary** — prefer updating existing docs
@@ -61,7 +62,7 @@ After each work session, update relevant `.md` files:
 ```
 backend/     → Express 5 + TypeScript + PostgreSQL
 frontend/    → Vue 3 + Vite + TypeScript + Tailwind
-docs/        → เอกสารโครงการ (ห้ามลบ)
+docs/        → เอกสาร (ดู docs/README.md) — ห้ามลบทั้งโฟลเดอร์โดยพลการ
 data/        → ข้อมูลอ้างอิง (ห้ามลบ)
 ```
 
@@ -69,8 +70,7 @@ data/        → ข้อมูลอ้างอิง (ห้ามลบ)
 ### Do NOT
 
 - สร้างโฟลเดอร์ `vue-test`, `documents/`, `Data Set/` (เปลี่ยนชื่อแล้ว)
-- ลบไฟล์ใน `docs/` และ `data/` โดยไม่ได้รับอนุญาต
-- Commit `.env`, secrets, หรือ `backend/uploads/`
+- ลบไฟล์ใน `docs/` และ `data/` โดยไม่ได้รับอนุญาต (ยกเว้นเมื่อ user สั่งชัด เช่น ตัดเอกสารเก่า)- Commit `.env`, secrets, หรือ `backend/uploads/`
 - สร้าง README ซ้ำซ้อนใน subfolder ถ้า `README.md` หลักครอบคลุมแล้ว
 
 ### ใช้ scripts ตามนี้
@@ -140,17 +140,16 @@ UAT bootstrap               → DEV_ADMIN_EMAILS / DEV_INTERNAL_EMAILS ใน .e
 ## 4. เอกสาร
 ## 4. Documentation Rules
 
-### โฟลเดอร์ `docs/`
+### โฟลเดอร์ `docs/` (ดูแผนที่ใน `docs/README.md`)
 
-| ไฟล์ | หน้าที่ |
-|------|---------|
-| `planning.md` | แผน 8 Sprints |
-| `requirements.md` | ข้อกำหนดระบบ |
-| `schema.md` | Database schema |
-| `UAT_TEST_SCENARIOS.md` | 65 test cases |
-| `payment_gateway.md` | Payment adapters |
-| `CITS_RUNBOOK.md` | Deploy / Docker |
-| `GO_LIVE_CHECKLIST.md` | Checklist ก่อน go-live |
+| หมวด | path | หน้าที่ |
+|------|------|---------|
+| Hub | `docs/README.md` | แผนที่เอกสารทั้งหมด |
+| Product | `docs/product/` | requirements, features, planning, schema |
+| Payment | `docs/payment/STRIPE.md` | Stripe (gateway ที่ทีมเลือก) |
+| Testing | `docs/testing/` | Test Case Tracker, UAT, E2E, evidence |
+| Meetings | `docs/meetings/` | Recording 3–4, demo / presentation |
+| Ops | `docs/ops/` | CITS, go-live, backup, security |
 
 ### โฟลเดอร์ `data/`
 
@@ -195,13 +194,13 @@ cd frontend && npm run typecheck
 
 ### UAT
 
-- อ้างอิง `docs/UAT_TEST_SCENARIOS.md`
-- บันทึกผลใน `docs/UAT_ROUND1_RESULTS.md`
-- Bug ใช้ `docs/UAT_BUG_REPORT_TEMPLATE.md`
+- อ้างอิง `docs/testing/TEST_CASE_TRACKER.md` (+ `docs/testing/test-cases/` รายบุคคล)
+- บันทึกผลใน `docs/testing/UAT_ROUND1_RESULTS.md`
+- Bug ใช้ `docs/testing/UAT_BUG_REPORT_TEMPLATE.md`
 
 ### E2E / Load
 
-- Playwright: `frontend/e2e/`
+- Playwright: `frontend/e2e/` · คู่มือ `docs/testing/QA_AUTOMATION_GUIDE.md`
 - k6: `backend/scripts/k6-load-test.js`
 
 ---
@@ -217,14 +216,14 @@ cd frontend && npm run typecheck
 
 ### Payment (ปัจจุบัน)
 
-- UAT: `PAYMENT_PROVIDER=mock_sandbox`
-- Production (เมื่อพร้อม): `promptpay_manual` หรือ gateway ที่หน่วยงานเลือก
-- ดู `docs/payment_gateway.md` ก่อนเปลี่ยน provider
+- UAT เร็ว: `PAYMENT_PROVIDER=mock_sandbox`
+- เป้าหมายทีม: **Stripe** — `PAYMENT_PROVIDER=stripe` (ดู `docs/payment/STRIPE.md`)
+- Demo ไม่มี key: Stripe demo checkout ในเครื่อง
 
 ### Deploy
 
-- Local/Docker: `docs/CITS_RUNBOOK.md`
-- ก่อน go-live: `docs/GO_LIVE_CHECKLIST.md`
+- Local/Docker: `docs/ops/CITS_RUNBOOK.md`
+- ก่อน go-live: `docs/ops/GO_LIVE_CHECKLIST.md`
 - Seed production: `npm run seed:production` (ไม่ใช่ `seed:demo`)
 
 ---
@@ -275,14 +274,16 @@ AI Agent ต้องตรวจก่อนสรุปงาน:
 | Env ตัวอย่าง | `backend/.env.example` |
 | Production env | `.env.production.example` |
 | ประวัติการแก้ | `AI_CHANGELOG.md` |
-| UAT test cases | `docs/UAT_TEST_SCENARIOS.md` |
-| Security | `docs/SECURITY_CHECKLIST.md` |
+| UAT test cases | `docs/testing/TEST_CASE_TRACKER.md` |
+| Docs map | `docs/README.md` |
+| Stripe | `docs/payment/STRIPE.md` |
+| Security | `docs/ops/SECURITY_CHECKLIST.md` |
 | กฎ AI (ฉบับเต็ม) | `RULES.md` |
 | Cursor auto-apply | `.cursor/rules/project-rules.mdc` |
 
 ---
 
-*อัปเดตล่าสุด: 2026-09-01 — สร้างโดยทีมพัฒนา + AI Assistant*
+*อัปเดตล่าสุด: 2026-10-05 — จัดหมวด `docs/` + Stripe เป็นเอกสาร payment หลัก*
 
 ## การเชื่อมกับ Cursor
 

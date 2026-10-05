@@ -16,7 +16,7 @@ The system categorizes users into distinct authorization levels with different p
 - **Availability Search & Advanced Booking:** Check real-time room availability and submit advance reservation requests.
 - **Service Customization (Add-ons):** Select supplementary services or equipment (e.g., tables, chairs) with automated cost calculation.
 - **Secure Authentication:** Google OAuth. Roles: exact `@mfu.ac.th` → Internal; `@lamduan.mfu.ac.th` and other domains → External; Admin only via promote in Admin Users (or `DEV_ADMIN_EMAILS` for UAT bootstrap).
-- **Secure Payment Integration:** Process instant online payments securely via a third-party gateway using dynamic PromptPay QR Codes (Opn Payments).
+- **Secure Payment Integration:** **Stripe** (demo/test + webhook Transaction ID). Mock sandbox สำหรับ UAT. PromptPay QR ยังอยู่ในโค้ดเป็นทางเลือกสำรอง.
 - **Promotions and Incentives:** Apply promotional discounts or special offers during booking.
 - **Reservation Management & History:** Access booking logs, track statuses, and cancel existing bookings.
 - **Status and Event Notifications:** Receive automated alerts for booking confirmations, status updates, and promotions.

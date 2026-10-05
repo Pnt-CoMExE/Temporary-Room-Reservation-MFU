@@ -6,8 +6,8 @@
 เอกสารประกอบ:
 - [`FRIDAY_DEMO_PREP.md`](./FRIDAY_DEMO_PREP.md)
 - [`DEMO_SECURITY.md`](./DEMO_SECURITY.md)
-- [`TESTING_PLAN.md`](./TESTING_PLAN.md)
-- [`PAYMENT_STRIPE_NOTES.md`](./PAYMENT_STRIPE_NOTES.md)
+- [`../testing/TESTING_PLAN.md`](../testing/TESTING_PLAN.md)
+- [`STRIPE.md`](../payment/STRIPE.md)
 
 ---
 
@@ -108,7 +108,7 @@ admin                       → promote ใน Admin Users (เก็บ DB) ห
 - `backend/scripts/auto-update-booking-status.ts`  
 
 ### Phase 6
-- [`TESTING_PLAN.md`](./TESTING_PLAN.md), [`PAYMENT_STRIPE_NOTES.md`](./PAYMENT_STRIPE_NOTES.md)  
+- [`../testing/TESTING_PLAN.md`](../testing/TESTING_PLAN.md), [`STRIPE.md`](../payment/STRIPE.md)  
 
 ### UX polish
 - Card contrast / `shadow-card*` ใน `main.css`  

@@ -23,6 +23,8 @@ interface BookingItem {
   date: string;
   duration: string;
   totalPrice: number;
+  roomPrice?: number;
+  addonsPrice?: number;
   status: string;
   hasFeedback: boolean;
   feedbackData?: { rating: number; comment: string };
@@ -31,7 +33,62 @@ interface BookingItem {
   tempDocFile?: File;
   memoDocumentUrl?: string;
   approvalDocumentUrl?: string;
+  organizationType?: string;
+  objective?: string;
+  timeSlot?: string;
+  priceHalfInternal?: number;
+  priceFullInternal?: number;
+  priceHalfCoop?: number;
+  priceFullCoop?: number;
+  priceHalfExternal?: number;
+  priceFullExternal?: number;
 }
+
+const ORG_LABEL: Record<string, string> = {
+  internal: "ภายใน (Internal)",
+  co_op: "ร่วมจัด / Coop",
+  external: "ภายนอก (External)",
+};
+
+const pickTierPrice = (item: BookingItem, org: string): number => {
+  const isFull = item.timeSlot === "full";
+  if (org === "external") {
+    return Number(isFull ? item.priceFullExternal : item.priceHalfExternal) || 0;
+  }
+  if (org === "co_op") {
+    return Number(isFull ? item.priceFullCoop : item.priceHalfCoop) || 0;
+  }
+  return Number(isFull ? item.priceFullInternal : item.priceHalfInternal) || 0;
+};
+
+const resolveUploadUrl = (url?: string) => {
+  if (!url) return "";
+  if (/^https?:\/\//i.test(url) || url.startsWith("blob:")) return url;
+  const apiBase = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
+  return `${apiBase}${url.startsWith("/") ? url : `/${url}`}`;
+};
+
+const previewHtmlForUrl = (url: string, title: string) => {
+  if (!url) {
+    return `<p class="text-xs text-gray-400">${title}: ไม่มีไฟล์</p>`;
+  }
+  const lower = url.toLowerCase();
+  const isPdf = lower.includes(".pdf") || lower.includes("application/pdf");
+  if (isPdf || lower.includes("/uploads/")) {
+    // Prefer iframe for pdf; images still work in iframe often — also offer open link
+    const isImg = /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url);
+    if (isImg) {
+      return `<div class="mb-2"><p class="text-[11px] font-bold text-gray-500 mb-1">${title}</p>
+        <img src="${url}" alt="${title}" class="max-h-40 mx-auto rounded-lg border border-gray-200 object-contain bg-white" />
+        <a href="${url}" target="_blank" class="text-[10px] text-blue-600 underline">เปิดเต็มจอ</a></div>`;
+    }
+    return `<div class="mb-2"><p class="text-[11px] font-bold text-gray-500 mb-1">${title}</p>
+      <iframe src="${url}" class="w-full h-40 rounded-lg border border-gray-200 bg-white"></iframe>
+      <a href="${url}" target="_blank" class="text-[10px] text-blue-600 underline">เปิดเต็มจอ</a></div>`;
+  }
+  return `<div class="mb-2"><p class="text-[11px] font-bold text-gray-500 mb-1">${title}</p>
+    <a href="${url}" target="_blank" class="text-xs text-blue-600 underline">เปิดไฟล์</a></div>`;
+};
 
 const hasDownloadableDoc = (b: BookingItem) =>
   !!(b.memoDocumentUrl || b.approvalDocumentUrl || b.hasDoc);
@@ -51,7 +108,7 @@ watch(() => props.initialBookings, (newVal) => {
   bookings.value = [...newVal];
 }, { immediate: true });
 
-const updateBookingStatus = async (id, status, remark = "") => {
+const updateBookingStatus = async (id, status, remark = "", organizationType?: string) => {
   const item = bookings.value.find(b => b.id === id);
   if (!item) return;
 
@@ -59,19 +116,25 @@ const updateBookingStatus = async (id, status, remark = "") => {
     const formData = new FormData();
     formData.append("status", status);
     formData.append("remarks", remark);
-    formData.append("adminId", getAdminId() || ""); // ✅ ดึง adminId จาก token จริง
-    
+    formData.append("adminId", getAdminId() || "");
+    if (organizationType) {
+      formData.append("organizationType", organizationType);
+    }
+
     if (item.tempDocFile) {
       formData.append("approvalDocument", item.tempDocFile);
     }
 
-    await api.put(`/api/admin/bookings/${item.dbId}/status`, formData, {
+    const { data } = await api.put(`/api/admin/bookings/${item.dbId}/status`, formData, {
       headers: { "Content-Type": "multipart/form-data" }
     });
-    
+
     item.status = status;
     item.actionBy = localStorage.getItem("userName") || "เจ้าหน้าที่ จัดการทรัพย์สิน";
-    
+    if (organizationType) item.organizationType = organizationType;
+    if (data?.totalPrice != null) item.totalPrice = Number(data.totalPrice);
+    if (data?.roomPrice != null) item.roomPrice = Number(data.roomPrice);
+
     Swal.fire({
       icon: "success",
       title: "ดำเนินการสำเร็จ!",
@@ -368,11 +431,7 @@ const openConfirm = (id, type) => {
     }).then((result) => {
       if (item) {
         if (result.isConfirmed) {
-          updateBookingStatus(id, "approved_pending_payment");
-          saveLog(
-            "อนุมัติคำขอจอง",
-            `อนุมัติรายการจอง: ${id} ของ ${item.userName} แล้ว`,
-          );
+          openApproveConfirm(id);
         } else if (result.isDenied) {
           // ✨ เพิ่มส่วนให้แอดมินกรอกเหตุผลที่ปฏิเสธ ✨
           Swal.fire({
@@ -428,6 +487,114 @@ const openConfirm = (id, type) => {
       }
     });
   }
+};
+
+/** Confirm approve: summary + rate tier + document preview (Recording 4) */
+const openApproveConfirm = (id: string) => {
+  const item = bookings.value.find((b) => b.id === id);
+  if (!item) return;
+
+  const currentOrg =
+    item.organizationType === "co_organizer" || item.organizationType === "coop"
+      ? "co_op"
+      : item.organizationType === "external"
+        ? "external"
+        : item.organizationType === "co_op"
+          ? "co_op"
+          : "internal";
+
+  const priceInternal = pickTierPrice(item, "internal");
+  const priceCoop = pickTierPrice(item, "co_op");
+  const priceExternal = pickTierPrice(item, "external");
+  const oldRoom = Number(item.roomPrice ?? pickTierPrice(item, currentOrg));
+  const oldTotal = Number(item.totalPrice || 0);
+
+  const memoUrl = resolveUploadUrl(item.memoDocumentUrl);
+  let approvalPreviewUrl = "";
+  if (item.tempDocFile) {
+    approvalPreviewUrl = URL.createObjectURL(item.tempDocFile);
+  } else if (item.approvalDocumentUrl) {
+    approvalPreviewUrl = resolveUploadUrl(item.approvalDocumentUrl);
+  }
+
+  const estimateTotal = (org: string) => {
+    const room = pickTierPrice(item, org);
+    return oldTotal - oldRoom + room;
+  };
+
+  Swal.fire({
+    title: "ยืนยันการอนุมัติ",
+    width: 560,
+    html: `
+      <div class="text-left space-y-3 text-sm">
+        <div class="bg-gray-50 border border-gray-100 rounded-xl p-3">
+          <p class="text-xs font-bold text-gray-400 uppercase mb-2">รายละเอียดการจอง</p>
+          <p><span class="text-gray-500">รหัส:</span> <b>${item.id}</b></p>
+          <p><span class="text-gray-500">ผู้จอง:</span> <b>${item.userName}</b></p>
+          <p><span class="text-gray-500">ห้อง:</span> <b>${item.roomName}</b></p>
+          <p><span class="text-gray-500">วันที่ / ช่วง:</span> <b>${item.date} · ${item.duration}</b></p>
+          ${item.objective ? `<p><span class="text-gray-500">วัตถุประสงค์:</span> ${item.objective}</p>` : ""}
+          <p><span class="text-gray-500">เรทเดิม:</span> <b>${ORG_LABEL[currentOrg] || currentOrg}</b>
+            · ห้อง ฿${oldRoom.toLocaleString()} · รวม ฿${oldTotal.toLocaleString()}</p>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-gray-500 mb-2">เลือกเรทราคา (ตามหนังสืออนุมัติ)</p>
+          <label class="flex items-center gap-2 mb-1.5 cursor-pointer">
+            <input type="radio" name="org-rate" value="internal" ${currentOrg === "internal" ? "checked" : ""} />
+            <span>ภายใน — ฿${priceInternal.toLocaleString()} <span class="text-gray-400 text-xs">(ประมาณรวม ฿${estimateTotal("internal").toLocaleString()})</span></span>
+          </label>
+          <label class="flex items-center gap-2 mb-1.5 cursor-pointer">
+            <input type="radio" name="org-rate" value="co_op" ${currentOrg === "co_op" ? "checked" : ""} />
+            <span>ร่วมจัด / Coop — ฿${priceCoop.toLocaleString()} <span class="text-gray-400 text-xs">(ประมาณรวม ฿${estimateTotal("co_op").toLocaleString()})</span></span>
+          </label>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="org-rate" value="external" ${currentOrg === "external" ? "checked" : ""} />
+            <span>ภายนอก — ฿${priceExternal.toLocaleString()} <span class="text-gray-400 text-xs">(ประมาณรวม ฿${estimateTotal("external").toLocaleString()})</span></span>
+          </label>
+          <p class="text-[10px] text-amber-700 mt-2">การเปลี่ยนเรทจะถูกบันทึกใน Activity Log</p>
+        </div>
+        <div class="border-t border-gray-100 pt-3">
+          <p class="text-xs font-bold text-gray-500 mb-2">Preview เอกสารแนบ</p>
+          ${previewHtmlForUrl(memoUrl, "หนังสือบันทึกข้อความ")}
+          ${previewHtmlForUrl(approvalPreviewUrl, "ใบอนุมัติ")}
+        </div>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: "ยืนยันอนุมัติ",
+    cancelButtonText: "ย้อนกลับ",
+    confirmButtonColor: "#059669",
+    customClass: {
+      popup: "rounded-[1.5rem] p-5",
+      confirmButton: "rounded-xl px-6 py-3 font-bold",
+      cancelButton: "rounded-xl px-6 py-3 font-bold",
+    },
+    preConfirm: () => {
+      const selected = (
+        Swal.getPopup()?.querySelector('input[name="org-rate"]:checked') as HTMLInputElement | null
+      )?.value;
+      if (!selected) {
+        Swal.showValidationMessage("กรุณาเลือกเรทราคา");
+        return false;
+      }
+      return selected;
+    },
+  }).then((result) => {
+    if (approvalPreviewUrl.startsWith("blob:")) {
+      try {
+        URL.revokeObjectURL(approvalPreviewUrl);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (!result.isConfirmed || !result.value) return;
+    const org = String(result.value);
+    updateBookingStatus(id, "approved_pending_payment", "", org);
+    saveLog(
+      "อนุมัติคำขอจอง",
+      `อนุมัติรายการจอง: ${id} ของ ${item.userName} | เรท: ${ORG_LABEL[org] || org} | รวมประมาณ ฿${estimateTotal(org).toLocaleString()}`,
+    );
+  });
 };
 
 // ✨ ฟังก์ชันสำหรับให้แอดมินดูรีวิว ✨

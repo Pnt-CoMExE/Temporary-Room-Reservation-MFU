@@ -53,7 +53,7 @@
 1. ปิด `RATE_LIMIT_DISABLED` บน production
 2. เปิด HTTPS + `COOKIE_SECURE=true`
 3. ลบหรือจำกัด `DEV_ADMIN_EMAILS`
-4. ทดสอบ regression ตาม [UAT_TEST_SCENARIOS.md](UAT_TEST_SCENARIOS.md) บน staging HTTPS
+4. ทดสอบ regression ตาม [TEST_CASE_TRACKER.md](TEST_CASE_TRACKER.md) บน staging HTTPS
 
 ---
 

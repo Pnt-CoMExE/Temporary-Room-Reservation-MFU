@@ -2,6 +2,52 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-06 — Stripe real test connect]
+
+- เพิ่ม `POST /api/payment/stripe/confirm` — ดึง Checkout Session หลัง redirect (localhost ไม่พึ่ง webhook)
+- Dashboard: success → confirm → อัปเดตสถานะชำระแล้ว + Tx ID
+- คู่มือ: `docs/payment/STRIPE.md` · `.env.example` ชี้ Stripe test
+
+## [2026-10-05 — Reorganize docs by category]
+
+- จัด `docs/` เป็น `product/` · `payment/` · `testing/` · `meetings/` · `ops/` + hub `docs/README.md`
+- Payment เอกสารเหลือ **Stripe เท่านั้น** (`payment/STRIPE.md`) — ลบ `payment_gateway.md`
+- ลบ stub `UAT_TEST_SCENARIOS.md` (รวมใน tracker แล้ว)
+- อัปเดต RULES / README / ลิงก์ภายใน
+
+## [2026-10-05 — Per-person test case sheets]
+
+- แยกไฟล์รายบุคคล: `docs/test-cases/kom.md` · `cee.md` · `part.md` · `jay.md` + README
+- ลิงก์จาก `TEST_CASE_TRACKER.md`
+
+## [2026-10-05 — Merge UAT scenarios into TEST_CASE_TRACKER]
+
+- รวม `UAT_TEST_SCENARIOS` เข้า `TEST_CASE_TRACKER.md` (77 เคส: Scenario+Expected+Owner+ผล ในตารางเดียว)
+- `UAT_TEST_SCENARIOS.md` เหลือเป็นทางเข้าชี้ไป tracker
+- อัปเดต RULES / README / RECORDING4 / UAT_DOCKER_CHECKLIST
+
+## [2026-10-05 — Rebalance Test Case owners by difficulty]
+
+- คอม (เก่งสุด) ← เคสยาก: Stripe, เรท+log, จองชน/เต็ม, AuthZ
+- พาร์ท ← ปาน–ยาก: Admin เอกสาร, PromptPay/Mock
+- ซี ← ปาน: User UI ตามสคริปต์
+- เจ ← ง่าย: เปิดดู / ไม่มีปุ่ม Co-op
+- อัปเดต `TEST_CASE_TRACKER.md` + `RECORDING4_ACTION_PLAN.md`
+
+## [2026-10-05 — Test Case Tracker for Recording 4]
+
+- เพิ่ม `docs/TEST_CASE_TRACKER.md` — ตารางสรุป + บัตรเคสละเอียด แบ่ง คอม/ซี/พาร์ท/เจ
+- โฟลเดอร์ `docs/evidence/` + README สำหรับ screenshot
+- ลิงก์จาก `RECORDING4_ACTION_PLAN.md`
+
+## [2026-10-05 — Recording 4 full set A→E]
+
+- Docs: `RECORDING4_ACTION_PLAN.md` (Test Case template, แบ่ง คอม/ซี/พาร์ท/เจ, Preproject scope)
+- Approve UX: confirm สรุปจอง + เลือกเรท 3 tier + preview memo/ใบอนุมัติ + audit log เปลี่ยนเรท
+- AdminUsers: ลบปุ่มตั้ง Co-op (ตัดสินเรทตอนอนุมัติ)
+- Stripe: adapter + demo checkout + webhook → `approved_paid` + `payments.transaction_id`
+- อัปเดต `PAYMENT_STRIPE_NOTES`, `TESTING_PLAN`, `UAT_TEST_SCENARIOS`, `.env.example`
+
 ## [2026-09-16 — QA Playwright E2E core + guide]
 
 - JWT auth fixtures (`asUser`/`asAdmin`) + `jsonwebtoken` (frontend devDependency)

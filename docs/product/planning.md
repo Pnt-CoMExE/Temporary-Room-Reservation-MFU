@@ -53,7 +53,7 @@
 - ทดสอบขั้นตอนการทำงานทั้งหมดตั้งแต่ต้นจนจบ (End-to-End Walkthrough): เข้าสู่ระบบ → ค้นหาและเลือกห้อง → ส่งคำขอจอง → อัปโหลดหนังสือบันทึกข้อความ (Memo PDF) → เจ้าหน้าที่ตรวจสอบและอนุมัติ → แสดง PromptPay QR Code → อัปโหลดสลิปโอนเงิน → เจ้าหน้าที่ตรวจสอบและยืนยันการชำระเงิน ✅ เสร็จแล้ว
 - จัดเตรียมสภาพแวดล้อม UAT Demo: ติดตั้งระบบบนเครื่อง localhost เพื่อให้อาจารย์ที่ปรึกษาและผู้มีส่วนเกี่ยวข้องสามารถเข้าทดสอบได้ ✅ เสร็จแล้ว
 - นำเข้าข้อมูลตัวอย่างที่สมจริง (Seed Realistic Demo Data): ข้อมูลห้องและพื้นที่ 8 ประเภท, อัตราค่าบริการตามประเภทผู้ใช้ 3 ระดับ, รหัสส่วนลด, อุปกรณ์เสริม, ตัวอย่างการจอง 5 รายการ และบัญชี Admin สำหรับทดสอบ (`npm run seed:demo`) ✅ เสร็จแล้ว
-- จัดทำเอกสารสถานการณ์การทดสอบ (UAT Test Scenarios) และรายการตรวจสอบ (Checklist) แยกตามบทบาทผู้ใช้งาน 4 กลุ่ม รวม 65 Test Cases (`docs/UAT_TEST_SCENARIOS.md`) ✅ เสร็จแล้ว
+- จัดทำเอกสารสถานการณ์การทดสอบ (UAT Test Scenarios) และรายการตรวจสอบ (Checklist) แยกตามบทบาทผู้ใช้งาน 4 กลุ่ม รวม 65 Test Cases (`docs/testing/TEST_CASE_TRACKER.md`) ✅ เสร็จแล้ว
 - ชุดทดสอบ Integration Tests + API Health Check: ผ่านครบ **163/163 Tests** (เพิ่มขึ้นจาก 105 Tests) ✅ เสร็จแล้ว
 
 ---
@@ -69,7 +69,7 @@
 - อัปเดต Seed Demo Data: แก้ไขอีเมล Admin เป็น `admin.demo@property.mfu.ac.th` ✅
 - ชุดทดสอบ Unit Tests: ผ่านครบ **169/169 Tests** (เพิ่ม `resolveUserType.test.ts` 6 tests) ✅
 - ลบสคริปต์ seed เก่าที่ซ้ำซ้อน (`seed-banners.ts`, `seed-promos.ts`, `seed-logs.ts`) — ใช้ `seed:demo` แทน ✅
-- จัดทำเอกสาร UAT: `UAT_ROUND1_RESULTS.md`, `UAT_BUG_REPORT_TEMPLATE.md`, `UAT_SIGNOFF.md` ✅
+- จัดทำเอกสาร UAT: `testing/UAT_ROUND1_RESULTS.md`, `testing/UAT_BUG_REPORT_TEMPLATE.md`, `testing/UAT_SIGNOFF.md` ✅
 
 **รอดำเนินการ (ต้องมีผู้ทดสอบจริง):**
 - ทดสอบการเข้าสู่ระบบด้วย Google OAuth — การจำแนก Role อัตโนมัติตามโดเมนอีเมล (`@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal, โดเมนอื่น → external)
@@ -92,7 +92,7 @@
 ### 🔹 Sprint 4 (สัปดาห์ที่ 4): UAT รอบที่ 2 — แก้ไขข้อผิดพลาด และ Regression [🔄 รอผล UAT รอบ 1]
 
 **เตรียมพร้อมแล้ว:**
-- แบบฟอร์ม Bug Report และ Sign-Off (`docs/UAT_BUG_REPORT_TEMPLATE.md`, `docs/UAT_SIGNOFF.md`) ✅
+- แบบฟอร์ม Bug Report และ Sign-Off (`docs/testing/UAT_BUG_REPORT_TEMPLATE.md`, `docs/testing/UAT_SIGNOFF.md`) ✅
 - Regression test suite (Vitest 169+ tests) ✅
 
 **รอดำเนินการ:**
@@ -115,7 +115,7 @@
 - Frontend admin route guard (`requiresAdmin`) ✅
 - Server-side audit logs (`auditLog.service.ts`) ✅
 - Double-booking prevention (`pg_advisory_xact_lock` + `FOR UPDATE`) ✅
-- เอกสาร `docs/SECURITY_CHECKLIST.md` ✅
+- เอกสาร `docs/ops/SECURITY_CHECKLIST.md` ✅
 
 **ด้านระบบการชำระเงิน:**
 - SMTP email service (พร้อมใช้เมื่อได้เมล มฟล.; fallback console) ✅
@@ -140,7 +140,7 @@
 
 - GitHub Actions: Docker build job เพิ่มใน `ci.yml` ✅
 - `docker-compose.prod.yml` — env vars ครบ (OAuth, Payment, SMTP) ✅
-- `docs/CITS_RUNBOOK.md`, `docs/BACKUP_RESTORE.md` ✅
+- `docs/ops/CITS_RUNBOOK.md`, `docs/ops/BACKUP_RESTORE.md` ✅
 - `backend/scripts/pre-deploy-check.js` ✅
 - `.env.production.example` อัปเดตสำหรับ localhost/UAT ✅
 
@@ -150,7 +150,7 @@
 
 **เสร็จแล้ว:**
 - `backend/scripts/seed-production.ts` (`npm run seed:production`) ✅
-- `docs/GO_LIVE_CHECKLIST.md` ✅
+- `docs/ops/GO_LIVE_CHECKLIST.md` ✅
 - Docker stack พร้อมรัน localhost ✅
 
 **รอดำเนินการ (ต้องมี CITS):**

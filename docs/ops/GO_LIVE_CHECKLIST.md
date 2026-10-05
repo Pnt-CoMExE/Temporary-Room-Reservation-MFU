@@ -24,7 +24,7 @@
 - [ ] `npm test` ผ่านทั้งหมด (backend)
 - [ ] `npm run typecheck` ผ่าน (backend + frontend)
 - [ ] `npm run build` ผ่าน (frontend)
-- [ ] UAT Sign-Off ลงนามแล้ว (`docs/UAT_SIGNOFF.md`)
+- [ ] UAT Sign-Off ลงนามแล้ว (`docs/testing/UAT_SIGNOFF.md`)
 
 ## Docker / Deploy
 

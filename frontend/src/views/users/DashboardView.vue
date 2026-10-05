@@ -123,6 +123,53 @@ onMounted(async () => {
     }
 
     await fetchBookings();
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("stripe") === "success") {
+      const sessionId = params.get("session_id") || "";
+      const tx = params.get("tx") || sessionId || "";
+      let displayTx = tx;
+
+      if (sessionId.startsWith("cs_")) {
+        try {
+          const { data } = await api.post("/api/payment/stripe/confirm", { sessionId });
+          displayTx = data?.transactionId || sessionId;
+          await fetchBookings();
+        } catch (err: any) {
+          console.error("stripe confirm failed", err);
+          Swal.fire({
+            icon: "warning",
+            title: t("dashboard.stripe_pay_error"),
+            text: err.response?.data?.message || err.message || "",
+            confirmButtonColor: "#ba0b2f",
+          });
+        }
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: t("dashboard.stripe_pay_success"),
+        html: `<p class="text-sm text-gray-600">${t("dashboard.stripe_pay_success_sub")}</p>
+          ${displayTx ? `<p class="mt-2 text-xs font-mono break-all">Transaction ID: ${displayTx}</p>` : ""}`,
+        confirmButtonColor: "#ba0b2f",
+        customClass: { popup: "rounded-[2rem]" },
+      });
+      const url = new URL(window.location.href);
+      url.searchParams.delete("stripe");
+      url.searchParams.delete("tx");
+      url.searchParams.delete("session_id");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    } else if (params.get("stripe") === "cancel") {
+      Swal.fire({
+        icon: "info",
+        title: t("dashboard.stripe_pay_cancel") || "ยกเลิกการชำระเงิน",
+        confirmButtonColor: "#ba0b2f",
+        customClass: { popup: "rounded-[2rem]" },
+      });
+      const url = new URL(window.location.href);
+      url.searchParams.delete("stripe");
+      window.history.replaceState({}, "", url.pathname + url.search);
+    }
   } catch (error) {
     console.error("Error fetching dashboard data:", error);
   } finally {
@@ -179,7 +226,48 @@ const openPayment = async (booking: BookingItem) => {
   if (activePaymentProvider.value === "mock_sandbox") {
     return openMockPayment(booking);
   }
+  if (activePaymentProvider.value === "stripe") {
+    return openStripePayment(booking);
+  }
   return openPromptPayPayment(booking);
+};
+
+const openStripePayment = async (booking: BookingItem) => {
+  const result = await Swal.fire({
+    title: `<span class="font-extrabold text-xl text-gray-900">${t("dashboard.stripe_pay_title")}</span>`,
+    html: `
+      <p class="text-sm text-gray-500 mb-2 font-medium">${t("dashboard.net_total")}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
+      <div class="bg-indigo-50 p-4 rounded-xl text-left border border-indigo-100 text-xs text-indigo-800 font-medium mb-4">
+        ${t("dashboard.stripe_pay_desc")}
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: t("dashboard.stripe_pay_btn"),
+    cancelButtonText: t("dashboard.close_window"),
+    confirmButtonColor: "#635bff",
+    customClass: {
+      popup: "rounded-[2.5rem] p-8 max-w-md",
+      confirmButton: "rounded-xl px-6 py-3 font-bold cursor-pointer",
+      cancelButton: "rounded-xl px-6 py-3 font-bold cursor-pointer",
+    },
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    const { data } = await api.post("/api/payment/checkout", { bookingId: booking.dbId });
+    if (!data?.success || !data?.checkoutUrl) {
+      throw new Error(data?.message || "checkout failed");
+    }
+    window.location.href = data.checkoutUrl;
+  } catch (err: any) {
+    Swal.fire({
+      icon: "error",
+      title: t("dashboard.stripe_pay_error"),
+      text: err.response?.data?.message || err.message || "",
+      confirmButtonColor: "#ba0b2f",
+    });
+  }
 };
 
 const openMockPayment = async (booking: BookingItem) => {
@@ -821,8 +909,14 @@ const formatDate = (dateString: string) =>
                     @click="openPayment(booking)"
                     class="bg-sky-600 text-white px-6 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-sky-200 hover:bg-sky-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon :icon="activePaymentProvider === 'mock_sandbox' ? 'flask' : 'qrcode'" />
-                    {{ activePaymentProvider === 'mock_sandbox' ? $t('dashboard.mock_pay') : $t('dashboard.scan_pay') }}
+                    <font-awesome-icon :icon="activePaymentProvider === 'mock_sandbox' ? 'flask' : activePaymentProvider === 'stripe' ? 'wallet' : 'qrcode'" />
+                    {{
+                      activePaymentProvider === 'mock_sandbox'
+                        ? $t('dashboard.mock_pay')
+                        : activePaymentProvider === 'stripe'
+                          ? $t('dashboard.stripe_pay')
+                          : $t('dashboard.scan_pay')
+                    }}
                   </button>
 
                   <button

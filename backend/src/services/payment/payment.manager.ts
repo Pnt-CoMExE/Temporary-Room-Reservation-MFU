@@ -10,6 +10,7 @@ import { SCBPaymentAdapter } from "./scb.adapter";
 import { KBankPaymentAdapter } from "./kbank.adapter";
 import { KTBPaymentAdapter } from "./ktb.adapter";
 import { MockPaymentAdapter } from "./mock.adapter";
+import { StripePaymentAdapter } from "./stripe.adapter";
 
 export class PaymentGatewayManager {
   private static instance: PaymentGatewayManager;
@@ -23,6 +24,7 @@ export class PaymentGatewayManager {
     this.registerAdapter(new KBankPaymentAdapter());
     this.registerAdapter(new KTBPaymentAdapter());
     this.registerAdapter(new MockPaymentAdapter());
+    this.registerAdapter(new StripePaymentAdapter());
   }
 
   public static getInstance(): PaymentGatewayManager {

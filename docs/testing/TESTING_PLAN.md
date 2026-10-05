@@ -1,11 +1,10 @@
 # แผนการทดสอบ (Testing Plan) — แยกตามโมดูล / Sprint
 
 **โครงการ:** MFU Space Reservation  
-**อัปเดต:** 2026-09-15  
-**ที่มา:** ข้อเสนอแนะอาจารย์ (Recording 1 + Recording 3) — แผน testing แยกโมดูล + AuthZ ข้าม Role + Manual/Postman  
-**หลักการ:** ทำฟังก์ชันหลัก → ทดสอบให้มั่นใจ → ค่อยขยายฟังก์ชันเสริม (เช่น Payment gateway จริง)
+**อัปเดต:** 2026-10-05  
+**ที่มา:** ข้อเสนอแนะอาจารย์ (Recording 1 + 3 + **4**) — แผน testing แยกโมดูล + AuthZ ข้าม Role + Manual/Postman + Test Case template / แบ่งทีม  
 
-เอกสารประกอบ: [`FRIDAY_DEMO_PREP.md`](./FRIDAY_DEMO_PREP.md) · [`DEMO_SECURITY.md`](./DEMO_SECURITY.md) · [`RECORDING3_ACTION_PLAN.md`](./RECORDING3_ACTION_PLAN.md)
+เอกสารประกอบ: [`FRIDAY_DEMO_PREP.md`](../meetings/FRIDAY_DEMO_PREP.md) · [`DEMO_SECURITY.md`](../meetings/DEMO_SECURITY.md) · [`RECORDING3_ACTION_PLAN.md`](../meetings/RECORDING3_ACTION_PLAN.md) · [`RECORDING4_ACTION_PLAN.md`](../meetings/RECORDING4_ACTION_PLAN.md)
 
 ---
 
@@ -86,6 +85,8 @@
 | Admin-only endpoints | AuthZ tests | `verifyAdmin`, integration | ✅ |
 | Audit log | Unit | `auditLog.service.test.ts` | ✅ |
 | อนุมัติจองบน UI | E2E + Manual | `admin-approve.spec.ts` (แนบใบอนุมัติก่อน) | ✅ |
+| Confirm + เลือกเรท + preview เอกสาร (R4) | Manual | AdminBookings approve modal | ✅ |
+| Log เปลี่ยนเรทราคา | Manual / API | `admin_activity_logs` | ✅ |
 
 ---
 
@@ -96,9 +97,9 @@
 | PromptPay payload / adapters | Unit | `payment.test.ts`, `payment_adapter.test.ts` | ✅ |
 | Ownership ตอน checkout/slip | Unit | `coverage_authz_a.test.ts` | ✅ |
 | Mock sandbox flow | Manual Demo | `PAYMENT_PROVIDER=mock_sandbox` | 🔄 |
-| Gateway จริง (ฟรี/sandbox ภายนอก) | แผนถัดไป | ตามอาจารย์ | ⏳ |
+| Stripe demo / test + Transaction ID callback (R4) | Unit + Manual | `stripe.adapter` · [`STRIPE.md`](../payment/STRIPE.md) | ✅ |
 
-**หมายเหตุตามอาจารย์:** Payment เป็นฟังก์ชันเสริม — ทำหลังฟังก์ชันหลักถูกและมี test รองรับ
+**หมายเหตุตามอาจารย์:** Payment เป็นฟังก์ชันเสริม — มี Stripe demo สำหรับโชว์ callback แล้ว; production รอหน่วยงาน
 
 ---
 

@@ -5,7 +5,7 @@
 **ผู้พูด 4 คน:** คอม · ซี · พาร์ท · เจ  
 **เวลารวมแนะนำ:** ~12–15 นาที (+ Q&A)
 
-เอกสารอ้างอิง: [`RECORDING3_ACTION_PLAN.md`](./RECORDING3_ACTION_PLAN.md) · [`TESTING_PLAN.md`](./TESTING_PLAN.md) · [`PAYMENT_STRIPE_NOTES.md`](./PAYMENT_STRIPE_NOTES.md)
+เอกสารอ้างอิง: [`RECORDING3_ACTION_PLAN.md`](./RECORDING3_ACTION_PLAN.md) · [`../testing/TESTING_PLAN.md`](../testing/TESTING_PLAN.md) · [`STRIPE.md`](../payment/STRIPE.md)
 
 ---
 
@@ -153,7 +153,7 @@
 
 ### Testing
 
-> “เรามีแผนทดสอบแยกโมดูลใน `TESTING_PLAN.md` แล้วครับ/ค่ะ  
+> “เรามีแผนทดสอบแยกโมดูลใน `../testing/TESTING_PLAN.md` แล้วครับ/ค่ะ  
 > ครอบคลุม Auth, Authorization, โฟลว์จอง, Admin และ Payment  
 > ฝั่ง automated มี Vitest ฝั่ง backend, มี CI และมีการแก้เคสที่เคย fail ใน pipeline  
 > ตามที่อาจารย์แนะนำ เราถือว่าฟังก์ชันหลักต้องมี test รองรับก่อน แล้วค่อยต่อ gateway จริงครับ/ค่ะ”
@@ -167,7 +167,7 @@
 ### Payment (พูดตรง ๆ — อย่าขายเกิน)
 
 > “เรื่อง Payment Gateway เช่น Stripe  
-> ทีม**ศึกษาและจดโน้ตเปรียบเทียบ**ไว้แล้ว ใน `PAYMENT_STRIPE_NOTES.md`  
+> ทีม**ศึกษาและจดโน้ตเปรียบเทียบ**ไว้แล้ว ใน `../payment/STRIPE.md`  
 > ระบบเรามีโครง adapter อยู่แล้ว — ตอนนี้ใช้ **mock_sandbox** สำหรับ UAT/Demo  
 > และมี PromptPay QR อยู่แล้วสำหรับบริบทไทย  
 > **ยังไม่ผูก Stripe จริง** เพราะอยากให้หน่วยงานเลือก provider และทำหลัง core + test แน่น ตามลำดับที่อาจารย์แนะนำครับ/ค่ะ”

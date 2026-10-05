@@ -43,17 +43,57 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-// GET /api/admin/bookings — all bookings with user + room details
+const ORG_TYPES = new Set(["internal", "co_op", "external"]);
+
+function normalizeOrgType(raw: string | undefined | null): string | null {
+  if (!raw) return null;
+  const v = String(raw).trim().toLowerCase();
+  if (v === "co_organizer" || v === "coop") return "co_op";
+  return ORG_TYPES.has(v) ? v : null;
+}
+
+function pickRoomPrice(
+  pricing: Record<string, unknown> | null | undefined,
+  orgType: string,
+  timeSlot: string
+): number {
+  if (!pricing) return 0;
+  const isFull = timeSlot === "full";
+  const key =
+    orgType === "external"
+      ? isFull
+        ? "price_full_day_external"
+        : "price_half_day_external"
+      : orgType === "co_op"
+        ? isFull
+          ? "price_full_day_co_organizer"
+          : "price_half_day_co_organizer"
+        : isFull
+          ? "price_full_day_internal"
+          : "price_half_day_internal";
+  return Number(pricing[key] || 0);
+}
+
+// GET /api/admin/bookings — all bookings with user + room details + pricing tiers
 router.get("/", verifyToken, verifyAdmin, async (_req: any, res: Response) => {
   try {
     const result = await query(`
       SELECT b.*, u.firstname, u.lastname, u.email as user_email,
              r.name as room_name, r.location as room_location,
              f.rating as feedback_rating, f.comment as feedback_comment,
-             TRIM(CONCAT(COALESCE(admin_u.firstname, ''), ' ', COALESCE(admin_u.lastname, ''))) AS admin_name
+             TRIM(CONCAT(COALESCE(admin_u.firstname, ''), ' ', COALESCE(admin_u.lastname, ''))) AS admin_name,
+             p.price_half_day_internal, p.price_full_day_internal,
+             p.price_half_day_co_organizer, p.price_full_day_co_organizer,
+             p.price_half_day_external, p.price_full_day_external
       FROM bookings b
       JOIN users u ON b.user_id = u.id
       JOIN rooms r ON b.room_id = r.id
+      LEFT JOIN LATERAL (
+        SELECT * FROM room_pricing
+        WHERE room_id = r.id
+        ORDER BY effective_date DESC NULLS LAST, id DESC
+        LIMIT 1
+      ) p ON TRUE
       LEFT JOIN feedbacks f ON b.id = f.booking_id
       LEFT JOIN users admin_u ON b.approved_by = admin_u.id
       ORDER BY b.created_at DESC
@@ -65,7 +105,7 @@ router.get("/", verifyToken, verifyAdmin, async (_req: any, res: Response) => {
   }
 });
 
-// PUT /api/admin/bookings/:id/status — update booking status
+// PUT /api/admin/bookings/:id/status — update booking status (+ optional rate tier on approve)
 router.put(
   "/:id/status",
   verifyToken,
@@ -74,27 +114,71 @@ router.put(
   async (req: any, res: Response) => {
     const { id } = req.params;
     const { status, remarks, adminId } = req.body;
+    const organizationType = normalizeOrgType(req.body.organizationType || req.body.organization_type);
     const resolvedAdminId = Number(adminId) || Number(req.user?.userId) || null;
     const documentUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
-      const prevRes = await query("SELECT status FROM bookings WHERE id = $1", [id]);
+      const prevRes = await query(
+        `SELECT status, organization_type, room_price, addons_price, total_price,
+                room_id, time_slot, booking_no
+         FROM bookings WHERE id = $1`,
+        [id]
+      );
       if (prevRes.rows.length === 0) {
         return res.status(404).json({ message: "ไม่พบรายการจอง" });
       }
-      const previousStatus = String(prevRes.rows[0].status || "");
+      const previous = prevRes.rows[0];
+      const previousStatus = String(previous.status || "");
+
+      let rateLog = "";
+      let nextOrg = previous.organization_type;
+      let nextRoomPrice = Number(previous.room_price || 0);
+      let nextTotal = Number(previous.total_price || 0);
+
+      if (
+        organizationType &&
+        (status === "approved_pending_payment" || status === "approved")
+      ) {
+        const pricingRes = await query(
+          `SELECT price_half_day_internal, price_full_day_internal,
+                  price_half_day_co_organizer, price_full_day_co_organizer,
+                  price_half_day_external, price_full_day_external
+           FROM room_pricing
+           WHERE room_id = $1
+           ORDER BY effective_date DESC NULLS LAST, id DESC
+           LIMIT 1`,
+          [previous.room_id]
+        );
+        const pricing = pricingRes.rows[0] || null;
+        const newRoomPrice = pickRoomPrice(pricing, organizationType, String(previous.time_slot || ""));
+        const oldRoomPrice = Number(previous.room_price || 0);
+        const oldOrg = String(previous.organization_type || "");
+        nextOrg = organizationType;
+        nextRoomPrice = newRoomPrice;
+        nextTotal = Number(previous.total_price || 0) - oldRoomPrice + newRoomPrice;
+        if (nextTotal < 0) nextTotal = newRoomPrice + Number(previous.addons_price || 0);
+
+        if (oldOrg !== organizationType || oldRoomPrice !== newRoomPrice) {
+          rateLog = ` | เรท: ${oldOrg || "-"}→${organizationType} | ราคาห้อง: ${oldRoomPrice}→${newRoomPrice} | รวม: ${previous.total_price}→${nextTotal}`;
+        }
+      }
 
       if (documentUrl) {
         await query(
           `UPDATE bookings SET status = $1, remarks = $2, approved_by = $3,
-           approved_at = NOW(), approval_document_url = $4 WHERE id = $5`,
-          [status, remarks, resolvedAdminId, documentUrl, id]
+           approved_at = NOW(), approval_document_url = $4,
+           organization_type = $5, room_price = $6, total_price = $7
+           WHERE id = $8`,
+          [status, remarks, resolvedAdminId, documentUrl, nextOrg, nextRoomPrice, nextTotal, id]
         );
       } else {
         await query(
           `UPDATE bookings SET status = $1, remarks = $2, approved_by = $3,
-           approved_at = NOW() WHERE id = $4`,
-          [status, remarks, resolvedAdminId, id]
+           approved_at = NOW(),
+           organization_type = $4, room_price = $5, total_price = $6
+           WHERE id = $7`,
+          [status, remarks, resolvedAdminId, nextOrg, nextRoomPrice, nextTotal, id]
         );
       }
 
@@ -137,11 +221,26 @@ router.put(
       await logAdminAction(
         adminNameFromReq(req),
         `อัปเดตสถานะการจอง #${id}`,
-        `${transition}${remarks ? ` | เหตุผล: ${remarks}` : ""}`,
+        `${transition}${remarks ? ` | เหตุผล: ${remarks}` : ""}${rateLog}`,
         Number(id)
       );
 
-      res.json({ message: "อัปเดตสถานะการจองสำเร็จ", documentUrl });
+      if (rateLog) {
+        await logAdminAction(
+          adminNameFromReq(req),
+          `เปลี่ยนเรทราคาการจอง #${id}`,
+          rateLog.replace(/^\s*\|\s*/, ""),
+          Number(id)
+        );
+      }
+
+      res.json({
+        message: "อัปเดตสถานะการจองสำเร็จ",
+        documentUrl,
+        organizationType: nextOrg,
+        roomPrice: nextRoomPrice,
+        totalPrice: nextTotal,
+      });
     } catch (err) {
       console.error("[admin/bookings] Error updating status:", err);
       res.status(500).json({ message: "เกิดข้อผิดพลาดในการอัปเดตสถานะ" });
