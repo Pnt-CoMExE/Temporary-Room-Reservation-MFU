@@ -37,6 +37,23 @@ app.use(
     credentials: true,
   })
 );
+// Stripe webhook needs raw body for signature verification (must run before express.json)
+app.use(
+  "/api/payment/webhook/stripe",
+  express.raw({ type: "application/json" }),
+  (req: any, _res, next) => {
+    req.rawBody = req.body;
+    try {
+      const text = Buffer.isBuffer(req.body)
+        ? req.body.toString("utf8")
+        : String(req.body || "{}");
+      req.body = JSON.parse(text || "{}");
+    } catch {
+      req.body = {};
+    }
+    next();
+  }
+);
 app.use(express.json({ limit: "10mb" }));
 app.use(cookieParser());
 app.use(morgan("dev"));
@@ -172,6 +189,18 @@ query(
       WHERE table_name = 'admin_activity_logs' AND column_name = 'booking_id'
     ) THEN
       ALTER TABLE admin_activity_logs ADD COLUMN booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'payments' AND column_name = 'payment_gateway_ref'
+    ) THEN
+      ALTER TABLE payments ADD COLUMN payment_gateway_ref TEXT;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'payments' AND column_name = 'raw_payload'
+    ) THEN
+      ALTER TABLE payments ADD COLUMN raw_payload JSONB;
     END IF;
 
     CREATE TABLE IF NOT EXISTS notifications (

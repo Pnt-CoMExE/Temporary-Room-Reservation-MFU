@@ -129,14 +129,17 @@ onMounted(async () => {
       const sessionId = params.get("session_id") || "";
       const tx = params.get("tx") || sessionId || "";
       let displayTx = tx;
+      let confirmed = !sessionId.startsWith("cs_");
 
       if (sessionId.startsWith("cs_")) {
         try {
           const { data } = await api.post("/api/payment/stripe/confirm", { sessionId });
           displayTx = data?.transactionId || sessionId;
+          confirmed = true;
           await fetchBookings();
         } catch (err: any) {
           console.error("stripe confirm failed", err);
+          confirmed = false;
           Swal.fire({
             icon: "warning",
             title: t("dashboard.stripe_pay_error"),
@@ -146,14 +149,16 @@ onMounted(async () => {
         }
       }
 
-      Swal.fire({
-        icon: "success",
-        title: t("dashboard.stripe_pay_success"),
-        html: `<p class="text-sm text-gray-600">${t("dashboard.stripe_pay_success_sub")}</p>
-          ${displayTx ? `<p class="mt-2 text-xs font-mono break-all">Transaction ID: ${displayTx}</p>` : ""}`,
-        confirmButtonColor: "#ba0b2f",
-        customClass: { popup: "rounded-[2rem]" },
-      });
+      if (confirmed) {
+        Swal.fire({
+          icon: "success",
+          title: t("dashboard.stripe_pay_success"),
+          html: `<p class="text-sm text-gray-600">${t("dashboard.stripe_pay_success_sub")}</p>
+            ${displayTx ? `<p class="mt-2 text-xs font-mono break-all">Transaction ID: ${displayTx}</p>` : ""}`,
+          confirmButtonColor: "#ba0b2f",
+          customClass: { popup: "rounded-[2rem]" },
+        });
+      }
       const url = new URL(window.location.href);
       url.searchParams.delete("stripe");
       url.searchParams.delete("tx");

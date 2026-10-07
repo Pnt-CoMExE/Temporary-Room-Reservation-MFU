@@ -119,9 +119,20 @@ router.put(
     const documentUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     try {
+      // Stripe path only — admin must not mark paid manually
+      if (
+        status === "approved_paid" &&
+        process.env.PAYMENT_PROVIDER === "stripe"
+      ) {
+        return res.status(403).json({
+          message:
+            "เมื่อใช้ Stripe แอดมินยืนยันชำระเงินเองไม่ได้ — รอลูกค้าชำระผ่าน Checkout",
+        });
+      }
+
       const prevRes = await query(
         `SELECT status, organization_type, room_price, addons_price, total_price,
-                room_id, time_slot, booking_no
+                room_id, time_slot, booking_no, approval_document_url
          FROM bookings WHERE id = $1`,
         [id]
       );
@@ -130,16 +141,43 @@ router.put(
       }
       const previous = prevRes.rows[0];
       const previousStatus = String(previous.status || "");
+      const isApproveStatus =
+        status === "approved_pending_payment" || status === "approved";
+
+      // อนุมัติต้องมีใบอนุมัติ (อัปโหลดรอบนี้ หรือมีในระบบแล้ว)
+      if (isApproveStatus) {
+        const hasApproval =
+          !!documentUrl || !!previous.approval_document_url;
+        if (!hasApproval) {
+          return res.status(400).json({
+            message: "ต้องแนบใบอนุมัติก่อนจึงจะอนุมัติได้",
+          });
+        }
+        if (previousStatus !== "pending") {
+          return res.status(400).json({
+            message: "อนุมัติและเลือกเรทได้เฉพาะรายการที่รออนุมัติเท่านั้น",
+          });
+        }
+        if (!organizationType) {
+          return res.status(400).json({
+            message: "ต้องเลือกเรทราคาตอนยืนยันอนุมัติ",
+          });
+        }
+      }
+
+      // เรทแก้ได้ครั้งเดียวตอนอนุมัติจาก pending เท่านั้น
+      if (organizationType && !isApproveStatus) {
+        return res.status(400).json({
+          message: "เปลี่ยนเรทราคาได้เฉพาะตอนยืนยันอนุมัติครั้งเดียว",
+        });
+      }
 
       let rateLog = "";
       let nextOrg = previous.organization_type;
       let nextRoomPrice = Number(previous.room_price || 0);
       let nextTotal = Number(previous.total_price || 0);
 
-      if (
-        organizationType &&
-        (status === "approved_pending_payment" || status === "approved")
-      ) {
+      if (organizationType && isApproveStatus) {
         const pricingRes = await query(
           `SELECT price_half_day_internal, price_full_day_internal,
                   price_half_day_co_organizer, price_full_day_co_organizer,

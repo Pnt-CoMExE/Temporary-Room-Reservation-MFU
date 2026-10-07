@@ -4,23 +4,41 @@ import {
   PaymentSessionResponse,
   WebhookResult,
 } from "./payment.adapter.interface";
+import { isStripeLiveKey, isStripeSecretKey } from "./stripeWebhook.util";
 
 /**
- * Stripe adapter — test/demo mode for Recording 4.
- * - With STRIPE_SECRET_KEY (sk_test_...): creates real Checkout Session via Stripe API
- * - Without key: local demo checkout URL that posts webhook callback + Transaction ID
+ * Stripe adapter — Checkout Session + webhook/confirm.
+ * - sk_test_ / sk_live_: real Stripe API
+ * - no key: local demo checkout (blocked when NODE_ENV=production)
  */
 export class StripePaymentAdapter implements IPaymentAdapter {
   readonly providerId = "stripe";
-  readonly providerName = "Stripe (Test / Demo)";
+
+  get providerName(): string {
+    const key = process.env.STRIPE_SECRET_KEY || "";
+    if (isStripeLiveKey(key)) return "Stripe (Live)";
+    if (key.startsWith("sk_test_")) return "Stripe (Test)";
+    return "Stripe (Demo)";
+  }
 
   isEnabled(): boolean {
     return process.env.PAYMENT_PROVIDER === "stripe";
   }
 
-  private hasLiveTestKey(): boolean {
+  private hasApiKey(): boolean {
+    return isStripeSecretKey(process.env.STRIPE_SECRET_KEY || "");
+  }
+
+  private assertLiveAllowed(): string | null {
     const key = process.env.STRIPE_SECRET_KEY || "";
-    return key.startsWith("sk_test_") || key.startsWith("sk_live_");
+    if (!isStripeLiveKey(key)) return null;
+    const allow =
+      process.env.NODE_ENV === "production" ||
+      process.env.STRIPE_ALLOW_LIVE === "true";
+    if (!allow) {
+      return "sk_live_ blocked outside production (set NODE_ENV=production or STRIPE_ALLOW_LIVE=true).";
+    }
+    return null;
   }
 
   private appBase(): string {
@@ -46,8 +64,29 @@ export class StripePaymentAdapter implements IPaymentAdapter {
       };
     }
 
-    if (this.hasLiveTestKey()) {
+    const liveBlock = this.assertLiveAllowed();
+    if (liveBlock) {
+      return {
+        success: false,
+        providerId: this.providerId,
+        providerName: this.providerName,
+        paymentStatus: "failed",
+        message: liveBlock,
+      };
+    }
+
+    if (this.hasApiKey()) {
       return this.createStripeCheckoutSession(request);
+    }
+
+    if (process.env.NODE_ENV === "production") {
+      return {
+        success: false,
+        providerId: this.providerId,
+        providerName: this.providerName,
+        paymentStatus: "failed",
+        message: "Production requires STRIPE_SECRET_KEY (sk_live_... or sk_test_...).",
+      };
     }
 
     const transactionId = `stripe_demo_${Date.now()}`;
@@ -120,14 +159,24 @@ export class StripePaymentAdapter implements IPaymentAdapter {
       transactionId: data.id,
       checkoutUrl: data.url,
       paymentStatus: "pending",
-      message: "[STRIPE TEST] Checkout Session created",
+      message: isStripeLiveKey(secret)
+        ? "[STRIPE LIVE] Checkout Session created"
+        : "[STRIPE TEST] Checkout Session created",
       raw: data,
     };
   }
 
   async handleWebhook(payload: any, headers?: any): Promise<WebhookResult> {
-    // Demo / internal confirm payload
+    // Demo / internal confirm — never when live key is configured
     if (payload?.source === "stripe_demo" || payload?.simulateStatus) {
+      if (isStripeLiveKey(process.env.STRIPE_SECRET_KEY || "")) {
+        return {
+          success: false,
+          status: "failed",
+          message: "Demo webhook rejected while using sk_live_",
+          raw: payload,
+        };
+      }
       const ok = payload.simulateStatus !== "failed";
       return {
         success: ok,
@@ -180,7 +229,7 @@ export class StripePaymentAdapter implements IPaymentAdapter {
   }
 
   async queryPaymentStatus(transactionId: string): Promise<{ status: string; raw?: any }> {
-    if (!this.hasLiveTestKey()) {
+    if (!this.hasApiKey()) {
       return { status: "pending", raw: { transactionId, mode: "demo" } };
     }
     return { status: "pending", raw: { transactionId, provider: "stripe" } };

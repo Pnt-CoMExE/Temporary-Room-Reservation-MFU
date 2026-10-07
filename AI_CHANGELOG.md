@@ -2,6 +2,38 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-07 — UAT emails: admin พาร์ท/เจ]
+- พาร์ท = `6631501081@…` · เจ = `6631501164@…` (`DEV_ADMIN_EMAILS`)
+- `part.md` · `jay.md` · `TEST_CASE_TRACKER.md`
+
+## [2026-10-07 — UAT emails: ซี]
+- `DEV_INTERNAL_EMAILS` += `6631501073@lamduan.mfu.ac.th`
+- เอกสาร: `cee.md` + `TEST_CASE_TRACKER.md` — external: `prattanakorn22127@gmail.com`, `frewgametv@gmail.com`
+
+## [2026-10-07 — Approve: require PDF + rate once]
+- UI: `hasDoc` = ใบอนุมัติเท่านั้น (ไม่นับ memo) · ปุ่มอนุมัติ disabled จนกว่าจะแนบ
+- API: อนุมัติต้องมี `approvalDocument` / `approval_document_url` + เลือกเรท · เปลี่ยนเรทได้เฉพาะจาก `pending`
+- Docs: `RECORDING4_ACTION_PLAN.md` ข้อ 3–4
+
+## [2026-10-07 — CoM test run complete + Stripe payments fix]
+- `docs/testing/evidence/CoM/` — kom.md 15/15 ✅ · Tx `pi_3UNxD6…`
+- Fix: add `payments.payment_gateway_ref` migration; `applyVerifiedPayment` in DB transaction
+- Dashboard: Stripe success Swal only after confirm succeeds
+
+
+## [2026-10-07 — Fix missing FontAwesome icons]
+- Register icons used on user dashboard (`lock`, `save`, `pencil-alt`, `external-link-alt`, `angle-right`, `flask`)
+
+## [2026-10-07 — Admin: no manual pay + real avatar]
+- Awaiting payment: badge only (no admin confirm); API blocks `approved_paid` / verify when `PAYMENT_PROVIDER=stripe`
+- Admin sidebar: load Google `profile_picture` from `/api/user/profile`
+- i18n: `admin.awaiting_stripe_*`
+
+## [2026-10-07 — Stripe Live (production) harden]
+- `sk_live_` + `STRIPE_WEBHOOK_SECRET` signature verify (raw body)
+- Block live key outside production unless `STRIPE_ALLOW_LIVE=true`
+- Docs: `docs/payment/STRIPE.md` Live checklist · `.env.production.example`
+
 ## [2026-10-06 — Stripe real test connect]
 
 - เพิ่ม `POST /api/payment/stripe/confirm` — ดึง Checkout Session หลัง redirect (localhost ไม่พึ่ง webhook)

@@ -2,7 +2,7 @@ import { Router, Response } from "express";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { query } from "../../db";
+import { query, pool } from "../../db";
 import { verifyToken, verifyAdmin } from "../middleware/auth";
 import { generatePromptPayPayload } from "../services/promptpay.service";
 import { paymentGateway } from "../services/payment/payment.manager";
@@ -136,23 +136,35 @@ async function applyVerifiedPayment(
   }
   if (!booking) return null;
 
-  await query(
-    `UPDATE bookings
-     SET payment_status = 'verified', status = 'approved_paid'
-     WHERE id = $1`,
-    [booking.id]
-  );
-
   const txId = result.transactionId || `${providerId}_${Date.now()}`;
   const amount = result.amount != null ? Number(result.amount) : Number(booking.total_price);
 
-  await query(
-    `INSERT INTO payments (booking_id, transaction_id, amount, payment_method, payment_gateway_ref, status, paid_at)
-     VALUES ($1, $2, $3, $4, $5, 'verified', NOW())
-     ON CONFLICT (transaction_id) DO UPDATE
-       SET status = 'verified', paid_at = COALESCE(payments.paid_at, NOW())`,
-    [booking.id, txId, amount, providerId, txId]
-  );
+  // Atomic: never leave booking paid without a payments row
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query(
+      `UPDATE bookings
+       SET payment_status = 'verified', status = 'approved_paid'
+       WHERE id = $1`,
+      [booking.id]
+    );
+    await client.query(
+      `INSERT INTO payments (booking_id, transaction_id, amount, payment_method, payment_gateway_ref, status, paid_at)
+       VALUES ($1, $2, $3, $4, $5, 'verified', NOW())
+       ON CONFLICT (transaction_id) DO UPDATE
+         SET status = 'verified',
+             payment_gateway_ref = COALESCE(EXCLUDED.payment_gateway_ref, payments.payment_gateway_ref),
+             paid_at = COALESCE(payments.paid_at, NOW())`,
+      [booking.id, txId, amount, providerId, txId]
+    );
+    await client.query("COMMIT");
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 
   return {
     bookingId: booking.id,
@@ -165,10 +177,42 @@ async function applyVerifiedPayment(
 /**
  * POST /api/payment/webhook/:provider
  * Webhook / callback handler (Opn, SCB, KBank, KTB, Mock, Stripe)
+ * Stripe Live: requires STRIPE_WEBHOOK_SECRET + verified Stripe-Signature (raw body from app.ts).
  */
 router.post("/webhook/:provider", async (req: any, res: Response) => {
   try {
     const providerId = req.params.provider;
+
+    if (providerId === "stripe") {
+      const { verifyStripeWebhookSignature, isStripeLiveKey } = await import(
+        "../services/payment/stripeWebhook.util"
+      );
+      const whsec = process.env.STRIPE_WEBHOOK_SECRET || "";
+      const live = isStripeLiveKey(process.env.STRIPE_SECRET_KEY || "");
+      if (live && !whsec) {
+        return res.status(503).json({
+          message: "Live Stripe requires STRIPE_WEBHOOK_SECRET",
+        });
+      }
+      if (whsec) {
+        const raw: Buffer | string =
+          req.rawBody != null
+            ? req.rawBody
+            : typeof req.body === "string"
+              ? req.body
+              : JSON.stringify(req.body || {});
+        const check = verifyStripeWebhookSignature(
+          raw,
+          req.headers["stripe-signature"] as string | undefined,
+          whsec
+        );
+        if (!check.ok) {
+          console.warn("[payment/webhook/stripe] signature failed:", check.reason);
+          return res.status(400).json({ message: "Invalid Stripe signature", reason: check.reason });
+        }
+      }
+    }
+
     const result = await paymentGateway.handleWebhook(providerId, req.body, req.headers);
 
     let applied = null;
@@ -206,7 +250,17 @@ router.post("/stripe/confirm", verifyToken, async (req: any, res: Response) => {
     const secret = process.env.STRIPE_SECRET_KEY || "";
     if (!secret.startsWith("sk_test_") && !secret.startsWith("sk_live_")) {
       return res.status(400).json({
-        message: "ยังไม่ได้ตั้ง STRIPE_SECRET_KEY (sk_test_...)",
+        message: "ยังไม่ได้ตั้ง STRIPE_SECRET_KEY (sk_test_... หรือ sk_live_...)",
+      });
+    }
+    if (
+      secret.startsWith("sk_live_") &&
+      process.env.NODE_ENV !== "production" &&
+      process.env.STRIPE_ALLOW_LIVE !== "true"
+    ) {
+      return res.status(403).json({
+        message:
+          "sk_live_ ถูกบล็อกนอก production — ตั้ง NODE_ENV=production หรือ STRIPE_ALLOW_LIVE=true",
       });
     }
 
@@ -543,6 +597,12 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
     const { bookingId, isVerified, remark } = req.body;
     if (!bookingId) {
       return res.status(400).json({ message: "กรุณาระบุ bookingId" });
+    }
+    if (process.env.PAYMENT_PROVIDER === "stripe") {
+      return res.status(403).json({
+        message:
+          "เมื่อใช้ Stripe แอดมินยืนยันสลิปเองไม่ได้ — รอลูกค้าชำระผ่าน Checkout",
+      });
     }
 
     const newPaymentStatus = isVerified ? "verified" : "rejected";

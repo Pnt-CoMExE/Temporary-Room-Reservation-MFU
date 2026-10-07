@@ -26,6 +26,15 @@
 - Docker: `http://localhost:8080`
 - Payment UAT: `PAYMENT_PROVIDER=mock_sandbox` · Stripe: `PAYMENT_PROVIDER=stripe`
 
+### บัญชี Google ของซี (UAT)
+| อีเมล | Role ที่ตั้งไว้ | ใช้เทส |
+|--------|-----------------|--------|
+| `6631501073@lamduan.mfu.ac.th` | **internal** via `DEV_INTERNAL_EMAILS` | TC-U-01 + จอง/dashboard ส่วนใหญ่ |
+| `prattanakorn22127@gmail.com` | **external** (โดเมนอื่น) | TC-U-03 |
+| `frewgametv@gmail.com` | **external** (โดเมนอื่น) | TC-U-03 / สำรอง |
+
+หมายเหตุ TC-U-02 (`@lamduan` → external): ถอด `6631501073@…` ออกจาก `DEV_INTERNAL_EMAILS` ชั่วคราว แล้ว login ใหม่ — ไม่งั้นระบบจะยังถือเป็น internal
+
 ---
 
 ## ตารางของ ซี

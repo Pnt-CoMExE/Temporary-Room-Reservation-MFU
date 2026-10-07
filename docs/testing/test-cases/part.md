@@ -26,6 +26,10 @@
 - Docker: `http://localhost:8080`
 - Payment UAT: `PAYMENT_PROVIDER=mock_sandbox` · Stripe: `PAYMENT_PROVIDER=stripe`
 
+### บัญชี Admin (UAT)
+- ของพาร์ท: `6631501081@lamduan.mfu.ac.th` → **admin** (`DEV_ADMIN_EMAILS`)
+- เคสส่วนใหญ่ใช้ **admin** · เคสชำระเงิน (U-23/24/24b) ใช้ **user** แยกอีกบัญชี
+
 ---
 
 ## ตารางของ พาร์ท

@@ -264,6 +264,10 @@ export default {
     approve_btn: "Approve",
     disapprove_btn: "Disapprove",
     verify_payment_btn: "Verify Payment",
+    awaiting_stripe_title: "Awaiting Stripe payment",
+    awaiting_stripe_hint:
+      "The customer must pay via Stripe only — admins cannot confirm payment manually",
+    awaiting_stripe_hint_short: "Waiting for customer Stripe payment",
     export_zip: "Export ZIP Permits",
   },
   common: {

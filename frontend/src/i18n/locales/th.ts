@@ -264,6 +264,10 @@ export default {
     approve_btn: "อนุมัติ",
     disapprove_btn: "ปฏิเสธ",
     verify_payment_btn: "ยืนยันชำระเงิน",
+    awaiting_stripe_title: "รอชำระเงินผ่าน Stripe",
+    awaiting_stripe_hint:
+      "ลูกค้าต้องชำระผ่าน Stripe เท่านั้น — แอดมินยืนยันการชำระเงินเองไม่ได้",
+    awaiting_stripe_hint_short: "รอลูกค้าชำระผ่าน Stripe",
     export_zip: "ส่งออก ZIP เอกสาร",
   },
   common: {

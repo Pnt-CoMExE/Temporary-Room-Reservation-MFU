@@ -1,77 +1,92 @@
-# Payment — Stripe (เชื่อมจริง)
+# Payment — Stripe
 
-**สถานะ:** ทีมเลือก Stripe · ใช้ **test key** (`sk_test_`) ก่อนเสมอ  
-**อัปเดต:** 2026-10-06
+**สถานะ:** รองรับ Test (`sk_test_`) และ Live (`sk_live_`)  
+**อัปเดต:** 2026-10-07
 
 ---
 
-## ขั้นตอนเชื่อม Stripe Test (แนะนำ)
+## ขั้นตอนเชื่อม Stripe Test (ก่อน Live เสมอ)
 
-### 1) สร้างกุญแจใน Stripe Dashboard
+### 1) กุญแจใน Stripe Dashboard
 
-1. เปิด [https://dashboard.stripe.com/register](https://dashboard.stripe.com/register) (หรือ login)
-2. สลับโหมด **Test mode** (มุมขวาบน)
-3. **Developers → API keys**
-4. คัดลอก:
-   - **Secret key** → `sk_test_...`
-   - **Publishable key** → `pk_test_...` (เก็บไว้ ยังไม่บังคับใน flow ปัจจุบัน)
+1. [dashboard.stripe.com](https://dashboard.stripe.com) → สลับ **Test mode**
+2. **Developers → API keys**
+3. คัดลอก **Secret key** → `sk_test_...` (อย่า commit · ใส่เฉพาะ `backend/.env`)
 
-อย่า commit key ลง git · ใส่เฉพาะ `backend/.env`
-
-### 2) ตั้ง `backend/.env`
+### 2) `backend/.env`
 
 ```env
 PAYMENT_PROVIDER=stripe
-STRIPE_SECRET_KEY=sk_test_วางคีย์จริงตรงนี้
+STRIPE_SECRET_KEY=sk_test_วางคีย์ตรงนี้
 FRONTEND_URL=http://localhost:5173
-# ถ้า backend รันคนละพอร์ต / Docker ให้ตั้ง APP_URL ให้ถูกต้อง เช่น
 # APP_URL=http://localhost:3000
 ```
 
-Docker ที่พอร์ต 8080:
+Docker พอร์ต 8080: ตั้ง `FRONTEND_URL` + `APP_URL` เป็น `http://localhost:8080`
 
-```env
-PAYMENT_PROVIDER=stripe
-STRIPE_SECRET_KEY=sk_test_...
-FRONTEND_URL=http://localhost:8080
-APP_URL=http://localhost:8080
-```
+### 3) Restart + ทดสอบ
 
-### 3) Restart backend
+- `GET /api/payment/providers` → `activeProvider.id` = `stripe`
+- จองรอชำระ → Dashboard → ชำระ Stripe → บัตร `4242 4242 4242 4242`
+- กลับ `/dashboard?stripe=success&session_id=cs_...` → `POST /api/payment/stripe/confirm` → สถานะชำระแล้ว
 
-```bash
-cd backend
-# หยุด process เดิม แล้ว
-npm run dev
-```
-
-ตรวจ: `GET /api/payment/providers` → `activeProvider.id` = `stripe`
-
-### 4) ทดสอบจ่าย
-
-1. มีจองสถานะ **รอชำระเงิน**
-2. Dashboard → **ชำระผ่าน Stripe** → ไปหน้า Stripe Checkout
-3. ใช้บัตรทดสอบ: `4242 4242 4242 4242` · วันหมดอายุอนาคต · CVC อะไรก็ได้ · ชื่ออะไรก็ได้
-4. หลังจ่าย สำเร็จ → กลับ `/dashboard?stripe=success&session_id=cs_...`
-5. ระบบเรียก `POST /api/payment/stripe/confirm` → สถานะ **ชำระแล้ว** + Transaction ID
+Localhost: webhook จาก Stripe Cloud ยิงเข้าเครื่องไม่ได้ → ใช้ **confirm หลัง redirect**  
+ทางเลือก: `stripe listen --forward-to localhost:3000/api/payment/webhook/stripe`
 
 ---
 
-## ทำไมต้อง `confirm` บน localhost
+## โหมด Live (เงินจริง) — ใช้งานจริง
 
-Webhook จาก Stripe Cloud **ยิงเข้าเครื่องคุณไม่ได้** ถ้าไม่มี tunnel  
-เลยยืนยันด้วยการดึง Checkout Session จาก API หลัง redirect กลับ
+**ระวัง:** ตัดบัตรจริง · ต้องบัญชี Stripe ผ่าน Activate / Business details · โดเมน **HTTPS สาธารณะ**
 
-ถ้า deploy มีโดเมนสาธารณะ ค่อยตั้ง webhook:
+### เงื่อนไขก่อนเปิด
 
-```text
-POST https://<โดเมน>/api/payment/webhook/stripe
-Event: checkout.session.completed
+| รายการ | ต้องมี |
+|--------|--------|
+| Stripe Account | เปิด **Live mode** แล้ว (ไม่ใช่แค่ Test) |
+| Secret key | `sk_live_...` จาก Developers → API keys (ปิด Test mode) |
+| โดเมน | `https://your-domain` ที่ Stripe ยิง webhook ได้ |
+| Frontend / Backend URL | HTTPS จริงใน env |
+| Webhook secret | `whsec_...` จาก endpoint ที่สร้างใน Dashboard |
+
+### 1) สร้าง Webhook ใน Stripe (Live mode)
+
+1. Dashboard → **ปิด Test mode**
+2. **Developers → Webhooks → Add endpoint**
+3. URL: `https://<โดเมนของคุณ>/api/payment/webhook/stripe`
+4. Event: `checkout.session.completed`
+5. คัดลอก **Signing secret** → `whsec_...`
+
+### 2) Env บนเซิร์ฟเวอร์ (อย่าแปะในแชท / git)
+
+```env
+NODE_ENV=production
+PAYMENT_PROVIDER=stripe
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+FRONTEND_URL=https://your-domain
+APP_URL=https://your-domain
+# ถ้าต้องทด Live จากเครื่อง dev (ไม่แนะนำ): STRIPE_ALLOW_LIVE=true
 ```
 
-แล้วใส่ `STRIPE_WEBHOOK_SECRET=whsec_...` (verify signature จะเพิ่มทีหลังได้)
+`sk_live_` **ถูกบล็อก** นอก `NODE_ENV=production` เว้นแต่ตั้ง `STRIPE_ALLOW_LIVE=true`
 
-ทางเลือก local: `stripe listen --forward-to localhost:3000/api/payment/webhook/stripe`
+### 3) Deploy + ตรวจ
+
+1. Restart backend / container
+2. Stripe Dashboard → Webhook → Send test event หรือจ่ายจริงจำนวนเล็ก
+3. ดู log: signature ผ่าน + จองเป็น `approved_paid`
+4. Fallback หลัง Checkout: `stripe/confirm` ยังใช้ได้ถ้า webhook ช้า
+
+### Checklist Live
+
+- [ ] ผ่าน Stripe Activate / KYC
+- [ ] ใช้ `sk_live_` (ไม่ใช่ test)
+- [ ] `STRIPE_WEBHOOK_SECRET` ตั้งแล้ว
+- [ ] Webhook URL HTTPS สาธารณะ
+- [ ] `FRONTEND_URL` / `APP_URL` เป็น HTTPS เดียวกับที่ deploy
+- [ ] ไม่ commit `.env`
+- [ ] ทดสอบยอดเล็กก่อนเปิดผู้ใช้จริง
 
 ---
 
@@ -79,17 +94,17 @@ Event: checkout.session.completed
 
 | Env | ผล |
 |-----|-----|
-| `PAYMENT_PROVIDER=stripe` + **ไม่มี** key | Demo หน้าในเครื่อง (ไม่เรียก Stripe) |
-| `PAYMENT_PROVIDER=stripe` + `sk_test_...` | Checkout จริงใน Test mode |
+| `PAYMENT_PROVIDER=stripe` + ไม่มี key | Demo ในเครื่อง (production ปฏิเสธ) |
+| `+ sk_test_...` | Checkout Test |
+| `+ sk_live_...` + webhook secret | Checkout เงินจริง |
 | `PAYMENT_PROVIDER=mock_sandbox` | จำลองจ่ายแบบเดิม |
-| `sk_live_...` | เงินจริง — ใช้เมื่อ มฟล./CITS พร้อมเท่านั้น |
 
 ---
 
-## Checklist ด่วน
+## Checklist Test ด่วน
 
 - [ ] Test mode ใน Dashboard
-- [ ] `STRIPE_SECRET_KEY=sk_test_...` ใน `.env` (ไม่ commit)
+- [ ] `STRIPE_SECRET_KEY=sk_test_...`
 - [ ] `PAYMENT_PROVIDER=stripe`
 - [ ] Restart backend
-- [ ] จ่ายด้วย `4242...` สำเร็จ + สถานะจองเป็นชำระแล้ว
+- [ ] จ่าย `4242...` สำเร็จ + สถานะชำระแล้ว

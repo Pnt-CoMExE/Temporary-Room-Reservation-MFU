@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, computed, watch, type PropType } from "vue";
+import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { getStoredUserId } from "@/utils/auth";
+
+const { t } = useI18n();
 import {
   getAwaitingReviewLabel,
   getBookingStatusBadgeClass,
@@ -93,6 +96,10 @@ const previewHtmlForUrl = (url: string, title: string) => {
 const hasDownloadableDoc = (b: BookingItem) =>
   !!(b.memoDocumentUrl || b.approvalDocumentUrl || b.hasDoc);
 
+/** ใบอนุมัติที่เซ็นแล้วเท่านั้น (ไม่นับ memo ของผู้จอง) */
+const hasApprovalDoc = (b: BookingItem) =>
+  !!(b.tempDocFile || b.approvalDocumentUrl || b.hasDoc);
+
 const getAdminId = (): number | null => getStoredUserId();
 
 const props = defineProps({
@@ -134,6 +141,11 @@ const updateBookingStatus = async (id, status, remark = "", organizationType?: s
     if (organizationType) item.organizationType = organizationType;
     if (data?.totalPrice != null) item.totalPrice = Number(data.totalPrice);
     if (data?.roomPrice != null) item.roomPrice = Number(data.roomPrice);
+    if (data?.documentUrl) {
+      item.approvalDocumentUrl = data.documentUrl;
+      item.hasDoc = true;
+      item.tempDocFile = undefined;
+    }
 
     Swal.fire({
       icon: "success",
@@ -141,12 +153,14 @@ const updateBookingStatus = async (id, status, remark = "", organizationType?: s
       showConfirmButton: false,
       timer: 1500,
     });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error updating status:", err);
+    const msg =
+      err?.response?.data?.message || "ไม่สามารถอัปเดตสถานะได้";
     Swal.fire({
       icon: "error",
       title: "เกิดข้อผิดพลาด",
-      text: "ไม่สามารถอัปเดตสถานะได้",
+      text: msg,
     });
   }
 };
@@ -388,11 +402,11 @@ const openConfirm = (id, type) => {
           <button id="btn-export-doc" class="bg-blue-50 text-blue-600 px-4 py-3 rounded-xl text-xs font-bold border border-blue-100 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full sm:w-1/2">
             <font-awesome-icon icon="file-download" /> ใบขออนุญาต
           </button>
-          <button id="btn-import-doc" class="bg-purple-50 text-purple-600 px-4 py-3 rounded-xl text-xs font-bold border border-purple-100 hover:bg-purple-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full sm:w-1/2 ${item.hasDoc ? "ring-2 ring-purple-400 bg-purple-100" : ""}">
-            <font-awesome-icon icon="file-upload" /> ${item.hasDoc ? "แนบใบอนุมัติ ✓" : "แนบใบอนุมัติ"}
+          <button id="btn-import-doc" class="bg-purple-50 text-purple-600 px-4 py-3 rounded-xl text-xs font-bold border border-purple-100 hover:bg-purple-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full sm:w-1/2 ${hasApprovalDoc(item) ? "ring-2 ring-purple-400 bg-purple-100" : ""}">
+            <font-awesome-icon icon="file-upload" /> ${hasApprovalDoc(item) ? "แนบใบอนุมัติ ✓" : "แนบใบอนุมัติ"}
           </button>
         </div>
-        ${!item.hasDoc ? '<p class="text-xs text-red-500 mb-2 font-bold"><font-awesome-icon icon="exclamation-circle" /> บังคับแนบใบอนุมัติก่อน จึงจะสามารถกดอนุมัติได้</p>' : ""}
+        ${!hasApprovalDoc(item) ? '<p class="text-xs text-red-500 mb-2 font-bold"><font-awesome-icon icon="exclamation-circle" /> บังคับแนบใบอนุมัติก่อน จึงจะสามารถกดอนุมัติได้</p>' : ""}
       `,
       showDenyButton: true,
       showCancelButton: true,
@@ -410,7 +424,7 @@ const openConfirm = (id, type) => {
       },
       didOpen: () => {
         const confirmBtn = Swal.getConfirmButton();
-        if (!item.hasDoc) {
+        if (!hasApprovalDoc(item)) {
           confirmBtn.disabled = true;
           confirmBtn.style.opacity = "0.4";
           confirmBtn.style.cursor = "not-allowed";
@@ -431,6 +445,15 @@ const openConfirm = (id, type) => {
     }).then((result) => {
       if (item) {
         if (result.isConfirmed) {
+          if (!hasApprovalDoc(item)) {
+            Swal.fire({
+              icon: "warning",
+              title: "ต้องแนบใบอนุมัติ",
+              text: "กรุณาแนบใบอนุมัติก่อนกดอนุมัติ",
+              confirmButtonText: "ตกลง",
+            }).then(() => openConfirm(id, "manage_pending"));
+            return;
+          }
           openApproveConfirm(id);
         } else if (result.isDenied) {
           // ✨ เพิ่มส่วนให้แอดมินกรอกเหตุผลที่ปฏิเสธ ✨
@@ -466,25 +489,15 @@ const openConfirm = (id, type) => {
     });
   } else if (type === "payment") {
     Swal.fire({
-      title: "ยืนยันการรับชำระเงิน",
-      text: `คุณยืนยันว่าได้รับเงินสำหรับรายการ ${id} ครบถ้วนแล้วใช่หรือไม่?`,
+      title: t("admin.awaiting_stripe_title"),
+      text: t("admin.awaiting_stripe_hint"),
       icon: "info",
-      showCancelButton: true,
-      confirmButtonText: "ยืนยัน",
-      cancelButtonText: "ยกเลิก",
-      reverseButtons: false,
+      confirmButtonText: t("common.confirm"),
       buttonsStyling: false,
       customClass: {
         popup: "rounded-[2rem] p-8",
-        actions: "flex gap-3 mt-6 w-full justify-center",
-        confirmButton: statusActionBtn.confirmPayment,
-        cancelButton: statusActionBtn.secondary,
+        confirmButton: statusActionBtn.secondary,
       },
-    }).then((result) => {
-      if (result.isConfirmed && item) {
-        updateBookingStatus(id, "approved_paid");
-        saveLog("ยืนยันการชำระเงิน", `ยืนยันรับชำระเงินของรายการ: ${id}`);
-      }
     });
   }
 };
@@ -551,12 +564,13 @@ const openApproveConfirm = (id: string) => {
             <input type="radio" name="org-rate" value="external" ${currentOrg === "external" ? "checked" : ""} />
             <span>ภายนอก — ฿${priceExternal.toLocaleString()} <span class="text-gray-400 text-xs">(ประมาณรวม ฿${estimateTotal("external").toLocaleString()})</span></span>
           </label>
-          <p class="text-[10px] text-amber-700 mt-2">การเปลี่ยนเรทจะถูกบันทึกใน Activity Log</p>
+          <p class="text-[10px] text-amber-700 mt-2">เลือกเรทได้เฉพาะตอนยืนยันอนุมัตินี้ครั้งเดียว · บันทึกใน Activity Log</p>
         </div>
         <div class="border-t border-gray-100 pt-3">
           <p class="text-xs font-bold text-gray-500 mb-2">Preview เอกสารแนบ</p>
           ${previewHtmlForUrl(memoUrl, "หนังสือบันทึกข้อความ")}
           ${previewHtmlForUrl(approvalPreviewUrl, "ใบอนุมัติ")}
+          ${!approvalPreviewUrl ? '<p class="text-xs text-red-500 font-bold">ยังไม่มีใบอนุมัติ — ย้อนกลับไปแนบไฟล์ก่อน</p>' : ""}
         </div>
       </div>
     `,
@@ -569,7 +583,21 @@ const openApproveConfirm = (id: string) => {
       confirmButton: "rounded-xl px-6 py-3 font-bold",
       cancelButton: "rounded-xl px-6 py-3 font-bold",
     },
+    didOpen: () => {
+      const confirmBtn = Swal.getConfirmButton();
+      if (!hasApprovalDoc(item) || !approvalPreviewUrl) {
+        if (confirmBtn) {
+          confirmBtn.disabled = true;
+          confirmBtn.style.opacity = "0.4";
+          confirmBtn.style.cursor = "not-allowed";
+        }
+      }
+    },
     preConfirm: () => {
+      if (!hasApprovalDoc(item)) {
+        Swal.showValidationMessage("ต้องแนบใบอนุมัติก่อนยืนยัน");
+        return false;
+      }
       const selected = (
         Swal.getPopup()?.querySelector('input[name="org-rate"]:checked') as HTMLInputElement | null
       )?.value;
@@ -953,16 +981,21 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                     {{ getStatusText(booking.status) }}
                     <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
                   </button>
-                  <button
+                  <!-- Awaiting Stripe — display only; admin cannot mark paid -->
+                  <div
                     v-else-if="isBookingStatus(booking.status, 'approved_pending_payment')"
-                    @click="openConfirm(booking.id, 'payment')"
-                    :class="getStatusClass(booking.status)"
-                    class="min-w-[7.5rem] px-4 py-2.5 rounded-xl text-sm font-black border-2 shadow-sm flex items-center justify-center gap-2 hover:shadow-md hover:opacity-95 transition-all cursor-pointer whitespace-nowrap"
+                    class="flex flex-col items-center gap-1"
                   >
-                    <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
-                    {{ getStatusText(booking.status) }}
-                    <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
-                  </button>
+                    <span
+                      :class="getStatusClass(booking.status)"
+                      class="min-w-[7.5rem] px-4 py-2.5 rounded-xl text-sm font-black border-2 shadow-sm inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-default"
+                      :title="t('admin.awaiting_stripe_hint')"
+                    >
+                      <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
+                      {{ getStatusText(booking.status) }}
+                    </span>
+                    <span class="text-[10px] text-sky-600 font-semibold">{{ t("admin.awaiting_stripe_hint_short") }}</span>
+                  </div>
 
                   <div v-else class="flex flex-col items-center gap-2">
                     <span

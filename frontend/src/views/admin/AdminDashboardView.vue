@@ -74,7 +74,25 @@ const activeTab = ref("overview");
 const adminProfile = ref({
   fullName: localStorage.getItem("userName") || "เจ้าหน้าที่ จัดการทรัพย์สิน",
   role: "Admin",
+  profilePicture: null as string | null,
 });
+
+const loadAdminProfile = async () => {
+  try {
+    const res = await api.get("/api/user/profile");
+    const data = res.data || {};
+    if (data.profile_picture) {
+      adminProfile.value.profilePicture = data.profile_picture;
+    }
+    const name = [data.firstname, data.lastname].filter(Boolean).join(" ").trim();
+    if (name) {
+      adminProfile.value.fullName = name;
+      localStorage.setItem("userName", name);
+    }
+  } catch {
+    // keep localStorage fallback + shield icon
+  }
+};
 
 const bookings = ref<BookingInfo[]>([]);
 const stats = ref<Record<string, number>>({
@@ -188,7 +206,8 @@ const fetchAdminData = async () => {
       actionBy: (b.admin_name || "").trim() || undefined,
       memoDocumentUrl: b.memo_document_url || undefined,
       approvalDocumentUrl: b.approval_document_url || undefined,
-      hasDoc: !!(b.approval_document_url || b.memo_document_url),
+      // ใบอนุมัติเท่านั้น — หนังสือบันทึก (memo) ไม่นับเป็นเอกสารอนุมัติ
+      hasDoc: !!b.approval_document_url,
     }));
 
     if (!range.scopeAll && range.from && range.to) {
@@ -268,7 +287,10 @@ const fetchAdminData = async () => {
   }
 };
 
-onMounted(() => fetchAdminData());
+onMounted(() => {
+  loadAdminProfile();
+  fetchAdminData();
+});
 
 const pendingCount = computed(() => {
   return stats.value.pendingCount;
@@ -393,9 +415,16 @@ const confirmLogout = () => {
           >
             <div class="text-center mb-8 border-b border-gray-100 pb-6">
               <div
-                class="w-24 h-24 mx-auto bg-linear-to-tr from-[#ba0b2f] to-[#8c0823] rounded-full flex items-center justify-center text-white text-3xl shadow-lg border-4 border-white mb-4"
+                class="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-lg border-4 border-white mb-4 bg-linear-to-tr from-[#ba0b2f] to-[#8c0823] flex items-center justify-center text-white text-3xl"
               >
-                <font-awesome-icon icon="user-shield" />
+                <img
+                  v-if="adminProfile.profilePicture"
+                  :src="adminProfile.profilePicture"
+                  :alt="adminProfile.fullName"
+                  referrerpolicy="no-referrer"
+                  class="w-full h-full object-cover"
+                />
+                <font-awesome-icon v-else icon="user-shield" />
               </div>
               <h3 class="text-lg font-extrabold text-gray-900 mb-1">
                 {{ adminProfile.fullName }}

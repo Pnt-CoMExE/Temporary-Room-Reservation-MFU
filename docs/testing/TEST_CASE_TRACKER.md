@@ -48,6 +48,16 @@
 Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื่นๆ → external, admin = promote / `DEV_ADMIN_EMAILS`  
 **โปรโม:** `MFUWELCOME` / `PROMO2026` / `STUDENT10`
 
+**บัญชีทีม (UAT จริง — เพิ่มทีละคน):**  
+| คน | อีเมล | Role UAT |
+|----|--------|----------|
+| คอม (bootstrap) | `comza962@gmail.com` | admin (`DEV_ADMIN_EMAILS`) |
+| พาร์ท | `6631501081@lamduan.mfu.ac.th` | admin (`DEV_ADMIN_EMAILS`) |
+| เจ | `6631501164@lamduan.mfu.ac.th` | admin (`DEV_ADMIN_EMAILS`) |
+| ซี | `6631501073@lamduan.mfu.ac.th` | internal (`DEV_INTERNAL_EMAILS`) |
+| ซี | `prattanakorn22127@gmail.com` | external |
+| ซี | `frewgametv@gmail.com` | external |
+
 ---
 
 ## รหัส TC ย่อมาจากอะไร
