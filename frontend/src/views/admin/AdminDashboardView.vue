@@ -8,6 +8,7 @@ import AdminRooms from "./AdminRooms.vue";
 import AdminBanners from "./AdminBanners.vue";
 import AdminUsers from "./AdminUsers.vue";
 import AdminPromoCodes from "./AdminPromoCodes.vue";
+import AdminActivityLog from "./AdminActivityLog.vue";
 
 const { t, locale } = useI18n();
 locale.value = "th";
@@ -510,6 +511,17 @@ const confirmLogout = () => {
               >
                 <font-awesome-icon icon="bullhorn" class="w-5" /> การประกาศ
               </button>
+              <button
+                @click="activeTab = 'logs'"
+                :class="
+                  activeTab === 'logs'
+                    ? 'bg-red-50 text-[#ba0b2f]'
+                    : 'text-gray-600 hover:bg-gray-50'
+                "
+                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+              >
+                <font-awesome-icon icon="history" class="w-5" /> บันทึกกิจกรรม
+              </button>
 
               <div class="pt-6 mt-6 border-t border-gray-100">
                 <button
@@ -789,6 +801,7 @@ const confirmLogout = () => {
           <AdminUsers v-if="activeTab === 'users'" />
           <AdminPromoCodes v-if="activeTab === 'promos'" />
           <AdminBanners v-if="activeTab === 'banners'" />
+          <AdminActivityLog v-if="activeTab === 'logs'" />
         </div>
       </div>
     </div>

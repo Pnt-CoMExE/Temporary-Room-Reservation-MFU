@@ -101,9 +101,9 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-U-02 | U-02 | ซี | เข้าสู่ระบบ Google OAuth (@lamduan.mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @lamduan.mfu.ac.th | Login สำเร็จ, Role=external, ไป /home | ⬜ | |  |
 | TC-U-02b | U-02b | พาร์ท | Admin promote ผู้ใช้เป็น admin | `Admin Users` | 1. Login Admin 2. Users 3. ตั้ง Role=admin | ผู้ใช้นั้น login แล้วได้ Role=admin | ⬜ | |  |
 | TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ⬜ | |  |
-| TC-U-04 | U-04 | เจ | ออกจากระบบ | `Navbar` | 1. เมนู Navbar 2. ออกจากระบบ 3. ยืนยัน | Redirect Login, ลบ session/cookie | ⬜ | |  |
+| TC-U-04 | U-04 | เจ | ออกจากระบบ | `Navbar` | 1. เมนู Navbar 2. ออกจากระบบ 3. ยืนยัน | Redirect Login, ลบ session/cookie | ✅ | `evidence/JJ/TC-U-04.png` |  |
 | TC-U-05 | U-05 | ซี | เข้าหน้าที่ต้อง login โดยไม่ login | `/home` | 1. เปิด /home โดยตรงโดยไม่ login | Redirect ไป Login | ⬜ | |  |
-| TC-U-06 | U-06 | เจ | หน้าหลัก — Featured Rooms | `/home` | 1. Login 2. เข้า /home | Banner + Featured Rooms | ⬜ | |  |
+| TC-U-06 | U-06 | เจ | หน้าหลัก — Featured Rooms | `/home` | 1. Login 2. เข้า /home | Banner + Featured Rooms | ✅ | `evidence/JJ/TC-U-06.png` |  |
 | TC-U-07 | U-07 | ซี | หน้ารายการห้อง | `/rooms` | 1. เมนูห้องทั้งหมด 2. ดูรายการ | แสดงห้องพร้อมรูป+ราคา | ⬜ | |  |
 | TC-U-08 | U-08 | ซี | กรองตามประเภทพื้นที่ | `/rooms` | 1. เปิด /rooms 2. เลือก Meeting Room | แสดงเฉพาะห้องประชุม | ⬜ | |  |
 | TC-U-09 | U-09 | ซี | ค้นหาห้องภาษาไทย | `/rooms` | 1. พิมพ์ ห้องประชุม | แสดงห้องที่ชื่อตรง | ⬜ | |  |
@@ -127,8 +127,8 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-U-26 | U-26 | ซี | ส่งรีวิวความพึงพอใจ | `/dashboard` | 1. รีวิว 2. ดาว+คอมเมนต์ 3. ส่ง | ส่งรีวิวสำเร็จ + เห็นดาว | ⬜ | |  |
 | TC-U-27 | U-27 | ซี | ดูข้อมูลส่วนตัว | `/dashboard โปรไฟล์` | 1. แท็บโปรไฟล์ | ชื่อ อีเมล Role เบอร์ | ⬜ | |  |
 | TC-U-28 | U-28 | ซี | แก้ไขเบอร์โทรศัพท์ | `/dashboard โปรไฟล์` | 1. แก้เบอร์ 2. บันทึก | บันทึกสำเร็จ | ⬜ | |  |
-| TC-A-01 | A-01 | เจ | แสดง Dashboard สถิติ | `/admin/dashboard` | 1. Login admin 2. เปิด dashboard | กราฟ/สถิติจอง | ⬜ | |  |
-| TC-A-02 | A-02 | เจ | แท็บ Sidebar ครบ | `/admin/*` | 1. ตรวจ Sidebar | มีแท็บหลักครบ | ⬜ | |  |
+| TC-A-01 | A-01 | เจ | แสดง Dashboard สถิติ | `/admin/dashboard` | 1. Login admin 2. เปิด dashboard | กราฟ/สถิติจอง | ✅ | `evidence/JJ/TC-A-01.png` |  |
+| TC-A-02 | A-02 | เจ | แท็บ Sidebar ครบ | `/admin/*` | 1. ตรวจ Sidebar | มีแท็บหลักครบ | ✅ | `evidence/JJ/TC-A-02.png` |  |
 | TC-A-03 | A-03 | พาร์ท | ดูรายการคำขอจอง | `Admin คำขอจอง` | 1. เปิดแท็บคำขอจอง | ตารางเลขที่ ผู้จอง ห้อง วัน สถานะ เอกสาร | ⬜ | |  |
 | TC-A-04 | A-04 | พาร์ท | กรองคำขอตามสถานะ | `Admin คำขอจอง` | 1. filter รออนุมัติ | เฉพาะ pending | ⬜ | |  |
 | TC-A-05 | A-05 | คอม | อนุมัติคำขอจอง (แนบใบ+confirm) | `Admin คำขอจอง` | 1. แนบใบอนุมัติ 2. อนุมัติ 3. ยืนยัน confirm | สถานะรอชำระเงิน (approved_pending_payment) | ⬜ | |  |
@@ -137,20 +137,20 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-A-08 | A-08 | พาร์ท | ส่งออกเอกสาร ZIP | `Admin คำขอจอง` | 1. ติ๊กหลายรายการ 2. ดาวน์โหลด ZIP | ZIP แยกตาม booking_no | ⬜ | |  |
 | TC-A-09 | A-09 | พาร์ท | ดูสลิปการชำระเงิน | `Admin คำขอจอง` | 1. เปิดรายการ pending_verification | เห็นรูปสลิป | ⬜ | |  |
 | TC-A-10 | A-10 | พาร์ท | ยืนยันการชำระเงิน | `Admin คำขอจอง` | 1. กดยืนยันการชำระเงิน | verified / ชำระแล้ว | ⬜ | |  |
-| TC-A-11 | A-11 | เจ | ดูรายการห้องทั้งหมด | `Admin ห้อง` | 1. แท็บจัดการห้อง | ตารางห้อง + active/inactive | ⬜ | |  |
+| TC-A-11 | A-11 | เจ | ดูรายการห้องทั้งหมด | `Admin ห้อง` | 1. แท็บจัดการห้อง | ตารางห้อง + active/inactive | ✅ | `evidence/JJ/TC-A-11.png` |  |
 | TC-A-12 | A-12 | พาร์ท | เปิด/ปิดการใช้งานห้อง | `Admin ห้อง` | 1. Toggle ห้อง 2. ดู /rooms | ห้องที่ปิดไม่โชว์ฝั่งผู้ใช้ | ⬜ | |  |
-| TC-A-13 | A-13 | เจ | ดูรายการแบนเนอร์ | `Admin แบนเนอร์` | 1. แท็บบันเนอร์ | รายการ+preview | ⬜ | |  |
-| TC-A-14 | A-14 | เจ | เพิ่มแบนเนอร์ใหม่ | `Admin แบนเนอร์` | 1. กรอก+อัปโหลด 2. บันทึก | โชว์ใน admin และ /home | ⬜ | |  |
-| TC-A-15 | A-15 | เจ | เปิด/ปิดแบนเนอร์ | `Admin แบนเนอร์` | 1. Toggle | ที่ปิดไม่โชว์ /home | ⬜ | |  |
-| TC-A-15b | A-15b | เจ | ลบแบนเนอร์ | `Admin แบนเนอร์` | 1. ลบ 2. ยืนยัน | หายจาก admin และ /home | ⬜ | |  |
-| TC-A-15c | A-15c | เจ | ส่งประกาศ Broadcast | `Admin` | 1. ส่งประกาศ | ผู้ใช้เห็นในกระดิ่ง Navbar | ⬜ | |  |
-| TC-A-16 | A-16 | เจ | ดูรายการ Promo Codes | `Admin โปรโม` | 1. แท็บรหัสส่วนลด | เห็นรหัส+สถิติ | ⬜ | |  |
-| TC-A-17 | A-17 | เจ | สร้าง Promo Code ใหม่ | `Admin โปรโม` | 1. กรอกฟอร์ม 2. สร้าง | ใช้ได้ตอนจอง | ⬜ | |  |
-| TC-A-18 | A-18 | เจ | เปิด/ปิด Promo Code | `Admin โปรโม` | 1. Toggle | รหัสที่ปิดใช้ไม่ได้ | ⬜ | |  |
-| TC-A-19 | A-19 | เจ | ดูรายการผู้ใช้ | `Admin Users` | 1. แท็บผู้ใช้ | ตารางชื่อ อีเมล Role สถิติ | ⬜ | |  |
-| TC-A-20 | A-20 | เจ | ค้นหาผู้ใช้ | `Admin Users` | 1. พิมพ์ชื่อ/อีเมล | กรองตรง | ⬜ | |  |
+| TC-A-13 | A-13 | เจ | ดูรายการแบนเนอร์ | `Admin แบนเนอร์` | 1. แท็บบันเนอร์ | รายการ+preview | ✅ | `evidence/JJ/TC-A-13.png` |  |
+| TC-A-14 | A-14 | เจ | เพิ่มแบนเนอร์ใหม่ | `Admin แบนเนอร์` | 1. กรอก+อัปโหลด 2. บันทึก | โชว์ใน admin และ /home | ✅ | `evidence/JJ/TC-A-14.png` |  |
+| TC-A-15 | A-15 | เจ | เปิด/ปิดแบนเนอร์ | `Admin แบนเนอร์` | 1. Toggle | ที่ปิดไม่โชว์ /home | ✅ | `evidence/JJ/TC-A-15.png` |  |
+| TC-A-15b | A-15b | เจ | ลบแบนเนอร์ | `Admin แบนเนอร์` | 1. ลบ 2. ยืนยัน | หายจาก admin และ /home | ✅ | `evidence/JJ/TC-A-15b.png` |  |
+| TC-A-15c | A-15c | เจ | ส่งประกาศ Broadcast | `Admin` | 1. ส่งประกาศ | ผู้ใช้เห็นในกระดิ่ง Navbar | ✅ | `evidence/JJ/TC-A-15c.png` |  |
+| TC-A-16 | A-16 | เจ | ดูรายการ Promo Codes | `Admin โปรโม` | 1. แท็บรหัสส่วนลด | เห็นรหัส+สถิติ | ✅ | `evidence/JJ/TC-A-16.png` |  |
+| TC-A-17 | A-17 | เจ | สร้าง Promo Code ใหม่ | `Admin โปรโม` | 1. กรอกฟอร์ม 2. สร้าง | ใช้ได้ตอนจอง | ✅ | `evidence/JJ/TC-A-17.png` |  |
+| TC-A-18 | A-18 | เจ | เปิด/ปิด Promo Code | `Admin โปรโม` | 1. Toggle | รหัสที่ปิดใช้ไม่ได้ | ✅ | `evidence/JJ/TC-A-18.png` |  |
+| TC-A-19 | A-19 | เจ | ดูรายการผู้ใช้ | `Admin Users` | 1. แท็บผู้ใช้ | ตารางชื่อ อีเมล Role สถิติ | ✅ | `evidence/JJ/TC-A-19.png` |  |
+| TC-A-20 | A-20 | เจ | ค้นหาผู้ใช้ | `Admin Users` | 1. พิมพ์ชื่อ/อีเมล | กรองตรง | ✅ | `evidence/JJ/TC-A-20.png` |  |
 | TC-A-21 | A-21 | พาร์ท | เปลี่ยน Role / Promote Admin | `Admin Users` | 1. ตั้ง/ถอด Admin | Role อัปเดตสำเร็จ | ⬜ | |  |
-| TC-A-22 | A-22 | เจ | ดูบันทึกกิจกรรม | `Admin Logs` | 1. แท็บบันทึกกิจกรรม | เห็น admin การกระทำ รายละเอียด เวลา | ⬜ | |  |
+| TC-A-22 | A-22 | เจ | ดูบันทึกกิจกรรม | `Admin Logs` | 1. แท็บบันทึกกิจกรรม | เห็น admin การกระทำ รายละเอียด เวลา | ✅ | `evidence/JJ/TC-A-22.png` |  |
 | TC-I-01 | I-01 | ซี | สลับภาษา TH → EN | `Navbar` | 1. คลิกเปลี่ยนภาษา | ข้อความเป็นอังกฤษ | ⬜ | |  |
 | TC-I-02 | I-02 | ซี | สลับภาษา EN → TH | `Navbar` | 1. สลับกลับ | ข้อความเป็นไทย | ⬜ | |  |
 | TC-I-03 | I-03 | ซี | หน้า Login สลับภาษา | `Login` | 1. สลับภาษาบน Login | ข้อความเปลี่ยนถูกต้อง | ⬜ | |  |
@@ -163,7 +163,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-E-03 | E-03 | คอม | Non-admin เข้า Admin | `/admin/dashboard` | 1. Login user ธรรมดา 2. เปิด /admin | กันเข้า / redirect | ⬜ | |  |
 | TC-E-04 | E-04 | ซี | ส่งฟอร์มจองว่าง | `/booking/:id` | 1. กดส่งโดยไม่กรอก | validation error | ⬜ | |  |
 | TC-E-05 | E-05 | คอม | อัปโหลดไฟล์เกิน 10MB | `/booking/:id` | 1. แนบ PDF ~15MB 2. ส่ง | error ไฟล์ใหญ่เกินไป | ⬜ | |  |
-| TC-E-06 | E-06 | เจ | Responsive Mobile | `ทั้งระบบ` | 1. DevTools iPhone/Pixel | ไม่มีเลื่อนแนวนอนผิดปกติ | ⬜ | |  |
+| TC-E-06 | E-06 | เจ | Responsive Mobile | `ทั้งระบบ` | 1. DevTools iPhone/Pixel | ไม่มีเลื่อนแนวนอนผิดปกติ | ✅ | `evidence/JJ/TC-E-06.png` |  |
 | TC-E-07 | E-07 | พาร์ท | อีเมลยืนยันหลังจอง | `อีเมล` | 1. ส่งจอง 2. ดู inbox | ได้อีเมลยืนยัน (หรือ console ถ้ายังไม่มี SMTP) | ⬜ | |  |
 | TC-E-08 | E-08 | พาร์ท | อีเมลแจ้งผลอนุมัติ | `อีเมล` | 1. Admin อนุมัติ 2. ดู inbox ผู้ใช้ | ได้อีเมลแจ้งผล | ⬜ | |  |
 | TC-P-R4-01 | — (R4) | คอม | Stripe demo checkout | `/dashboard` | 1. PAYMENT_PROVIDER=stripe 2. กดชำระ Stripe 3. demo checkout 4. Callback | สถานะ approved_paid | ⬜ | | ดู ../payment/STRIPE.md |
@@ -171,7 +171,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-A-R4-01 | — (R4) | คอม | เลือกเรทตอนอนุมัติ | `Admin confirm` | 1. อนุมัติ 2. เลือกเรท 3. ยืนยัน | เรท+ราคาตรงที่เลือก | ⬜ | |  |
 | TC-A-R4-02 | — (R4) | พาร์ท | Preview เอกสารก่อนอนุมัติ | `Admin confirm` | 1. เปิด confirm 2. ดู Preview | เห็น preview PDF/รูป | ⬜ | |  |
 | TC-A-R4-03 | — (R4) | คอม | Log เปลี่ยนเรท | `Admin ประวัติจอง` | 1. อนุมัติพร้อมเปลี่ยนเรท 2. ดูประวัติ | มี log เรท/ราคาเก่า→ใหม่ | ⬜ | |  |
-| TC-A-R4-04 | — (R4) | เจ | ไม่มีปุ่มตั้ง Co-op ที่ Users | `Admin Users` | 1. เปิด Users 2. ดูปุ่มจัดการ | ไม่มีปุ่มตั้งเป็น Co-op | ⬜ | |  |
+| TC-A-R4-04 | — (R4) | เจ | ไม่มีปุ่มตั้ง Co-op ที่ Users | `Admin Users` | 1. เปิด Users 2. ดูปุ่มจัดการ | ไม่มีปุ่มตั้งเป็น Co-op | ✅ | `evidence/JJ/TC-A-R4-04.png` |  |
 | TC-Z-01 | — (≈E-03) | คอม | AuthZ กันหน้า Admin | `/admin/dashboard` | 1. Login non-admin 2. เปิด /admin | กันเข้าได้ | ⬜ | |  |
 | TC-Z-02 | — (Unit) | คอม | รัน npm test AuthZ | `backend` | 1. cd backend 2. npm test | เทส AuthZ/เขียว | ⬜ | |  |
 
