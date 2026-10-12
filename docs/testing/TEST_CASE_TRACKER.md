@@ -100,7 +100,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-U-01 | U-01 | ซี | เข้าสู่ระบบ Google OAuth (@mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @mfu.ac.th | Login สำเร็จ, Role=internal, ไป /home | ⬜ | |  |
 | TC-U-02 | U-02 | ซี | เข้าสู่ระบบ Google OAuth (@lamduan.mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @lamduan.mfu.ac.th | Login สำเร็จ, Role=external, ไป /home | ⬜ | |  |
 | TC-U-02b | U-02b | พาร์ท | Admin promote ผู้ใช้เป็น admin | `Admin Users` | 1. Login Admin 2. Users 3. ตั้ง Role=admin | ผู้ใช้นั้น login แล้วได้ Role=admin | ⬜ | |  |
-| TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ⬜ | |  |
+| TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ✅ | `evidence/CCC/TC-U-03.png` | `frewgametv@gmail.com` external → `/home` |
 | TC-U-04 | U-04 | เจ | ออกจากระบบ | `Navbar` | 1. เมนู Navbar 2. ออกจากระบบ 3. ยืนยัน | Redirect Login, ลบ session/cookie | ⬜ | |  |
 | TC-U-05 | U-05 | ซี | เข้าหน้าที่ต้อง login โดยไม่ login | `/home` | 1. เปิด /home โดยตรงโดยไม่ login | Redirect ไป Login | ⬜ | |  |
 | TC-U-06 | U-06 | เจ | หน้าหลัก — Featured Rooms | `/home` | 1. Login 2. เข้า /home | Banner + Featured Rooms | ⬜ | |  |
@@ -124,7 +124,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-U-24 | U-24 | พาร์ท | อัปโหลดสลิปการโอน | `/dashboard` | 1. ใน Modal แนบสลิป jpg 2. ส่ง | รอตรวจสอบการชำระเงิน | ⬜ | |  |
 | TC-U-24b | U-24b | พาร์ท | จำลองชำระเงิน Mock Sandbox | `/dashboard` | 1. PAYMENT_PROVIDER=mock_sandbox 2. จำลองชำระ 3. ยืนยัน | pending_verification โดยไม่โอนจริง | ⬜ | |  |
 | TC-U-25 | U-25 | ซี | ยกเลิกคำขอจอง | `/dashboard` | 1. ยกเลิกบนรายการ pending 2. ยืนยัน | สถานะยกเลิกแล้ว | ⬜ | |  |
-| TC-U-26 | U-26 | ซี | ส่งรีวิวความพึงพอใจ | `/dashboard` | 1. รีวิว 2. ดาว+คอมเมนต์ 3. ส่ง | ส่งรีวิวสำเร็จ + เห็นดาว | ⬜ | |  |
+| TC-U-26 | U-26 | ซี | ส่งรีวิวความพึงพอใจ | `/dashboard` | 1. รีวิว 2. ดาว+คอมเมนต์ 3. ส่ง | ส่งรีวิวสำเร็จ + เห็นดาว | ✅ | `evidence/CCC/TC-U-26.png` | BK-20261012-K9S3 ให้ 5 ดาว แล้วขึ้นมีรีวิวแล้ว |
 | TC-U-27 | U-27 | ซี | ดูข้อมูลส่วนตัว | `/dashboard โปรไฟล์` | 1. แท็บโปรไฟล์ | ชื่อ อีเมล Role เบอร์ | ⬜ | |  |
 | TC-U-28 | U-28 | ซี | แก้ไขเบอร์โทรศัพท์ | `/dashboard โปรไฟล์` | 1. แก้เบอร์ 2. บันทึก | บันทึกสำเร็จ | ⬜ | |  |
 | TC-A-01 | A-01 | เจ | แสดง Dashboard สถิติ | `/admin/dashboard` | 1. Login admin 2. เปิด dashboard | กราฟ/สถิติจอง | ⬜ | |  |
