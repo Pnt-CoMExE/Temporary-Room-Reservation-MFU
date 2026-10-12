@@ -2,6 +2,18 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-12]
+- เริ่มเก็บหลักฐานเทสของซีใน `docs/testing/evidence/CCC/` ตาม `cee.md`: TC-U-05 กับ TC-E-01 ผ่าน, TC-I-03 ไม่ผ่าน (หน้า Login ไม่มีปุ่มสลับภาษา) เคสที่เหลือต้องล็อกอิน Google ก่อน
+- TC-U-01 ผ่านด้วย `6631501073@lamduan.mfu.ac.th` (ผู้ใช้ภายในผ่าน `DEV_INTERNAL_EMAILS`) แล้วไปหน้า `/home` รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-01.png`
+- TC-U-07 ผ่าน: เมนูจองห้องเปิดรายการ 104 ห้อง การ์ดมีรูปและราคา รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-07.png`
+- เทสต่อใน `cee.md` ด้วยบัญชีลำดวน: ผ่าน U-08, U-09, U-11, U-13, U-14, U-17, U-27, I-01, I-02, I-05, I-07, E-04 ไม่ผ่าน U-10, U-21, I-04 รูปอยู่ใน `docs/testing/evidence/CCC/`
+- ตรวจรายการจองจริง BK-20261012-FJ9U ใหม่: U-20 และ U-22 ผ่าน, สถานะภาษาอังกฤษเป็น Pending approval (I-06 ผ่าน) ยังไม่กดยกเลิกคำขอ
+- TC-U-25 ผ่าน: ยืนยันยกเลิก BK-20261012-FJ9U แล้วสถานะเป็นยกเลิกแล้ว TC-U-28 ผ่าน: บันทึกเบอร์ในโปรไฟล์แล้ว โหลดหน้าใหม่ค่ายังอยู่
+- TC-U-02 ไม่ผ่าน: ถอดเมลออกจาก `DEV_INTERNAL_EMAILS` แล้วล็อกอินใหม่ ไป `/home` ได้ แต่บทบาทยังเป็น internal เพราะฐานข้อมูลจำค่าเดิม ใส่เมลกลับใน `.env` แล้ว
+- TC-U-03 ไม่ผ่านรอบแรก: `prattanakorn22127@gmail.com` เป็น admin และไป `/admin/dashboard`
+- เทส TC-U-03 ใหม่ด้วย `frewgametv@gmail.com`: ผ่าน เป็นผู้ใช้ภายนอกและไป `/home` รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-03.png`
+- TC-U-26 ผ่าน: หลังชำระเงินรายการ BK-20261012-K9S3 ให้ 5 ดาวพร้อมข้อความ แล้วแดชบอร์ดขึ้น «มีรีวิวแล้ว» รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-26.png`
+
 ## [2026-10-07 — UAT emails: admin พาร์ท/เจ]
 - พาร์ท = `6631501081@…` · เจ = `6631501164@…` (`DEV_ADMIN_EMAILS`)
 - `part.md` · `jay.md` · `TEST_CASE_TRACKER.md`

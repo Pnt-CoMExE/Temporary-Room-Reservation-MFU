@@ -97,36 +97,36 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 
 | TC# | เดิม | Owner | ชื่อเคส | หน้า | Scenario | Expected | ผล | หลักฐาน | หมายเหตุ |
 |-----|------|-------|---------|------|----------|----------|----|---------|----------|
-| TC-U-01 | U-01 | ซี | เข้าสู่ระบบ Google OAuth (@mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @mfu.ac.th | Login สำเร็จ, Role=internal, ไป /home | ⬜ | |  |
-| TC-U-02 | U-02 | ซี | เข้าสู่ระบบ Google OAuth (@lamduan.mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @lamduan.mfu.ac.th | Login สำเร็จ, Role=external, ไป /home | ⬜ | |  |
+| TC-U-01 | U-01 | ซี | เข้าสู่ระบบ Google OAuth (@mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @mfu.ac.th | Login สำเร็จ, Role=internal, ไป /home | ✅ | `evidence/CCC/TC-U-01.png` | `6631501073@lamduan` ผ่าน DEV_INTERNAL_EMAILS, Role=internal, ไป `/home` |
+| TC-U-02 | U-02 | ซี | เข้าสู่ระบบ Google OAuth (@lamduan.mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @lamduan.mfu.ac.th | Login สำเร็จ, Role=external, ไป /home | ❌ | `evidence/CCC/TC-U-02.png` | เข้า `/home` ได้ แต่ role ยังเป็น internal เพราะในฐานข้อมูลถูกตั้งเป็น internal ไว้แล้ว |
 | TC-U-02b | U-02b | พาร์ท | Admin promote ผู้ใช้เป็น admin | `Admin Users` | 1. Login Admin 2. Users 3. ตั้ง Role=admin | ผู้ใช้นั้น login แล้วได้ Role=admin | ⬜ | |  |
-| TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ⬜ | |  |
+| TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ✅ | `evidence/CCC/TC-U-03.png` | `frewgametv@gmail.com` Role=external ไป `/home` (เมล `prattanakorn22127@gmail.com` เป็น admin ในฐานข้อมูล จึงใช้เมลสำรอง) |
 | TC-U-04 | U-04 | เจ | ออกจากระบบ | `Navbar` | 1. เมนู Navbar 2. ออกจากระบบ 3. ยืนยัน | Redirect Login, ลบ session/cookie | ✅ | `evidence/JJ/TC-U-04.png` |  |
-| TC-U-05 | U-05 | ซี | เข้าหน้าที่ต้อง login โดยไม่ login | `/home` | 1. เปิด /home โดยตรงโดยไม่ login | Redirect ไป Login | ⬜ | |  |
+| TC-U-05 | U-05 | ซี | เข้าหน้าที่ต้อง login โดยไม่ login | `/home` | 1. เปิด /home โดยตรงโดยไม่ login | Redirect ไป Login | ✅ | `evidence/CCC/TC-U-05.png` | เปิด `/home` แล้วกลับหน้า Login |
 | TC-U-06 | U-06 | เจ | หน้าหลัก — Featured Rooms | `/home` | 1. Login 2. เข้า /home | Banner + Featured Rooms | ✅ | `evidence/JJ/TC-U-06.png` |  |
-| TC-U-07 | U-07 | ซี | หน้ารายการห้อง | `/rooms` | 1. เมนูห้องทั้งหมด 2. ดูรายการ | แสดงห้องพร้อมรูป+ราคา | ⬜ | |  |
-| TC-U-08 | U-08 | ซี | กรองตามประเภทพื้นที่ | `/rooms` | 1. เปิด /rooms 2. เลือก Meeting Room | แสดงเฉพาะห้องประชุม | ⬜ | |  |
-| TC-U-09 | U-09 | ซี | ค้นหาห้องภาษาไทย | `/rooms` | 1. พิมพ์ ห้องประชุม | แสดงห้องที่ชื่อตรง | ⬜ | |  |
-| TC-U-10 | U-10 | ซี | ค้นหาห้องภาษาอังกฤษ | `/rooms` | 1. พิมพ์ Meeting Room | ผลเดียวกับค้นหาไทย | ⬜ | |  |
-| TC-U-11 | U-11 | ซี | หน้ารายละเอียดห้อง | `/rooms/:id` | 1. คลิกการ์ดห้อง | รูป ความจุ สถานที่ ราคา 3-tier ปฏิทิน | ⬜ | |  |
+| TC-U-07 | U-07 | ซี | หน้ารายการห้อง | `/rooms` | 1. เมนูห้องทั้งหมด 2. ดูรายการ | แสดงห้องพร้อมรูป+ราคา | ✅ | `evidence/CCC/TC-U-07.png` | พบ 104 ห้อง การ์ดมีรูป ชื่อ และราคา เช่น C3-101 ฿500 |
+| TC-U-08 | U-08 | ซี | กรองตามประเภทพื้นที่ | `/rooms` | 1. เปิด /rooms 2. เลือก Meeting Room | แสดงเฉพาะห้องประชุม | ✅ | `evidence/CCC/TC-U-08.png` | เลือกห้องประชุม เหลือ 58 ห้อง |
+| TC-U-09 | U-09 | ซี | ค้นหาห้องภาษาไทย | `/rooms` | 1. พิมพ์ ห้องประชุม | แสดงห้องที่ชื่อตรง | ✅ | `evidence/CCC/TC-U-09.png` | พบ 48 ห้อง |
+| TC-U-10 | U-10 | ซี | ค้นหาห้องภาษาอังกฤษ | `/rooms` | 1. พิมพ์ Meeting Room | ผลเดียวกับค้นหาไทย | ❌ | `evidence/CCC/TC-U-10.png` | ได้ 45 ห้อง ไม่เท่ากับค้นไทย 48 ห้อง |
+| TC-U-11 | U-11 | ซี | หน้ารายละเอียดห้อง | `/rooms/:id` | 1. คลิกการ์ดห้อง | รูป ความจุ สถานที่ ราคา 3-tier ปฏิทิน | ✅ | `evidence/CCC/TC-U-11.png` | C3-101 ความจุ 50 มีคิวจอง เรทภายในครึ่งวัน ฿500 เต็มวัน ฿1,000 |
 | TC-U-12 | U-12 | คอม | ส่งคำขอจอง — กรอกครบ | `/booking/:id` | 1. กรอกฟอร์มครบ 2. แนบ PDF 3. ส่ง | สำเร็จ + redirect /dashboard + สถานะรออนุมัติ | ⬜ | |  |
-| TC-U-13 | U-13 | ซี | เลือกวันที่และช่วงเวลา | `/booking/:id` | 1. เลือกวัน 2. เลือกเช้า/บ่าย/เต็มวัน | ราคาเปลี่ยนตามช่วง | ⬜ | |  |
-| TC-U-14 | U-14 | ซี | เลือกอุปกรณ์เสริม | `/booking/:id` | 1. เลือก Add-on | ราคารวมอัปเดตถูกต้อง | ⬜ | |  |
+| TC-U-13 | U-13 | ซี | เลือกวันที่และช่วงเวลา | `/booking/:id` | 1. เลือกวัน 2. เลือกเช้า/บ่าย/เต็มวัน | ราคาเปลี่ยนตามช่วง | ✅ | `evidence/CCC/TC-U-13.png` | 20 ต.ค. 2026 ครึ่งวันเช้า ฿500 เต็มวัน ฿1,000 |
+| TC-U-14 | U-14 | ซี | เลือกอุปกรณ์เสริม | `/booking/:id` | 1. เลือก Add-on | ราคารวมอัปเดตถูกต้อง | ✅ | `evidence/CCC/TC-U-14.png` | โปรเจคเตอร์ 1 ชุด รวม ฿1,500 |
 | TC-U-15 | U-15 | คอม | ใช้รหัสส่วนลด | `/booking/:id` | 1. พิมพ์ MFUWELCOME 2. ตรวจสอบ | ลด 100 บาท + รวมลดลง | ⬜ | |  |
 | TC-U-16 | U-16 | คอม | ใช้รหัสส่วนลดที่ไม่มี | `/booking/:id` | 1. พิมพ์ INVALID123 2. ตรวจสอบ | error รหัสไม่ถูกต้อง | ⬜ | |  |
-| TC-U-17 | U-17 | ซี | ไม่แนบไฟล์ PDF | `/booking/:id` | 1. กรอกครบไม่แนบไฟล์ 2. ส่ง | error ขอแนบหนังสือบันทึกข้อความ | ⬜ | |  |
+| TC-U-17 | U-17 | ซี | ไม่แนบไฟล์ PDF | `/booking/:id` | 1. กรอกครบไม่แนบไฟล์ 2. ส่ง | error ขอแนบหนังสือบันทึกข้อความ | ✅ | `evidence/CCC/TC-U-17.png` | ขึ้น «กรุณาแนบเอกสาร» ยังไม่สร้างรายการจอง |
 | TC-U-18 | U-18 | คอม | แนบไฟล์ที่ไม่ใช่ PDF | `/booking/:id` | 1. แนบ .txt 2. ส่ง | error เฉพาะ PDF | ⬜ | |  |
 | TC-U-19 | U-19 | คอม | จองซ้ำ slot เดียวกัน | `/booking/:id` | 1. มีจองเต็มวันแล้ว 2. จองครึ่งวันเช้าวันเดียวกัน | error จองช่วงเวลานั้นไม่ได้ | ⬜ | |  |
-| TC-U-20 | U-20 | ซี | ดูรายการจองของตัวเอง | `/dashboard` | 1. เข้า /dashboard | เห็นจองของตัวเอง + badge สถานะ | ⬜ | |  |
-| TC-U-21 | U-21 | ซี | กรองรายการตามสถานะ | `/dashboard` | 1. filter สถานะ | แสดงเฉพาะสถานะนั้น | ⬜ | |  |
-| TC-U-22 | U-22 | ซี | ค้นหาตาม booking number | `/dashboard` | 1. พิมพ์ BK-DEMO | แสดงรายการตรงเลข | ⬜ | |  |
+| TC-U-20 | U-20 | ซี | ดูรายการจองของตัวเอง | `/dashboard` | 1. เข้า /dashboard | เห็นจองของตัวเอง + badge สถานะ | ✅ | `evidence/CCC/TC-U-20.png` | BK-20261012-FJ9U สถานะรออนุมัติ ฿2,500 |
+| TC-U-21 | U-21 | ซี | กรองรายการตามสถานะ | `/dashboard` | 1. filter สถานะ | แสดงเฉพาะสถานะนั้น | ❌ | `evidence/CCC/TC-U-21.png` | มีรายการรออนุมัติแล้ว แต่แถบกรองมีแค่ค้นหาและวันที่ ไม่มีช่องเลือกสถานะ |
+| TC-U-22 | U-22 | ซี | ค้นหาตาม booking number | `/dashboard` | 1. พิมพ์ BK-DEMO | แสดงรายการตรงเลข | ✅ | `evidence/CCC/TC-U-22.png` | ค้น BK-20261012-FJ9U แล้วเจอรายการนี้ บัญชีนี้ไม่มีเลข BK-DEMO |
 | TC-U-23 | U-23 | พาร์ท | ดู QR Code PromptPay | `/dashboard` | 1. PAYMENT_PROVIDER=promptpay_manual 2. สแกนชำระเงิน | Modal QR + ยอด + อัปโหลดสลิป | ⬜ | |  |
 | TC-U-24 | U-24 | พาร์ท | อัปโหลดสลิปการโอน | `/dashboard` | 1. ใน Modal แนบสลิป jpg 2. ส่ง | รอตรวจสอบการชำระเงิน | ⬜ | |  |
 | TC-U-24b | U-24b | พาร์ท | จำลองชำระเงิน Mock Sandbox | `/dashboard` | 1. PAYMENT_PROVIDER=mock_sandbox 2. จำลองชำระ 3. ยืนยัน | pending_verification โดยไม่โอนจริง | ⬜ | |  |
-| TC-U-25 | U-25 | ซี | ยกเลิกคำขอจอง | `/dashboard` | 1. ยกเลิกบนรายการ pending 2. ยืนยัน | สถานะยกเลิกแล้ว | ⬜ | |  |
-| TC-U-26 | U-26 | ซี | ส่งรีวิวความพึงพอใจ | `/dashboard` | 1. รีวิว 2. ดาว+คอมเมนต์ 3. ส่ง | ส่งรีวิวสำเร็จ + เห็นดาว | ⬜ | |  |
-| TC-U-27 | U-27 | ซี | ดูข้อมูลส่วนตัว | `/dashboard โปรไฟล์` | 1. แท็บโปรไฟล์ | ชื่อ อีเมล Role เบอร์ | ⬜ | |  |
-| TC-U-28 | U-28 | ซี | แก้ไขเบอร์โทรศัพท์ | `/dashboard โปรไฟล์` | 1. แก้เบอร์ 2. บันทึก | บันทึกสำเร็จ | ⬜ | |  |
+| TC-U-25 | U-25 | ซี | ยกเลิกคำขอจอง | `/dashboard` | 1. ยกเลิกบนรายการ pending 2. ยืนยัน | สถานะยกเลิกแล้ว | ✅ | `evidence/CCC/TC-U-25.png` | BK-20261012-FJ9U ยืนยันแล้วยกเลิก สถานะเป็นยกเลิกแล้ว |
+| TC-U-26 | U-26 | ซี | ส่งรีวิวความพึงพอใจ | `/dashboard` | 1. รีวิว 2. ดาว+คอมเมนต์ 3. ส่ง | ส่งรีวิวสำเร็จ + เห็นดาว | ✅ | `evidence/CCC/TC-U-26.png` | BK-20261012-K9S3 หลังชำระเงิน ให้ 5 ดาวและข้อความ แล้วขึ้น «มีรีวิวแล้ว» |
+| TC-U-27 | U-27 | ซี | ดูข้อมูลส่วนตัว | `/dashboard โปรไฟล์` | 1. แท็บโปรไฟล์ | ชื่อ อีเมล Role เบอร์ | ✅ | `evidence/CCC/TC-U-27.png` | ชื่อ อีเมล และบุคลากรภายใน ช่องเบอร์ยังว่าง |
+| TC-U-28 | U-28 | ซี | แก้ไขเบอร์โทรศัพท์ | `/dashboard โปรไฟล์` | 1. แก้เบอร์ 2. บันทึก | บันทึกสำเร็จ | ✅ | `evidence/CCC/TC-U-28.png` | บันทึกเบอร์ที่มีในช่องแล้ว โหลดหน้าใหม่ค่ายังอยู่ |
 | TC-A-01 | A-01 | เจ | แสดง Dashboard สถิติ | `/admin/dashboard` | 1. Login admin 2. เปิด dashboard | กราฟ/สถิติจอง | ✅ | `evidence/JJ/TC-A-01.png` |  |
 | TC-A-02 | A-02 | เจ | แท็บ Sidebar ครบ | `/admin/*` | 1. ตรวจ Sidebar | มีแท็บหลักครบ | ✅ | `evidence/JJ/TC-A-02.png` |  |
 | TC-A-03 | A-03 | พาร์ท | ดูรายการคำขอจอง | `Admin คำขอจอง` | 1. เปิดแท็บคำขอจอง | ตารางเลขที่ ผู้จอง ห้อง วัน สถานะ เอกสาร | ⬜ | |  |
@@ -151,17 +151,17 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-A-20 | A-20 | เจ | ค้นหาผู้ใช้ | `Admin Users` | 1. พิมพ์ชื่อ/อีเมล | กรองตรง | ✅ | `evidence/JJ/TC-A-20.png` |  |
 | TC-A-21 | A-21 | พาร์ท | เปลี่ยน Role / Promote Admin | `Admin Users` | 1. ตั้ง/ถอด Admin | Role อัปเดตสำเร็จ | ⬜ | |  |
 | TC-A-22 | A-22 | เจ | ดูบันทึกกิจกรรม | `Admin Logs` | 1. แท็บบันทึกกิจกรรม | เห็น admin การกระทำ รายละเอียด เวลา | ✅ | `evidence/JJ/TC-A-22.png` |  |
-| TC-I-01 | I-01 | ซี | สลับภาษา TH → EN | `Navbar` | 1. คลิกเปลี่ยนภาษา | ข้อความเป็นอังกฤษ | ⬜ | |  |
-| TC-I-02 | I-02 | ซี | สลับภาษา EN → TH | `Navbar` | 1. สลับกลับ | ข้อความเป็นไทย | ⬜ | |  |
-| TC-I-03 | I-03 | ซี | หน้า Login สลับภาษา | `Login` | 1. สลับภาษาบน Login | ข้อความเปลี่ยนถูกต้อง | ⬜ | |  |
-| TC-I-04 | I-04 | ซี | Modal Dialogs สลับภาษา | `Modal` | 1. เปิด Modal 2. สลับภาษา | ข้อความใน Modal ถูก | ⬜ | |  |
-| TC-I-05 | I-05 | ซี | ชื่อห้องแปลอัตโนมัติ | `/rooms` | 1. สลับ EN 2. ดูชื่อห้อง | ชื่อแปลตาม translator | ⬜ | |  |
-| TC-I-06 | I-06 | ซี | สถานะการจองแปลอัตโนมัติ | `/dashboard` | 1. สลับ EN 2. ดูสถานะ | สถานะเป็น EN | ⬜ | |  |
-| TC-I-07 | I-07 | ซี | Footer สลับภาษา | `Footer` | 1. สลับภาษา | Footer เปลี่ยนภาษา | ⬜ | |  |
-| TC-E-01 | E-01 | ซี | เปิด URL ที่ไม่มีอยู่ | `/nonexistent` | 1. เปิด URL มั่ว | หน้า 404 | ⬜ | |  |
+| TC-I-01 | I-01 | ซี | สลับภาษา TH → EN | `Navbar` | 1. คลิกเปลี่ยนภาษา | ข้อความเป็นอังกฤษ | ✅ | `evidence/CCC/TC-I-01.png` | เมนูและฟอร์มจองเป็นอังกฤษ |
+| TC-I-02 | I-02 | ซี | สลับภาษา EN → TH | `Navbar` | 1. สลับกลับ | ข้อความเป็นไทย | ✅ | `evidence/CCC/TC-I-02.png` | สลับกลับเป็นไทยที่หน้ารายการห้อง |
+| TC-I-03 | I-03 | ซี | หน้า Login สลับภาษา | `Login` | 1. สลับภาษาบน Login | ข้อความเปลี่ยนถูกต้อง | ❌ | `evidence/CCC/TC-I-03.png` | หน้า Login ไม่มีปุ่มสลับภาษา |
+| TC-I-04 | I-04 | ซี | Modal Dialogs สลับภาษา | `Modal` | 1. เปิด Modal 2. สลับภาษา | ข้อความใน Modal ถูก | ❌ | `evidence/CCC/TC-I-04.png` | หน้าเป็นอังกฤษ แต่ข้อความในกล่องแจ้งยังเป็นไทย |
+| TC-I-05 | I-05 | ซี | ชื่อห้องแปลอัตโนมัติ | `/rooms` | 1. สลับ EN 2. ดูชื่อห้อง | ชื่อแปลตาม translator | ✅ | `evidence/CCC/TC-I-05.png` | เช่น C3-101 Meeting Room |
+| TC-I-06 | I-06 | ซี | สถานะการจองแปลอัตโนมัติ | `/dashboard` | 1. สลับ EN 2. ดูสถานะ | สถานะเป็น EN | ✅ | `evidence/CCC/TC-I-06.png` | รออนุมัติ เป็น Pending approval |
+| TC-I-07 | I-07 | ซี | Footer สลับภาษา | `Footer` | 1. สลับภาษา | Footer เปลี่ยนภาษา | ✅ | `evidence/CCC/TC-I-07.png` | Footer อังกฤษที่ท้ายหน้ารายการห้อง |
+| TC-E-01 | E-01 | ซี | เปิด URL ที่ไม่มีอยู่ | `/nonexistent` | 1. เปิด URL มั่ว | หน้า 404 | ✅ | `evidence/CCC/TC-E-01.png` | `/nonexistent-ccc-test` → 404 |
 | TC-E-02 | E-02 | คอม | Session หมดอายุ / ไม่ login | `API/หน้า protected` | 1. ลบ session 2. เรียกหน้าที่ต้อง auth | Redirect Login | ⬜ | |  |
 | TC-E-03 | E-03 | คอม | Non-admin เข้า Admin | `/admin/dashboard` | 1. Login user ธรรมดา 2. เปิด /admin | กันเข้า / redirect | ⬜ | |  |
-| TC-E-04 | E-04 | ซี | ส่งฟอร์มจองว่าง | `/booking/:id` | 1. กดส่งโดยไม่กรอก | validation error | ⬜ | |  |
+| TC-E-04 | E-04 | ซี | ส่งฟอร์มจองว่าง | `/booking/:id` | 1. กดส่งโดยไม่กรอก | validation error | ✅ | `evidence/CCC/TC-E-04.png` | ขึ้น Please fill out this field ที่เบอร์โทร |
 | TC-E-05 | E-05 | คอม | อัปโหลดไฟล์เกิน 10MB | `/booking/:id` | 1. แนบ PDF ~15MB 2. ส่ง | error ไฟล์ใหญ่เกินไป | ⬜ | |  |
 | TC-E-06 | E-06 | เจ | Responsive Mobile | `ทั้งระบบ` | 1. DevTools iPhone/Pixel | ไม่มีเลื่อนแนวนอนผิดปกติ | ✅ | `evidence/JJ/TC-E-06.png` |  |
 | TC-E-07 | E-07 | พาร์ท | อีเมลยืนยันหลังจอง | `อีเมล` | 1. ส่งจอง 2. ดู inbox | ได้อีเมลยืนยัน (หรือ console ถ้ายังไม่มี SMTP) | ⬜ | |  |
