@@ -229,6 +229,7 @@ export default {
     stripe_pay_error: "ไม่สามารถเปิด Stripe Checkout ได้",
     stripe_pay_success: "ชำระเงินสำเร็จ",
     stripe_pay_success_sub: "ระบบบันทึก Transaction ID จาก Callback แล้ว",
+    transaction_id: "Transaction ID",
     stripe_pay_cancel: "ยกเลิกการชำระเงิน",
     cancel_booking_title: "ยกเลิกการจอง?",
     cancel_booking_text: "คุณต้องการยกเลิกคำขอจองรหัส",

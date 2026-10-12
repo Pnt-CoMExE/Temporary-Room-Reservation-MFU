@@ -229,6 +229,7 @@ export default {
     stripe_pay_error: "Could not open Stripe Checkout",
     stripe_pay_success: "Payment successful",
     stripe_pay_success_sub: "Transaction ID from callback was recorded.",
+    transaction_id: "Transaction ID",
     stripe_pay_cancel: "Payment cancelled",
     cancel_booking_title: "Cancel Booking?",
     cancel_booking_text: "Are you sure you want to cancel booking ref.",

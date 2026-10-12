@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-13 — CoM evidence gaps]
+- Paid booking card shows `transaction_id` from `payments`
+- Recaptured `TC-E-03`, `TC-Z-01`, `TC-A-R4-03`, `TC-P-R4-02`
+
 ## [2026-10-12]
 - เริ่มเก็บหลักฐานเทสของซีใน `docs/testing/evidence/CCC/` ตาม `cee.md`: TC-U-05 กับ TC-E-01 ผ่าน, TC-I-03 ไม่ผ่าน (หน้า Login ไม่มีปุ่มสลับภาษา) เคสที่เหลือต้องล็อกอิน Google ก่อน
 - TC-U-01 ผ่านด้วย `6631501073@lamduan.mfu.ac.th` (ผู้ใช้ภายในผ่าน `DEV_INTERNAL_EMAILS`) แล้วไปหน้า `/home` รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-01.png`

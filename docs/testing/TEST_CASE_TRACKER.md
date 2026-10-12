@@ -112,7 +112,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-U-12 | U-12 | คอม | ส่งคำขอจอง — กรอกครบ | `/booking/:id` | 1. กรอกฟอร์มครบ 2. แนบ PDF 3. ส่ง | สำเร็จ + redirect /dashboard + สถานะรออนุมัติ | ⬜ | |  |
 | TC-U-13 | U-13 | ซี | เลือกวันที่และช่วงเวลา | `/booking/:id` | 1. เลือกวัน 2. เลือกเช้า/บ่าย/เต็มวัน | ราคาเปลี่ยนตามช่วง | ✅ | `evidence/CCC/TC-U-13.png` | 20 ต.ค. 2026 ครึ่งวันเช้า ฿500 เต็มวัน ฿1,000 |
 | TC-U-14 | U-14 | ซี | เลือกอุปกรณ์เสริม | `/booking/:id` | 1. เลือก Add-on | ราคารวมอัปเดตถูกต้อง | ✅ | `evidence/CCC/TC-U-14.png` | โปรเจคเตอร์ 1 ชุด รวม ฿1,500 |
-| TC-U-15 | U-15 | คอม | ใช้รหัสส่วนลด | `/booking/:id` | 1. พิมพ์ MFUWELCOME 2. ตรวจสอบ | ลด 100 บาท + รวมลดลง | ⬜ | |  |
+| TC-U-15 | U-15 | คอม | ใช้รหัสส่วนลด | `/booking/:id` | 1. พิมพ์ MFUWELCOME 2. ตรวจสอบ | ลด 100% แล้วใช้โค้ดได้ | ✅ | `evidence/CoM/TC-U-15.png` | `MFUWELCOME` ตั้งใจให้ลด 100% |
 | TC-U-16 | U-16 | คอม | ใช้รหัสส่วนลดที่ไม่มี | `/booking/:id` | 1. พิมพ์ INVALID123 2. ตรวจสอบ | error รหัสไม่ถูกต้อง | ⬜ | |  |
 | TC-U-17 | U-17 | ซี | ไม่แนบไฟล์ PDF | `/booking/:id` | 1. กรอกครบไม่แนบไฟล์ 2. ส่ง | error ขอแนบหนังสือบันทึกข้อความ | ✅ | `evidence/CCC/TC-U-17.png` | ขึ้น «กรุณาแนบเอกสาร» ยังไม่สร้างรายการจอง |
 | TC-U-18 | U-18 | คอม | แนบไฟล์ที่ไม่ใช่ PDF | `/booking/:id` | 1. แนบ .txt 2. ส่ง | error เฉพาะ PDF | ⬜ | |  |
@@ -160,19 +160,19 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-I-07 | I-07 | ซี | Footer สลับภาษา | `Footer` | 1. สลับภาษา | Footer เปลี่ยนภาษา | ✅ | `evidence/CCC/TC-I-07.png` | Footer อังกฤษที่ท้ายหน้ารายการห้อง |
 | TC-E-01 | E-01 | ซี | เปิด URL ที่ไม่มีอยู่ | `/nonexistent` | 1. เปิด URL มั่ว | หน้า 404 | ✅ | `evidence/CCC/TC-E-01.png` | `/nonexistent-ccc-test` → 404 |
 | TC-E-02 | E-02 | คอม | Session หมดอายุ / ไม่ login | `API/หน้า protected` | 1. ลบ session 2. เรียกหน้าที่ต้อง auth | Redirect Login | ⬜ | |  |
-| TC-E-03 | E-03 | คอม | Non-admin เข้า Admin | `/admin/dashboard` | 1. Login user ธรรมดา 2. เปิด /admin | กันเข้า / redirect | ⬜ | |  |
+| TC-E-03 | E-03 | คอม | Non-admin เข้า Admin | `/admin/dashboard` | 1. Login user ธรรมดา 2. เปิด /admin | กันเข้า / redirect | ✅ | `evidence/CoM/TC-E-03.png` | ผู้ใช้ที่ไม่ใช่แอดมินเปิด `/admin` แล้วกลับ `/home` |
 | TC-E-04 | E-04 | ซี | ส่งฟอร์มจองว่าง | `/booking/:id` | 1. กดส่งโดยไม่กรอก | validation error | ✅ | `evidence/CCC/TC-E-04.png` | ขึ้น Please fill out this field ที่เบอร์โทร |
 | TC-E-05 | E-05 | คอม | อัปโหลดไฟล์เกิน 10MB | `/booking/:id` | 1. แนบ PDF ~15MB 2. ส่ง | error ไฟล์ใหญ่เกินไป | ⬜ | |  |
 | TC-E-06 | E-06 | เจ | Responsive Mobile | `ทั้งระบบ` | 1. DevTools iPhone/Pixel | ไม่มีเลื่อนแนวนอนผิดปกติ | ✅ | `evidence/JJ/TC-E-06.png` |  |
 | TC-E-07 | E-07 | พาร์ท | อีเมลยืนยันหลังจอง | `อีเมล` | 1. ส่งจอง 2. ดู inbox | ได้อีเมลยืนยัน (หรือ console ถ้ายังไม่มี SMTP) | ⬜ | |  |
 | TC-E-08 | E-08 | พาร์ท | อีเมลแจ้งผลอนุมัติ | `อีเมล` | 1. Admin อนุมัติ 2. ดู inbox ผู้ใช้ | ได้อีเมลแจ้งผล | ⬜ | |  |
 | TC-P-R4-01 | — (R4) | คอม | Stripe demo checkout | `/dashboard` | 1. PAYMENT_PROVIDER=stripe 2. กดชำระ Stripe 3. demo checkout 4. Callback | สถานะ approved_paid | ⬜ | | ดู ../payment/STRIPE.md |
-| TC-P-R4-02 | — (R4) | คอม | Stripe callback / Transaction ID | `/dashboard?stripe=success` | 1. ต่อจาก P-R4-01 2. อ่าน Tx ID 3. ตรวจ payments.transaction_id | มี Transaction ID + จ่ายแล้ว | ⬜ | |  |
+| TC-P-R4-02 | — (R4) | คอม | Stripe callback / Transaction ID | `/dashboard?stripe=success` | 1. ต่อจาก P-R4-01 2. อ่าน Tx ID 3. ตรวจ payments.transaction_id | มี Transaction ID + จ่ายแล้ว | ✅ | `evidence/CoM/TC-P-R4-02.png` | การ์ดจองโชว์ `pi_3UNxD6PR1axRnRPb0cs9FxXS` |
 | TC-A-R4-01 | — (R4) | คอม | เลือกเรทตอนอนุมัติ | `Admin confirm` | 1. อนุมัติ 2. เลือกเรท 3. ยืนยัน | เรท+ราคาตรงที่เลือก | ⬜ | |  |
 | TC-A-R4-02 | — (R4) | พาร์ท | Preview เอกสารก่อนอนุมัติ | `Admin confirm` | 1. เปิด confirm 2. ดู Preview | เห็น preview PDF/รูป | ⬜ | |  |
-| TC-A-R4-03 | — (R4) | คอม | Log เปลี่ยนเรท | `Admin ประวัติจอง` | 1. อนุมัติพร้อมเปลี่ยนเรท 2. ดูประวัติ | มี log เรท/ราคาเก่า→ใหม่ | ⬜ | |  |
+| TC-A-R4-03 | — (R4) | คอม | Log เปลี่ยนเรท | `Admin ประวัติจอง` | 1. อนุมัติพร้อมเปลี่ยนเรท 2. ดูประวัติ | มี log เรท/ราคาเก่า→ใหม่ | ✅ | `evidence/CoM/TC-A-R4-03.png` | `internal→external` ราคา `2400→4800` |
 | TC-A-R4-04 | — (R4) | เจ | ไม่มีปุ่มตั้ง Co-op ที่ Users | `Admin Users` | 1. เปิด Users 2. ดูปุ่มจัดการ | ไม่มีปุ่มตั้งเป็น Co-op | ✅ | `evidence/JJ/TC-A-R4-04.png` |  |
-| TC-Z-01 | — (≈E-03) | คอม | AuthZ กันหน้า Admin | `/admin/dashboard` | 1. Login non-admin 2. เปิด /admin | กันเข้าได้ | ⬜ | |  |
+| TC-Z-01 | — (≈E-03) | คอม | AuthZ กันหน้า Admin | `/admin/dashboard` | 1. Login non-admin 2. เปิด /admin | กันเข้าได้ | ✅ | `evidence/CoM/TC-Z-01.png` | ผู้ใช้ที่ล็อกอินแล้วและไม่ใช่แอดมินถูกส่งกลับ `/home` |
 | TC-Z-02 | — (Unit) | คอม | รัน npm test AuthZ | `backend` | 1. cd backend 2. npm test | เทส AuthZ/เขียว | ⬜ | |  |
 
 ---
