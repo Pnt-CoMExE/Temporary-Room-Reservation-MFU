@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-19 — merge ForJJ / ForParttime / ForCCC]
+- รวมหลักฐาน `TC-A-15` ของเจ, รูปเทสของพาร์ท, และรูปใหม่ของซี (U-01, U-02, U-03, U-11, U-26)
+- ตารางรวมคงผลของทุกคน แล้วอัปเดตแถวของซีตาม `cee.md` (U-02 เป็นผ่าน)
+
 ## [2026-10-13 — CoM evidence gaps]
 - Paid booking card shows `transaction_id` from `payments`
 - Recaptured `TC-E-03`, `TC-Z-01`, `TC-A-R4-03`, `TC-P-R4-02`
@@ -17,6 +21,11 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - TC-U-03 ไม่ผ่านรอบแรก: `prattanakorn22127@gmail.com` เป็น admin และไป `/admin/dashboard`
 - เทส TC-U-03 ใหม่ด้วย `frewgametv@gmail.com`: ผ่าน เป็นผู้ใช้ภายนอกและไป `/home` รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-03.png`
 - TC-U-26 ผ่าน: หลังชำระเงินรายการ BK-20261012-K9S3 ให้ 5 ดาวพร้อมข้อความ แล้วแดชบอร์ดขึ้น «มีรีวิวแล้ว» รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-26.png`
+- ถ่ายหลักฐาน TC-U-01 และ TC-U-02 ใหม่ที่แท็บโปรไฟล์: เห็นเมลลำดวนกับคำว่าบุคลากรภายใน (Internal) U-01 ใช้เมลนี้แทน @mfu.ac.th ตาม DEV_INTERNAL_EMAILS, U-02 ยังไม่ผ่านเพราะบทบาทไม่กลายเป็นผู้ใช้ภายนอก
+- ถ่าย TC-U-03 ใหม่ที่แท็บโปรไฟล์ของ `frewgametv@gmail.com` เห็นคำว่าบุคคลทั่วไป (External)
+- TC-U-02 ผ่านหลังล้าง user_type ที่ค้างและถอดเมลออกจาก DEV_INTERNAL_EMAILS ชั่วคราว โปรไฟล์ขึ้นบุคคลทั่วไป แล้วใส่เมลกลับใน `.env` แล้ว
+- ถ่าย TC-U-11 ใหม่ที่ตารางห้องของแอดมิน ให้เห็นราคาสามเรท ภายใน ร่วมจัด และภายนอก เพราะหน้ารายละเอียดของผู้ใช้โชว์เฉพาะเรทของคนที่ล็อกอิน
+- ถ่าย TC-U-26 ใหม่จากปุ่มดูรีวิวของแอดมิน รายการ BK-20261012-K9S3 เห็น 5 ดาวและข้อความ «ห้องและอุปกรณ์ใช้งานได้ดี»
 
 ## [2026-10-07 — UAT emails: admin พาร์ท/เจ]
 - พาร์ท = `6631501081@…` · เจ = `6631501164@…` (`DEV_ADMIN_EMAILS`)

@@ -97,10 +97,10 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 
 | TC# | เดิม | Owner | ชื่อเคส | หน้า | Scenario | Expected | ผล | หลักฐาน | หมายเหตุ |
 |-----|------|-------|---------|------|----------|----------|----|---------|----------|
-| TC-U-01 | U-01 | ซี | เข้าสู่ระบบ Google OAuth (@mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @mfu.ac.th | Login สำเร็จ, Role=internal, ไป /home | ✅ | `evidence/CCC/TC-U-01.png` | `6631501073@lamduan` ผ่าน DEV_INTERNAL_EMAILS, Role=internal, ไป `/home` |
-| TC-U-02 | U-02 | ซี | เข้าสู่ระบบ Google OAuth (@lamduan.mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @lamduan.mfu.ac.th | Login สำเร็จ, Role=external, ไป /home | ❌ | `evidence/CCC/TC-U-02.png` | เข้า `/home` ได้ แต่ role ยังเป็น internal เพราะในฐานข้อมูลถูกตั้งเป็น internal ไว้แล้ว |
+| TC-U-01 | U-01 | ซี | เข้าสู่ระบบ Google OAuth (@mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @mfu.ac.th | Login สำเร็จ, Role=internal, ไป /home | ✅ | `evidence/CCC/TC-U-01.png` | ไม่มีเมล @mfu.ac.th จริง ใช้ `6631501073@lamduan` ที่ถูกตั้งใน DEV_INTERNAL_EMAILS โปรไฟล์เห็นบุคลากรภายใน (Internal) |
+| TC-U-02 | U-02 | ซี | เข้าสู่ระบบ Google OAuth (@lamduan.mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @lamduan.mfu.ac.th | Login สำเร็จ, Role=external, ไป /home | ✅ | `evidence/CCC/TC-U-02.png` | ล้างค่า internal ที่ค้างในฐานข้อมูลและถอดเมลออกจาก DEV_INTERNAL_EMAILS ชั่วคราว แล้วโปรไฟล์ขึ้นบุคคลทั่วไป (External) |
 | TC-U-02b | U-02b | พาร์ท | Admin promote ผู้ใช้เป็น admin | `Admin Users` | 1. Login Admin 2. Users 3. ตั้ง Role=admin | ผู้ใช้นั้น login แล้วได้ Role=admin | ⬜ | |  |
-| TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ✅ | `evidence/CCC/TC-U-03.png` | `frewgametv@gmail.com` Role=external ไป `/home` (เมล `prattanakorn22127@gmail.com` เป็น admin ในฐานข้อมูล จึงใช้เมลสำรอง) |
+| TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ✅ | `evidence/CCC/TC-U-03.png` | `frewgametv@gmail.com` โปรไฟล์เห็นบุคคลทั่วไป (External) |
 | TC-U-04 | U-04 | เจ | ออกจากระบบ | `Navbar` | 1. เมนู Navbar 2. ออกจากระบบ 3. ยืนยัน | Redirect Login, ลบ session/cookie | ✅ | `evidence/JJ/TC-U-04.png` |  |
 | TC-U-05 | U-05 | ซี | เข้าหน้าที่ต้อง login โดยไม่ login | `/home` | 1. เปิด /home โดยตรงโดยไม่ login | Redirect ไป Login | ✅ | `evidence/CCC/TC-U-05.png` | เปิด `/home` แล้วกลับหน้า Login |
 | TC-U-06 | U-06 | เจ | หน้าหลัก — Featured Rooms | `/home` | 1. Login 2. เข้า /home | Banner + Featured Rooms | ✅ | `evidence/JJ/TC-U-06.png` |  |
@@ -108,7 +108,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-U-08 | U-08 | ซี | กรองตามประเภทพื้นที่ | `/rooms` | 1. เปิด /rooms 2. เลือก Meeting Room | แสดงเฉพาะห้องประชุม | ✅ | `evidence/CCC/TC-U-08.png` | เลือกห้องประชุม เหลือ 58 ห้อง |
 | TC-U-09 | U-09 | ซี | ค้นหาห้องภาษาไทย | `/rooms` | 1. พิมพ์ ห้องประชุม | แสดงห้องที่ชื่อตรง | ✅ | `evidence/CCC/TC-U-09.png` | พบ 48 ห้อง |
 | TC-U-10 | U-10 | ซี | ค้นหาห้องภาษาอังกฤษ | `/rooms` | 1. พิมพ์ Meeting Room | ผลเดียวกับค้นหาไทย | ❌ | `evidence/CCC/TC-U-10.png` | ได้ 45 ห้อง ไม่เท่ากับค้นไทย 48 ห้อง |
-| TC-U-11 | U-11 | ซี | หน้ารายละเอียดห้อง | `/rooms/:id` | 1. คลิกการ์ดห้อง | รูป ความจุ สถานที่ ราคา 3-tier ปฏิทิน | ✅ | `evidence/CCC/TC-U-11.png` | C3-101 ความจุ 50 มีคิวจอง เรทภายในครึ่งวัน ฿500 เต็มวัน ฿1,000 |
+| TC-U-11 | U-11 | ซี | หน้ารายละเอียดห้อง | `/rooms/:id` | 1. คลิกการ์ดห้อง | รูป ความจุ สถานที่ ราคา 3-tier ปฏิทิน | ✅ | `evidence/CCC/TC-U-11.png` | หน้าผู้ใช้โชว์เฉพาะเรทของคนที่ล็อกอิน สามเรทอยู่ที่ตารางแอดมิน: ภายใน ร่วมจัด ภายนอก |
 | TC-U-12 | U-12 | คอม | ส่งคำขอจอง — กรอกครบ | `/booking/:id` | 1. กรอกฟอร์มครบ 2. แนบ PDF 3. ส่ง | สำเร็จ + redirect /dashboard + สถานะรออนุมัติ | ⬜ | |  |
 | TC-U-13 | U-13 | ซี | เลือกวันที่และช่วงเวลา | `/booking/:id` | 1. เลือกวัน 2. เลือกเช้า/บ่าย/เต็มวัน | ราคาเปลี่ยนตามช่วง | ✅ | `evidence/CCC/TC-U-13.png` | 20 ต.ค. 2026 ครึ่งวันเช้า ฿500 เต็มวัน ฿1,000 |
 | TC-U-14 | U-14 | ซี | เลือกอุปกรณ์เสริม | `/booking/:id` | 1. เลือก Add-on | ราคารวมอัปเดตถูกต้อง | ✅ | `evidence/CCC/TC-U-14.png` | โปรเจคเตอร์ 1 ชุด รวม ฿1,500 |
@@ -124,7 +124,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-U-24 | U-24 | พาร์ท | อัปโหลดสลิปการโอน | `/dashboard` | 1. ใน Modal แนบสลิป jpg 2. ส่ง | รอตรวจสอบการชำระเงิน | ⬜ | |  |
 | TC-U-24b | U-24b | พาร์ท | จำลองชำระเงิน Mock Sandbox | `/dashboard` | 1. PAYMENT_PROVIDER=mock_sandbox 2. จำลองชำระ 3. ยืนยัน | pending_verification โดยไม่โอนจริง | ⬜ | |  |
 | TC-U-25 | U-25 | ซี | ยกเลิกคำขอจอง | `/dashboard` | 1. ยกเลิกบนรายการ pending 2. ยืนยัน | สถานะยกเลิกแล้ว | ✅ | `evidence/CCC/TC-U-25.png` | BK-20261012-FJ9U ยืนยันแล้วยกเลิก สถานะเป็นยกเลิกแล้ว |
-| TC-U-26 | U-26 | ซี | ส่งรีวิวความพึงพอใจ | `/dashboard` | 1. รีวิว 2. ดาว+คอมเมนต์ 3. ส่ง | ส่งรีวิวสำเร็จ + เห็นดาว | ✅ | `evidence/CCC/TC-U-26.png` | BK-20261012-K9S3 หลังชำระเงิน ให้ 5 ดาวและข้อความ แล้วขึ้น «มีรีวิวแล้ว» |
+| TC-U-26 | U-26 | ซี | ส่งรีวิวความพึงพอใจ | `/dashboard` | 1. รีวิว 2. ดาว+คอมเมนต์ 3. ส่ง | ส่งรีวิวสำเร็จ + เห็นดาว | ✅ | `evidence/CCC/TC-U-26.png` | BK-20261012-K9S3 แอดมินเปิดดูรีวิวเห็น 5 ดาวและข้อความ «ห้องและอุปกรณ์ใช้งานได้ดี» |
 | TC-U-27 | U-27 | ซี | ดูข้อมูลส่วนตัว | `/dashboard โปรไฟล์` | 1. แท็บโปรไฟล์ | ชื่อ อีเมล Role เบอร์ | ✅ | `evidence/CCC/TC-U-27.png` | ชื่อ อีเมล และบุคลากรภายใน ช่องเบอร์ยังว่าง |
 | TC-U-28 | U-28 | ซี | แก้ไขเบอร์โทรศัพท์ | `/dashboard โปรไฟล์` | 1. แก้เบอร์ 2. บันทึก | บันทึกสำเร็จ | ✅ | `evidence/CCC/TC-U-28.png` | บันทึกเบอร์ที่มีในช่องแล้ว โหลดหน้าใหม่ค่ายังอยู่ |
 | TC-A-01 | A-01 | เจ | แสดง Dashboard สถิติ | `/admin/dashboard` | 1. Login admin 2. เปิด dashboard | กราฟ/สถิติจอง | ✅ | `evidence/JJ/TC-A-01.png` |  |
