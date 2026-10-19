@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-19 — Stripe replaces slip checks]
+- UAT ปัจจุบันคือ `PAYMENT_PROVIDER=stripe` เคสสลิปของพาร์ท `TC-U-23`, `TC-U-24`, `TC-A-09`, `TC-A-10` เป็นข้าม
+- ตารางรวมของคอมตรงกับ `kom.md` แล้ว
+
 ## [2026-10-19 — merge ForJJ / ForParttime / ForCCC]
 - รวมหลักฐาน `TC-A-15` ของเจ, รูปเทสของพาร์ท, และรูปใหม่ของซี (U-01, U-02, U-03, U-11, U-26)
 - ตารางรวมคงผลของทุกคน แล้วอัปเดตแถวของซีตาม `cee.md` (U-02 เป็นผ่าน)

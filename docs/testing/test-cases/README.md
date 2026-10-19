@@ -5,7 +5,7 @@
 | คน | ไฟล์ | จำนวน | โฟกัส |
 |----|------|--------|--------|
 | **คอม** | [kom.md](./kom.md) | 15 | จองซับซ้อน, promo, อนุมัติ+เรท+log, Stripe, AuthZ |
-| **พาร์ท** | [part.md](./part.md) | 16 | Admin จอง/เอกสาร/สลิป, PromptPay/Mock, promote admin |
+| **พาร์ท** | [part.md](./part.md) | 16 | Admin จอง/เอกสาร, promote admin (ข้ามสลิป/PromptPay) |
 | **ซี** | [cee.md](./cee.md) | 28 | Login, ห้อง, dashboard ผู้ใช้, i18n |
 | **เจ** | [jay.md](./jay.md) | 18 | เปิดดู Admin หลายแท็บ, logout, Featured, ไม่มีปุ่ม Co-op |
 
