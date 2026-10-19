@@ -151,6 +151,15 @@ router.get("/bookings/:userId", verifyToken, async (req: any, res: Response) => 
               r.name as room_name, r.location as room_location, r.image_url as room_image,
               EXISTS(SELECT 1 FROM feedbacks f WHERE f.booking_id = b.id) as has_feedback,
               TRIM(CONCAT(COALESCE(admin_u.firstname, ''), ' ', COALESCE(admin_u.lastname, ''))) AS admin_name,
+              (
+                SELECT p.transaction_id
+                FROM payments p
+                WHERE p.booking_id = b.id
+                  AND p.transaction_id IS NOT NULL
+                  AND p.transaction_id <> ''
+                ORDER BY p.id DESC
+                LIMIT 1
+              ) AS transaction_id,
               COALESCE((
                 SELECT json_agg(json_build_object(
                   'id', a.id,

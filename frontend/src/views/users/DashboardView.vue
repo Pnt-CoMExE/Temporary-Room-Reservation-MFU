@@ -30,6 +30,7 @@ interface BookingItem {
   adminName?: string;
   remark?: string;
   memoDocumentUrl?: string;
+  transactionId?: string;
 }
 
 import { useI18n } from "vue-i18n";
@@ -88,6 +89,7 @@ const fetchBookings = async () => {
     memoDocumentUrl: b.memo_document_url || null,
     adminName: (b.admin_name || "").trim() || undefined,
     remark: b.remarks || b.remark || undefined,
+    transactionId: b.transaction_id || undefined,
     addons: Array.isArray(b.addons)
       ? b.addons.map((a: any) => ({
           name: a.name,
@@ -803,8 +805,12 @@ const formatDate = (dateString: string) =>
                 <span
                   class="text-xs font-black text-gray-500 uppercase tracking-widest"
                   >Booking ID:
-                  <span class="text-gray-900">{{ booking.id }}</span></span
-                >
+                  <span class="text-gray-900">{{ booking.id }}</span>
+                  <span
+                    v-if="booking.transactionId"
+                    class="mt-1 block normal-case tracking-normal font-mono text-[11px] text-gray-700"
+                  >{{ $t('dashboard.transaction_id') }}: {{ booking.transactionId }}</span>
+                </span>
                 <div class="flex items-center gap-2 flex-wrap justify-end">
                   <span
                     :class="getStatusClass(booking.status)"
