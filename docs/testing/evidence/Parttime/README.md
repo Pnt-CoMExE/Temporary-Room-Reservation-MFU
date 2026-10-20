@@ -1,0 +1,21 @@
+### พาร์ท (Parttime) — Admin จอง/เอกสาร, Promote Admin
+**สรุปความก้าวหน้า:** 16 / 16 เคส (✅ ผ่าน 12 เคส · ⏭️ ข้าม 4 เคสตามเงื่อนไข Stripe UAT)
+
+| TC# | ชื่อเคส | Owner | สถานะ | หลักฐาน | หมายเหตุ |
+|-----|---------|-------|--------|----------|----------|
+| TC-U-02b | Admin promote ผู้ใช้เป็น admin | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-U-02b.png` <br> `docs/testing/evidence/Parttime/TC-U-02b-login-admin.png` | ตั้ง Role แล้วผู้ใช้ล็อกอินได้สิทธิ์ Admin เรียบร้อย |
+| TC-U-23 | ดู QR Code PromptPay | พาร์ท | ⏭️ | `docs/testing/evidence/Parttime/TC-U-23.png` | ข้าม: UAT ปัจจุบันเป็น Stripe มีรูป QR เก่าไว้แล้ว |
+| TC-U-24 | อัปโหลดสลิปการโอน | พาร์ท | ⏭️ | `docs/testing/evidence/Parttime/TC-U-24.png` | ข้าม: Stripe ไม่มีขั้นส่งสลิป มีรูปเก่าไว้แล้ว |
+| TC-U-24b | จำลองชำระเงิน Mock Sandbox | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-U-24b.png` | โหมด mock รูปขึ้นจำลองสำเร็จ |
+| TC-A-03 | ดูรายการคำขอจอง | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-03.png` | แสดงรายการคำขอจองครบถ้วน |
+| TC-A-04 | กรองคำขอตามสถานะ | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-04.png` | กรองและค้นหาคำขอจองได้ถูกต้อง |
+| TC-A-06 | ปฏิเสธคำขอจอง | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-06-admin.png` <br> `docs/testing/evidence/Parttime/TC-A-06-user.png` | ปฏิเสธคำขอสำเร็จและผู้ใช้เห็นเหตุผลในประวัติ |
+| TC-A-07 | ดาวน์โหลดเอกสาร Memo | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-07.png` | เปิดเอกสาร PDF ได้ถูกต้อง |
+| TC-A-08 | ส่งออกเอกสาร ZIP | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-08.png` | รวมไฟล์เอกสารเป็น ZIP ดาวน์โหลดสำเร็จ |
+| TC-A-09 | ดูสลิปการชำระเงิน | พาร์ท | ⏭️ | — | ข้าม: Stripe ไม่มีสลิปให้แอดมินเปิดดู |
+| TC-A-10 | ยืนยันการชำระเงิน | พาร์ท | ⏭️ | — | ข้าม: Stripe ตั้งชำระแล้วเอง ดู TC-P-R4-01 |
+| TC-A-12 | เปิด/ปิดการใช้งานห้อง | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-12-admin.png` <br> `docs/testing/evidence/Parttime/TC-A-12-user.png` | ปิดสวิตช์แล้วห้องซ่อนจากรายการฝั่งผู้ใช้ |
+| TC-A-21 | เปลี่ยน Role / Promote Admin | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-21.png` | อัปเดต Role ผู้ใช้สำเร็จ |
+| TC-E-07 | อีเมลยืนยันหลังจอง | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-E-07.png` | แสดง Log การส่งอีเมลยืนยันคำขอจองผ่าน Console |
+| TC-E-08 | อีเมลแจ้งผลอนุมัติ | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-E-08.png` | แสดง Log การส่งอีเมลแจ้งผลการพิจารณาผ่าน Console |
+| TC-A-R4-02 | Preview เอกสารก่อนอนุมัติ | พาร์ท | ✅ | `docs/testing/evidence/Parttime/TC-A-R4-02.png` | แสดง Preview เอกสารก่อนอนุมัติเรียบร้อย |
