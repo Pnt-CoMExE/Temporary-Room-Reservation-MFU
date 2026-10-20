@@ -12,12 +12,18 @@ interface Notification {
   title: string;
   desc: string;
   time: string;
+  createdAt?: string;
   read: boolean;
   link?: string;
 }
 
 import { useI18n } from "vue-i18n";
-const { t } = useI18n();
+import {
+  notificationBody,
+  notificationTime,
+  notificationTitle,
+} from "@/utils/notificationText";
+const { t, locale } = useI18n();
 const router = useRouter();
 const isMenuOpen = ref(false);
 const isNotifOpen = ref(false);
@@ -261,13 +267,14 @@ const confirmLogout = () => {
                         </div>
                         <div>
                           <p class="text-sm font-bold text-gray-900 mb-0.5">
-                            {{ notif.title }}
+                            {{ notificationTitle(notif.title, t) }}
                           </p>
                           <p class="text-xs text-gray-500 leading-relaxed">
-                            {{ notif.desc }}
+                            {{ notificationBody(notif.desc, locale, t) }}
                           </p>
                           <p class="text-[10px] font-bold text-gray-400 mt-2">
-                            <FontAwesomeIcon :icon="['far', 'clock']" class="mr-1" /> {{ notif.time }}
+                            <FontAwesomeIcon :icon="['far', 'clock']" class="mr-1" />
+                            {{ notificationTime(notif.createdAt, locale, notif.time, t) }}
                           </p>
                         </div>
                       </div>
