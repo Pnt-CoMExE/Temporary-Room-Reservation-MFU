@@ -68,7 +68,7 @@ watch([selectedType, selectedCapacity], () => {
 });
 
 import { useI18n } from "vue-i18n";
-import { translateRoomName } from "@/utils/translator";
+import { matchesRoomSearch } from "@/utils/translator";
 
 const { locale } = useI18n();
 
@@ -77,10 +77,7 @@ const filteredRooms = computed(() => {
 
   if (searchQuery.value) {
     const q = searchQuery.value.toLowerCase();
-    result = result.filter((r) =>
-      r.name.toLowerCase().includes(q) ||
-      translateRoomName(r.name, "en").toLowerCase().includes(q)
-    );
+    result = result.filter((r) => matchesRoomSearch(r.name, q));
   }
 
   if (sortBy.value === "capacity_asc")

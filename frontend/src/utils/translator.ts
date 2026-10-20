@@ -129,6 +129,24 @@ export function translateRoomName(name: string | undefined | null, locale: strin
   return s.replace(/\s+/g, " ").trim();
 }
 
+/** Thai phrases whose English name does not still contain the generic English words. */
+const searchAliases: Array<{ th: string; en: string }> = [
+  { th: "ห้องประชุม", en: "meeting room" },
+];
+
+export function matchesRoomSearch(name: string | undefined | null, query: string): boolean {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  if (!name) return false;
+
+  const english = translateRoomName(name, "en").toLowerCase();
+  const extras = searchAliases
+    .filter((alias) => name.includes(alias.th))
+    .map((alias) => alias.en);
+  const haystack = `${name} ${english} ${extras.join(" ")}`.toLowerCase();
+  return haystack.includes(q);
+}
+
 export function translateRoomType(type: string | undefined | null, locale: string): string {
   if (!type) return "Space";
   if (locale !== "en") return type;
