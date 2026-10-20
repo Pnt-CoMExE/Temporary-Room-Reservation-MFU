@@ -140,13 +140,13 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-A-11 | A-11 | เจ | ดูรายการห้องทั้งหมด | `Admin ห้อง` | 1. แท็บจัดการห้อง | ตารางห้อง + active/inactive | ✅ | `evidence/JJ/TC-A-11.png` |  |
 | TC-A-12 | A-12 | พาร์ท | เปิด/ปิดการใช้งานห้อง | `Admin ห้อง` | 1. Toggle ห้อง 2. ดู /rooms | ห้องที่ปิดไม่โชว์ฝั่งผู้ใช้ | ⬜ | `evidence/Parttime/TC-A-12-admin.png` | ปิดสวิตช์แล้ว หน้ารายการยังไม่ชี้ว่าห้องนั้นหาย |
 | TC-A-13 | A-13 | เจ | ดูรายการแบนเนอร์ | `Admin แบนเนอร์` | 1. แท็บบันเนอร์ | รายการ+preview | ✅ | `evidence/JJ/TC-A-13.png` |  |
-| TC-A-14 | A-14 | เจ | เพิ่มแบนเนอร์ใหม่ | `Admin แบนเนอร์` | 1. กรอก+อัปโหลด 2. บันทึก | โชว์ใน admin และ /home | ✅ | `evidence/JJ/TC-A-14.png` | ยังไม่เห็นแบนเนอร์บน /home |
-| TC-A-15 | A-15 | เจ | เปิด/ปิดแบนเนอร์ | `Admin แบนเนอร์` | 1. Toggle | ที่ปิดไม่โชว์ /home | ✅ | `evidence/JJ/TC-A-15.png` | ยังไม่เห็นว่าใบที่ซ่อนหายจาก /home |
-| TC-A-15b | A-15b | เจ | ลบแบนเนอร์ | `Admin แบนเนอร์` | 1. ลบ 2. ยืนยัน | หายจาก admin และ /home | ✅ | `evidence/JJ/TC-A-15b.png` | ยังไม่เห็นว่าหายจาก /home |
-| TC-A-15c | A-15c | เจ | ส่งประกาศ Broadcast | `Admin` | 1. ส่งประกาศ | ผู้ใช้เห็นในกระดิ่ง Navbar | ✅ | `evidence/JJ/TC-A-15c.png` | ยังไม่เห็นกระดิ่งของผู้ใช้ |
+| TC-A-14 | A-14 | เจ | เพิ่มแบนเนอร์ใหม่ | `Admin แบนเนอร์` | 1. กรอก+อัปโหลด 2. บันทึก | โชว์ใน admin และ /home | ✅ | `evidence/JJ/TC-A-14(edit).png` | `/home` เห็น «โปรโมชันทดสอบ UAT» |
+| TC-A-15 | A-15 | เจ | เปิด/ปิดแบนเนอร์ | `Admin แบนเนอร์` | 1. Toggle | ที่ปิดไม่โชว์ /home | ✅ | `evidence/JJ/TC-A-15(admin).png` + `TC-A-15(User).png` | ซ่อน Co-Working แล้ว `/home` เหลือแค่โปรโมชันทดสอบ UAT |
+| TC-A-15b | A-15b | เจ | ลบแบนเนอร์ | `Admin แบนเนอร์` | 1. ลบ 2. ยืนยัน | หายจาก admin และ /home | ✅ | `evidence/JJ/TC-A-15b(admin).png` + `TC-A-15b(user).png` | ลบใบรถแล้วหายจากแอดมินและ `/home` |
+| TC-A-15c | A-15c | เจ | ส่งประกาศ Broadcast | `Admin` | 1. ส่งประกาศ | ผู้ใช้เห็นในกระดิ่ง Navbar | ✅ | `evidence/JJ/TC-A-15c(edit).png` | กระดิ่งเห็น «ทดสอบประกาศครบระบบปิดปรับปรุง» |
 | TC-A-16 | A-16 | เจ | ดูรายการ Promo Codes | `Admin โปรโม` | 1. แท็บรหัสส่วนลด | เห็นรหัส+สถิติ | ✅ | `evidence/JJ/TC-A-16.png` |  |
-| TC-A-17 | A-17 | เจ | สร้าง Promo Code ใหม่ | `Admin โปรโม` | 1. กรอกฟอร์ม 2. สร้าง | ใช้ได้ตอนจอง | ✅ | `evidence/JJ/TC-A-17.png` | ยังไม่เห็นใช้ตอนจอง |
-| TC-A-18 | A-18 | เจ | เปิด/ปิด Promo Code | `Admin โปรโม` | 1. Toggle | รหัสที่ปิดใช้ไม่ได้ | ✅ | `evidence/JJ/TC-A-18.png` | ยังไม่เห็นว่ารหัสถูกปฏิเสธตอนจอง |
+| TC-A-17 | A-17 | เจ | สร้าง Promo Code ใหม่ | `Admin โปรโม` | 1. กรอกฟอร์ม 2. สร้าง | ใช้ได้ตอนจอง | ✅ | `evidence/JJ/TC-A-17(edit).png` | `JAY10` ลด 10% ฿6,540 → ฿5,886 |
+| TC-A-18 | A-18 | เจ | เปิด/ปิด Promo Code | `Admin โปรโม` | 1. Toggle | รหัสที่ปิดใช้ไม่ได้ | ✅ | `evidence/JJ/TC-A-18(edit).png` | `JAY10` ถูกปฏิเสธ ราคายัง ฿6,540 |
 | TC-A-19 | A-19 | เจ | ดูรายการผู้ใช้ | `Admin Users` | 1. แท็บผู้ใช้ | ตารางชื่อ อีเมล Role สถิติ | ✅ | `evidence/JJ/TC-A-19.png` |  |
 | TC-A-20 | A-20 | เจ | ค้นหาผู้ใช้ | `Admin Users` | 1. พิมพ์ชื่อ/อีเมล | กรองตรง | ✅ | `evidence/JJ/TC-A-20.png` |  |
 | TC-A-21 | A-21 | พาร์ท | เปลี่ยน Role / Promote Admin | `Admin Users` | 1. ตั้ง/ถอด Admin | Role อัปเดตสำเร็จ | ✅ | `evidence/Parttime/TC-A-21.png` |  |

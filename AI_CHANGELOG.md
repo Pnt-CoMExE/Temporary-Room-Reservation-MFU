@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-20 — merge ForJJ + ForCCC to master]
+- รวม `ForJJ` รูป `TC-A-15`/`TC-A-15b` แอดมิน+ผู้ใช้ และ `ForCCC` แก้ i18n/ค้นหา/กรองสถานะ โดยไม่มี conflict ค้าง
+- เจครบ expected ทั้ง 18 เคสแล้ว: ซ่อนแบนเนอร์แล้ว `/home` ไม่โชว์ Co-Working · ลบใบรถแล้วหายจากแอดมินและ `/home`
+
 ## [2026-10-20 — Login language switch]
 - แก้ TC-I-03: หน้า Login มีปุ่ม TH/EN มุมขวาบน หัวข้อและปุ่ม Google เปลี่ยนตามภาษา
 - เทส TC-I-03 ใหม่ผ่าน: กด EN แล้วหน้า Login เป็น Login และ Sign in with Google รูปอยู่ที่ `docs/testing/evidence/CCC/TC-I-03.png`
@@ -12,6 +16,11 @@ This file tracks the actions, modifications, and updates performed by the AI Ass
 - แก้ TC-U-21: หน้าแดชบอร์ดมีช่องกรองสถานะข้างช่องค้นหา เลือกแล้วเหลือเฉพาะรายการสถานะนั้น
 - เทส TC-U-21 ผ่าน: เลือกสถานะรออนุมัติแล้วเหลือเฉพาะ BK-20261020-IZZQ รูปอยู่ที่ `docs/testing/evidence/CCC/TC-U-21.png`
 - กระดิ่งแจ้งเตือนแปลหัวข้อ รายละเอียด และวันที่ตามภาษาที่เลือก รายการเก่าในฐานข้อมูลที่บันทึกเป็นไทยก็เปลี่ยนตาม ไม่แตะประกาศที่แอดมินพิมพ์เอง
+
+## [2026-10-20 — Jay revised evidence]
+- Fast-forward `ForJJ` (`ed700a7`) รูปแก้ 6 ใบ ไม่มี conflict
+- `TC-A-14`, `TC-A-15c`, `TC-A-17`, `TC-A-18` ครบ expected แล้ว
+- ต่อมา `TC-A-15`/`TC-A-15b` ครบด้วยรูปแอดมิน+ผู้ใช้
 
 ## [2026-10-19 — Stripe replaces slip checks]
 - UAT ปัจจุบันคือ `PAYMENT_PROVIDER=stripe` เคสสลิปของพาร์ท `TC-U-23`, `TC-U-24`, `TC-A-09`, `TC-A-10` เป็นข้าม
