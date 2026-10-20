@@ -2,10 +2,13 @@
 import { onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useToast } from "vue-toastification";
+import { useI18n } from "vue-i18n";
+import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
 
 const router = useRouter();
 const route = useRoute();
 const toast = useToast();
+const { t } = useI18n();
 
 // ✅ อ่านข้อมูลหลัง Google OAuth redirect กลับมา
 // Server ส่ง loginSuccess=true&role=...&name=...&email=... (ไม่มี token ใน URL)
@@ -15,7 +18,7 @@ onMounted(() => {
 
   if (loginSuccess === "true") {
     if (!userId || !role || !name || !email) {
-      toast.error("เกิดข้อผิดพลาดในการเข้าสู่ระบบ กรุณาลองใหม่");
+      toast.error(t("login.error"));
       return;
     }
 
@@ -25,7 +28,7 @@ onMounted(() => {
     localStorage.setItem("userEmail", decodeURIComponent(email));
     localStorage.setItem("isLoggedIn", "true");
 
-    toast.success(`ยินดีต้อนรับคุณ ${decodeURIComponent(name)}! 👋`);
+    toast.success(t("login.welcome", { name: decodeURIComponent(name) }));
 
     // ล้าง query string ออกจาก URL แล้ว redirect
     if (role === "admin") {
@@ -40,7 +43,7 @@ onMounted(() => {
 // ฟังก์ชันสำหรับ Login ด้วย Google
 // ----------------------------------------------------
 const loginWithGoogle = () => {
-  toast.info("กำลังนำคุณไปยังหน้า Login ของ Google...", {
+  toast.info(t("login.redirecting"), {
     timeout: 2000,
   });
 
@@ -70,6 +73,10 @@ const loginWithGoogle = () => {
       <div
         class="absolute inset-0 bg-linear-to-b from-[#ba0b2f]/30 via-black/60 to-black/90"
       ></div>
+    </div>
+
+    <div class="absolute top-6 right-6 z-20">
+      <LanguageSwitcher />
     </div>
 
     <div class="relative z-10 w-full max-w-md px-4 sm:px-0">
@@ -103,7 +110,7 @@ const loginWithGoogle = () => {
           </div>
           <h2 class="text-2xl font-bold text-gray-900 mb-2">{{ $t('nav.login') }}</h2>
           <p class="text-sm font-medium transition-colors duration-300 text-gray-500">
-            Sign in with Google Account
+            {{ $t('login.subtitle') }}
           </p>
         </div>
 
@@ -122,7 +129,7 @@ const loginWithGoogle = () => {
               <span
                 class="font-bold text-gray-700 text-sm tracking-wide group-hover:text-gray-900"
               >
-                Sign in with Google
+                {{ $t('login.google_button') }}
               </span>
             </button>
           </div>

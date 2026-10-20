@@ -122,8 +122,8 @@ const handleMemoFile = (event: Event) => {
     if (file.type !== "application/pdf") {
       Swal.fire({
         icon: "error",
-        title: "ไฟล์ไม่ถูกต้อง",
-        text: "กรุณาเลือกไฟล์ PDF เท่านั้น",
+        title: t("booking.invalid_file_title"),
+        text: t("booking.invalid_file_text"),
       });
       clearMemoFile();
       return;
@@ -131,8 +131,8 @@ const handleMemoFile = (event: Event) => {
     if (file.size > 10 * 1024 * 1024) {
       Swal.fire({
         icon: "error",
-        title: "ไฟล์มีขนาดใหญ่เกินไป",
-        text: "กรุณาเลือกไฟล์ที่มีขนาดไม่เกิน 10 MB",
+        title: t("booking.file_too_large_title"),
+        text: t("booking.file_too_large_text"),
       });
       clearMemoFile();
       return;
@@ -305,8 +305,8 @@ const submitBooking = async () => {
   if (!bookingForm.value.acceptTerms) {
     Swal.fire({
       icon: "warning",
-      title: "คำเตือน",
-      text: "กรุณายอมรับเงื่อนไขการใช้บริการ",
+      title: t("booking.terms_required_title"),
+      text: t("booking.terms_required_text"),
       confirmButtonColor: "#ba0b2f",
     });
     return;
@@ -348,8 +348,8 @@ const submitBooking = async () => {
   if (!memoFile.value) {
     Swal.fire({
       icon: "warning",
-      title: "กรุณาแนบเอกสาร",
-      text: "ต้องแนบหนังสือบันทึกข้อความ (ไฟล์ PDF) ก่อนส่งคำขอจอง",
+      title: t("booking.memo_required_title"),
+      text: t("booking.memo_required_text"),
       confirmButtonColor: "#ba0b2f",
     });
     return;
@@ -408,7 +408,7 @@ const submitBooking = async () => {
   } catch (err: any) {
     console.error("Booking error:", err);
     const errorMsg =
-      err?.message || err.response?.data?.message || "ไม่สามารถส่งคำขอจองได้ในขณะนี้";
+      err?.message || err.response?.data?.message || t("booking.submit_error_fallback");
     Swal.fire({
       icon: "error",
       title: t('booking.submit_error_title'),
