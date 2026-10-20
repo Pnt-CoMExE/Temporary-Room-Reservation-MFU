@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-21 — merge ForParttime]
+- Fast-forward `ForParttime` (`f9fe25c`) หลักฐานพาร์ทครบตาม `part.md` ไม่มี conflict
+- เคสใหม่: `TC-U-02b-login-admin`, `TC-A-06-user`, `TC-E-07`, `TC-E-08`
+- หมายเหตุตรวจรูป: `TC-A-04` ยังเป็นค้นชื่อห้อง · `TC-A-12` หน้ารายการยังไม่ชี้ห้องที่ถูกปิด
+
 ## [2026-10-20 — merge ForJJ + ForCCC to master]
 - รวม `ForJJ` รูป `TC-A-15`/`TC-A-15b` แอดมิน+ผู้ใช้ และ `ForCCC` แก้ i18n/ค้นหา/กรองสถานะ โดยไม่มี conflict ค้าง
 - เจครบ expected ทั้ง 18 เคสแล้ว: ซ่อนแบนเนอร์แล้ว `/home` ไม่โชว์ Co-Working · ลบใบรถแล้วหายจากแอดมินและ `/home`

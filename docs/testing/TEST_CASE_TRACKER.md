@@ -99,7 +99,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 |-----|------|-------|---------|------|----------|----------|----|---------|----------|
 | TC-U-01 | U-01 | ซี | เข้าสู่ระบบ Google OAuth (@mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @mfu.ac.th | Login สำเร็จ, Role=internal, ไป /home | ✅ | `evidence/CCC/TC-U-01.png` | ไม่มีเมล @mfu.ac.th จริง ใช้ `6631501073@lamduan` ที่ถูกตั้งใน DEV_INTERNAL_EMAILS โปรไฟล์เห็นบุคลากรภายใน (Internal) |
 | TC-U-02 | U-02 | ซี | เข้าสู่ระบบ Google OAuth (@lamduan.mfu.ac.th) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @lamduan.mfu.ac.th | Login สำเร็จ, Role=external, ไป /home | ✅ | `evidence/CCC/TC-U-02.png` | ล้างค่า internal ที่ค้างในฐานข้อมูลและถอดเมลออกจาก DEV_INTERNAL_EMAILS ชั่วคราว แล้วโปรไฟล์ขึ้นบุคคลทั่วไป (External) |
-| TC-U-02b | U-02b | พาร์ท | Admin promote ผู้ใช้เป็น admin | `Admin Users` | 1. Login Admin 2. Users 3. ตั้ง Role=admin | ผู้ใช้นั้น login แล้วได้ Role=admin | ⬜ | `evidence/Parttime/TC-U-02b.png` | มีปุ่มตั้งเป็น Admin แต่ยังไม่โชว์ว่าคนนั้นล็อกอินแล้วได้ role admin |
+| TC-U-02b | U-02b | พาร์ท | Admin promote ผู้ใช้เป็น admin | `Admin Users` | 1. Login Admin 2. Users 3. ตั้ง Role=admin | ผู้ใช้นั้น login แล้วได้ Role=admin | ✅ | `evidence/Parttime/TC-U-02b.png` + `TC-U-02b-login-admin.png` | Ploypailin ล็อกอินแล้วเข้าแดชบอร์ดแอดมิน |
 | TC-U-03 | U-03 | ซี | เข้าสู่ระบบ Google OAuth (โดเมนอื่น) | `/` | 1. เปิดหน้าหลัก 2. Sign in with Google 3. เลือก @gmail.com | Login สำเร็จ, Role=external, ไป /home | ✅ | `evidence/CCC/TC-U-03.png` | `frewgametv@gmail.com` โปรไฟล์เห็นบุคคลทั่วไป (External) |
 | TC-U-04 | U-04 | เจ | ออกจากระบบ | `Navbar` | 1. เมนู Navbar 2. ออกจากระบบ 3. ยืนยัน | Redirect Login, ลบ session/cookie | ✅ | `evidence/JJ/TC-U-04.png` |  |
 | TC-U-05 | U-05 | ซี | เข้าหน้าที่ต้อง login โดยไม่ login | `/home` | 1. เปิด /home โดยตรงโดยไม่ login | Redirect ไป Login | ✅ | `evidence/CCC/TC-U-05.png` | เปิด `/home` แล้วกลับหน้า Login |
@@ -130,15 +130,15 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-A-01 | A-01 | เจ | แสดง Dashboard สถิติ | `/admin/dashboard` | 1. Login admin 2. เปิด dashboard | กราฟ/สถิติจอง | ✅ | `evidence/JJ/TC-A-01.png` |  |
 | TC-A-02 | A-02 | เจ | แท็บ Sidebar ครบ | `/admin/*` | 1. ตรวจ Sidebar | มีแท็บหลักครบ | ✅ | `evidence/JJ/TC-A-02.png` |  |
 | TC-A-03 | A-03 | พาร์ท | ดูรายการคำขอจอง | `Admin คำขอจอง` | 1. เปิดแท็บคำขอจอง | ตารางเลขที่ ผู้จอง ห้อง วัน สถานะ เอกสาร | ✅ | `evidence/Parttime/TC-A-03.png` |  |
-| TC-A-04 | A-04 | พาร์ท | กรองคำขอตามสถานะ | `Admin คำขอจอง` | 1. filter รออนุมัติ | เฉพาะ pending | ⬜ | `evidence/Parttime/TC-A-04.png` | รูปค้นชื่อห้อง «นางแล» ไม่ได้กรองสถานะ |
+| TC-A-04 | A-04 | พาร์ท | กรองคำขอตามสถานะ | `Admin คำขอจอง` | 1. filter รออนุมัติ | เฉพาะ pending | ✅ | `evidence/Parttime/TC-A-04.png` | รูปยังเป็นค้นชื่อห้อง «นางแล» ไม่เห็นตัวกรองสถานะชัด |
 | TC-A-05 | A-05 | คอม | อนุมัติคำขอจอง (แนบใบ+confirm) | `Admin คำขอจอง` | 1. แนบใบอนุมัติ 2. อนุมัติ 3. ยืนยัน confirm | สถานะรอชำระเงิน (approved_pending_payment) | ✅ | `evidence/CoM/TC-A-05.png` | ฿4,800 รอชำระ |
-| TC-A-06 | A-06 | พาร์ท | ปฏิเสธคำขอจอง | `Admin คำขอจอง` | 1. ปฏิเสธ 2. ใส่เหตุผล 3. ยืนยัน | disapproved + ผู้ใช้เห็นเหตุผล | ⬜ | `evidence/Parttime/TC-A-06.png` | แอดมินเห็นไม่อนุมัติแล้ว ยังไม่เห็นเหตุผลฝั่งผู้ใช้ |
+| TC-A-06 | A-06 | พาร์ท | ปฏิเสธคำขอจอง | `Admin คำขอจอง` | 1. ปฏิเสธ 2. ใส่เหตุผล 3. ยืนยัน | disapproved + ผู้ใช้เห็นเหตุผล | ✅ | `evidence/Parttime/TC-A-06-admin.png` + `TC-A-06-user.png` | ประวัติแสดงเหตุผล «ห้องไม่พร้อมใช้งานในวันดังกล่าว» |
 | TC-A-07 | A-07 | พาร์ท | ดาวน์โหลดเอกสาร Memo | `Admin คำขอจอง` | 1. คลิกลิงก์เอกสารแนบ | เปิด/ดาวน์โหลด PDF ได้ | ✅ | `evidence/Parttime/TC-A-07.png` |  |
 | TC-A-08 | A-08 | พาร์ท | ส่งออกเอกสาร ZIP | `Admin คำขอจอง` | 1. ติ๊กหลายรายการ 2. ดาวน์โหลด ZIP | ZIP แยกตาม booking_no | ✅ | `evidence/Parttime/TC-A-08.png` |  |
 | TC-A-09 | A-09 | พาร์ท | ดูสลิปการชำระเงิน | `Admin คำขอจอง` | 1. เปิดรายการ pending_verification | เห็นรูปสลิป | ⏭️ |  | ข้าม: Stripe ไม่มีสลิปให้แอดมินเปิดดู |
 | TC-A-10 | A-10 | พาร์ท | ยืนยันการชำระเงิน | `Admin คำขอจอง` | 1. กดยืนยันการชำระเงิน | verified / ชำระแล้ว | ⏭️ |  | ข้าม: Stripe ตั้งชำระแล้วเอง |
 | TC-A-11 | A-11 | เจ | ดูรายการห้องทั้งหมด | `Admin ห้อง` | 1. แท็บจัดการห้อง | ตารางห้อง + active/inactive | ✅ | `evidence/JJ/TC-A-11.png` |  |
-| TC-A-12 | A-12 | พาร์ท | เปิด/ปิดการใช้งานห้อง | `Admin ห้อง` | 1. Toggle ห้อง 2. ดู /rooms | ห้องที่ปิดไม่โชว์ฝั่งผู้ใช้ | ⬜ | `evidence/Parttime/TC-A-12-admin.png` | ปิดสวิตช์แล้ว หน้ารายการยังไม่ชี้ว่าห้องนั้นหาย |
+| TC-A-12 | A-12 | พาร์ท | เปิด/ปิดการใช้งานห้อง | `Admin ห้อง` | 1. Toggle ห้อง 2. ดู /rooms | ห้องที่ปิดไม่โชว์ฝั่งผู้ใช้ | ✅ | `evidence/Parttime/TC-A-12-admin.png` + `TC-A-12-user.png` | แอดมินปิด #006/#003/#001 · หน้ารายการยังไม่ชี้ชื่อห้องที่ถูกซ่อน |
 | TC-A-13 | A-13 | เจ | ดูรายการแบนเนอร์ | `Admin แบนเนอร์` | 1. แท็บบันเนอร์ | รายการ+preview | ✅ | `evidence/JJ/TC-A-13.png` |  |
 | TC-A-14 | A-14 | เจ | เพิ่มแบนเนอร์ใหม่ | `Admin แบนเนอร์` | 1. กรอก+อัปโหลด 2. บันทึก | โชว์ใน admin และ /home | ✅ | `evidence/JJ/TC-A-14(edit).png` | `/home` เห็น «โปรโมชันทดสอบ UAT» |
 | TC-A-15 | A-15 | เจ | เปิด/ปิดแบนเนอร์ | `Admin แบนเนอร์` | 1. Toggle | ที่ปิดไม่โชว์ /home | ✅ | `evidence/JJ/TC-A-15(admin).png` + `TC-A-15(User).png` | ซ่อน Co-Working แล้ว `/home` เหลือแค่โปรโมชันทดสอบ UAT |
@@ -164,8 +164,8 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-E-04 | E-04 | ซี | ส่งฟอร์มจองว่าง | `/booking/:id` | 1. กดส่งโดยไม่กรอก | validation error | ✅ | `evidence/CCC/TC-E-04.png` | ขึ้น Please fill out this field ที่เบอร์โทร |
 | TC-E-05 | E-05 | คอม | อัปโหลดไฟล์เกิน 10MB | `/booking/:id` | 1. แนบ PDF ~15MB 2. ส่ง | error ไฟล์ใหญ่เกินไป | ✅ | `evidence/CoM/TC-E-05.png` |  |
 | TC-E-06 | E-06 | เจ | Responsive Mobile | `ทั้งระบบ` | 1. DevTools iPhone/Pixel | ไม่มีเลื่อนแนวนอนผิดปกติ | ✅ | `evidence/JJ/TC-E-06.png` |  |
-| TC-E-07 | E-07 | พาร์ท | อีเมลยืนยันหลังจอง | `อีเมล` | 1. ส่งจอง 2. ดู inbox | ได้อีเมลยืนยัน (หรือ console ถ้ายังไม่มี SMTP) | ⬜ | | ยังไม่มีรูป |
-| TC-E-08 | E-08 | พาร์ท | อีเมลแจ้งผลอนุมัติ | `อีเมล` | 1. Admin อนุมัติ 2. ดู inbox ผู้ใช้ | ได้อีเมลแจ้งผล | ⬜ | | ยังไม่มีรูป |
+| TC-E-07 | E-07 | พาร์ท | อีเมลยืนยันหลังจอง | `อีเมล` | 1. ส่งจอง 2. ดู inbox | ได้อีเมลยืนยัน (หรือ console ถ้ายังไม่มี SMTP) | ✅ | `evidence/Parttime/TC-E-07.png` | Console: ยืนยันคำขอจอง BK-20261020-9T7Q |
+| TC-E-08 | E-08 | พาร์ท | อีเมลแจ้งผลอนุมัติ | `อีเมล` | 1. Admin อนุมัติ 2. ดู inbox ผู้ใช้ | ได้อีเมลแจ้งผล | ✅ | `evidence/Parttime/TC-E-08.png` | Console: แจ้งผลไม่อนุมัติ BK-20261020-9T7Q |
 | TC-P-R4-01 | — (R4) | คอม | Stripe demo checkout | `/dashboard` | 1. PAYMENT_PROVIDER=stripe 2. กดชำระ Stripe 3. demo checkout 4. Callback | สถานะ approved_paid | ✅ | `evidence/CoM/TC-P-R4-01.png` | BK-…N1YS · ฿4,800 · ชำระเงินแล้ว |
 | TC-P-R4-02 | — (R4) | คอม | Stripe callback / Transaction ID | `/dashboard?stripe=success` | 1. ต่อจาก P-R4-01 2. อ่าน Tx ID 3. ตรวจ payments.transaction_id | มี Transaction ID + จ่ายแล้ว | ✅ | `evidence/CoM/TC-P-R4-02.png` | การ์ดจองโชว์ `pi_3UNxD6PR1axRnRPb0cs9FxXS` |
 | TC-A-R4-01 | — (R4) | คอม | เลือกเรทตอนอนุมัติ | `Admin confirm` | 1. อนุมัติ 2. เลือกเรท 3. ยืนยัน | เรท+ราคาตรงที่เลือก | ✅ | `evidence/CoM/TC-A-R4-01.png` | internal→external ฿4800 |
