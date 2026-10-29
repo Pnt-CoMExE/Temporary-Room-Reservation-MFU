@@ -5,6 +5,8 @@
 
 เริ่มจากตารางนี้ — เปิดเฉพาะหมวดที่ต้องการ
 
+**Project handover / get a usable site running:** start with [`../README.md`](../README.md) (clone → `.env` → seed → run / Docker → handover checklist)
+
 ---
 
 ## แผนที่เอกสาร

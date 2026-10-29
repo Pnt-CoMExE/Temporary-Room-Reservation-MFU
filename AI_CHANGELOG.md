@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-29 — README handover guide (EN)]
+- Rewrite root `README.md` in English for handover: prerequisites · `.env` table · DB/seed/import · dev + Docker · roles/payment · ready-to-use checklist · troubleshooting
+- `docs/README.md` + `SETUP_FROM_ENV_EXAMPLE.md` point to root README as the handover entry
+
 ## [2026-10-29 — Room category default photos]
 - ใส่รูปหมวด: `meeting.png` (ห้องประชุม) · `seminar.png` (ห้องสัมมนา) · `lecture.jpg` (ห้องบรรยาย)
 - `resolveRoomImage(..., roomType)` ใช้รูปหมวดเมื่อไม่มีรูปอัปโหลด

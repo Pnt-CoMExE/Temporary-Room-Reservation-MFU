@@ -2,6 +2,8 @@
 
 สำหรับคนที่ **ไม่มีไฟล์ `.env` จริง** ในเครื่อง — ตั้งค่าจากตัวอย่างใน repo แล้วกรอกค่าทดสอบเอง
 
+Full handover guide (DB · seed · Docker · ready-to-use checklist): [`../../README.md`](../../README.md)
+
 **อย่า commit ไฟล์ `.env`** · ตัวอย่างไม่ใช่ secret production
 
 ---
