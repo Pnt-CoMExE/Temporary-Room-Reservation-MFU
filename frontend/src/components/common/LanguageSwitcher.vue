@@ -17,7 +17,7 @@ const setLanguage = (lang: "th" | "en") => {
     <button
       @click="setLanguage('th')"
       type="button"
-      class="px-3.5 py-1 rounded-full text-xs font-black tracking-wider transition-all duration-300 cursor-pointer"
+      class="px-3.5 py-1.5 rounded-full text-sm font-black tracking-wider transition-all duration-300 cursor-pointer"
       :class="
         currentLang === 'th'
           ? 'bg-white text-[#ba0b2f] shadow-md shadow-red-100 scale-105'
@@ -30,7 +30,7 @@ const setLanguage = (lang: "th" | "en") => {
     <button
       @click="setLanguage('en')"
       type="button"
-      class="px-3.5 py-1 rounded-full text-xs font-black tracking-wider transition-all duration-300 cursor-pointer"
+      class="px-3.5 py-1.5 rounded-full text-sm font-black tracking-wider transition-all duration-300 cursor-pointer"
       :class="
         currentLang === 'en'
           ? 'bg-white text-[#ba0b2f] shadow-md shadow-red-100 scale-105'

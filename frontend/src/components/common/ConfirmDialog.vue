@@ -11,20 +11,20 @@
             <span class="text-2xl">{{ icon }}</span>
             <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
           </div>
-          <p class="text-gray-600 text-sm mb-6 leading-relaxed">
+          <p class="text-gray-600 text-base mb-6 leading-relaxed">
             {{ message }}
           </p>
           <div class="flex justify-end gap-3">
             <button
               @click="$emit('cancel')"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+              class="px-5 py-2.5 text-base font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
               {{ cancelText }}
             </button>
             <button
               @click="$emit('confirm')"
               :class="[
-                'px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors',
+                'px-5 py-2.5 text-base font-medium text-white rounded-lg transition-colors',
                 danger
                   ? 'bg-red-600 hover:bg-red-700'
                   : 'bg-[#ba0b2f] hover:bg-[#980926]',

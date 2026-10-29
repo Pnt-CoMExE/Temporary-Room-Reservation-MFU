@@ -13,7 +13,7 @@ import Navbar from "@/components/common/Navbar.vue";
     </main>
 
     <footer
-      class="bg-[#111827] text-gray-400 text-center py-6 text-sm w-full border-t-4 border-[#ba0b2f]"
+      class="bg-[#111827] text-gray-400 text-center py-7 text-base w-full border-t-4 border-[#ba0b2f]"
     >
       {{ $t('home.footer_copyright') }}
     </footer>

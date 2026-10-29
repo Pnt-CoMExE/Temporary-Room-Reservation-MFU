@@ -2,6 +2,24 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-30 — Test cases readability pass]
+- จัดโฟลว์ใหม่ให้อ่านง่าย: เฟส ผู้ใช้ → แอดมิน → ข้ามระบบ · แยกหัวข้อย่อยในแต่ละไฟล์ · เรียงเคสตามลำดับใช้งาน (เช่น Booking happy path ก่อน error)
+- ตารางบางลง (ตัดคอลัมน์รหัสเก่าออกจากตารางหลัก → อยู่ที่ `_id-map.md`) · Tracker แบ่ง section + สารบัญ · README มีลำดับรันแนะนำ
+- ยังรวม **79** เคส · รหัส TC ในโฟลว์อาจสลับลำดับภายในกลุ่มให้ตรง narrative (ดู `_id-map.md`)
+
+## [2026-10-30 — Drop 4 skipped PromptPay/slip test cases]
+- ลบ TC-PAY-04/05 (U-23/U-24) และ TC-ADM-BOOK-10/11 (A-09/A-10) ออกจาก tracker + flow files · รวมเหลือ **79** เคส (ผ่านครบ)
+
+## [2026-10-30 — Global font readability + test cases by flow + Project Structure]
+- Frontend: root `html` font-size 18px · bump Tailwind type scale · roomier inputs/tables · Navbar / RoomCard / LanguageSwitcher / ConfirmDialog / footer spacing fit larger type
+- Test cases: reorganize `docs/testing/test-cases/` by flow (`01-auth` … `12-edge-email`) · renumber to `TC-AUTH-` / `TC-BOOK-` / … · keep old IDs in column **เดิม** + evidence filenames · update `TEST_CASE_TRACKER.md` · person files → redirect stubs
+- README §10 renamed/expanded to **Project Structure** (frontend/backend folder roles, no code move)
+
+## [2026-10-29 — Senior Project 2 Chapters 4 and 5 draft]
+- เพิ่ม `docs/product/CHAPTER_4_AND_5.md` ร่างภาษาอังกฤษ Chapter 4 Results และ Chapter 5 Conclusion and Discussion สำหรับวางในเล่ม
+- อ้างผลทดสอบจาก tracker: 83 เคส ผ่าน 79 ข้าม 4 · backend 204/204 ณ 2026-10-07 · ไม่ใส่ secret
+- ชี้จาก `THESIS_CHAPTERS_CHECKLIST.md` และ `docs/README.md`
+
 ## [2026-10-29 — README handover guide (EN)]
 - Rewrite root `README.md` in English for handover: prerequisites · `.env` table · DB/seed/import · dev + Docker · roles/payment · ready-to-use checklist · troubleshooting
 - `docs/README.md` + `SETUP_FROM_ENV_EXAMPLE.md` point to root README as the handover entry

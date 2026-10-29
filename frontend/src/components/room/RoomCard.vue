@@ -59,7 +59,7 @@ const goToRoom = () => {
       ></div>
 
       <div
-        class="absolute top-4 right-4 px-4 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-lg backdrop-blur-md border"
+        class="absolute top-4 right-4 px-4 py-2 rounded-full text-sm font-bold tracking-wide shadow-lg backdrop-blur-md border"
         :class="
           room.isAvailable
             ? 'bg-white/90 text-green-600 border-white/50'
@@ -76,7 +76,7 @@ const goToRoom = () => {
       </div>
 
       <div
-        class="absolute bottom-4 left-4 px-4 py-1.5 bg-[#ba0b2f] text-white rounded-lg text-xs font-bold shadow-lg transform translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
+        class="absolute bottom-4 left-4 px-4 py-2 bg-[#ba0b2f] text-white rounded-lg text-sm font-bold shadow-lg transform translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
       >
         {{ displayType }}
       </div>
@@ -94,7 +94,7 @@ const goToRoom = () => {
       </h3>
 
       <div class="space-y-3 mb-6 mt-auto">
-        <div class="flex items-start text-sm text-gray-500 font-medium">
+        <div class="flex items-start text-base text-gray-500 font-medium">
           <div class="w-6 flex justify-center text-gray-400 mt-0.5">
             <FontAwesomeIcon :icon="['fas', 'map-marker-alt']" />
           </div>
@@ -102,7 +102,7 @@ const goToRoom = () => {
             displayLocation
           }}</span>
         </div>
-        <div class="flex items-center text-sm text-gray-500 font-medium">
+        <div class="flex items-center text-base text-gray-500 font-medium">
           <div class="w-6 flex justify-center text-gray-400">
             <FontAwesomeIcon :icon="['fas', 'users']" />
           </div>
@@ -119,7 +119,7 @@ const goToRoom = () => {
       >
         <div>
           <p
-            class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5"
+            class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-0.5"
           >
             {{ $t('room.half_day') }} ({{ $t('room.price_internal') }})
           </p>

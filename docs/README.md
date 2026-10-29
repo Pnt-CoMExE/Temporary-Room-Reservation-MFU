@@ -1,7 +1,7 @@
 # Documentation — MFU Space Reservation
 
 **โครงการ:** ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง  
-**อัปเดตโครงสร้าง:** 2026-10-05
+**อัปเดตโครงสร้าง:** 2026-10-30
 
 เริ่มจากตารางนี้ — เปิดเฉพาะหมวดที่ต้องการ
 
@@ -32,6 +32,7 @@
 | [`product/planning.md`](./product/planning.md) | แผน 8 sprints |
 | [`product/schema.md`](./product/schema.md) | โครง DB |
 | [`product/THESIS_CHAPTERS_CHECKLIST.md`](./product/THESIS_CHAPTERS_CHECKLIST.md) | Checklist บท 3–5 (สอบ) |
+| [`product/CHAPTER_4_AND_5.md`](./product/CHAPTER_4_AND_5.md) | ร่างภาษาอังกฤษ Chapter 4 Results และ Chapter 5 สำหรับวางในเล่ม |
 
 ---
 
@@ -50,7 +51,7 @@ UAT ชั่วคราวยังใช้ `PAYMENT_PROVIDER=mock_sandbox` �
 | ไฟล์ | คำอธิบาย |
 |------|----------|
 | [`testing/TEST_CASE_TRACKER.md`](./testing/TEST_CASE_TRACKER.md) | **ตาราง Test Case ทั้งหมด** |
-| [`testing/test-cases/`](./testing/test-cases/) | แยกรายบุคคล: คอม / ซี / พาร์ท / เจ |
+| [`testing/test-cases/`](./testing/test-cases/) | จัดตามโฟลว์ (`01-auth` … `12-edge-email`) + รหัส TC ใหม่ |
 | [`testing/evidence/`](./testing/evidence/) | Screenshot หลักฐาน |
 | [`testing/TESTING_PLAN.md`](./testing/TESTING_PLAN.md) | แผน Unit / Integration / E2E |
 | [`testing/QA_AUTOMATION_GUIDE.md`](./testing/QA_AUTOMATION_GUIDE.md) | Playwright E2E |

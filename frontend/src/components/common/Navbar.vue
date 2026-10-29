@@ -159,7 +159,7 @@ const confirmLogout = () => {
                   >MFU</span
                 >
                 <span
-                  class="text-[10px] font-bold text-[#d4af37] tracking-[0.2em] mt-0.5"
+                  class="text-xs font-bold text-[#d4af37] tracking-[0.2em] mt-0.5"
                   >PROPERTY</span
                 >
               </div>
@@ -169,7 +169,7 @@ const confirmLogout = () => {
           <div class="hidden md:flex items-center space-x-8">
             <RouterLink
               to="/home"
-              class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
+              class="text-base font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
               {{ $t('nav.home') }}<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
@@ -177,7 +177,7 @@ const confirmLogout = () => {
             </RouterLink>
             <RouterLink
               to="/rooms"
-              class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
+              class="text-base font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
               {{ $t('nav.rooms') }}<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
@@ -185,7 +185,7 @@ const confirmLogout = () => {
             </RouterLink>
             <RouterLink
               to="/dashboard"
-              class="text-sm font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
+              class="text-base font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
             >
               {{ $t('nav.dashboard') }}<span
                 class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
@@ -198,9 +198,9 @@ const confirmLogout = () => {
 
               <!-- ✨ ชื่อผู้ใช้งาน และ รูปโปรไฟล์ Google -->
               <div class="hidden lg:flex items-center gap-3">
-                <img v-if="profileImage" :src="profileImage" referrerpolicy="no-referrer" class="w-8 h-8 rounded-full shadow-sm object-cover border border-gray-200" />
-                <div v-else class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200"><FontAwesomeIcon :icon="['fas', 'user']" class="text-xs" /></div>
-                <span class="text-xs font-bold text-gray-500">
+                <img v-if="profileImage" :src="profileImage" referrerpolicy="no-referrer" class="w-9 h-9 rounded-full shadow-sm object-cover border border-gray-200" />
+                <div v-else class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200"><FontAwesomeIcon :icon="['fas', 'user']" class="text-sm" /></div>
+                <span class="text-sm font-bold text-gray-500">
                   {{ $t('nav.welcome') }} <span class="text-[#ba0b2f]">{{ userName }}</span>
                 </span>
               </div>
@@ -230,7 +230,7 @@ const confirmLogout = () => {
                     <button
                       v-if="notifications.length > 0"
                       @click="markAllAsRead"
-                      class="text-[10px] font-bold text-[#ba0b2f] hover:underline cursor-pointer"
+                      class="text-xs font-bold text-[#ba0b2f] hover:underline cursor-pointer"
                     >
                       {{ $t('nav.mark_all_read') }}
                     </button>
@@ -266,13 +266,13 @@ const confirmLogout = () => {
                           />
                         </div>
                         <div>
-                          <p class="text-sm font-bold text-gray-900 mb-0.5">
+                          <p class="text-base font-bold text-gray-900 mb-0.5">
                             {{ notificationTitle(notif.title, t) }}
                           </p>
-                          <p class="text-xs text-gray-500 leading-relaxed">
+                          <p class="text-sm text-gray-500 leading-relaxed">
                             {{ notificationBody(notif.desc, locale, t) }}
                           </p>
-                          <p class="text-[10px] font-bold text-gray-400 mt-2">
+                          <p class="text-xs font-bold text-gray-400 mt-2">
                             <FontAwesomeIcon :icon="['far', 'clock']" class="mr-1" />
                             {{ notificationTime(notif.createdAt, locale, notif.time, t) }}
                           </p>
@@ -285,7 +285,7 @@ const confirmLogout = () => {
 
               <button
                 @click="confirmLogout"
-                class="group bg-white text-gray-600 px-5 py-2.5 rounded-full font-bold hover:bg-red-50 hover:text-[#ba0b2f] transition-all duration-300 border border-gray-200 hover:border-red-100 text-sm flex items-center gap-2 shadow-sm hover:shadow-md cursor-pointer"                  >
+                class="group bg-white text-gray-600 px-5 py-3 rounded-full font-bold hover:bg-red-50 hover:text-[#ba0b2f] transition-all duration-300 border border-gray-200 hover:border-red-100 text-base flex items-center gap-2 shadow-sm hover:shadow-md cursor-pointer"                  >
                   <FontAwesomeIcon
                     :icon="['fas', 'sign-out-alt']" class="text-gray-400 group-hover:text-[#ba0b2f] transition-colors"
                   />

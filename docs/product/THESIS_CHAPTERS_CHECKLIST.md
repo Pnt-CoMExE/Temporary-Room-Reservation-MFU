@@ -2,6 +2,9 @@
 
 ใช้คู่กับ [`../ops/SETUP_FROM_ENV_EXAMPLE.md`](../ops/SETUP_FROM_ENV_EXAMPLE.md) และ [`../testing/TEST_CASE_TRACKER.md`](../testing/TEST_CASE_TRACKER.md)
 
+**ฉบับภาษาอังกฤษสำหรับวางในเล่ม (Chapter 4 Results + Chapter 5 Conclusion and Discussion):** [`CHAPTER_4_AND_5.md`](./CHAPTER_4_AND_5.md)  
+ตัวเลขในฉบับนั้น: manual 83 เคส = ผ่าน 79 / ข้าม 4 / ไม่ผ่าน 0 · backend `npm test` 204/204 ณ 7 October 2026 (TC-Z-02)
+
 ---
 
 ## บทที่ 3 — การวิเคราะห์และออกแบบ / ติดตั้งระบบ

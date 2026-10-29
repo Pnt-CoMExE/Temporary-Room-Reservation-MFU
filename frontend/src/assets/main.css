@@ -2,6 +2,15 @@
 
 @theme {
   --font-sans: "IBM Plex Sans Thai Looped", ui-sans-serif, system-ui, sans-serif;
+  /* Bump Tailwind type scale (~+1 step readability at 18px root) */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.3125rem;
+  --text-2xl: 1.5625rem;
+  --text-3xl: 1.9375rem;
+  --text-4xl: 2.3125rem;
   --color-mfu-red: #ba0b2f;
   --color-mfu-gold: #d4af37;
   --color-canvas: #f1f3f5;
@@ -10,6 +19,45 @@
   --shadow-card-lg: 0 12px 36px rgba(17, 24, 39, 0.12);
   --shadow-card-float: 0 16px 48px rgba(17, 24, 39, 0.14);
   --shadow-card-hover: 0 24px 52px rgba(17, 24, 39, 0.16);
+}
+
+@layer base {
+  html {
+    font-size: 18px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    font-family: "IBM Plex Sans Thai Looped", sans-serif !important;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Roomier form controls to match larger type */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+  select,
+  textarea {
+    min-height: 2.75rem;
+    line-height: 1.5;
+  }
+
+  textarea {
+    min-height: 6rem;
+  }
+
+  table th,
+  table td {
+    padding-block: 0.75rem;
+    padding-inline: 0.875rem;
+    line-height: 1.5;
+  }
+
+  button,
+  [role="button"],
+  .swal2-styled {
+    line-height: 1.4;
+  }
 }
 
 @layer components {
@@ -28,8 +76,4 @@
   .ui-card-glass {
     @apply bg-white/95 backdrop-blur-xl border border-gray-200/80 shadow-card-float;
   }
-}
-
-body {
-  font-family: "IBM Plex Sans Thai Looped", sans-serif !important;
 }

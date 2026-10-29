@@ -25,7 +25,7 @@ Web system for searching, booking, approving, and paying for temporary rental sp
 7. [Roles / Admin / payments](#7-roles--admin--payments)
 8. [Handover checklist (site ready to use)](#8-handover-checklist-site-ready-to-use)
 9. [Tests and build](#9-tests-and-build)
-10. [Project layout (short)](#10-project-layout-short)
+10. [Project Structure](#10-project-structure)
 11. [Reference docs](#11-reference-docs)
 12. [Troubleshooting](#12-troubleshooting)
 
@@ -307,24 +307,63 @@ E2E (Playwright): see [`docs/testing/QA_AUTOMATION_GUIDE.md`](docs/testing/QA_AU
 
 ---
 
-## 10) Project layout (short)
+## 10) Project Structure
+
+Source is split into **frontend** (Vue SPA) and **backend** (Express API). Docs and reference data sit beside them — do not delete `docs/` or `data/`.
 
 ```
 Temporary-Room-Reservation-MFU/
-├── backend/                 # Express API (TypeScript)
-│   ├── .env.example
-│   ├── scripts/             # seed, import rooms, jobs, migrations
-│   └── src/                 # routes, services, middleware
-├── frontend/                # Vue 3 + Vite + i18n TH/EN
-├── data/                    # room pricing Excel + import test files
-├── docs/                    # start at docs/README.md
-├── docker-compose.prod.yml
-├── docker-compose.local.yml
+├── frontend/                 # Vue 3 + Vite + TypeScript + Tailwind + vue-i18n
+│   ├── public/               # static assets served as-is
+│   ├── index.html
+│   └── src/
+│       ├── assets/           # global CSS (main.css), images
+│       ├── components/       # shared UI (Navbar, RoomCard, dialogs…)
+│       ├── composables/      # reusable Vue composition helpers
+│       ├── i18n/locales/     # TH + EN message catalogs
+│       ├── layouts/          # UserLayout / AdminLayout shells
+│       ├── router/           # routes + auth/admin guards
+│       ├── services/         # axios API client
+│       ├── utils/            # translators, formatters, helpers
+│       ├── views/users/      # Login, Home, Rooms, Booking, Dashboard…
+│       └── views/admin/      # Admin dashboard, bookings, rooms, users…
+├── backend/                  # Express 5 + TypeScript + PostgreSQL
+│   ├── .env.example          # copy to .env — never commit real secrets
+│   ├── scripts/              # seed, import rooms, schema, maintenance jobs
+│   ├── uploads/              # runtime uploads (gitignored)
+│   └── src/
+│       ├── config/           # env.ts and app config
+│       ├── middleware/       # auth, admin, upload limits
+│       ├── routes/           # public API modules (auth, rooms, booking…)
+│       ├── routes/admin/     # admin-only routes
+│       ├── services/         # business logic (payment, mail, import…)
+│       ├── utils/            # resolveUserType, helpers
+│       └── __tests__/        # Vitest unit / integration tests
+├── data/                     # room pricing Excel + import fixtures (keep)
+├── docs/                     # full docs map → docs/README.md (keep)
+│   ├── testing/              # TEST_CASE_TRACKER + flow-based test-cases/
+│   ├── payment/              # Stripe guide
+│   ├── ops/                  # setup, go-live, CITS runbook
+│   └── product/              # schema, features, thesis drafts
+├── docker-compose.local.yml  # local UAT stack
+├── docker-compose.prod.yml   # near-production compose
 ├── .env.production.example
-└── README.md                # this file
+├── RULES.md                  # team / AI coding rules
+├── AI_CHANGELOG.md           # change log for AI-assisted work
+└── README.md                 # this handover guide
 ```
 
+| Area | Responsibility |
+|------|----------------|
+| `frontend/src/views/users` | End-user flows: search rooms, book, pay, profile |
+| `frontend/src/views/admin` | Admin UX: approve bookings, rooms, add-ons, promos, users |
+| `backend/src/routes` | HTTP API surface; keep SQL parameterized |
+| `backend/src/services` | Domain logic (pricing import, Stripe/mock payment, mail, audit) |
+| `backend/scripts` | One-off / ops: `seed:demo`, `import:rooms`, schema init |
+| `docs/testing` | Manual UAT cases grouped by flow (`test-cases/01-auth.md` …) |
+
 ---
+
 
 ## 11) Reference docs
 
