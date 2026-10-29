@@ -105,7 +105,11 @@ const slotStatusLabel = (status: string) =>
   getBookingStatusLabel(status, locale.value);
 
 const displayRoomImage = computed(() =>
-  resolveRoomImage(room.value?.image_url, room.value?.id ?? room.value?.name)
+  resolveRoomImage(
+    room.value?.image_url,
+    room.value?.id ?? room.value?.name,
+    room.value?.type
+  )
 );
 
 const displayRoomName = computed(() => translateRoomName(room.value?.name, locale.value));

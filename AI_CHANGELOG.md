@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-29 — Room category default photos]
+- ใส่รูปหมวด: `meeting.png` (ห้องประชุม) · `seminar.png` (ห้องสัมมนา) · `lecture.jpg` (ห้องบรรยาย)
+- `resolveRoomImage(..., roomType)` ใช้รูปหมวดเมื่อไม่มีรูปอัปโหลด
+
 ## [2026-10-29 — Year filter single year = 12 months]
 - โหมด「รายปี」: จากปี=ถึงปี → กราฟ 12 เดือนของปีนั้น · หลายปียังเป็นแท่งรายปี
 - `getRevenueByMonth(year)` เติมเดือนที่ไม่มีรายได้เป็น 0 ให้ครบ 12 แท่ง

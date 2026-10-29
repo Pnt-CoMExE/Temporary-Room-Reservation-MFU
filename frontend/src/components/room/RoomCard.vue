@@ -33,7 +33,7 @@ const displayType = computed(() => translateRoomType(props.room.type, locale.val
 const displayLocation = computed(() => translateLocation(props.room.location, locale.value));
 const displayName = computed(() => translateRoomName(props.room.name, locale.value));
 const displayImage = computed(() =>
-  resolveRoomImage(props.room.image, props.room.id ?? props.room.name)
+  resolveRoomImage(props.room.image, props.room.id ?? props.room.name, props.room.type)
 );
 
 const goToRoom = () => {

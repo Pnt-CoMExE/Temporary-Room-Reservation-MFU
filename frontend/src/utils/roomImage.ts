@@ -1,5 +1,12 @@
-/** Deterministic room image variants when real photos are missing. */
+/** Deterministic room image variants when real photos / category images are missing. */
 export const DEFAULT_ROOM_IMAGE = "/images/rooms/room-01.svg";
+
+/** Category default photos (user-provided). */
+export const ROOM_TYPE_IMAGES: Record<string, string> = {
+  "ห้องประชุม": "/images/rooms/meeting.png",
+  "ห้องสัมมนา": "/images/rooms/seminar.png",
+  "ห้องบรรยาย": "/images/rooms/lecture.jpg",
+};
 
 const ROOM_IMAGE_VARIANTS = [
   "/images/rooms/room-01.svg",
@@ -25,14 +32,34 @@ export function roomImageVariant(seed?: string | number | null): string {
   return ROOM_IMAGE_VARIANTS[idx];
 }
 
+/** Map room type label → category photo (meeting / seminar / lecture). */
+export function roomImageByType(roomType?: string | null): string | null {
+  const t = String(roomType || "").trim();
+  if (!t) return null;
+  if (ROOM_TYPE_IMAGES[t]) return ROOM_TYPE_IMAGES[t];
+
+  const lower = t.toLowerCase();
+  if (t.includes("สัมมนา") || lower.includes("seminar")) {
+    return ROOM_TYPE_IMAGES["ห้องสัมมนา"];
+  }
+  if (t.includes("บรรยาย") || lower.includes("lecture")) {
+    return ROOM_TYPE_IMAGES["ห้องบรรยาย"];
+  }
+  if (t.includes("ประชุม") || lower.includes("meeting") || lower.includes("conference")) {
+    return ROOM_TYPE_IMAGES["ห้องประชุม"];
+  }
+  return null;
+}
+
 /**
  * Resolve a room image URL for display.
- * Keeps uploads and absolute URLs; maps known /images paths; otherwise
- * picks a deterministic variant from `seed` (room id/name) so rooms differ.
+ * Keeps uploads and absolute URLs; uses category photo by `roomType` when no real image;
+ * otherwise picks a deterministic SVG variant from `seed`.
  */
 export function resolveRoomImage(
   url?: string | null,
-  seed?: string | number | null
+  seed?: string | number | null,
+  roomType?: string | null
 ): string {
   const value = (url || "").trim();
   if (
@@ -42,9 +69,19 @@ export function resolveRoomImage(
   ) {
     return value;
   }
-  if (value.startsWith("/images/rooms/") && value.endsWith(".svg")) {
+  if (
+    value.startsWith("/images/rooms/") &&
+    (value.endsWith(".svg") ||
+      value.endsWith(".png") ||
+      value.endsWith(".jpg") ||
+      value.endsWith(".jpeg") ||
+      value.endsWith(".webp"))
+  ) {
     return value;
   }
-  // Prefer seed (id/name) so each room stays visually distinct
+
+  const byType = roomImageByType(roomType);
+  if (byType) return byType;
+
   return roomImageVariant(seed ?? value ?? "room");
 }
