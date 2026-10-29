@@ -30,7 +30,13 @@ if (env.isProduction) {
 }
 
 // ---- Security & parsing middleware ----
-app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
+// frameguard off: admin UI (often :5173) embeds PDF previews from /uploads (API)
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+    frameguard: false,
+  })
+);
 app.use(
   cors({
     origin: env.frontendOrigins.length === 1 ? env.frontendOrigins[0] : env.frontendOrigins,
@@ -244,6 +250,7 @@ import adminStatsRoutes from "./src/routes/admin/stats.routes";
 import adminBookingRoutes from "./src/routes/admin/booking.routes";
 import adminRoomRoutes from "./src/routes/admin/room.routes";
 import adminPromoRoutes from "./src/routes/admin/promo.routes";
+import adminAddonRoutes from "./src/routes/admin/addon.routes";
 import adminBannerRoutes from "./src/routes/admin/banner.routes";
 import adminBroadcastRoutes from "./src/routes/admin/broadcast.routes";
 import adminLogRoutes from "./src/routes/admin/log.routes";
@@ -284,6 +291,7 @@ app.use("/api/admin/import-rooms", (req, res, next) => {
   return adminRoomRoutes(req, res, next);
 });
 app.use("/api/admin/promocodes", adminPromoRoutes);
+app.use("/api/admin/addons", adminAddonRoutes);
 app.use("/api/admin/banners", adminBannerRoutes);
 app.use("/api/admin/broadcast", adminBroadcastRoutes);
 app.use("/api/admin/logs", adminLogRoutes);

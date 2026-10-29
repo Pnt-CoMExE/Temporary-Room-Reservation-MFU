@@ -60,22 +60,11 @@ router.put(
   }
 );
 
-// DELETE /api/admin/promocodes/:id
-router.delete("/:id", verifyToken, verifyAdmin, async (req: any, res: Response) => {
-  const { id } = req.params;
-  try {
-    const result = await query(
-      "DELETE FROM promo_codes WHERE id = $1 RETURNING code",
-      [id]
-    );
-    if (result.rows.length === 0) {
-      return res.status(404).json({ message: "ไม่พบรหัสส่วนลด" });
-    }
-    res.json({ message: "ลบรหัสส่วนลดสำเร็จ", code: result.rows[0].code });
-  } catch (err) {
-    console.error("[admin/promos] Error deleting promo:", err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการลบรหัสส่วนลด" });
-  }
+// DELETE disabled (Recording 5) — keep history / accounting; use status toggle instead
+router.delete("/:id", verifyToken, verifyAdmin, async (_req: any, res: Response) => {
+  res.status(403).json({
+    message: "ไม่สามารถลบรหัสส่วนลดได้ กรุณาปิดการใช้งานแทน เพื่อเก็บประวัติและงานบัญชี",
+  });
 });
 
 export default router;

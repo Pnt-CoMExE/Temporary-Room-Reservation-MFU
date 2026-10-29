@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { resolveUserType } from "../resolveUserType";
+import { resolveUserType, canPromoteToAdmin } from "../resolveUserType";
 
 describe("resolveUserType", () => {
   const originalEnv = process.env;
@@ -79,5 +79,18 @@ describe("resolveUserType", () => {
 
   it("คง internal ที่ถูกตั้งไว้สำหรับเมลนอก @mfu.ac.th", () => {
     expect(resolveUserType("guest@gmail.com", "internal")).toBe("internal");
+  });
+});
+
+describe("canPromoteToAdmin", () => {
+  it("อนุญาตเฉพาะโดเมนตรงๆ @mfu.ac.th", () => {
+    expect(canPromoteToAdmin("staff@mfu.ac.th")).toBe(true);
+    expect(canPromoteToAdmin("  Wichai@MFU.ac.th ")).toBe(true);
+  });
+
+  it("ปฏิเสธ lamduan / external / property", () => {
+    expect(canPromoteToAdmin("6631501071@lamduan.mfu.ac.th")).toBe(false);
+    expect(canPromoteToAdmin("guest@gmail.com")).toBe(false);
+    expect(canPromoteToAdmin("staff@property.mfu.ac.th")).toBe(false);
   });
 });

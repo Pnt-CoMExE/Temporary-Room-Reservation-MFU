@@ -2,7 +2,7 @@
 
 **Owner:** คอม  
 **โฟกัส:** จองซับซ้อน, promo, อนุมัติ+เรท+log, Stripe, AuthZ  
-**จำนวน:** 15 เคส  
+**จำนวน:** 21 เคส  
 **ส่งก่อน:** TC-P-R4-01, TC-P-R4-02, TC-A-R4-01, TC-A-R4-03, TC-U-12, TC-Z-01
 
 **เอกสารหลักรวมทุกคน:** [`../TEST_CASE_TRACKER.md`](../TEST_CASE_TRACKER.md)  
@@ -47,6 +47,12 @@
 | TC-A-R4-03 | — (R4) | Log เปลี่ยนเรท | `Admin ประวัติจอง` | 1. อนุมัติพร้อมเปลี่ยนเรท 2. ดูประวัติ | มี log เรท/ราคาเก่า→ใหม่ | ✅ | `evidence/CoM/TC-A-R4-03.png` | แท็บบันทึกกิจกรรม: `internal→external` ราคา `2400→4800` |
 | TC-Z-01 | — (≈E-03) | AuthZ กันหน้า Admin | `/admin/dashboard` | 1. Login non-admin 2. เปิด /admin | กันเข้าได้ | ✅ | `evidence/CoM/TC-Z-01.png` | ผู้ใช้ที่ล็อกอินแล้วและไม่ใช่แอดมินถูกส่งกลับ `/home` |
 | TC-Z-02 | — (Unit) | รัน npm test AuthZ | `backend` | 1. cd backend 2. npm test | เทส AuthZ/เขียว | ✅ | `evidence/CoM/README.md` | 204/204 ผ่าน |
+| TC-A-23 | A-23 (R5) | Import Excel — เทมเพลตถูกต้อง | `Admin ห้อง` | 1. ใช้ `room-pricing-rates.xlsx` 2. Import | สำเร็จ + นับรายการ | ✅ | `evidence/CoM/TC-A-23.png` + `TC-A-23-success.png` | 96 รายการ |
+| TC-A-24 | A-24 (R5) | Import Excel — ไฟล์ผิดรูปแบบ | `Admin ห้อง` | 1. อัปโหลด xlsx ว่าง | error ไม่พบข้อมูลห้อง | ✅ | `evidence/CoM/TC-A-24.png` | |
+| TC-A-25 | A-25 (R5) | Import Excel — จำนวนห้องสมเหตุสมผล | `Admin ห้อง` | 1. Import 2. นับแถว | ไม่เป็น 0 / ~96+ | ✅ | `evidence/CoM/TC-A-25.png` | DB 100 ห้อง |
+| TC-A-26 | A-26 (R5) | Import Excel — ราคาครึ่ง/เต็มวันถูกต้อง | `Admin ห้อง` | 1. เทียบ C3-101 กับ Excel | half/full 3 เรทตรง | ✅ | `evidence/CoM/TC-A-26.png` | 500/1000 · 750/1500 · 1000/2000 |
+| TC-A-27 | A-27 (R5) | Admin แก้ราคา Add-on | `Admin อุปกรณ์เสริม` | 1. แก้ราคา 2. บันทึก 3. หน้าจอง | ราคาตาม DB | ✅ | `evidence/CoM/TC-A-27.png` + `TC-A-27-admin.png` | restore หลังเทส |
+| TC-A-28 | A-28 (R5) | Promo — ไม่มีปุ่มลบ | `Admin รหัสส่วนลด` | 1. ตรวจ UI 2. DELETE API | มี toggle ไม่มีลบ · 403 | ✅ | `evidence/CoM/TC-A-28.png` (+ JJ) | Recording 5 D |
 
 
 ---
@@ -55,6 +61,8 @@
 
 - [x] Priority: TC-P-R4-01 · TC-P-R4-02 · TC-A-R4-01 · TC-A-R4-03 · TC-U-12 · TC-Z-01
 - [x] เคสอื่นของคอม (U-15/16/18/19 · A-05 · E-02/03/05 · Z-02)
+- [x] Recording 5 เฟส E: TC-A-23…26
+- [x] Recording 5 TC-A-27 / TC-A-28
 - [x] รูปใน `docs/testing/evidence/CoM/`
 
 

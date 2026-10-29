@@ -16,7 +16,7 @@ describe("getRevenueByMonth", () => {
     vi.clearAllMocks();
   });
 
-  it("ควรคืนรายการรายได้ 6 เดือนล่าสุดที่มีข้อมูล", async () => {
+  it("ควรคืนรายการรายได้สูงสุด 12 เดือนล่าสุดที่มีข้อมูล", async () => {
     mockQuery.mockResolvedValue({
       rows: [
         { month_label: "Dec 2025", month_date: "2025-12-01", revenue: "15000" },

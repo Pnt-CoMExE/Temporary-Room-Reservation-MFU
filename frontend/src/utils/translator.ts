@@ -185,6 +185,66 @@ export function translateLocation(location: string | undefined | null, locale: s
   return translateRoomName(location, locale);
 }
 
+/** Translate add-on display name (DB stores Thai; optional "TH (EN)" form). */
+export function translateAddonName(
+  name: string | undefined | null,
+  locale: string
+): string {
+  if (!name) return "";
+  if (locale !== "en") return name;
+
+  const trimmed = name.trim();
+
+  // Prefer English already in parentheses: "ชื่อไทย (English Name)"
+  const paren = trimmed.match(/\(([^)]+)\)\s*$/);
+  if (paren && /[A-Za-z]/.test(paren[1])) {
+    return paren[1].trim();
+  }
+
+  const exact: Record<string, string> = {
+    โต๊ะเอนกประสงค์: "Multipurpose Table",
+    โต๊ะอเนกประสงค์: "Multipurpose Table",
+    เก้าอี้เบาะนวม: "Padded Chair",
+    ไมโครโฟน: "Microphone",
+    "เครื่องโปรเจคเตอร์และฉากรับภาพ": "Projector Set",
+    ไมโครโฟนไร้สาย: "Wireless Microphone",
+    ชุดเครื่องเสียงจัดงาน: "Sound System Package",
+    "โต๊ะลงทะเบียน/จัดเลี้ยง": "Registration Table",
+    เก้าอี้เสริม: "Extra Chair",
+  };
+  if (exact[trimmed]) return exact[trimmed];
+
+  // Fuzzy partial matches for admin-added / renamed variants
+  const lower = trimmed.toLowerCase();
+  if (lower.includes("โปรเจค") || lower.includes("projector")) return "Projector Set";
+  if (lower.includes("ไร้สาย") || lower.includes("wireless")) return "Wireless Microphone";
+  if (lower.includes("เครื่องเสียง") || lower.includes("sound")) return "Sound System Package";
+  if (lower.includes("ลงทะเบียน") || lower.includes("registration")) return "Registration Table";
+  if (lower.includes("เก้าอี้เสริม") || lower.includes("extra chair")) return "Extra Chair";
+  if (lower.includes("เก้าอี้") || lower.includes("chair")) return "Chair";
+  if (lower.includes("ไมโคร") || lower.includes("mic")) return "Microphone";
+  if (lower.includes("โต๊ะ") || lower.includes("table")) return "Table";
+
+  return trimmed;
+}
+
+/** Translate add-on unit label (ตัว / ชุด / ชิ้น). */
+export function translateAddonUnit(
+  unit: string | undefined | null,
+  locale: string
+): string {
+  if (!unit) return locale === "en" ? "unit" : "ชิ้น";
+  if (locale !== "en") return unit;
+
+  const units: Record<string, string> = {
+    ตัว: "pc",
+    ชุด: "set",
+    ชิ้น: "unit",
+    อัน: "pc",
+  };
+  return units[unit.trim()] || unit;
+}
+
 export function translateDuration(duration: string | undefined | null, locale: string): string {
   if (!duration) return "";
   if (locale !== "en") return duration;

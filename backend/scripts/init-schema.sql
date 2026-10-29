@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS addons (
   name VARCHAR(255) NOT NULL,
   price_per_unit NUMERIC(10,2) DEFAULT 0,
   unit_name VARCHAR(50) DEFAULT 'ชิ้น',
+  image_url VARCHAR(500),
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT NOW()
 );

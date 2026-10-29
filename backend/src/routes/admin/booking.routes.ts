@@ -256,21 +256,13 @@ router.put(
           ? `สถานะ: ${toLabel}`
           : `เปลี่ยนจาก「${fromLabel}」เป็น「${toLabel}」`;
 
+      // หนึ่งรายการต่อ action: สถานะ + เรท (ถ้ามี) รวมใน log เดียว ไม่แยกซ้ำ
       await logAdminAction(
         adminNameFromReq(req),
         `อัปเดตสถานะการจอง #${id}`,
         `${transition}${remarks ? ` | เหตุผล: ${remarks}` : ""}${rateLog}`,
         Number(id)
       );
-
-      if (rateLog) {
-        await logAdminAction(
-          adminNameFromReq(req),
-          `เปลี่ยนเรทราคาการจอง #${id}`,
-          rateLog.replace(/^\s*\|\s*/, ""),
-          Number(id)
-        );
-      }
 
       res.json({
         message: "อัปเดตสถานะการจองสำเร็จ",

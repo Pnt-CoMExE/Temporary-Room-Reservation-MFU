@@ -200,29 +200,65 @@ const handleEditRoom = (room: RoomItem) => {
   Swal.fire({
     title: `<h3 class="text-xl font-black text-gray-900">แก้ไขห้อง #${room.id}</h3>`,
     html: `
-      <div class="text-left space-y-3 mt-2">
+      <div class="text-left space-y-4 mt-2">
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">ชื่อห้อง</label>
+          <label class="block text-xs font-bold text-gray-700 mb-1.5">ชื่อห้อง</label>
           <input id="edit-name" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold" value="${String(room.name).replace(/"/g, "&quot;")}">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">ประเภท</label>
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">ประเภท</label>
             <input id="edit-type" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold" value="${String(room.type).replace(/"/g, "&quot;")}">
           </div>
           <div>
-            <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">ความจุ</label>
+            <label class="block text-xs font-bold text-gray-700 mb-1.5">ความจุ</label>
             <input id="edit-cap" type="number" min="1" class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold" value="${Number(room.capacity) || 1}">
           </div>
         </div>
-        <p class="text-[10px] font-bold text-gray-400 uppercase pt-1">ราคาครึ่งวัน / เต็มวัน</p>
-        <div class="grid grid-cols-2 gap-2 text-sm">
-          <input id="edit-hi" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายใน ครึ่ง" value="${Number(room.price_half_day_internal || 0)}">
-          <input id="edit-fi" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายใน เต็ม" value="${Number(room.price_full_day_internal || 0)}">
-          <input id="edit-hc" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ร่วมจัด ครึ่ง" value="${Number(room.price_half_day_co_organizer || 0)}">
-          <input id="edit-fc" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ร่วมจัด เต็ม" value="${Number(room.price_full_day_co_organizer || 0)}">
-          <input id="edit-he" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายนอก ครึ่ง" value="${Number(room.price_half_day_external || 0)}">
-          <input id="edit-fe" type="number" min="0" class="px-3 py-2 bg-gray-50 border rounded-xl" placeholder="ภายนอก เต็ม" value="${Number(room.price_full_day_external || 0)}">
+
+        <div class="rounded-2xl border border-gray-200 overflow-hidden">
+          <div class="px-3 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center justify-between gap-2">
+            <p class="text-sm font-extrabold text-gray-800">เรทราคา (บาท)</p>
+            <div class="grid grid-cols-2 gap-2 w-[58%] text-[11px] font-bold text-gray-500 text-center">
+              <span>ครึ่งวัน</span>
+              <span>เต็มวัน</span>
+            </div>
+          </div>
+
+          <div class="divide-y divide-gray-100">
+            <div class="px-3 py-2.5 flex items-center gap-2 bg-red-50/40">
+              <div class="w-[42%] min-w-0">
+                <p class="text-xs font-extrabold text-[#8c0823]">บุคคลภายใน</p>
+                <p class="text-[10px] font-medium text-red-700/70">MFU / ภายใน</p>
+              </div>
+              <div class="grid grid-cols-2 gap-2 w-[58%]">
+                <input id="edit-hi" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-red-100 rounded-lg text-sm font-bold text-[#ba0b2f] tabular-nums" value="${Number(room.price_half_day_internal || 0)}">
+                <input id="edit-fi" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 tabular-nums" value="${Number(room.price_full_day_internal || 0)}">
+              </div>
+            </div>
+
+            <div class="px-3 py-2.5 flex items-center gap-2 bg-amber-50/50">
+              <div class="w-[42%] min-w-0">
+                <p class="text-xs font-extrabold text-amber-900">หน่วยงานร่วมจัด</p>
+                <p class="text-[10px] font-medium text-amber-800/70">Co-organizer</p>
+              </div>
+              <div class="grid grid-cols-2 gap-2 w-[58%]">
+                <input id="edit-hc" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-amber-100 rounded-lg text-sm font-bold text-amber-800 tabular-nums" value="${Number(room.price_half_day_co_organizer || 0)}">
+                <input id="edit-fc" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 tabular-nums" value="${Number(room.price_full_day_co_organizer || 0)}">
+              </div>
+            </div>
+
+            <div class="px-3 py-2.5 flex items-center gap-2 bg-sky-50/50">
+              <div class="w-[42%] min-w-0">
+                <p class="text-xs font-extrabold text-sky-900">บุคคลภายนอก</p>
+                <p class="text-[10px] font-medium text-sky-800/70">External</p>
+              </div>
+              <div class="grid grid-cols-2 gap-2 w-[58%]">
+                <input id="edit-he" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-sky-100 rounded-lg text-sm font-bold text-sky-800 tabular-nums" value="${Number(room.price_half_day_external || 0)}">
+                <input id="edit-fe" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 tabular-nums" value="${Number(room.price_full_day_external || 0)}">
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `,
@@ -230,8 +266,9 @@ const handleEditRoom = (room: RoomItem) => {
     confirmButtonText: "บันทึก",
     cancelButtonText: "ยกเลิก",
     showLoaderOnConfirm: true,
+    width: "36rem",
     customClass: {
-      popup: "rounded-[2rem] p-6 max-w-lg",
+      popup: "rounded-[2rem] p-6",
       confirmButton: "bg-[#ba0b2f] text-white rounded-xl px-5 py-3 font-bold cursor-pointer",
       cancelButton: "bg-gray-100 text-gray-700 rounded-xl px-5 py-3 font-bold cursor-pointer",
     },
@@ -305,37 +342,75 @@ const handleEditRoom = (room: RoomItem) => {
     <div
       class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
     >
+      <div
+        class="px-5 py-3 border-b border-gray-100 bg-gray-50/70 flex flex-wrap items-center justify-between gap-2"
+      >
+        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-600">
+          <span class="text-gray-500">คีย์ราคา:</span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-gray-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#ba0b2f]"></span>
+            ครึ่งวัน
+          </span>
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-gray-200">
+            <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+            เต็มวัน
+          </span>
+          <span class="text-gray-400 font-medium">(บาท)</span>
+        </div>
+        <p class="text-xs text-gray-500 font-bold">
+          {{ roomsList.length }} ห้อง
+        </p>
+      </div>
       <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse min-w-[700px]">
+        <table class="w-full text-left border-collapse min-w-[980px] table-fixed">
+          <colgroup>
+            <col class="w-[4.5rem]" />
+            <col />
+            <col class="w-[5.5rem]" />
+            <col class="w-[11rem]" />
+            <col class="w-[11rem]" />
+            <col class="w-[11rem]" />
+            <col class="w-[5.5rem]" />
+          </colgroup>
           <thead>
-            <tr
-              class="bg-gray-50/80 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
-            >
-              <th class="px-2 py-4 text-center">ID</th>
-              <th class="px-4 py-4">ชื่อห้อง / พื้นที่</th>
-              <th class="px-2 py-4 text-center">ความจุ</th>
-              <th class="px-4 py-4 text-center border-l border-gray-200">บุคคลภายใน<br/><span class="text-[9px] text-gray-400 normal-case font-normal">(ครึ่งวัน / เต็มวัน)</span></th>
-              <th class="px-4 py-4 text-center border-l border-gray-200">หน่วยงานร่วมจัด<br/><span class="text-[9px] text-gray-400 normal-case font-normal">(ครึ่งวัน / เต็มวัน)</span></th>
-              <th class="px-4 py-4 text-center border-l border-gray-200">บุคคลภายนอก<br/><span class="text-[9px] text-gray-400 normal-case font-normal">(ครึ่งวัน / เต็มวัน)</span></th>
-              <th class="px-4 py-4 text-center border-l border-gray-200">สถานะ</th>
+            <tr class="bg-white border-b border-gray-200">
+              <th class="px-3 py-4 text-center text-sm font-extrabold text-gray-500">ID</th>
+              <th class="px-4 py-4 text-left text-sm font-extrabold text-gray-700">ชื่อห้อง / พื้นที่</th>
+              <th class="px-2 py-4 text-center text-sm font-extrabold text-gray-700">ความจุ</th>
+              <th class="px-3 py-4 text-center bg-red-50/60">
+                <p class="text-sm font-extrabold text-[#8c0823]">บุคคลภายใน</p>
+                <p class="text-[11px] font-semibold text-red-700/70 mt-0.5 normal-case">ครึ่งวัน · เต็มวัน</p>
+              </th>
+              <th class="px-3 py-4 text-center bg-amber-50/70">
+                <p class="text-sm font-extrabold text-amber-900">หน่วยงานร่วมจัด</p>
+                <p class="text-[11px] font-semibold text-amber-800/70 mt-0.5 normal-case">ครึ่งวัน · เต็มวัน</p>
+              </th>
+              <th class="px-3 py-4 text-center bg-sky-50/70">
+                <p class="text-sm font-extrabold text-sky-900">บุคคลภายนอก</p>
+                <p class="text-[11px] font-semibold text-sky-800/70 mt-0.5 normal-case">ครึ่งวัน · เต็มวัน</p>
+              </th>
+              <th class="px-3 py-4 text-center text-sm font-extrabold text-gray-700">สถานะ</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
             <tr
-              v-for="room in roomsList"
+              v-for="(room, idx) in roomsList"
               :key="room.id"
-              class="hover:bg-gray-50 transition-colors"
-              :class="!room.isActive ? 'opacity-60 bg-gray-50/50' : ''"
+              class="transition-colors"
+              :class="[
+                !room.isActive ? 'opacity-55 bg-gray-50/80' : idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/40',
+                'hover:bg-amber-50/50',
+              ]"
             >
-              <td class="px-2 py-4 font-bold text-gray-500 text-sm text-center">
+              <td class="px-3 py-4 font-bold text-gray-400 text-xs text-center tabular-nums">
                 #{{ room.id.toString().padStart(3, "0") }}
               </td>
               <td class="px-4 py-4">
-                <div class="flex items-center gap-3">
-                  <!-- ✨ ปุ่มจัดการรูปภาพแบบมี Preview -->
+                <div class="flex items-center gap-3 min-w-0">
                   <button
+                    type="button"
                     @click="handleManageImages(room)"
-                    class="relative w-10 h-10 rounded-lg overflow-hidden bg-gray-100 border border-gray-200 group/img cursor-pointer shrink-0"
+                    class="relative w-11 h-11 rounded-xl overflow-hidden bg-gray-100 border border-gray-200 group/img cursor-pointer shrink-0 shadow-sm"
                   >
                     <img
                       :src="room.image || '/images/room-placeholder.jpg'"
@@ -349,58 +424,76 @@ const handleEditRoom = (room: RoomItem) => {
                     </div>
                   </button>
 
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-0.5">
-                      <p class="font-bold text-gray-900 text-sm" :title="room.name">
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-start gap-2 mb-1">
+                      <p
+                        class="font-bold text-gray-900 text-sm leading-snug line-clamp-2"
+                        :title="room.name"
+                      >
                         {{ room.name }}
                       </p>
                       <button
                         type="button"
                         @click="handleEditRoom(room)"
-                        class="text-[10px] font-bold text-[#ba0b2f] bg-red-50 border border-red-100 px-2 py-0.5 rounded-md hover:bg-red-100 cursor-pointer"
+                        class="shrink-0 text-[10px] font-bold text-[#ba0b2f] bg-red-50 border border-red-100 px-2 py-0.5 rounded-md hover:bg-red-100 cursor-pointer"
                       >
                         แก้ไข
                       </button>
                     </div>
                     <span
-                      class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200 uppercase tracking-wider"
-                      >{{ room.type }}</span
-                    >
+                      class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200"
+                    >{{ room.type }}</span>
                   </div>
                 </div>
               </td>
-              <td
-                class="px-2 py-4 text-center text-xs font-black text-gray-700"
-              >
-                {{ room.capacity }}
+              <td class="px-2 py-4 text-center">
+                <span class="inline-flex min-w-[2.5rem] justify-center px-2 py-1 rounded-lg bg-gray-100 text-xs font-black text-gray-700 tabular-nums">
+                  {{ room.capacity }}
+                </span>
               </td>
-              
-              <!-- ภายใน -->
-              <td class="px-4 py-4 text-center border-l border-gray-100">
-                <div class="flex flex-col items-center justify-center">
-                  <span class="text-sm font-bold text-[#ba0b2f]">฿{{ Number(room.price_half_day_internal || 0).toLocaleString() }}</span>
-                  <span class="text-[10px] text-gray-400 font-bold">/ ฿{{ Number(room.price_full_day_internal || 0).toLocaleString() }}</span>
+
+              <td class="px-3 py-4 bg-red-50/25">
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between gap-2 rounded-lg bg-white/80 border border-red-100 px-2 py-1">
+                    <span class="text-[10px] font-bold text-red-700/80 shrink-0">ครึ่ง</span>
+                    <span class="text-sm font-black text-[#ba0b2f] tabular-nums">฿{{ Number(room.price_half_day_internal || 0).toLocaleString() }}</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 rounded-lg bg-white/60 border border-gray-100 px-2 py-1">
+                    <span class="text-[10px] font-bold text-gray-500 shrink-0">เต็ม</span>
+                    <span class="text-sm font-bold text-gray-700 tabular-nums">฿{{ Number(room.price_full_day_internal || 0).toLocaleString() }}</span>
+                  </div>
                 </div>
               </td>
 
-              <!-- ร่วมจัด -->
-              <td class="px-4 py-4 text-center border-l border-gray-100">
-                <div class="flex flex-col items-center justify-center">
-                  <span class="text-sm font-bold text-[#ba0b2f]">฿{{ Number(room.price_half_day_co_organizer || 0).toLocaleString() }}</span>
-                  <span class="text-[10px] text-gray-400 font-bold">/ ฿{{ Number(room.price_full_day_co_organizer || 0).toLocaleString() }}</span>
+              <td class="px-3 py-4 bg-amber-50/30">
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between gap-2 rounded-lg bg-white/80 border border-amber-100 px-2 py-1">
+                    <span class="text-[10px] font-bold text-amber-800/80 shrink-0">ครึ่ง</span>
+                    <span class="text-sm font-black text-amber-800 tabular-nums">฿{{ Number(room.price_half_day_co_organizer || 0).toLocaleString() }}</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 rounded-lg bg-white/60 border border-gray-100 px-2 py-1">
+                    <span class="text-[10px] font-bold text-gray-500 shrink-0">เต็ม</span>
+                    <span class="text-sm font-bold text-gray-700 tabular-nums">฿{{ Number(room.price_full_day_co_organizer || 0).toLocaleString() }}</span>
+                  </div>
                 </div>
               </td>
 
-              <!-- ภายนอก -->
-              <td class="px-4 py-4 text-center border-l border-gray-100">
-                <div class="flex flex-col items-center justify-center">
-                  <span class="text-sm font-bold text-[#ba0b2f]">฿{{ Number(room.price_half_day_external || 0).toLocaleString() }}</span>
-                  <span class="text-[10px] text-gray-400 font-bold">/ ฿{{ Number(room.price_full_day_external || 0).toLocaleString() }}</span>
+              <td class="px-3 py-4 bg-sky-50/30">
+                <div class="space-y-1.5">
+                  <div class="flex items-center justify-between gap-2 rounded-lg bg-white/80 border border-sky-100 px-2 py-1">
+                    <span class="text-[10px] font-bold text-sky-800/80 shrink-0">ครึ่ง</span>
+                    <span class="text-sm font-black text-sky-800 tabular-nums">฿{{ Number(room.price_half_day_external || 0).toLocaleString() }}</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 rounded-lg bg-white/60 border border-gray-100 px-2 py-1">
+                    <span class="text-[10px] font-bold text-gray-500 shrink-0">เต็ม</span>
+                    <span class="text-sm font-bold text-gray-700 tabular-nums">฿{{ Number(room.price_full_day_external || 0).toLocaleString() }}</span>
+                  </div>
                 </div>
               </td>
 
-              <td class="px-4 py-4 text-center border-l border-gray-100">
+              <td class="px-3 py-4 text-center">
                 <button
+                  type="button"
                   @click="openStatusConfirm(room)"
                   class="text-2xl transition-colors outline-none cursor-pointer"
                   :class="

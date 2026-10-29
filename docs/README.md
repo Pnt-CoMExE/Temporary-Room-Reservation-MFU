@@ -14,7 +14,7 @@
 | **ผลิตภัณฑ์ / ขอบเขต** | [`product/`](./product/) | requirements, ฟีเจอร์, แผน sprint, schema |
 | **ชำระเงิน** | [`payment/`](./payment/) | **Stripe เท่านั้น** (ตัดสินใจแล้ว) |
 | **ทดสอบ** | [`testing/`](./testing/) | Test Case, แผนเทส, UAT, E2E, หลักฐาน |
-| **ประชุม / Demo** | [`meetings/`](./meetings/) | Recording 3–4, สคริปต์นำเสนอ, demo security |
+| **ประชุม / Demo** | [`meetings/`](./meetings/) | Recording 3–5, สคริปต์นำเสนอ, demo security |
 | **ปฏิบัติการ / Deploy** | [`ops/`](./ops/) | CITS, go-live, backup, security checklist |
 
 กฎ AI / ทีม: [`../RULES.md`](../RULES.md) · Changelog: [`../AI_CHANGELOG.md`](../AI_CHANGELOG.md)
@@ -29,6 +29,7 @@
 | [`product/features.md`](./product/features.md) | รายการฟีเจอร์ |
 | [`product/planning.md`](./product/planning.md) | แผน 8 sprints |
 | [`product/schema.md`](./product/schema.md) | โครง DB |
+| [`product/THESIS_CHAPTERS_CHECKLIST.md`](./product/THESIS_CHAPTERS_CHECKLIST.md) | Checklist บท 3–5 (สอบ) |
 
 ---
 
@@ -63,6 +64,7 @@ UAT ชั่วคราวยังใช้ `PAYMENT_PROVIDER=mock_sandbox` �
 
 | ไฟล์ | คำอธิบาย |
 |------|----------|
+| [`meetings/RECORDING5_ACTION_PLAN.md`](./meetings/RECORDING5_ACTION_PLAN.md) | แผน Recording 5 (UI / Promo / Excel TC / เอกสารสอบ) |
 | [`meetings/RECORDING4_ACTION_PLAN.md`](./meetings/RECORDING4_ACTION_PLAN.md) | แผน Recording 4 (Test Case / Coop / Stripe) |
 | [`meetings/RECORDING3_ACTION_PLAN.md`](./meetings/RECORDING3_ACTION_PLAN.md) | แผน Recording 3 |
 | [`meetings/PRESENTATION_SCRIPT_POST_FRIDAY.md`](./meetings/PRESENTATION_SCRIPT_POST_FRIDAY.md) | สคริปต์นำเสนอ 4 คน |
@@ -75,6 +77,7 @@ UAT ชั่วคราวยังใช้ `PAYMENT_PROVIDER=mock_sandbox` �
 
 | ไฟล์ | คำอธิบาย |
 |------|----------|
+| [`ops/SETUP_FROM_ENV_EXAMPLE.md`](./ops/SETUP_FROM_ENV_EXAMPLE.md) | Clone GitHub → คัดลอก `.env.example` → ใส่ API Key |
 | [`ops/CITS_RUNBOOK.md`](./ops/CITS_RUNBOOK.md) | รันบนเซิร์ฟเวอร์ CITS |
 | [`ops/GO_LIVE_CHECKLIST.md`](./ops/GO_LIVE_CHECKLIST.md) | ก่อนขึ้นจริง |
 | [`ops/BACKUP_RESTORE.md`](./ops/BACKUP_RESTORE.md) | สำรอง / กู้คืน DB |

@@ -11,7 +11,6 @@ import {
   getBookingStatusBadgeClass,
   getBookingStatusIcon,
   getBookingStatusLabel,
-  getReviewedBadgeClass,
   getReviewedLabel,
   humanizeStatusInText,
   isBookingStatus,
@@ -64,37 +63,102 @@ const pickTierPrice = (item: BookingItem, org: string): number => {
   return Number(isFull ? item.priceFullInternal : item.priceHalfInternal) || 0;
 };
 
+/** Prefer same-origin `/uploads/...` so Vite proxy + PDF iframe work (avoid :3000 cross-origin / X-Frame-Options). */
 const resolveUploadUrl = (url?: string) => {
   if (!url) return "";
-  if (/^https?:\/\//i.test(url) || url.startsWith("blob:")) return url;
-  const apiBase = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/$/, "");
-  return `${apiBase}${url.startsWith("/") ? url : `/${url}`}`;
+  if (/^https?:\/\//i.test(url) || url.startsWith("blob:") || url.startsWith("data:")) {
+    return url;
+  }
+  return url.startsWith("/") ? url : `/${url}`;
 };
 
-const previewHtmlForUrl = (url: string, title: string) => {
+const isPreviewableImage = (url: string, mime?: string) =>
+  (mime || "").startsWith("image/") || /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url);
+
+const isPreviewablePdf = (url: string, mime?: string) =>
+  mime === "application/pdf" ||
+  /\.pdf(\?|$)/i.test(url) ||
+  (url.includes("/uploads/") && !isPreviewableImage(url, mime));
+
+const previewHtmlForUrl = (
+  url: string,
+  title: string,
+  opts?: { mime?: string; accent?: "blue" | "emerald" | "slate" }
+) => {
   if (!url) {
-    return `<p class="text-xs text-gray-400">${title}: ไม่มีไฟล์</p>`;
+    return `
+      <div class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-center">
+        <p class="text-xs font-bold text-gray-400">${title}</p>
+        <p class="text-[11px] text-gray-400 mt-1">ไม่มีไฟล์แนบ</p>
+      </div>`;
   }
-  const lower = url.toLowerCase();
-  const isPdf = lower.includes(".pdf") || lower.includes("application/pdf");
-  if (isPdf || lower.includes("/uploads/")) {
-    // Prefer iframe for pdf; images still work in iframe often — also offer open link
-    const isImg = /\.(png|jpe?g|webp|gif)(\?|$)/i.test(url);
-    if (isImg) {
-      return `<div class="mb-2"><p class="text-[11px] font-bold text-gray-500 mb-1">${title}</p>
-        <img src="${url}" alt="${title}" class="max-h-40 mx-auto rounded-lg border border-gray-200 object-contain bg-white" />
-        <a href="${url}" target="_blank" class="text-[10px] text-blue-600 underline">เปิดเต็มจอ</a></div>`;
-    }
-    return `<div class="mb-2"><p class="text-[11px] font-bold text-gray-500 mb-1">${title}</p>
-      <iframe src="${url}" class="w-full h-40 rounded-lg border border-gray-200 bg-white"></iframe>
-      <a href="${url}" target="_blank" class="text-[10px] text-blue-600 underline">เปิดเต็มจอ</a></div>`;
-  }
-  return `<div class="mb-2"><p class="text-[11px] font-bold text-gray-500 mb-1">${title}</p>
-    <a href="${url}" target="_blank" class="text-xs text-blue-600 underline">เปิดไฟล์</a></div>`;
-};
 
-const hasDownloadableDoc = (b: BookingItem) =>
-  !!(b.memoDocumentUrl || b.approvalDocumentUrl || b.hasDoc);
+  const accent = opts?.accent || "slate";
+  const accentMap = {
+    blue: {
+      chip: "bg-blue-50 text-blue-700 border-blue-100",
+      btn: "bg-blue-600 hover:bg-blue-700 text-white",
+      ring: "border-blue-100",
+    },
+    emerald: {
+      chip: "bg-emerald-50 text-emerald-700 border-emerald-100",
+      btn: "bg-emerald-600 hover:bg-emerald-700 text-white",
+      ring: "border-emerald-100",
+    },
+    slate: {
+      chip: "bg-slate-50 text-slate-700 border-slate-200",
+      btn: "bg-slate-800 hover:bg-slate-900 text-white",
+      ring: "border-slate-200",
+    },
+  }[accent];
+
+  const openBtn = `
+    <a href="${url}" target="_blank" rel="noopener noreferrer"
+       class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold ${accentMap.btn} transition-colors">
+      เปิดเต็มจอ
+    </a>`;
+
+  if (isPreviewableImage(url, opts?.mime)) {
+    return `
+      <div class="rounded-2xl border ${accentMap.ring} bg-white overflow-hidden">
+        <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between gap-2 bg-gray-50/80">
+          <span class="inline-flex px-2 py-0.5 rounded-md text-[11px] font-bold border ${accentMap.chip}">${title}</span>
+          ${openBtn}
+        </div>
+        <div class="bg-slate-100/60 p-3 flex items-center justify-center min-h-[12rem]">
+          <img src="${url}" alt="${title}" class="max-h-56 w-auto max-w-full rounded-lg object-contain shadow-sm bg-white" />
+        </div>
+      </div>`;
+  }
+
+  if (isPreviewablePdf(url, opts?.mime)) {
+    const viewerSrc = `${url}#toolbar=1&navpanes=0&scrollbar=1&view=FitH`;
+    return `
+      <div class="rounded-2xl border ${accentMap.ring} bg-white overflow-hidden">
+        <div class="px-3 py-2 border-b border-gray-100 flex items-center justify-between gap-2 bg-gray-50/80">
+          <span class="inline-flex px-2 py-0.5 rounded-md text-[11px] font-bold border ${accentMap.chip}">${title}</span>
+          ${openBtn}
+        </div>
+        <div class="relative bg-slate-100">
+          <object data="${viewerSrc}" type="application/pdf" class="w-full h-64 block">
+            <iframe src="${viewerSrc}" title="${title}" class="w-full h-64 border-0 bg-white"></iframe>
+          </object>
+          <noscript>
+            <div class="p-6 text-center text-sm text-gray-500">เปิดไฟล์ด้วยปุ่มด้านบน</div>
+          </noscript>
+        </div>
+      </div>`;
+  }
+
+  return `
+    <div class="rounded-2xl border ${accentMap.ring} bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <p class="text-xs font-extrabold text-gray-800">${title}</p>
+        <p class="text-[11px] text-gray-500 mt-0.5">พรีวิวในหน้านี้ไม่รองรับชนิดไฟล์นี้</p>
+      </div>
+      ${openBtn}
+    </div>`;
+};
 
 /** ใบอนุมัติที่เซ็นแล้วเท่านั้น (ไม่นับ memo ของผู้จอง) */
 const hasApprovalDoc = (b: BookingItem) =>
@@ -181,43 +245,6 @@ const searchQuery = ref("");
 const filterStartDate = ref("");
 const filterEndDate = ref("");
 
-// เลือกเฉพาะรายการที่ต้องการ
-const selectedIds = ref<Set<string>>(new Set());
-const selectableCount = computed(() =>
-  filteredBookings.value.filter(hasDownloadableDoc).length
-);
-const selectedCount = computed(() => selectedIds.value.size);
-const hasSelection = computed(() => selectedIds.value.size > 0);
-const isAllSelected = computed(() =>
-  selectableCount.value > 0 && selectedIds.value.size === selectableCount.value
-);
-
-const toggleSelect = (id: string) => {
-  const newSet = new Set(selectedIds.value);
-  if (newSet.has(id)) {
-    newSet.delete(id);
-  } else {
-    newSet.add(id);
-  }
-  selectedIds.value = newSet;
-};
-
-const toggleSelectAll = () => {
-  if (isAllSelected.value) {
-    selectedIds.value = new Set();
-  } else {
-    const ids = new Set<string>();
-    filteredBookings.value
-      .filter(hasDownloadableDoc)
-      .forEach(b => ids.add(b.id));
-    selectedIds.value = ids;
-  }
-};
-
-const clearSelection = () => {
-  selectedIds.value = new Set();
-};
-
 const filteredBookings = computed(() => {
   return bookings.value.filter((booking) => {
     const matchSearch =
@@ -240,100 +267,6 @@ const filteredBookings = computed(() => {
     return matchSearch && matchDate;
   });
 });
-
-const isDownloading = ref(false);
-
-const downloadZip = async () => {
-  if (isDownloading.value) return;
-
-  const selectedItems = filteredBookings.value.filter(b =>
-    selectedIds.value.has(b.id)
-  );
-
-  if (selectedItems.length === 0) {
-    Swal.fire({
-      icon: "info",
-      title: "ไม่ได้เลือกรายการ",
-      text: "กรุณาเลือกอย่างน้อย 1 รายการที่มีเอกสารแนบก่อนดาวน์โหลด",
-      confirmButtonText: "ตกลง",
-      customClass: {
-        popup: "rounded-3xl",
-        confirmButton: "bg-[#ba0b2f] text-white rounded-xl px-6 py-3 font-bold cursor-pointer",
-      },
-    });
-    return;
-  }
-
-  const ids = selectedItems.map(b => b.dbId);
-
-  isDownloading.value = true;
-
-  // แสดง loading spinner
-  Swal.fire({
-    title: "กำลังสร้างไฟล์ ZIP",
-    html: `
-      <div class="flex flex-col items-center gap-4 py-4">
-        <div class="w-14 h-14 border-4 border-[#ba0b2f] border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-gray-500 font-medium">กำลังดาวน์โหลดเอกสาร ${ids.length} รายการ...</p>
-      </div>
-    `,
-    showConfirmButton: false,
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    customClass: {
-      popup: "rounded-3xl",
-    },
-  });
-
-  try {
-    const response = await api.post(
-      "/api/admin/bookings/export-zip",
-      { ids },
-      { responseType: "blob" }
-    );
-
-    // ปิด loading spinner
-    Swal.close();
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement("a");
-    link.href = url;
-    link.setAttribute("download", `booking-documents-${Date.now()}.zip`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.URL.revokeObjectURL(url);
-
-    saveLog("ดาวน์โหลดเอกสาร ZIP", `ดาวน์โหลดเอกสาร ${ids.length} รายการ`);
-
-    Swal.fire({
-      icon: "success",
-      title: "ดาวน์โหลดสำเร็จ!",
-      text: `เอกสาร ${ids.length} รายการถูกรวมเป็นไฟล์ ZIP แล้ว`,
-      showConfirmButton: false,
-      timer: 2000,
-      customClass: {
-        popup: "rounded-3xl",
-      },
-    });
-  } catch (err) {
-    // ปิด loading spinner
-    Swal.close();
-
-    console.error("Error downloading ZIP:", err);
-    Swal.fire({
-      icon: "error",
-      title: "เกิดข้อผิดพลาด",
-      text: "ไม่สามารถดาวน์โหลดเอกสารได้",
-      customClass: {
-        popup: "rounded-3xl",
-        confirmButton: "bg-[#ba0b2f] text-white rounded-xl px-6 py-3 font-bold cursor-pointer",
-      },
-    });
-  } finally {
-    isDownloading.value = false;
-  }
-};
 
 const exportPermission = (id) => {
   const item = bookings.value.find((b) => b.id === id);
@@ -524,8 +457,10 @@ const openApproveConfirm = (id: string) => {
 
   const memoUrl = resolveUploadUrl(item.memoDocumentUrl);
   let approvalPreviewUrl = "";
+  let approvalMime = "";
   if (item.tempDocFile) {
     approvalPreviewUrl = URL.createObjectURL(item.tempDocFile);
+    approvalMime = item.tempDocFile.type || "";
   } else if (item.approvalDocumentUrl) {
     approvalPreviewUrl = resolveUploadUrl(item.approvalDocumentUrl);
   }
@@ -535,42 +470,85 @@ const openApproveConfirm = (id: string) => {
     return oldTotal - oldRoom + room;
   };
 
+  const rateCard = (value: string, label: string, roomPrice: number, checked: boolean) => `
+    <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-colors has-[:checked]:border-emerald-400 has-[:checked]:bg-emerald-50/70 border-gray-200 bg-white hover:border-gray-300">
+      <input type="radio" name="org-rate" value="${value}" class="mt-1 accent-emerald-600" ${checked ? "checked" : ""} />
+      <span class="min-w-0 flex-1">
+        <span class="block text-sm font-extrabold text-gray-900">${label}</span>
+        <span class="block text-xs text-gray-500 mt-0.5">ค่าห้อง ฿${roomPrice.toLocaleString()}</span>
+        <span class="block text-sm font-black text-emerald-700 mt-1 tabular-nums">ประมาณรวม ฿${estimateTotal(value).toLocaleString()}</span>
+      </span>
+    </label>`;
+
   Swal.fire({
-    title: "ยืนยันการอนุมัติ",
-    width: 560,
+    title: `<div class="text-left">
+      <p class="text-xl font-black text-gray-900">ยืนยันการอนุมัติ</p>
+      <p class="text-xs font-medium text-gray-500 mt-1">ตรวจเอกสารและเลือกเรทราคาก่อนยืนยัน</p>
+    </div>`,
+    width: 640,
     html: `
-      <div class="text-left space-y-3 text-sm">
-        <div class="bg-gray-50 border border-gray-100 rounded-xl p-3">
-          <p class="text-xs font-bold text-gray-400 uppercase mb-2">รายละเอียดการจอง</p>
-          <p><span class="text-gray-500">รหัส:</span> <b>${item.id}</b></p>
-          <p><span class="text-gray-500">ผู้จอง:</span> <b>${item.userName}</b></p>
-          <p><span class="text-gray-500">ห้อง:</span> <b>${item.roomName}</b></p>
-          <p><span class="text-gray-500">วันที่ / ช่วง:</span> <b>${item.date} · ${item.duration}</b></p>
-          ${item.objective ? `<p><span class="text-gray-500">วัตถุประสงค์:</span> ${item.objective}</p>` : ""}
-          <p><span class="text-gray-500">เรทเดิม:</span> <b>${ORG_LABEL[currentOrg] || currentOrg}</b>
-            · ห้อง ฿${oldRoom.toLocaleString()} · รวม ฿${oldTotal.toLocaleString()}</p>
+      <div class="text-left space-y-4 text-sm max-h-[70vh] overflow-y-auto pr-1">
+        <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">รายละเอียดการจอง</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2.5">
+            <div>
+              <p class="text-[10px] font-bold text-gray-400">รหัสจอง</p>
+              <p class="font-mono text-sm font-black text-gray-900">${item.id}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-gray-400">ผู้จอง</p>
+              <p class="text-sm font-bold text-gray-900">${item.userName}</p>
+            </div>
+            <div class="sm:col-span-2">
+              <p class="text-[10px] font-bold text-gray-400">ห้อง / พื้นที่</p>
+              <p class="text-sm font-bold text-gray-900">${item.roomName}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-gray-400">วันที่ / ช่วง</p>
+              <p class="text-sm font-semibold text-gray-800">${item.date} · ${item.duration}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-gray-400">เรทเดิม / ยอด</p>
+              <p class="text-sm font-semibold text-gray-800">${ORG_LABEL[currentOrg] || currentOrg}</p>
+              <p class="text-xs text-gray-500">ห้อง ฿${oldRoom.toLocaleString()} · รวม ฿${oldTotal.toLocaleString()}</p>
+            </div>
+            ${
+              item.objective
+                ? `<div class="sm:col-span-2">
+                    <p class="text-[10px] font-bold text-gray-400">วัตถุประสงค์</p>
+                    <p class="text-sm text-gray-700 leading-snug">${item.objective}</p>
+                  </div>`
+                : ""
+            }
+          </div>
         </div>
+
         <div>
-          <p class="text-xs font-bold text-gray-500 mb-2">เลือกเรทราคา (ตามหนังสืออนุมัติ)</p>
-          <label class="flex items-center gap-2 mb-1.5 cursor-pointer">
-            <input type="radio" name="org-rate" value="internal" ${currentOrg === "internal" ? "checked" : ""} />
-            <span>ภายใน — ฿${priceInternal.toLocaleString()} <span class="text-gray-400 text-xs">(ประมาณรวม ฿${estimateTotal("internal").toLocaleString()})</span></span>
-          </label>
-          <label class="flex items-center gap-2 mb-1.5 cursor-pointer">
-            <input type="radio" name="org-rate" value="co_op" ${currentOrg === "co_op" ? "checked" : ""} />
-            <span>ร่วมจัด / Coop — ฿${priceCoop.toLocaleString()} <span class="text-gray-400 text-xs">(ประมาณรวม ฿${estimateTotal("co_op").toLocaleString()})</span></span>
-          </label>
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="org-rate" value="external" ${currentOrg === "external" ? "checked" : ""} />
-            <span>ภายนอก — ฿${priceExternal.toLocaleString()} <span class="text-gray-400 text-xs">(ประมาณรวม ฿${estimateTotal("external").toLocaleString()})</span></span>
-          </label>
-          <p class="text-[10px] text-amber-700 mt-2">เลือกเรทได้เฉพาะตอนยืนยันอนุมัตินี้ครั้งเดียว · บันทึกใน Activity Log</p>
+          <p class="text-sm font-extrabold text-gray-800 mb-2">เลือกเรทราคา <span class="text-xs font-medium text-gray-400">(ตามหนังสืออนุมัติ)</span></p>
+          <div class="grid grid-cols-1 gap-2">
+            ${rateCard("internal", "บุคคลภายใน", priceInternal, currentOrg === "internal")}
+            ${rateCard("co_op", "หน่วยงานร่วมจัด / Coop", priceCoop, currentOrg === "co_op")}
+            ${rateCard("external", "บุคคลภายนอก", priceExternal, currentOrg === "external")}
+          </div>
+          <p class="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mt-2 font-medium">
+            เลือกเรทได้เฉพาะตอนยืนยันอนุมัตินี้ครั้งเดียว · บันทึกใน Activity Log
+          </p>
         </div>
-        <div class="border-t border-gray-100 pt-3">
-          <p class="text-xs font-bold text-gray-500 mb-2">Preview เอกสารแนบ</p>
-          ${previewHtmlForUrl(memoUrl, "หนังสือบันทึกข้อความ")}
-          ${previewHtmlForUrl(approvalPreviewUrl, "ใบอนุมัติ")}
-          ${!approvalPreviewUrl ? '<p class="text-xs text-red-500 font-bold">ยังไม่มีใบอนุมัติ — ย้อนกลับไปแนบไฟล์ก่อน</p>' : ""}
+
+        <div class="space-y-3">
+          <p class="text-sm font-extrabold text-gray-800">เอกสารแนบ</p>
+          ${previewHtmlForUrl(memoUrl, "หนังสือบันทึกข้อความ", { accent: "blue" })}
+          ${previewHtmlForUrl(approvalPreviewUrl, "ใบอนุมัติ", {
+            mime: approvalMime,
+            accent: "emerald",
+          })}
+          ${
+            !approvalPreviewUrl
+              ? `<div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700">
+                   ยังไม่มีใบอนุมัติ — ย้อนกลับไปแนบไฟล์ก่อนจึงจะยืนยันได้
+                 </div>`
+              : ""
+          }
         </div>
       </div>
     `,
@@ -578,10 +556,16 @@ const openApproveConfirm = (id: string) => {
     confirmButtonText: "ยืนยันอนุมัติ",
     cancelButtonText: "ย้อนกลับ",
     confirmButtonColor: "#059669",
+    focusConfirm: false,
     customClass: {
-      popup: "rounded-[1.5rem] p-5",
-      confirmButton: "rounded-xl px-6 py-3 font-bold",
-      cancelButton: "rounded-xl px-6 py-3 font-bold",
+      popup: "rounded-[1.75rem] p-5 md:p-6",
+      title: "w-full p-0 mb-3",
+      htmlContainer: "m-0 overflow-visible",
+      confirmButton:
+        "rounded-xl px-6 py-3 font-bold bg-emerald-600 hover:bg-emerald-700 cursor-pointer",
+      cancelButton:
+        "rounded-xl px-6 py-3 font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer",
+      actions: "gap-2 mt-4",
     },
     didOpen: () => {
       const confirmBtn = Swal.getConfirmButton();
@@ -599,7 +583,9 @@ const openApproveConfirm = (id: string) => {
         return false;
       }
       const selected = (
-        Swal.getPopup()?.querySelector('input[name="org-rate"]:checked') as HTMLInputElement | null
+        Swal.getPopup()?.querySelector(
+          'input[name="org-rate"]:checked'
+        ) as HTMLInputElement | null
       )?.value;
       if (!selected) {
         Swal.showValidationMessage("กรุณาเลือกเรทราคา");
@@ -617,11 +603,8 @@ const openApproveConfirm = (id: string) => {
     }
     if (!result.isConfirmed || !result.value) return;
     const org = String(result.value);
+    // Backend บันทึก activity log เดียว (สถานะ + เรท) — ไม่ยิง saveLog ซ้ำจาก frontend
     updateBookingStatus(id, "approved_pending_payment", "", org);
-    saveLog(
-      "อนุมัติคำขอจอง",
-      `อนุมัติรายการจอง: ${id} ของ ${item.userName} | เรท: ${ORG_LABEL[org] || org} | รวมประมาณ ฿${estimateTotal(org).toLocaleString()}`,
-    );
   });
 };
 
@@ -806,36 +789,19 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
       </div>
     </div>
 
-    <div          class="bg-white p-5 rounded-2xl shadow-card border border-gray-200 flex flex-col lg:flex-row gap-4"
+    <div
+      class="bg-white p-5 rounded-2xl shadow-card border border-gray-200 flex flex-col lg:flex-row gap-4"
     >
-      <div class="flex-1 flex items-start gap-3">
-        <button
-          @click="downloadZip"
-          :disabled="isDownloading || !hasSelection"
-          class="text-xs font-bold px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow-sm shrink-0 cursor-pointer"
-          :class="isDownloading ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : !hasSelection ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#ba0b2f] text-white hover:bg-[#8c0823]'"
-        >
-          <font-awesome-icon v-if="isDownloading" icon="spinner" spin />
-          <font-awesome-icon v-else-if="hasSelection" icon="file-archive" />
-          <font-awesome-icon v-else icon="file-archive" class="text-gray-300" />
-          {{ isDownloading ? 'กำลังสร้าง ZIP...' : hasSelection ? `ดาวน์โหลด ZIP (${selectedCount})` : 'ดาวน์โหลด ZIP' }}
-        </button>
-        <!-- ปุ่มล้างการเลือก -->
-        <button
-          v-if="hasSelection"
-          @click="clearSelection"
-          class="text-xs font-bold px-3 py-2.5 rounded-xl transition-all flex items-center gap-2 border border-gray-200 text-gray-500 hover:bg-gray-100 hover:text-gray-700 shrink-0 cursor-pointer"
-        >
-          <font-awesome-icon icon="times" />
-          ล้าง
-        </button>
-        <!-- ข้อความแสดงจำนวนที่เลือก -->
-        <div class="flex-1">
+      <div class="flex-1">
         <label
           class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
           >ค้นหา (ID, ชื่อผู้จอง, ห้อง)</label
         >
-        <div class="relative"><font-awesome-icon icon="search" class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div class="relative">
+          <font-awesome-icon
+            icon="search"
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             v-model="searchQuery"
             type="text"
@@ -844,7 +810,6 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
           />
         </div>
       </div>
-    </div>
       <div class="w-full lg:w-auto flex gap-4">
         <div class="w-1/2 lg:w-auto">
           <label
@@ -880,16 +845,6 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
             <tr
               class="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
             >
-              <th class="px-4 py-5 w-12">
-                <input
-                  type="checkbox"
-                  :checked="isAllSelected"
-                  :indeterminate="!isAllSelected && hasSelection"
-                  @change="toggleSelectAll"
-                  class="w-4 h-4 rounded accent-[#ba0b2f] cursor-pointer"
-                  :disabled="selectableCount === 0"
-                />
-              </th>
               <th class="px-6 py-5">Booking ID</th>
               <th class="px-6 py-5">ผู้จอง</th>
               <th class="px-6 py-5">ห้องที่จอง</th>
@@ -913,15 +868,6 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                   : 'hover:bg-slate-100',
               ]"
             >
-              <td class="px-4 py-6 w-12">
-                <input
-                  type="checkbox"
-                  :checked="selectedIds.has(booking.id)"
-                  @change="toggleSelect(booking.id)"
-                  class="w-4 h-4 rounded accent-[#ba0b2f] cursor-pointer"
-                  :disabled="!hasDownloadableDoc(booking)"
-                />
-              </td>
               <td class="px-6 py-6 font-bold text-gray-900 text-sm">
                 {{ booking.id }}
               </td>
@@ -948,16 +894,28 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                   <font-awesome-icon :icon="['far', 'calendar-alt']" /> {{ booking.date }} |
                   <font-awesome-icon :icon="['far', 'clock']" /> {{ booking.duration }}
                 </p>
-                <!-- ปุ่มดู memo document -->
-                <a
-                  v-if="booking.memoDocumentUrl"
-                  :href="booking.memoDocumentUrl"
-                  target="_blank"
-                  class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 mt-1.5 transition-all"
-                >
-                  <font-awesome-icon icon="file-pdf" />
-                  หนังสือบันทึกข้อความ
-                </a>
+                <div class="flex flex-wrap gap-1.5 mt-1.5">
+                  <a
+                    v-if="booking.memoDocumentUrl"
+                    :href="resolveUploadUrl(booking.memoDocumentUrl)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition-all"
+                  >
+                    <font-awesome-icon icon="file-pdf" />
+                    หนังสือบันทึกข้อความ
+                  </a>
+                  <a
+                    v-if="booking.approvalDocumentUrl"
+                    :href="resolveUploadUrl(booking.approvalDocumentUrl)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all"
+                  >
+                    <font-awesome-icon icon="file-signature" />
+                    ใบอนุมัติ
+                  </a>
+                </div>
               </td>
               <td
                 class="px-6 py-6 text-right font-black text-lg"
@@ -1007,26 +965,21 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                     </span>
 
                     <template v-if="isBookingStatus(booking.status, 'approved_paid') || isBookingStatus(booking.status, 'completed')">
-                      <span
-                        v-if="booking.hasFeedback"
-                        :class="getReviewedBadgeClass()"
-                        class="px-3 py-1 rounded-lg text-[11px] font-bold border inline-flex items-center gap-1.5"
-                      >
-                        <font-awesome-icon icon="star" />
-                        {{ getReviewedLabel("th") }}
-                      </span>
                       <button
                         v-if="booking.hasFeedback"
+                        type="button"
                         @click="viewFeedback(booking)"
-                        class="bg-violet-50 text-violet-700 border border-violet-200 px-3 py-1.5 rounded-lg text-[11px] font-bold hover:bg-violet-100 transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        class="mt-0.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
+                        :title="getReviewedLabel('th')"
                       >
-                        <font-awesome-icon icon="eye" /> ดูรีวิว
+                        <font-awesome-icon icon="star" class="text-[10px]" />
+                        ดูรีวิว
                       </button>
                       <span
                         v-else
-                        class="text-[10px] text-slate-400 font-bold"
+                        class="text-[10px] text-slate-400 font-semibold"
                       >
-                        ({{ getAwaitingReviewLabel("th") }})
+                        {{ getAwaitingReviewLabel("th") }}
                       </span>
                     </template>
                   </div>

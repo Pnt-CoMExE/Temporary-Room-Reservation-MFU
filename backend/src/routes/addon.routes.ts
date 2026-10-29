@@ -6,9 +6,19 @@ const router = Router();
 // GET /api/addons — list all active add-ons
 router.get("/", async (_req: Request, res: Response) => {
   try {
-    const result = await query("SELECT * FROM addons WHERE is_active = TRUE");
+    const result = await query(
+      `SELECT id, name, price_per_unit, unit_name, image_url, is_active
+       FROM addons WHERE is_active = TRUE ORDER BY id ASC`
+    );
     res.json(result.rows);
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.code === "42703") {
+      const result = await query(
+        `SELECT id, name, price_per_unit, unit_name, is_active
+         FROM addons WHERE is_active = TRUE ORDER BY id ASC`
+      );
+      return res.json(result.rows.map((r: any) => ({ ...r, image_url: null })));
+    }
     console.error("[addons] Error fetching addons:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลอุปกรณ์เสริม" });
   }

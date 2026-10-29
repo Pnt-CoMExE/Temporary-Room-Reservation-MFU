@@ -160,6 +160,29 @@ router.get("/bookings/:userId", verifyToken, async (req: any, res: Response) => 
                 ORDER BY p.id DESC
                 LIMIT 1
               ) AS transaction_id,
+              CASE
+                WHEN pc.discount IS NULL THEN NULL
+                ELSE LEAST(
+                  100,
+                  GREATEST(
+                    0,
+                    COALESCE(
+                      NULLIF(regexp_replace(TRIM(pc.discount::text), '[^0-9.\\-]', '', 'g'), '')::numeric,
+                      0
+                    )
+                  )
+                )
+              END AS promo_discount_percent,
+              (
+                SELECT l.details
+                FROM admin_activity_logs l
+                WHERE l.booking_id = b.id
+                  AND l.details IS NOT NULL
+                  AND l.details ~ 'เรท:'
+                  AND l.details ~ '→'
+                ORDER BY l.created_at DESC, l.id DESC
+                LIMIT 1
+              ) AS rate_adjustment_raw,
               COALESCE((
                 SELECT json_agg(json_build_object(
                   'id', a.id,
@@ -176,11 +199,52 @@ router.get("/bookings/:userId", verifyToken, async (req: any, res: Response) => 
        FROM bookings b
        JOIN rooms r ON b.room_id = r.id
        LEFT JOIN users admin_u ON b.approved_by = admin_u.id
+       LEFT JOIN promo_codes pc ON UPPER(pc.code) = UPPER(NULLIF(TRIM(b.promo_code), ''))
        WHERE b.user_id = $1
        ORDER BY b.created_at DESC`,
       [tokenUserId]
     );
-    res.json(result.rows);
+
+    const parseRateAdjustment = (raw: string | null) => {
+      if (!raw) return null;
+      const org = raw.match(/เรท:\s*([^\s|→]+)\s*→\s*([^\s|]+)/);
+      const room = raw.match(/ราคาห้อง:\s*([\d.]+)\s*→\s*([\d.]+)/);
+      const total = raw.match(/รวม:\s*([\d.]+)\s*→\s*([\d.]+)/);
+      if (!org && !room && !total) return null;
+      const fromRoom = room ? Number(room[1]) : null;
+      const toRoom = room ? Number(room[2]) : null;
+      const fromTotal = total ? Number(total[1]) : null;
+      const toTotal = total ? Number(total[2]) : null;
+      return {
+        fromOrg: org?.[1] || null,
+        toOrg: org?.[2] || null,
+        fromRoom,
+        toRoom,
+        roomDelta:
+          fromRoom != null && toRoom != null && Number.isFinite(fromRoom) && Number.isFinite(toRoom)
+            ? toRoom - fromRoom
+            : null,
+        fromTotal,
+        toTotal,
+        totalDelta:
+          fromTotal != null &&
+          toTotal != null &&
+          Number.isFinite(fromTotal) &&
+          Number.isFinite(toTotal)
+            ? toTotal - fromTotal
+            : null,
+      };
+    };
+
+    res.json(
+      result.rows.map((row: any) => {
+        const { rate_adjustment_raw, ...rest } = row;
+        return {
+          ...rest,
+          rate_adjustment: parseRateAdjustment(rate_adjustment_raw || null),
+        };
+      })
+    );
   } catch (err) {
     console.error("[user] Error fetching user bookings:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาดในการดึงข้อมูลการจอง" });

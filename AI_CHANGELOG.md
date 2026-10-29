@@ -2,6 +2,119 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-10-29 — Year filter single year = 12 months]
+- โหมด「รายปี」: จากปี=ถึงปี → กราฟ 12 เดือนของปีนั้น · หลายปียังเป็นแท่งรายปี
+- `getRevenueByMonth(year)` เติมเดือนที่ไม่มีรายได้เป็น 0 ให้ครบ 12 แท่ง
+
+## [2026-10-29 — Show admin rate delta on user booking]
+- API user bookings: parse `rate_adjustment` จาก activity log (เรท/ราคาห้อง/ยอด รวมส่วนต่าง)
+- Dashboard รายละเอียดราคา: กล่อง「แอดมินปรับเรท」โชว์ from→to + ส่วนต่าง · chip บนการ์ด
+
+## [2026-10-29 — Merge approve audit logs]
+- ตอนอนุมัติ+เปลี่ยนเรท: เหลือ activity log เดียว (`อัปเดตสถานะ…` รวมเรทในรายละเอียด) · เลิกแยก「เปลี่ยนเรทราคา」
+- เอา `saveLog("อนุมัติคำขอจอง")` ฝั่ง frontend ออก กันซ้ำกับ backend
+- สคริปต์ `npm run fix:merge-approve-logs` ลบ log เก่าซ้ำใน DB (รันแล้วลบ 10 รายการ)
+
+## [2026-10-29 — Admin approve modal preview + UX]
+- แก้ PDF preview ใช้งานได้: `resolveUploadUrl` ใช้ path same-origin (`/uploads`) · `object`+`iframe` + ปุ่มเปิดเต็มจอ
+- โมดัลอนุมัติ: การ์ดรายละเอียด · เรทราคาเป็นการ์ดเลือก · พรีวิวสูงขึ้นแยก memo/ใบอนุมัติ
+- Helmet `frameguard: false` กันบล็อก iframe PDF ข้ามพอร์ตตอน dev
+
+## [2026-10-29 — Dashboard booking card UX]
+- จัดเลย์เอาต์การ์ดใหม่: header ID/สถานะ · meta chips (วัน/ช่วง/จำนวน add-on/โปรโม) · การ์ดยอดชำระ
+- รายละเอียดราคาขยายเต็มความกว้าง · ลดชิป add-on ซ้ำ · ปุ่มเอกสาร/ยกเลิก/จ่าย รวมแถบ footer
+
+## [2026-10-29 — Dashboard price breakdown]
+- การ์ดจองของฉัน: กดยอดเงิน /「ดูรายละเอียดราคา」ขยายแยกค่าห้อง + แต่ละ Add-on + ยอดรวม (i18n TH/EN)
+- แสดงโค้ดส่วนลด (`promo_code`) + ยอดลด + **% จาก `promo_codes.discount`** (fallback คำนวณจากยอดถ้าไม่มีใน DB)
+
+## [2026-10-29 — Add-on i18n EN]
+- `translateAddonName` / `translateAddonUnit` ใน `translator.ts` · ใช้ใน BookingView (การ์ด+สรุปบิล) และ Dashboard
+- EN: ดึงชื่อในวงเล็บถ้ามี · map รายการมาตรฐาน · หน่วย ตัว/ชุด/ชิ้น → pc/set/unit
+
+## [2026-10-29 — Booking summary add-on lines]
+- Booking Summary: แยกแถวแต่ละ Add-on ที่เลือก (ชื่อ × จำนวน + ราคา) แทนบรรทัดรวม「ค่าอุปกรณ์เสริม」
+
+## [2026-10-29 — AdminAddons edit name/unit]
+- แก้ชื่อ + หน่วยในแถวได้ · บันทึกรวมกับราคาเมื่อ dirty
+
+## [2026-10-29 — AdminAddons create + UX]
+- `POST /api/admin/addons` สร้างรายการใหม่ (ชื่อ / หน่วย / ราคา) + audit log
+- หน้า Admin Add-ons: ปุ่ม「เพิ่ม Add-on」· empty state · หัวตารางใหญ่ขึ้น · ปุ่มบันทึกเปิดเมื่อราคา dirty · นับรายการ/เปิดใช้
+- เอาข้อความอธิบาย hard code ออกจากหัวหน้า
+
+## [2026-10-29 — Admin promote @mfu.ac.th only]
+- ตั้ง Admin ได้เฉพาะอีเมลโดเมนตรงๆ `@mfu.ac.th` (lamduan / external / อื่นๆ ตั้งไม่ได้)
+- Backend `PUT /api/admin/users/:id/role` ตรวจ `canPromoteToAdmin` · UI ซ่อนปุ่ม「ตั้งเป็น Admin」แล้วโชว์「ไม่ใช่ @mfu.ac.th」
+- ถอด Admin ยังทำได้กับบัญชี admin เดิม (เช่น bootstrap ผ่าน `DEV_ADMIN_EMAILS`)
+
+## [2026-10-29 — Admin edit-room price form]
+- โมดัลแก้ไขห้อง: แยกเรทเป็น 3 แถวชัดเจน (บุคคลภายใน / หน่วยงานร่วมจัด / บุคคลภายนอก) · คอลัมน์ครึ่งวัน–เต็มวัน
+- เลเบลฟอร์มใหญ่ขึ้น · สีแถวตามเรท (แดง/ส้ม/ฟ้า)
+
+## [2026-10-29 — Admin rooms price readability]
+- หัวคอลัมน์ใหญ่ขึ้น (`text-sm`) · ชื่อเต็ม: บุคคลภายใน / หน่วยงานร่วมจัด / บุคคลภายนอก + ซับ「ครึ่งวัน · เต็มวัน」
+- เซลล์ราคาเป็นแถวคู่「ครึ่ง / เต็ม」มีป้ายกำกับชัด · คีย์สีบนแถบบนตาราง
+
+## [2026-10-29 — Admin rooms table UX]
+- หัวตารางสั้นลง (ภายใน / ร่วมจัด / ภายนอก) · คำอธิบายครึ่งวัน/เต็มวันย้ายไปแถบบน
+- คอลัมน์ราคาแยกสีอ่อน · zebra · ความจุเป็นชิป · ชื่อห้อง `line-clamp-2`
+
+## [2026-10-29 — Admin bookings docs UX]
+- เอาติ๊กเลือก + ปุ่ม ZIP / ล้าง ออกจากจัดการคำขอจอง
+- เปิดเอกสารต่อแถว: 「หนังสือบันทึกข้อความ」+「ใบอนุมัติ」(สไตล์เดียวกัน เมื่อมีไฟล์)
+
+## [2026-10-29 — Admin bookings review UX]
+- รวม「มีรีวิวแล้ว」+「ดูรีวิว」เป็นปุ่มเดียว `ดูรีวิว` (ม่วงทึบ + ดาว) · ไม่ซ้อน badge ที่ดูคล้ายปุ่ม
+
+## [2026-10-29 — Revenue card + year compare]
+- การ์ดรายได้: `whitespace-nowrap` + ย่อฟอนต์ · ≥1 ล้านโชว์เป็น `฿x.xxM` (title ยังเป็นยอดเต็ม)
+- โหมดตัวกรอง「รายปี」: ระบุ **จากปี–ถึงปี** ที่แถบตัวกรอง (ย้ายออกจากใต้กราฟ)
+- `stats.routes.ts` รองรับ `?group=year&from=&to=`
+
+## [2026-10-29 — Seed revenue history 2024–2025]
+- สคริปต์ `npm run seed:revenue-history` ใส่ booking `approved_paid` เดือนละ 1 รายการปี 2024+2025 (24 แท่ง)
+- ใช้ดูกราฟ Admin: โหมด「ทั้งหมด」ควรสลับเป็นรายปีอัตโนมัติ
+
+## [2026-10-29 — Admin dashboard filter + revenue chart]
+- กดโหมดตัวกรองแล้วโหลดทันที · `เลือกเดือน`/`ช่วงวัน` โหลดเมื่อค่าครบ · เอาปุ่ม「ใช้ตัวกรอง」ออก
+- เอาปุ่ม「ดูข้อมูลล่าสุด」ออก (ใช้โหมด「เดือนล่าสุด」แทน)
+- แนวโน้มรายได้: รายเดือนสูงสุด 12 แท่ง · ถ้าแท่งเดือน > 12 → สลับรายปีอัตโนมัติ
+- `revenue.service.ts`: default 12 เดือน · `getRevenueByYearInRange` · `getRevenueInRange` auto-yearly
+
+## [2026-10-29 — Sync rooms to Excel (96)]
+- Import Excel เป็น source of truth: upsert แล้ว **prune** ห้องที่ไม่อยู่ในไฟล์
+- รันแล้ว: upsert 96 · ลบ seed เกิน 4 · **DB = 96**
+- `seed:demo` ข้ามสร้าง 8 ห้อง demo ถ้ามีห้อง ≥ 50 แล้ว (กันค้างซ้ำ)
+- ไฟล์: `roomImport.service.ts` · `admin/room.routes.ts` · `seed-demo.ts`
+
+## [2026-10-29 — TC-A-27 / TC-A-28 evidence]
+- Excel `room-pricing-rates.xlsx`: **96 ห้อง** (6 sheets · unique 96)
+- TC-A-27 ✅ แก้ราคา add-on ใน Admin → โชว์บนหน้าจอง · `evidence/CoM/TC-A-27*.png`
+- TC-A-28 ✅ ไม่มีปุ่มลบ promo · DELETE → 403 · `evidence/JJ/TC-A-28.png`
+- Playwright: `frontend/e2e/r5-phase-e-a27-a28.spec.ts`
+
+## [2026-10-29 — Recording 5 Phase E evidence]
+- รัน TC-A-23…26 (Import Excel) ผ่าน Playwright + `npm run import:rooms` (96 ห้อง)
+- หลักฐาน: `docs/testing/evidence/CoM/TC-A-23.png` (+success) · `TC-A-24.png` · `TC-A-25.png` · `TC-A-26.png`
+- อัปเดต tracker / `kom.md` / `RECORDING5_ACTION_PLAN.md` · สคริปต์ `frontend/e2e/r5-phase-e-import.spec.ts`
+- ตรวจ DB: C3-101 ราคา 500/1000 · 750/1500 · 1000/2000 · จำนวนห้อง 100
+
+## [2026-10-22 — Recording 5 implement B–G]
+- **D:** Promo ไม่ลบ — UI toggle อย่างเดียว · `DELETE /api/admin/promocodes/:id` → 403
+- **C:** `AdminAddons.vue` + แท็บแอดมิน · `GET/PUT /api/admin/addons` แก้ราคา/สถานะจาก DB
+- **B:** `RoomDetailView` การ์ดครึ่งวัน/เต็มวันคนละสี · badge สถานะจาก `bookingStatus` · `BookingView` รูป add-on + แยกบิลค่าห้อง/อุปกรณ์ · i18n TH/EN
+- **E:** TC-A-23…28 ใน `TEST_CASE_TRACKER.md` (Import Excel + add-on price + promo no-delete) — รอหลักฐานรูป
+- **G:** `docs/ops/SETUP_FROM_ENV_EXAMPLE.md` · `docs/product/THESIS_CHAPTERS_CHECKLIST.md` · อัปเดต `docs/README.md` + `RECORDING5_ACTION_PLAN.md`
+
+## [2026-10-22 — Recording 5 scope refine]
+- เฟส B: half/full อยู่หน้ารายละเอียดห้องก่อนจอง · รูป add-on · แยกบิล
+- เฟส G: คู่มือ GitHub คิดเผื่อคนไม่มี `.env` จริง ต้องตั้งจาก `.env.example`
+
+## [2026-10-21 — Recording 5 action plan]
+- เพิ่ม `docs/meetings/RECORDING5_ACTION_PLAN.md` จาก Standard recording 5 (12:50–14:11)
+- แมปงาน: UI half/full + add-on รูป/แยกบิล, ราคา add-on แก้ได้, ห้ามลบ promo, TC Excel import, เอกสารบท 3–5
+
 ## [2026-10-21 — merge ForParttime]
 - Fast-forward `ForParttime` (`f9fe25c`) หลักฐานพาร์ทครบตาม `part.md` ไม่มี conflict
 - เคสใหม่: `TC-U-02b-login-admin`, `TC-A-06-user`, `TC-E-07`, `TC-E-08`

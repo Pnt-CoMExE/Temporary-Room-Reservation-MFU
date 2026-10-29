@@ -25,6 +25,7 @@ interface RoomDetail {
 interface BookedSlot {
   date: string;
   time: string;
+  /** Raw API status for badge color */
   status: string;
   memoDocumentUrl?: string;
 }
@@ -51,9 +52,14 @@ const fetchRoomDetail = async () => {
     const bookingsRes = await api.get(`/api/rooms/${roomId}/bookings`);
     bookedSlots.value = bookingsRes.data.map((b: any) => ({
       date: toDateKey(b.booking_date),
-      time: b.time_slot === 'full' ? 'เต็มวัน' : b.time_slot === 'half_morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย',
-      status: b.status === 'pending' ? 'รออนุมัติ' : 'จองแล้ว',
-      memoDocumentUrl: b.memo_document_url || undefined
+      time:
+        b.time_slot === "full"
+          ? "เต็มวัน"
+          : b.time_slot === "half_morning"
+            ? "ครึ่งวันเช้า"
+            : "ครึ่งวันบ่าย",
+      status: b.status || "pending",
+      memoDocumentUrl: b.memo_document_url || undefined,
     }));
   } catch (err: any) {
     console.error("Error fetching room details:", err);
@@ -85,10 +91,18 @@ import {
   translateRoomType,
   translateLocation,
   translateDuration,
-  translateStatus,
 } from "@/utils/translator";
+import {
+  getBookingStatusBadgeClass,
+  getBookingStatusLabel,
+} from "@/utils/bookingStatus";
 
 const { locale } = useI18n();
+
+const slotStatusBadgeClass = (status: string) =>
+  getBookingStatusBadgeClass(status);
+const slotStatusLabel = (status: string) =>
+  getBookingStatusLabel(status, locale.value);
 
 const displayRoomImage = computed(() =>
   resolveRoomImage(room.value?.image_url, room.value?.id ?? room.value?.name)
@@ -236,8 +250,9 @@ const amenities = [
                   </div>
                 </div>
                 <span
-                  class="text-xs font-bold bg-red-100 text-red-700 px-3 py-1 rounded-full uppercase tracking-wider"
-                  >{{ translateStatus(slot.status, locale) }}</span
+                  class="text-xs font-bold px-3 py-1 rounded-full border uppercase tracking-wider"
+                  :class="slotStatusBadgeClass(slot.status)"
+                  >{{ slotStatusLabel(slot.status) }}</span
                 >
               </div>
             </div>
@@ -263,24 +278,40 @@ const amenities = [
               {{ $t('room.pricing_title') }}
             </h3>
 
-            <div class="space-y-4 mb-8">
+            <div class="space-y-3 mb-8">
               <div
-                class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-200"
+                class="p-4 rounded-2xl border-2 border-amber-200 bg-amber-50/80"
               >
-                <span class="text-gray-600 font-medium"
-                  >{{ $t('room.half_day') }}</span
-                >
-                <span class="text-xl font-black text-[#ba0b2f]"
-                  >฿{{ (displayPrices.half || 0).toLocaleString() }}</span
-                >
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-amber-700">
+                      {{ $t('room.half_day') }}
+                    </p>
+                    <p class="text-xs text-amber-800/80 font-medium mt-0.5">
+                      {{ $t('room.half_day_hint') }}
+                    </p>
+                  </div>
+                  <span class="text-2xl font-black text-amber-800 tabular-nums"
+                    >฿{{ (displayPrices.half || 0).toLocaleString() }}</span
+                  >
+                </div>
               </div>
               <div
-                class="flex justify-between items-center p-4 bg-gray-50 rounded-xl border border-gray-200"
+                class="p-4 rounded-2xl border-2 border-[#ba0b2f]/40 bg-[#ba0b2f]/5"
               >
-                <span class="text-gray-600 font-medium">{{ $t('room.full_day') }}</span>
-                <span class="text-xl font-black text-[#ba0b2f]"
-                  >฿{{ (displayPrices.full || 0).toLocaleString() }}</span
-                >
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-[#ba0b2f]">
+                      {{ $t('room.full_day') }}
+                    </p>
+                    <p class="text-xs text-[#8c0823]/80 font-medium mt-0.5">
+                      {{ $t('room.full_day_hint') }}
+                    </p>
+                  </div>
+                  <span class="text-2xl font-black text-[#ba0b2f] tabular-nums"
+                    >฿{{ (displayPrices.full || 0).toLocaleString() }}</span
+                  >
+                </div>
               </div>
             </div>
 

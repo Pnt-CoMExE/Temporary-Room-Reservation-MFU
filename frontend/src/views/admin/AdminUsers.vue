@@ -128,9 +128,21 @@ const baseRoleForEmail = (email: string): "internal" | "external" => {
   return domain === "mfu.ac.th" ? "internal" : "external";
 };
 
+/** ตั้ง Admin ได้เฉพาะโดเมนตรงๆ @mfu.ac.th (ไม่รวม lamduan / external) */
+const canPromoteToAdmin = (email: string): boolean =>
+  baseRoleForEmail(email) === "internal";
+
 const setAdminRole = async (user: UserItem) => {
-  const nextRole =
-    user.user_type === "admin" ? baseRoleForEmail(user.email) : "admin";
+  const promoting = user.user_type !== "admin";
+  if (promoting && !canPromoteToAdmin(user.email)) {
+    Swal.fire({
+      icon: "info",
+      title: "ตั้ง Admin ไม่ได้",
+      text: "อนุญาตเฉพาะบัญชี @mfu.ac.th — บุคคลภายนอกและโดเมนอื่นตั้งไม่ได้",
+    });
+    return;
+  }
+  const nextRole = promoting ? "admin" : baseRoleForEmail(user.email);
   const { isConfirmed } = await Swal.fire({
     title: nextRole === "admin" ? "ตั้งเป็น Admin?" : "ถอดสิทธิ์ Admin?",
     text: `${user.email} → ${nextRole}`,
@@ -336,11 +348,19 @@ const setAdminRole = async (user: UserItem) => {
                     {{ user.is_active ? "ปิดใช้งาน" : "เปิดใช้งาน" }}
                   </button>
                   <button
+                    v-if="user.user_type === 'admin' || canPromoteToAdmin(user.email)"
                     @click="setAdminRole(user)"
                     class="px-3 py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
                   >
                     {{ user.user_type === "admin" ? "ถอด Admin" : "ตั้งเป็น Admin" }}
                   </button>
+                  <span
+                    v-else
+                    class="px-2 py-1 text-[10px] font-semibold text-gray-400"
+                    title="ตั้ง Admin ได้เฉพาะ @mfu.ac.th"
+                  >
+                    ไม่ใช่ @mfu.ac.th
+                  </span>
                 </div>
               </td>
             </tr>

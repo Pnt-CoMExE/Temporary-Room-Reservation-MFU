@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import { query } from "../../../db";
 import { verifyToken, verifyAdmin } from "../../middleware/auth";
 import { adminNameFromReq, logAdminAction } from "../../services/auditLog.service";
+import { canPromoteToAdmin } from "../../utils/resolveUserType";
 
 const router = Router();
 
@@ -94,11 +95,17 @@ router.put("/:id/role", verifyToken, verifyAdmin, async (req: any, res: Response
     if (existing.rows.length === 0) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้" });
     }
+    const targetEmail = String(existing.rows[0].email || "");
+    if (userType === "admin" && !canPromoteToAdmin(targetEmail)) {
+      return res.status(400).json({
+        message: "ตั้งเป็น Admin ได้เฉพาะบัญชี @mfu.ac.th (บุคคลภายนอก / โดเมนอื่นตั้งไม่ได้)",
+      });
+    }
     await query("UPDATE users SET user_type = $1 WHERE id = $2", [userType, id]);
     await logAdminAction(
       adminNameFromReq(req),
       `เปลี่ยน Role ผู้ใช้ #${id}`,
-      `${existing.rows[0].email}: ${existing.rows[0].user_type} → ${userType}`
+      `${targetEmail}: ${existing.rows[0].user_type} → ${userType}`
     );
     res.json({ message: "อัปเดต Role สำเร็จ" });
   } catch (err) {

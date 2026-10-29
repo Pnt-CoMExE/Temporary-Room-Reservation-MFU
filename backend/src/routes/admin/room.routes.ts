@@ -3,7 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { query, pool } from "../../../db";
-import { importRoomsFromExcelFile } from "../../services/roomImport.service";
+import { importRoomsFromExcelFileDetailed } from "../../services/roomImport.service";
 import { verifyToken, verifyAdmin } from "../../middleware/auth";
 
 const router = Router();
@@ -146,10 +146,14 @@ router.post(
     }
 
     try {
-      const count = await importRoomsFromExcelFile(req.file.path);
+      const result = await importRoomsFromExcelFileDetailed(req.file.path);
       res.json({
-        message: `นำเข้าข้อมูลสำเร็จทั้งหมด ${count} รายการ (จากทุก Sheet)`,
-        count,
+        message:
+          result.pruned > 0
+            ? `นำเข้าข้อมูลสำเร็จ ${result.imported} รายการ และลบห้องที่ไม่ได้อยู่ในไฟล์ ${result.pruned} รายการ`
+            : `นำเข้าข้อมูลสำเร็จทั้งหมด ${result.imported} รายการ (จากทุก Sheet)`,
+        count: result.imported,
+        pruned: result.pruned,
       });
     } catch (err: any) {
       console.error("[admin/rooms/import] Error:", err);

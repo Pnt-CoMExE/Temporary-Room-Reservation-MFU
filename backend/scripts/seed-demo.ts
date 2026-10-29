@@ -93,8 +93,14 @@ async function seedDemo() {
     }
 
     // ============================================================
-    // 2. ROOMS — 8 ห้อง ครอบคลุมทุกประเภท
+    // 2. ROOMS — 8 ห้อง demo (ข้ามถ้ามีแคตตาล็อกจาก Excel แล้ว)
     // ============================================================
+    const existingRoomCount = await query("SELECT COUNT(*)::int AS n FROM rooms");
+    if ((existingRoomCount.rows[0]?.n || 0) >= 50) {
+      console.log(
+        `\n🏢 Skip demo rooms — DB already has ${existingRoomCount.rows[0].n} rooms (use Excel import as source of truth)`
+      );
+    } else {
     console.log("\n🏢 Seeding Rooms (8 types)...");
     const rooms = [
       {
@@ -204,6 +210,7 @@ async function seedDemo() {
         console.log(`     └─ Pricing: ½day internal ฿${halfInternal} | fullday internal ฿${fullInternal}`);
       }
     }
+    } // end else: seed demo rooms only when catalog is small
 
     // ============================================================
     // 3. ADDONS — 5 อุปกรณ์เสริม

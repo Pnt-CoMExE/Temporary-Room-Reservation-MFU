@@ -3,6 +3,7 @@
  * - โดเมนตรงๆ @mfu.ac.th → internal (บุคลากร)
  * - @lamduan.mfu.ac.th / อื่นๆ → external
  * - admin มาจากการ promote ใน Admin UI (เก็บใน DB) เท่านั้น
+ *   promote ได้เฉพาะ @mfu.ac.th (ไม่รวม lamduan / external อื่น)
  *   ไม่ใช้ @property.mfu.ac.th (เมลไม่มีจริง / ไม่ใช้)
  *
  * Demo/UAT overrides (ปิดใน production จริง):
@@ -33,6 +34,11 @@ export function resolveUserType(email: string, existingType?: string): string {
   if (domain === "mfu.ac.th") return "internal";
 
   return existingType === "internal" ? "internal" : "external";
+}
+
+/** Promote เป็น admin ได้เฉพาะเมลโดเมนตรงๆ @mfu.ac.th */
+export function canPromoteToAdmin(email: string): boolean {
+  return emailDomain(email.trim().toLowerCase()) === "mfu.ac.th";
 }
 
 function emailDomain(email: string): string {

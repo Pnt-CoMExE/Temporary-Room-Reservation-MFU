@@ -16,6 +16,24 @@ interface UserProfile {
   role: string;
 }
 
+interface BookingAddonLine {
+  name: string;
+  qty: number;
+  unitPrice: number;
+  totalPrice: number;
+}
+
+interface RateAdjustment {
+  fromOrg: string | null;
+  toOrg: string | null;
+  fromRoom: number | null;
+  toRoom: number | null;
+  roomDelta: number | null;
+  fromTotal: number | null;
+  toTotal: number | null;
+  totalDelta: number | null;
+}
+
 interface BookingItem {
   id: string;
   dbId: number;
@@ -23,10 +41,17 @@ interface BookingItem {
   bookingDate: string;
   durationText: string;
   totalPrice: number;
+  roomPrice: number;
+  addonsPrice: number;
+  organizationType?: string;
+  promoCode?: string;
+  discountAmount: number;
+  promoDiscountPercent: number;
+  rateAdjustment?: RateAdjustment | null;
   status: string;
   hasFeedback: boolean;
   feedbackData?: { rating: number; comment: string };
-  addons: any[];
+  addons: BookingAddonLine[];
   adminName?: string;
   remark?: string;
   memoDocumentUrl?: string;
@@ -36,6 +61,7 @@ interface BookingItem {
 import { useI18n } from "vue-i18n";
 import {
   translateRoomName,
+  translateAddonName,
   translateDuration,
 } from "@/utils/translator";
 import {
@@ -54,6 +80,36 @@ const { t, locale } = useI18n();
 const router = useRouter();
 const activeTab = ref("bookings");
 
+const ORG_LABEL_TH: Record<string, string> = {
+  internal: "บุคคลภายใน",
+  co_op: "หน่วยงานร่วมจัด",
+  co_organizer: "หน่วยงานร่วมจัด",
+  coop: "หน่วยงานร่วมจัด",
+  external: "บุคคลภายนอก",
+};
+const ORG_LABEL_EN: Record<string, string> = {
+  internal: "Internal",
+  co_op: "Co-organizer",
+  co_organizer: "Co-organizer",
+  coop: "Co-organizer",
+  external: "External",
+};
+
+const orgLabel = (org: string | null | undefined) => {
+  if (!org) return "—";
+  const key = String(org).toLowerCase();
+  return locale.value === "en"
+    ? ORG_LABEL_EN[key] || org
+    : ORG_LABEL_TH[key] || org;
+};
+
+const formatSignedBaht = (n: number) => {
+  const abs = Math.abs(n).toLocaleString();
+  if (n > 0) return `+฿${abs}`;
+  if (n < 0) return `-฿${abs}`;
+  return `฿${abs}`;
+};
+
 // --- ส่วนที่ 1: ข้อมูล Profile ---
 const userProfile = ref<UserProfile>({
   fullName: "กำลังโหลด...",
@@ -66,6 +122,12 @@ const userProfile = ref<UserProfile>({
 const myBookings = ref<BookingItem[]>([]);
 const loadingBookings = ref(true);
 const activePaymentProvider = ref("promptpay_manual");
+const expandedPriceId = ref<string | null>(null);
+
+const togglePriceBreakdown = (bookingId: string) => {
+  expandedPriceId.value =
+    expandedPriceId.value === bookingId ? null : bookingId;
+};
 
 const fetchBookings = async () => {
   const userId = getStoredUserId();
@@ -84,7 +146,30 @@ const fetchBookings = async () => {
         : b.time_slot === "half_morning"
           ? "ครึ่งวันเช้า"
           : "ครึ่งวันบ่าย",
-    totalPrice: parseFloat(b.total_price),
+    totalPrice: parseFloat(b.total_price) || 0,
+    roomPrice: parseFloat(b.room_price) || 0,
+    addonsPrice: parseFloat(b.addons_price) || 0,
+    organizationType: b.organization_type || undefined,
+    rateAdjustment: b.rate_adjustment || null,
+    promoCode: (b.promo_code || "").trim() || undefined,
+    discountAmount: Math.max(
+      0,
+      (parseFloat(b.room_price) || 0) +
+        (parseFloat(b.addons_price) || 0) -
+        (parseFloat(b.total_price) || 0)
+    ),
+    promoDiscountPercent: (() => {
+      const fromDb = Number(b.promo_discount_percent);
+      if (Number.isFinite(fromDb) && fromDb > 0) return Math.min(100, fromDb);
+      const sub =
+        (parseFloat(b.room_price) || 0) + (parseFloat(b.addons_price) || 0);
+      const disc = Math.max(
+        0,
+        sub - (parseFloat(b.total_price) || 0)
+      );
+      if (sub <= 0 || disc <= 0) return 0;
+      return Math.min(100, Math.round((disc / sub) * 100));
+    })(),
     status: b.status,
     hasFeedback: b.has_feedback,
     memoDocumentUrl: b.memo_document_url || null,
@@ -94,7 +179,12 @@ const fetchBookings = async () => {
     addons: Array.isArray(b.addons)
       ? b.addons.map((a: any) => ({
           name: a.name,
-          qty: a.quantity ?? a.qty ?? 1,
+          qty: Number(a.quantity ?? a.qty ?? 1) || 1,
+          unitPrice: Number(a.unitPrice ?? a.unit_price ?? 0) || 0,
+          totalPrice:
+            Number(a.totalPrice ?? a.total_price ?? 0) ||
+            (Number(a.unitPrice ?? a.unit_price ?? 0) || 0) *
+              (Number(a.quantity ?? a.qty ?? 1) || 1),
         }))
       : [],
   }));
@@ -816,169 +906,379 @@ const formatDate = (dateString: string) =>
             <div
               v-for="booking in filteredBookings"
               :key="booking.id"
-              class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden hover:shadow-card-hover transition-all duration-300 group"
+              class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden hover:shadow-card-hover transition-all duration-300"
               :class="
                 isBookingStatus(booking.status, 'cancelled') ? 'opacity-60 grayscale-50' : ''
               "
             >
+              <!-- Header -->
               <div
-                class="bg-gray-50/80 px-6 py-4 border-b border-gray-100 flex justify-between items-center gap-3 flex-wrap"
+                class="px-5 md:px-6 py-3.5 border-b border-gray-100 bg-slate-50/80 flex justify-between items-start gap-3 flex-wrap"
               >
-                <span
-                  class="text-xs font-black text-gray-500 uppercase tracking-widest"
-                  >Booking ID:
-                  <span class="text-gray-900">{{ booking.id }}</span>
-                  <span
+                <div class="min-w-0">
+                  <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                    Booking ID
+                  </p>
+                  <p class="text-sm font-black text-gray-800 font-mono tracking-tight">
+                    {{ booking.id }}
+                  </p>
+                  <p
                     v-if="booking.transactionId"
-                    class="mt-1 block normal-case tracking-normal font-mono text-[11px] text-gray-700"
-                  >{{ $t('dashboard.transaction_id') }}: {{ booking.transactionId }}</span>
-                </span>
+                    class="mt-1 text-[11px] font-mono text-gray-500"
+                  >
+                    {{ $t("dashboard.transaction_id") }}:
+                    <span class="text-gray-700">{{ booking.transactionId }}</span>
+                  </p>
+                </div>
                 <div class="flex items-center gap-2 flex-wrap justify-end">
                   <span
                     :class="getStatusClass(booking.status)"
-                    class="px-4 py-1.5 rounded-xl text-xs font-bold border shadow-sm inline-flex items-center gap-1.5"
-                    ><font-awesome-icon :icon="getBookingStatusIcon(booking.status)" class="text-[11px]" />{{ getStatusText(booking.status) }}</span
+                    class="px-3 py-1.5 rounded-full text-xs font-bold border shadow-sm inline-flex items-center gap-1.5"
                   >
+                    <font-awesome-icon
+                      :icon="getBookingStatusIcon(booking.status)"
+                      class="text-[11px]"
+                    />
+                    {{ getStatusText(booking.status) }}
+                  </span>
                   <span
-                    v-if="
-                      canLeaveReview(booking.status) &&
-                      booking.hasFeedback
-                    "
+                    v-if="canLeaveReview(booking.status) && booking.hasFeedback"
                     :class="getReviewedBadgeClass()"
-                    class="px-3 py-1.5 rounded-xl text-xs font-bold border shadow-sm"
+                    class="px-3 py-1.5 rounded-full text-xs font-bold border shadow-sm"
                   >
                     {{ getReviewedLabel(locale) }}
                   </span>
                 </div>
               </div>
-              <div
-                class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6"
-              >
-                <div class="grow">
-                  <h3
-                    class="text-xl font-black text-gray-800 mb-2 group-hover:text-[#ba0b2f] transition-colors"
-                  >
-                    {{ translateRoomName(booking.roomName, locale) }}
-                  </h3>
-                  <div
-                    class="flex flex-wrap gap-4 text-sm text-gray-500 font-medium mb-4"
-                  >
-                    <span class="flex items-center gap-2"
-                      ><font-awesome-icon :icon="['far', 'calendar']" class="text-[#d4af37]" />
-                      {{ formatDate(booking.bookingDate) }}</span
-                    >
-                    <span class="flex items-center gap-2"
-                      ><font-awesome-icon :icon="['far', 'clock']" class="text-[#d4af37]" />
-                      {{ translateDuration(booking.durationText, locale) }}</span
-                    >
-                  </div>
-                  <div
-                    v-if="booking.addons.length > 0"
-                    class="flex flex-wrap gap-2 pt-2 border-t border-gray-50"
-                  >
-                    <span
-                      v-for="addon in booking.addons"
-                      :key="addon.name"
-                      class="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-[10px] font-bold"
-                      >+ {{ addon.name }} ({{ addon.qty }})</span
-                    >
-                  </div>
 
-                  <!-- ปุ่มดูเอกสารแนบ -->
-                  <div
-                    v-if="booking.memoDocumentUrl"
-                    class="mt-3"
-                  >
-                    <a
-                      :href="booking.memoDocumentUrl"
-                      target="_blank"
-                      class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 hover:bg-blue-100 hover:text-blue-800 transition-all"
-                    >
-                      <font-awesome-icon icon="file-pdf" />
-                      PDF Document
-                      <font-awesome-icon icon="external-link-alt" class="text-[10px] opacity-50" />
-                    </a>
-                  </div>
+              <!-- Body -->
+              <div class="p-5 md:p-6">
+                <div class="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-8">
+                  <div class="grow min-w-0">
+                    <h3 class="text-xl font-black text-gray-900 leading-snug">
+                      {{ translateRoomName(booking.roomName, locale) }}
+                    </h3>
 
-                  <div
-                    v-if="
-                      isBookingStatus(booking.status, 'approved_paid') ||
-                      isBookingStatus(booking.status, 'disapproved')
-                    "
-                    class="mt-4 pt-4 border-t border-gray-100"
-                  >
-                    <p
-                      class="text-xs text-gray-600 font-medium flex items-center gap-2"
-                    >
-                      <font-awesome-icon icon="user-tie" class="text-gray-400" />
-                      {{ $t('dashboard.updated_by') }}
-                      <span class="text-gray-900 font-bold">{{
-                        booking.adminName || $t('dashboard.admin_user')
-                      }}</span>
-                    </p>
-                    <div
-                      v-if="isBookingStatus(booking.status, 'disapproved') && booking.remark"
-                      class="mt-2 bg-red-50 p-3 rounded-xl border border-red-100 flex items-start gap-2"
-                    >
-                      <font-awesome-icon icon="info-circle" class="text-red-500 mt-0.5" />
-                      <p
-                        class="text-xs text-red-700 font-medium leading-relaxed"
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <span
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-100 text-xs font-bold"
                       >
-                        {{ $t('dashboard.disapproval_reason') }}: {{ booking.remark }}
-                      </p>
+                        <font-awesome-icon :icon="['far', 'calendar']" class="text-[#d4af37]" />
+                        {{ formatDate(booking.bookingDate) }}
+                      </span>
+                      <span
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold"
+                      >
+                        <font-awesome-icon :icon="['far', 'clock']" class="text-slate-400" />
+                        {{ translateDuration(booking.durationText, locale) }}
+                      </span>
+                      <span
+                        v-if="booking.addons.length > 0"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-sky-50 text-sky-800 border border-sky-100 text-xs font-bold"
+                      >
+                        <font-awesome-icon icon="box-open" class="text-sky-500" />
+                        {{ $t("dashboard.addons_count", { n: booking.addons.length }) }}
+                      </span>
+                      <span
+                        v-if="booking.promoCode"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-100 text-xs font-bold"
+                      >
+                        <font-awesome-icon icon="ticket-alt" class="text-emerald-500" />
+                        {{ booking.promoCode }}
+                        <template v-if="booking.promoDiscountPercent > 0">
+                          · {{ booking.promoDiscountPercent }}%
+                        </template>
+                      </span>
+                      <span
+                        v-if="booking.rateAdjustment"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-violet-50 text-violet-800 border border-violet-100 text-xs font-bold"
+                      >
+                        <font-awesome-icon icon="exchange-alt" class="text-violet-500" />
+                        {{ $t("dashboard.rate_adjusted") }}
+                        <template v-if="booking.rateAdjustment.totalDelta != null">
+                          · {{ formatSignedBaht(booking.rateAdjustment.totalDelta) }}
+                        </template>
+                      </span>
                     </div>
+
+                    <div
+                      v-if="
+                        isBookingStatus(booking.status, 'approved_paid') ||
+                        isBookingStatus(booking.status, 'disapproved')
+                      "
+                      class="mt-4"
+                    >
+                      <p class="text-xs text-gray-500 font-medium flex items-center gap-2">
+                        <font-awesome-icon icon="user-tie" class="text-gray-400" />
+                        {{ $t("dashboard.updated_by") }}
+                        <span class="text-gray-800 font-bold">{{
+                          booking.adminName || $t("dashboard.admin_user")
+                        }}</span>
+                      </p>
+                      <div
+                        v-if="
+                          isBookingStatus(booking.status, 'disapproved') && booking.remark
+                        "
+                        class="mt-2 bg-red-50 p-3 rounded-xl border border-red-100 flex items-start gap-2"
+                      >
+                        <font-awesome-icon icon="info-circle" class="text-red-500 mt-0.5" />
+                        <p class="text-xs text-red-700 font-medium leading-relaxed">
+                          {{ $t("dashboard.disapproval_reason") }}: {{ booking.remark }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Price summary (compact) -->
+                  <div class="w-full lg:w-64 shrink-0">
+                    <button
+                      type="button"
+                      class="w-full text-left rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-red-50/40 p-4 hover:border-[#ba0b2f]/30 hover:shadow-sm transition-all cursor-pointer"
+                      @click="togglePriceBreakdown(booking.id)"
+                    >
+                      <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                        {{ $t("dashboard.total_due") }}
+                      </p>
+                      <p class="mt-1 text-3xl font-black text-[#ba0b2f] tabular-nums leading-none">
+                        ฿{{ booking.totalPrice.toLocaleString() }}
+                      </p>
+                      <span
+                        class="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold text-[#ba0b2f]"
+                      >
+                        {{
+                          expandedPriceId === booking.id
+                            ? $t("dashboard.hide_price_detail")
+                            : $t("dashboard.view_price_detail")
+                        }}
+                        <font-awesome-icon
+                          :icon="
+                            expandedPriceId === booking.id ? 'chevron-up' : 'chevron-down'
+                          "
+                          class="text-[10px]"
+                        />
+                      </span>
+                    </button>
                   </div>
                 </div>
 
+                <!-- Full-width price breakdown -->
                 <div
-                  class="w-full md:w-auto text-left md:text-right flex flex-row md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-4 md:pt-0 gap-2"
+                  v-if="expandedPriceId === booking.id"
+                  class="mt-5 rounded-2xl border border-gray-200 bg-slate-50/80 overflow-hidden"
                 >
-                  <p class="text-2xl font-black text-[#ba0b2f]">
-                    ฿{{ booking.totalPrice.toLocaleString() }}
-                  </p>
+                  <div class="px-4 py-3 border-b border-gray-200 bg-white/70">
+                    <p class="text-sm font-extrabold text-gray-800">
+                      {{ $t("dashboard.view_price_detail") }}
+                    </p>
+                  </div>
+                  <div class="p-4 space-y-2">
+                    <div class="flex justify-between gap-4 text-sm text-gray-700">
+                      <span class="font-semibold">
+                        {{ $t("dashboard.room_fee") }}
+                        <span
+                          v-if="booking.organizationType"
+                          class="ml-1 text-[11px] font-medium text-gray-400"
+                        >
+                          ({{ orgLabel(booking.organizationType) }})
+                        </span>
+                      </span>
+                      <span class="font-bold tabular-nums"
+                        >฿{{ booking.roomPrice.toLocaleString() }}</span
+                      >
+                    </div>
 
+                    <div
+                      v-if="booking.rateAdjustment"
+                      class="rounded-xl border border-violet-100 bg-violet-50/80 px-3 py-2.5 space-y-1"
+                    >
+                      <p class="text-xs font-extrabold text-violet-900">
+                        {{ $t("dashboard.admin_rate_change") }}
+                      </p>
+                      <p
+                        v-if="booking.rateAdjustment.fromOrg && booking.rateAdjustment.toOrg"
+                        class="text-xs font-semibold text-violet-800"
+                      >
+                        {{ orgLabel(booking.rateAdjustment.fromOrg) }}
+                        →
+                        {{ orgLabel(booking.rateAdjustment.toOrg) }}
+                      </p>
+                      <div
+                        v-if="
+                          booking.rateAdjustment.fromRoom != null &&
+                          booking.rateAdjustment.toRoom != null
+                        "
+                        class="flex justify-between gap-3 text-xs text-violet-800"
+                      >
+                        <span>{{ $t("dashboard.room_fee") }}</span>
+                        <span class="tabular-nums font-bold">
+                          ฿{{ Number(booking.rateAdjustment.fromRoom).toLocaleString() }}
+                          → ฿{{ Number(booking.rateAdjustment.toRoom).toLocaleString() }}
+                          <span
+                            v-if="booking.rateAdjustment.roomDelta != null"
+                            class="ml-1"
+                            :class="
+                              booking.rateAdjustment.roomDelta > 0
+                                ? 'text-rose-600'
+                                : booking.rateAdjustment.roomDelta < 0
+                                  ? 'text-emerald-700'
+                                  : ''
+                            "
+                          >
+                            ({{ formatSignedBaht(booking.rateAdjustment.roomDelta) }})
+                          </span>
+                        </span>
+                      </div>
+                      <div
+                        v-if="
+                          booking.rateAdjustment.fromTotal != null &&
+                          booking.rateAdjustment.toTotal != null
+                        "
+                        class="flex justify-between gap-3 text-xs text-violet-900 font-bold"
+                      >
+                        <span>{{ $t("dashboard.total_due") }}</span>
+                        <span class="tabular-nums">
+                          ฿{{ Number(booking.rateAdjustment.fromTotal).toLocaleString() }}
+                          → ฿{{ Number(booking.rateAdjustment.toTotal).toLocaleString() }}
+                          <span
+                            v-if="booking.rateAdjustment.totalDelta != null"
+                            class="ml-1"
+                            :class="
+                              booking.rateAdjustment.totalDelta > 0
+                                ? 'text-rose-600'
+                                : booking.rateAdjustment.totalDelta < 0
+                                  ? 'text-emerald-700'
+                                  : ''
+                            "
+                          >
+                            ({{ formatSignedBaht(booking.rateAdjustment.totalDelta) }})
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div v-if="booking.addons.length > 0" class="pt-1">
+                      <p class="text-xs font-bold text-gray-500 mb-2">
+                        {{ $t("dashboard.addons_fee") }}
+                      </p>
+                      <div class="space-y-1.5">
+                        <div
+                          v-for="addon in booking.addons"
+                          :key="addon.name"
+                          class="flex justify-between gap-4 text-sm text-gray-600 bg-white rounded-xl px-3 py-2 border border-gray-100"
+                        >
+                          <span class="min-w-0 leading-snug">
+                            {{ translateAddonName(addon.name, locale) }}
+                            <span class="text-gray-400 font-medium">× {{ addon.qty }}</span>
+                          </span>
+                          <span class="shrink-0 font-bold tabular-nums text-gray-800"
+                            >฿{{ addon.totalPrice.toLocaleString() }}</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      v-else-if="booking.addonsPrice > 0"
+                      class="flex justify-between gap-4 text-sm text-gray-700"
+                    >
+                      <span class="font-semibold">{{ $t("dashboard.addons_fee") }}</span>
+                      <span class="font-bold tabular-nums"
+                        >฿{{ booking.addonsPrice.toLocaleString() }}</span
+                      >
+                    </div>
+
+                    <div
+                      v-if="booking.discountAmount > 0 || booking.promoCode"
+                      class="flex justify-between gap-3 text-sm font-bold text-emerald-800 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2.5"
+                    >
+                      <span class="min-w-0">
+                        {{ $t("dashboard.promo_discount") }}
+                        <span v-if="booking.promoDiscountPercent > 0" class="font-extrabold">
+                          {{ booking.promoDiscountPercent }}%
+                        </span>
+                        <span
+                          v-if="booking.promoCode"
+                          class="ml-1 font-mono text-xs text-emerald-700"
+                          >{{ booking.promoCode }}</span
+                        >
+                      </span>
+                      <span class="shrink-0 tabular-nums"
+                        >- ฿{{ booking.discountAmount.toLocaleString() }}</span
+                      >
+                    </div>
+
+                    <div
+                      class="flex justify-between gap-4 text-base font-black text-[#ba0b2f] border-t border-gray-200 pt-3 mt-2"
+                    >
+                      <span>{{ $t("dashboard.total_due") }}</span>
+                      <span class="tabular-nums"
+                        >฿{{ booking.totalPrice.toLocaleString() }}</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions footer -->
+              <div
+                class="px-5 md:px-6 py-3.5 border-t border-gray-100 bg-white flex flex-wrap items-center gap-2 justify-between"
+              >
+                <div class="flex flex-wrap items-center gap-2">
+                  <a
+                    v-if="booking.memoDocumentUrl"
+                    :href="booking.memoDocumentUrl"
+                    target="_blank"
+                    class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all"
+                  >
+                    <font-awesome-icon icon="file-pdf" class="text-red-500" />
+                    {{ $t("dashboard.memo_document") }}
+                    <font-awesome-icon icon="external-link-alt" class="text-[10px] opacity-50" />
+                  </a>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 ml-auto">
                   <button
                     v-if="isBookingStatus(booking.status, 'approved_pending_payment')"
+                    type="button"
                     @click="openPayment(booking)"
-                    class="bg-sky-600 text-white px-6 py-2.5 rounded-xl font-black text-sm shadow-lg shadow-sky-200 hover:bg-sky-700 transition-all flex items-center gap-2 cursor-pointer"
+                    class="bg-sky-600 text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-md shadow-sky-200/60 hover:bg-sky-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon :icon="activePaymentProvider === 'mock_sandbox' ? 'flask' : activePaymentProvider === 'stripe' ? 'wallet' : 'qrcode'" />
+                    <font-awesome-icon
+                      :icon="
+                        activePaymentProvider === 'mock_sandbox'
+                          ? 'flask'
+                          : activePaymentProvider === 'stripe'
+                            ? 'wallet'
+                            : 'qrcode'
+                      "
+                    />
                     {{
-                      activePaymentProvider === 'mock_sandbox'
-                        ? $t('dashboard.mock_pay')
-                        : activePaymentProvider === 'stripe'
-                          ? $t('dashboard.stripe_pay')
-                          : $t('dashboard.scan_pay')
+                      activePaymentProvider === "mock_sandbox"
+                        ? $t("dashboard.mock_pay")
+                        : activePaymentProvider === "stripe"
+                          ? $t("dashboard.stripe_pay")
+                          : $t("dashboard.scan_pay")
                     }}
                   </button>
 
                   <button
                     v-if="isBookingStatus(booking.status, 'pending')"
+                    type="button"
                     @click="cancelBooking(booking)"
-                    class="bg-white text-gray-500 border border-gray-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-gray-50 hover:text-red-600 transition-all flex items-center gap-2 cursor-pointer"
+                    class="bg-white text-gray-600 border border-gray-200 px-4 py-2 rounded-xl font-bold text-xs hover:border-rose-200 hover:text-rose-600 hover:bg-rose-50 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon icon="times" /> {{ $t('dashboard.cancel_request') }}
+                    <font-awesome-icon icon="times" />
+                    {{ $t("dashboard.cancel_request") }}
                   </button>
 
                   <button
-                    v-if="
-                      canLeaveReview(booking.status) && !booking.hasFeedback
-                    "
+                    v-if="canLeaveReview(booking.status) && !booking.hasFeedback"
+                    type="button"
                     @click="giveFeedback(booking)"
-                    class="bg-violet-50 text-violet-700 border border-violet-200 px-5 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-violet-100 transition-all flex items-center gap-2 cursor-pointer"
+                    class="bg-violet-600 text-white px-4 py-2 rounded-xl font-bold text-xs shadow-sm hover:bg-violet-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
-                    <font-awesome-icon icon="star" /> {{ $t('dashboard.give_review') }}
+                    <font-awesome-icon icon="star" />
+                    {{ $t("dashboard.give_review") }}
                   </button>
-
-                  <div
-                    v-if="
-                      canLeaveReview(booking.status) && booking.hasFeedback
-                    "
-                    :class="getReviewedBadgeClass()"
-                    class="px-4 py-1.5 rounded-xl font-bold text-[10px] flex items-center gap-1.5 mt-1 border"
-                  >
-                    <font-awesome-icon icon="check-circle" /> {{ getReviewedLabel(locale) }}
-                  </div>
                 </div>
               </div>
             </div>

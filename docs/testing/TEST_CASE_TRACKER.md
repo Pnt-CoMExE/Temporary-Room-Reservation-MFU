@@ -151,6 +151,12 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 | TC-A-20 | A-20 | เจ | ค้นหาผู้ใช้ | `Admin Users` | 1. พิมพ์ชื่อ/อีเมล | กรองตรง | ✅ | `evidence/JJ/TC-A-20.png` |  |
 | TC-A-21 | A-21 | พาร์ท | เปลี่ยน Role / Promote Admin | `Admin Users` | 1. ตั้ง/ถอด Admin | Role อัปเดตสำเร็จ | ✅ | `evidence/Parttime/TC-A-21.png` |  |
 | TC-A-22 | A-22 | เจ | ดูบันทึกกิจกรรม | `Admin Logs` | 1. แท็บบันทึกกิจกรรม | เห็น admin การกระทำ รายละเอียด เวลา | ✅ | `evidence/JJ/TC-A-22.png` |  |
+| TC-A-23 | A-23 (R5) | คอม | Import Excel — เทมเพลตถูกต้อง | `Admin ห้อง` / `npm run import:rooms` | 1. ใช้ `data/room-pricing-rates.xlsx` 2. Import | สำเร็จ มีห้องในระบบ / ข้อความ success | ✅ | `evidence/CoM/TC-A-23.png` + `TC-A-23-success.png` | Import ได้ 96 รายการ · Swal สำเร็จ |
+| TC-A-24 | A-24 (R5) | คอม | Import Excel — ไฟล์ผิดรูปแบบ | `Admin ห้อง` | 1. อัปโหลด .txt หรือ xlsx ว่าง/คอลัมน์ผิด | error / ไม่เขียนทับข้อมูลผิด | ✅ | `evidence/CoM/TC-A-24.png` | `TC-A-24-bad-import.xlsx` → ไม่พบข้อมูลห้องในไฟล์ |
+| TC-A-25 | A-25 (R5) | คอม | Import Excel — จำนวนห้องสมเหตุสมผล | `Admin ห้อง` | 1. Import ไฟล์มาตรฐาน 2. นับแถวห้อง | จำนวนใกล้เคียง Excel (ไม่เป็น 0) | ✅ | `evidence/CoM/TC-A-25.png` | Excel = **96** · DB sync เหลือ **96** (prune ห้องนอกไฟล์) |
+| TC-A-26 | A-26 (R5) | คอม | Import Excel — ราคาครึ่ง/เต็มวันถูกต้อง | `Admin ห้อง` / `/rooms/:id` | 1. Import 2. เทียบราคา half/full กับแถวใน Excel | ราคา internal/coop/external ตรง | ✅ | `evidence/CoM/TC-A-26.png` | C3-101: 500/1000 · 750/1500 · 1000/2000 |
+| TC-A-27 | A-27 (R5) | คอม | Admin แก้ราคา Add-on | `Admin อุปกรณ์เสริม` | 1. แก้ราคา 2. บันทึก 3. เปิดหน้าจอง | ราคาหน้าจองตาม DB | ✅ | `evidence/CoM/TC-A-27.png` + `TC-A-27-admin.png` | แก้ราคาแล้วโชว์บนหน้าจอง · restore หลังเทส |
+| TC-A-28 | A-28 (R5) | เจ | Promo — ไม่มีปุ่มลบ (เหลือ toggle) | `Admin รหัสส่วนลด` | 1. เปิดแท็บโปรโม 2. ตรวจ UI | มีเปิด/ปิด ไม่มีลบ · DELETE API → 403 | ✅ | `evidence/JJ/TC-A-28.png` (+ `CoM/TC-A-28.png`) | UI ไม่มีปุ่มลบ · DELETE → 403 |
 | TC-I-01 | I-01 | ซี | สลับภาษา TH → EN | `Navbar` | 1. คลิกเปลี่ยนภาษา | ข้อความเป็นอังกฤษ | ✅ | `evidence/CCC/TC-I-01.png` | เมนูและฟอร์มจองเป็นอังกฤษ |
 | TC-I-02 | I-02 | ซี | สลับภาษา EN → TH | `Navbar` | 1. สลับกลับ | ข้อความเป็นไทย | ✅ | `evidence/CCC/TC-I-02.png` | สลับกลับเป็นไทยที่หน้ารายการห้อง |
 | TC-I-03 | I-03 | ซี | หน้า Login สลับภาษา | `Login` | 1. สลับภาษาบน Login | ข้อความเปลี่ยนถูกต้อง | ✅ | `evidence/CCC/TC-I-03.png` | มีปุ่ม TH/EN ข้อความเป็น Login เมื่อกด EN |
@@ -192,7 +198,7 @@ Login จริงใช้ Google OAuth — `@mfu.ac.th` → internal, อื�
 
 | | |
 |--|--|
-| **รวมในตารางนี้** | **77** เคส |
+| **รวมในตารางนี้** | **83** เคส |
 
 ก่อนเทส: `cd backend && npm run seed:demo` เมื่อต้องการข้อมูลตัวอย่างใหม่  
 หลักฐาน: [`evidence/`](./evidence/)

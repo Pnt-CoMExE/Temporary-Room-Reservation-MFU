@@ -6,6 +6,7 @@ import Swal from "sweetalert2";
 import api from "@/services/api";
 import { getStoredUserId } from "@/utils/auth";
 import { resolveRoomImage } from "@/utils/roomImage";
+import { resolveAddonImage } from "@/utils/addonImage";
 import { toDateKey } from "@/utils/dateKey";
 
 const { t, locale } = useI18n();
@@ -36,10 +37,15 @@ interface AddonItem {
   price: number;
   unit: string;
   quantity: number;
-  iconName: string;
+  imageUrl: string;
 }
 
-import { translateRoomName, translateLocation } from "@/utils/translator";
+import {
+  translateRoomName,
+  translateLocation,
+  translateAddonName,
+  translateAddonUnit,
+} from "@/utils/translator";
 
 const route = useRoute();
 const router = useRouter();
@@ -174,9 +180,9 @@ const fetchRoomData = async () => {
       id: a.id,
       name: a.name,
       price: parseFloat(a.price_per_unit) || 0,
-      unit: a.name.includes('โต๊ะ') || a.name.includes('เก้าอี้') ? 'ตัว' : 'ชุด',
+      unit: a.unit_name || (a.name.includes("โต๊ะ") || a.name.includes("เก้าอี้") ? "ตัว" : "ชุด"),
       quantity: 0,
-      iconName: a.name.includes('โต๊ะ') ? 'table' : a.name.includes('เก้าอี้') ? 'chair' : 'microphone'
+      imageUrl: resolveAddonImage(a.name, a.image_url),
     }));
 
     // ดึงคิวการจองที่มีอยู่แล้วของห้องนี้เพื่อล็อควันที่
@@ -244,22 +250,30 @@ const currentPriceFullDay = computed(() => {
   return room.value.priceFullDayInternal;
 });
 
-// ✨ คำนวณราคาแบบยังไม่หักส่วนลด (Subtotal)
-const subTotalPrice = computed(() => {
+const roomOnlyPrice = computed(() => {
   if (!room.value || !bookingForm.value.userType || !bookingForm.value.duration)
     return 0;
   const isHalfDay =
     bookingForm.value.duration === "half_morning" ||
     bookingForm.value.duration === "half_afternoon";
-  const basePrice = isHalfDay
-    ? currentPriceHalfDay.value
-    : currentPriceFullDay.value;
-  const addOnTotal = addOns.value.reduce(
+  return isHalfDay ? currentPriceHalfDay.value : currentPriceFullDay.value;
+});
+
+const selectedAddOnLines = computed(() =>
+  addOns.value.filter((a) => a.quantity > 0),
+);
+
+const addOnsTotalPrice = computed(() =>
+  selectedAddOnLines.value.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
-  );
-  return basePrice + addOnTotal;
-});
+  ),
+);
+
+// ✨ คำนวณราคาแบบยังไม่หักส่วนลด (Subtotal)
+const subTotalPrice = computed(
+  () => roomOnlyPrice.value + addOnsTotalPrice.value,
+);
 
 // ✨ คำนวณราคาสุทธิ (หักส่วนลดแล้ว)
 const finalPrice = computed(() => {
@@ -384,7 +398,7 @@ const submitBooking = async () => {
   formData.append("timeSlot", bookingForm.value.duration);
   formData.append("objective", bookingForm.value.objective.trim());
   formData.append("roomPrice", String(bookingForm.value.duration === 'full' ? currentPriceFullDay.value : currentPriceHalfDay.value));
-  formData.append("addonsPrice", String(addOns.value.reduce((sum, item) => sum + (item.price * item.quantity), 0)));
+  formData.append("addonsPrice", String(addOnsTotalPrice.value));
   formData.append("totalPrice", String(finalPrice.value));
   formData.append("addons", JSON.stringify(selectedAddons));
   if (isPromoApplied.value && bookingForm.value.promoCode) {
@@ -506,9 +520,26 @@ const submitBooking = async () => {
                   {{ $t('booking.estimated_payment') }}
                 </p>
 
-                <!-- ✨ แสดงราคาก่อนหักส่วนลด -->
+                <!-- แยกบิล: ค่าห้อง / ค่าอุปกรณ์ -->
                 <div
                   class="flex justify-between items-center mb-1 text-sm font-medium text-gray-600"
+                >
+                  <span>{{ $t('booking.room_fee') }}</span>
+                  <span>฿{{ roomOnlyPrice.toLocaleString() }}</span>
+                </div>
+                <div
+                  v-for="item in selectedAddOnLines"
+                  :key="item.id"
+                  class="flex justify-between items-start gap-3 mb-1 text-sm font-medium text-gray-600"
+                >
+                  <span class="min-w-0 leading-snug">
+                    {{ translateAddonName(item.name, locale) }}
+                    <span class="text-gray-400 font-normal">× {{ item.quantity }}</span>
+                  </span>
+                  <span class="shrink-0 tabular-nums">฿{{ (item.price * item.quantity).toLocaleString() }}</span>
+                </div>
+                <div
+                  class="flex justify-between items-center mb-1 text-sm font-bold text-gray-800 border-t border-red-200/40 pt-2"
                 >
                   <span>{{ $t('booking.net_service_fee') }}</span>
                   <span>฿{{ subTotalPrice.toLocaleString() }}</span>
@@ -746,16 +777,16 @@ const submitBooking = async () => {
                     :key="item.id"
                     class="p-5 bg-gray-50 rounded-2xl border border-gray-200 text-center transition-all hover:shadow-card"
                   >
-                    <div
-                      class="w-10 h-10 bg-white rounded-full flex items-center justify-center text-[#ba0b2f] mx-auto mb-2 border border-gray-200 shadow-card"
-                    >
-                      <font-awesome-icon :icon="item.iconName" />
-                    </div>
+                    <img
+                      :src="item.imageUrl"
+                      :alt="translateAddonName(item.name, locale)"
+                      class="w-full h-24 object-cover rounded-xl mb-3 border border-gray-200 bg-white"
+                    />
                     <p class="font-bold text-gray-800 text-sm mb-1 leading-snug">
-                      {{ item.name }}
+                      {{ translateAddonName(item.name, locale) }}
                     </p>
                     <p class="text-xs text-gray-500 mb-3 font-medium">
-                      ฿{{ item.price }} / {{ item.unit }}
+                      ฿{{ item.price }} / {{ translateAddonUnit(item.unit, locale) }}
                     </p>
                     <div class="flex items-center justify-center gap-3">
                       <button

@@ -4,6 +4,7 @@ import { verifyToken, verifyAdmin } from "../../middleware/auth";
 import {
   getRevenueByMonth,
   getRevenueInRange,
+  getRevenueByYearInRange,
 } from "../../services/revenue.service";
 
 const router = Router();
@@ -101,14 +102,17 @@ router.get("/", verifyToken, verifyAdmin, async (req: any, res: Response) => {
   }
 });
 
-// GET /api/admin/stats/revenue — ?year=2026 optional
+// GET /api/admin/stats/revenue — ?year=2026 | ?from=&to= | ?group=year
 router.get("/revenue", verifyToken, verifyAdmin, async (req: any, res: Response) => {
   try {
     const year = req.query.year ? Number(req.query.year) : undefined;
     const from = parseDateParam(req.query.from);
     const to = parseDateParam(req.query.to);
+    const groupYear = String(req.query.group || "").toLowerCase() === "year";
     if (from && to) {
-      const data = await getRevenueInRange(from, to);
+      const data = groupYear
+        ? await getRevenueByYearInRange(from, to)
+        : await getRevenueInRange(from, to);
       return res.json(data);
     }
     const data = await getRevenueByMonth(year);

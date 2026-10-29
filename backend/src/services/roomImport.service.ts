@@ -168,10 +168,23 @@ export function parseRoomsFromWorkbook(workbook: ExcelJS.Workbook): ParsedRoomIm
   return roomsToInsert;
 }
 
-export async function importRoomsToDatabase(rooms: ParsedRoomImport[]): Promise<number> {
+export type RoomImportResult = {
+  imported: number;
+  pruned: number;
+};
+
+/**
+ * Upsert rooms from Excel, then remove DB rooms whose names are not in the file
+ * so the catalog matches the uploaded workbook (source of truth).
+ */
+export async function importRoomsToDatabase(
+  rooms: ParsedRoomImport[]
+): Promise<RoomImportResult> {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+
+    const keepNames = [...new Set(rooms.map((r) => r.name))];
 
     for (const room of rooms) {
       const roomRes = await client.query("SELECT id FROM rooms WHERE name = $1", [room.name]);
@@ -211,8 +224,25 @@ export async function importRoomsToDatabase(rooms: ParsedRoomImport[]): Promise<
       );
     }
 
+    // Prune rooms not present in this upload (Excel = source of truth)
+    const stale = await client.query(
+      `SELECT id FROM rooms
+       WHERE NOT (name = ANY($1::text[]))`,
+      [keepNames]
+    );
+    const staleIds = stale.rows.map((r: { id: number }) => r.id);
+    let pruned = 0;
+    if (staleIds.length > 0) {
+      // bookings.room_id has no ON DELETE CASCADE — clear dependents first
+      await client.query(`DELETE FROM bookings WHERE room_id = ANY($1::int[])`, [
+        staleIds,
+      ]);
+      await client.query(`DELETE FROM rooms WHERE id = ANY($1::int[])`, [staleIds]);
+      pruned = staleIds.length;
+    }
+
     await client.query("COMMIT");
-    return rooms.length;
+    return { imported: keepNames.length, pruned };
   } catch (err) {
     await client.query("ROLLBACK");
     throw err;
@@ -221,7 +251,9 @@ export async function importRoomsToDatabase(rooms: ParsedRoomImport[]): Promise<
   }
 }
 
-export async function importRoomsFromExcelFile(filePath: string): Promise<number> {
+export async function importRoomsFromExcelFileDetailed(
+  filePath: string
+): Promise<RoomImportResult> {
   const workbook = new ExcelJS.Workbook();
   await workbook.xlsx.readFile(filePath);
 
@@ -234,6 +266,14 @@ export async function importRoomsFromExcelFile(filePath: string): Promise<number
     throw new Error("ไม่พบข้อมูลห้องในไฟล์ Excel");
   }
 
-  const count = await importRoomsToDatabase(rooms);
-  return count;
+  const result = await importRoomsToDatabase(rooms);
+  console.log(
+    `📦 Import sync: upsert ${result.imported} room(s), pruned ${result.pruned} not in file`
+  );
+  return result;
+}
+
+export async function importRoomsFromExcelFile(filePath: string): Promise<number> {
+  const result = await importRoomsFromExcelFileDetailed(filePath);
+  return result.imported;
 }
