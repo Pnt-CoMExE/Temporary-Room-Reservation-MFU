@@ -130,7 +130,7 @@ const filteredRooms = computed(() => {
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 w-full grow">
-      <div class="ui-filter-panel mb-12 -mt-24 relative z-20">
+      <div class="ui-filter-panel ui-motion-panel mb-12 -mt-24 relative z-20">
         <!-- ✨ เปลี่ยนเป็น Grid 5 คอลัมน์สำหรับเพิ่มช่องวันที่ -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <div>

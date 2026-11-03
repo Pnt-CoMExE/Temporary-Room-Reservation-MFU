@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
 import Swal from "sweetalert2";
+import { withSwalTheme } from "@/utils/swalTheme";
 import api from "@/services/api";
 
 interface Banner {
@@ -29,12 +30,13 @@ const loadBanners = async () => {
     }));
   } catch (err) {
     console.error("Error fetching banners:", err);
-    Swal.fire({
-      icon: "error",
-      title: "โหลดแบนเนอร์ไม่สำเร็จ",
-      text: "ไม่สามารถดึงรายการแบนเนอร์ได้",
-      customClass: { popup: "rounded-3xl" },
-    });
+    Swal.fire(
+      withSwalTheme({
+        icon: "error",
+        title: "โหลดแบนเนอร์ไม่สำเร็จ",
+        text: "ไม่สามารถดึงรายการแบนเนอร์ได้",
+      })
+    );
   }
 };
 
@@ -51,7 +53,8 @@ const saveLog = async (action: string, details: string) => {
 };
 
 const handleAddBanner = () => {
-  Swal.fire({
+  Swal.fire(
+    withSwalTheme({
     title:
       '<h3 class="text-2xl font-black text-gray-900 mb-2">เพิ่มแบนเนอร์ใหม่</h3>',
     html: `
@@ -75,14 +78,8 @@ const handleAddBanner = () => {
     confirmButtonText: "อัปโหลดแบนเนอร์",
     cancelButtonText: "ยกเลิก",
     reverseButtons: true,
-    buttonsStyling: false,
     customClass: {
-      popup: "rounded-[2.5rem] p-8 max-w-md",
-      actions: "flex flex-row gap-3 mt-8 w-full justify-center",
-      confirmButton:
-        "bg-mfu-red text-white rounded-2xl px-6 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
-      cancelButton:
-        "bg-gray-100 text-gray-700 border border-gray-200 rounded-2xl px-6 py-3.5 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
+      popup: "rounded-[2.5rem] p-8 max-w-md border border-gray-100 shadow-2xl",
     },
     preConfirm: (file) => {
       const titleEl = document.getElementById("swal-input-title") as HTMLInputElement | null;
@@ -95,7 +92,8 @@ const handleAddBanner = () => {
       }
       return { title, link, file };
     },
-  }).then(async (result) => {
+  })
+  ).then(async (result) => {
     if (!result.isConfirmed || !result.value) return;
 
     const { title, link, file } = result.value;
@@ -108,21 +106,23 @@ const handleAddBanner = () => {
       const res = await api.post("/api/admin/banners", formData);
       banners.value = [res.data, ...banners.value];
       saveLog("เพิ่มแบนเนอร์", `อัปโหลดแบนเนอร์ใหม่หัวข้อ: ${title}`);
-      Swal.fire({
-        icon: "success",
-        title: "อัปโหลดสำเร็จ!",
-        text: "แบนเนอร์จะแสดงบนหน้าแรกทันที",
-        showConfirmButton: false,
-        timer: 1500,
-        customClass: { popup: "rounded-3xl" },
-      });
+      Swal.fire(
+        withSwalTheme({
+          icon: "success",
+          title: "อัปโหลดสำเร็จ!",
+          text: "แบนเนอร์จะแสดงบนหน้าแรกทันที",
+          showConfirmButton: false,
+          timer: 1500,
+        })
+      );
     } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "อัปโหลดไม่สำเร็จ",
-        text: err?.message || "ไม่สามารถอัปโหลดแบนเนอร์ได้",
-        customClass: { popup: "rounded-3xl" },
-      });
+      Swal.fire(
+        withSwalTheme({
+          icon: "error",
+          title: "อัปโหลดไม่สำเร็จ",
+          text: err?.message || "ไม่สามารถอัปโหลดแบนเนอร์ได้",
+        })
+      );
     }
   });
 };

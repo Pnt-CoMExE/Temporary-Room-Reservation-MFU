@@ -337,9 +337,7 @@ const handleEditRoom = (room: RoomItem) => {
     </div>
 
     <!-- Table -->
-    <div
-      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
-    >
+    <div class="ui-table-card">
       <div
         class="px-5 py-3 border-b border-gray-100 bg-gray-50/70 flex flex-wrap items-center justify-between gap-2"
       >
@@ -359,7 +357,7 @@ const handleEditRoom = (room: RoomItem) => {
           {{ roomsList.length }} ห้อง
         </p>
       </div>
-      <div class="overflow-x-auto">
+      <div class="ui-table-wrap max-h-[70vh] rounded-none border-0 shadow-none">
         <table class="w-full text-left border-collapse min-w-[980px] table-fixed">
           <colgroup>
             <col class="w-[4.5rem]" />

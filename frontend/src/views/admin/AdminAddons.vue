@@ -197,11 +197,11 @@ onMounted(loadAddons);
     <div class="ui-card ui-admin-header p-6">
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
-          <font-awesome-icon icon="box-open" class="text-mfu-gold" />
+          <font-awesome-icon icon="box-open" class="text-mfu-red" />
           อุปกรณ์เสริม (Add-ons)
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          {{ addons.length }} รายการ
+          โทนแดง = จัดการอุปกรณ์หลัก · {{ addons.length }} รายการ
           <span class="text-gray-300 mx-1">·</span>
           เปิดใช้ {{ activeCount }}
         </p>
@@ -217,33 +217,22 @@ onMounted(loadAddons);
       </button>
     </div>
 
-    <div
-      v-if="loading"
-      class="bg-white rounded-3xl p-8 border border-gray-200 animate-pulse space-y-4"
-    >
-      <div v-for="i in 3" :key="i" class="h-16 bg-gray-100 rounded-xl"></div>
+    <div v-if="loading" class="ui-table-card p-8 space-y-4">
+      <div v-for="i in 3" :key="i" class="ui-skeleton h-16"></div>
     </div>
 
-    <div
-      v-else-if="addons.length === 0"
-      class="bg-white rounded-3xl shadow-card border border-gray-200 py-16 flex flex-col items-center text-center"
-    >
-      <p class="text-lg font-black text-gray-700 mb-1">ยังไม่มีอุปกรณ์เสริม</p>
-      <p class="text-sm text-gray-400 mb-5">กด「เพิ่ม Add-on」เพื่อสร้างรายการแรก</p>
-      <button
-        type="button"
-        class="ui-btn-primary"
-        @click="handleAddAddon"
-      >
-        เพิ่ม Add-on
-      </button>
+    <div v-else-if="addons.length === 0" class="ui-table-card">
+      <div class="ui-empty">
+        <p class="text-lg font-black text-gray-700 mb-1">ยังไม่มีอุปกรณ์เสริม</p>
+        <p class="text-sm text-gray-400 mb-5">กด「เพิ่ม Add-on」เพื่อสร้างรายการแรก</p>
+        <button type="button" class="ui-btn-primary" @click="handleAddAddon">
+          เพิ่ม Add-on
+        </button>
+      </div>
     </div>
 
-    <div
-      v-else
-      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
-    >
-      <div class="overflow-x-auto">
+    <div v-else class="ui-table-card">
+      <div class="ui-table-wrap max-h-[70vh] rounded-none border-0 shadow-none">
         <table class="w-full text-left min-w-[720px]">
           <thead>
             <tr class="bg-gray-50 border-b border-gray-200">

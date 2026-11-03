@@ -770,13 +770,9 @@ const viewBookingHistory = async (booking: BookingItem) => {
 
 <template>
   <div class="space-y-6 animate-fade-up">
-    <div
-      class="bg-white p-6 rounded-3xl shadow-card border border-gray-200 flex flex-col justify-between gap-6"
-    >
+    <div class="ui-card ui-admin-header p-6">
       <div>
-        <h2
-          class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
-        >
+        <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
           <font-awesome-icon icon="clipboard-list" class="text-mfu-red" />
           จัดการคำขอจองพื้นที่
         </h2>
@@ -833,14 +829,12 @@ const viewBookingHistory = async (booking: BookingItem) => {
       </div>
     </div>
 
-    <div
-      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
-    >
-      <div class="overflow-x-auto">
+    <div class="ui-table-card">
+      <div class="ui-table-wrap max-h-[70vh] rounded-none border-0 shadow-none">
         <table class="w-full text-left border-collapse min-w-225">
           <thead>
             <tr
-              class="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
+              class="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
             >
               <th class="px-6 py-5">Booking ID</th>
               <th class="px-6 py-5">ผู้จอง</th>

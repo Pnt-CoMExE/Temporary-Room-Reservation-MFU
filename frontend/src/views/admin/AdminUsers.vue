@@ -227,30 +227,29 @@ const setAdminRole = async (user: UserItem) => {
       </div>
     </div>
 
-    <div
-      v-if="loading"
-      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
-    >
-      <div class="p-6 space-y-4">
-        <div v-for="i in 6" :key="i" class="flex items-center gap-4 animate-pulse">
-          <div class="w-10 h-10 rounded-full bg-gray-200 shrink-0"></div>
-          <div class="flex-1 space-y-2">
-            <div class="h-3 bg-gray-200 rounded-full w-1/3"></div>
-            <div class="h-3 bg-gray-100 rounded-full w-1/2"></div>
-          </div>
+    <div v-if="loading" class="ui-table-card p-6 space-y-4">
+      <div v-for="i in 6" :key="i" class="flex items-center gap-4">
+        <div class="ui-skeleton w-10 h-10 rounded-full shrink-0"></div>
+        <div class="flex-1 space-y-2">
+          <div class="ui-skeleton h-3 w-1/3 rounded-full"></div>
+          <div class="ui-skeleton h-3 w-1/2 rounded-full"></div>
         </div>
       </div>
     </div>
 
-    <div
-      v-else-if="filteredUsers.length > 0"
-      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
-    >
-      <div class="overflow-x-auto">
+    <div v-else-if="filteredUsers.length === 0" class="ui-table-card">
+      <div class="ui-empty">
+        <font-awesome-icon icon="users" class="text-4xl mb-3 opacity-40" />
+        <p>ไม่พบผู้ใช้ตามตัวกรอง</p>
+      </div>
+    </div>
+
+    <div v-else class="ui-table-card">
+      <div class="ui-table-wrap max-h-[70vh] rounded-none border-0 shadow-none">
         <table class="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr
-              class="bg-slate-50 text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
+              class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
             >
               <th class="px-4 py-4">ผู้ใช้</th>
               <th class="px-4 py-4">อีเมล</th>
@@ -361,16 +360,6 @@ const setAdminRole = async (user: UserItem) => {
           </tbody>
         </table>
       </div>
-    </div>
-
-    <div
-      v-else
-      class="bg-white rounded-3xl shadow-card border border-gray-200 py-20 flex flex-col items-center justify-center text-center"
-    >
-      <h3 class="text-xl font-black text-gray-700 mb-2">ไม่พบผู้ใช้</h3>
-      <p class="text-sm text-gray-400 font-medium max-w-xs">
-        ลองเปลี่ยนคำค้นหา หรือ filter เป็น "ทั้งหมด"
-      </p>
     </div>
   </div>
 </template>

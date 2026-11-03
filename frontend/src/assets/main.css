@@ -166,11 +166,31 @@
   }
 
   .ui-table-wrap {
-    @apply overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-card;
+    @apply overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-card max-h-[70vh];
+  }
+
+  .ui-table-wrap thead th {
+    @apply sticky top-0 z-10 bg-slate-50 shadow-[0_1px_0_0_rgba(229,231,235,1)];
+  }
+
+  .ui-table-card {
+    @apply bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden;
+  }
+
+  .ui-empty {
+    @apply text-center py-16 px-6 text-gray-400 font-bold;
+  }
+
+  .ui-skeleton {
+    @apply bg-gray-100 rounded-xl animate-pulse;
   }
 
   .ui-label {
     @apply block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2;
+  }
+
+  .ui-req {
+    @apply text-mfu-red font-black ml-0.5;
   }
 
   .ui-filter-panel {
@@ -191,5 +211,45 @@
 
   .ui-admin-header {
     @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8;
+  }
+
+  .ui-step-title {
+    @apply text-xl md:text-2xl font-extrabold text-gray-900 flex items-center gap-3 mb-2;
+  }
+
+  .ui-step-num-red {
+    @apply w-10 h-10 shrink-0 rounded-full bg-mfu-red text-white flex items-center justify-center text-lg font-black;
+  }
+
+  .ui-step-num-gold {
+    @apply w-10 h-10 shrink-0 rounded-full bg-mfu-gold text-white flex items-center justify-center text-lg font-black;
+  }
+
+  /* Intentional motion (respects prefers-reduced-motion via base layer) */
+  .ui-motion-fade-up {
+    animation: ui-fade-up 0.7s ease-out both;
+  }
+
+  .ui-motion-panel {
+    animation: ui-fade-up 0.55s ease-out both;
+  }
+
+  .ui-card-interactive {
+    @apply transition-all duration-500;
+  }
+
+  .ui-card-interactive:hover {
+    @apply shadow-card-hover -translate-y-1;
+  }
+}
+
+@keyframes ui-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

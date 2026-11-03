@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { formatPromoPercent } from "@/utils/bookingStatus";
+import { withSwalTheme } from "@/utils/swalTheme";
 
 interface PromoCode {
   id: number;
@@ -65,9 +66,11 @@ const totalUsed = computed(() => promoCodes.value.reduce((sum, p) => sum + Numbe
 
 // ─── Create Promo Code ────────────────────────────────────────
 const handleAddPromoCode = () => {
-  Swal.fire({
-    title: '<h3 class="text-xl font-black text-gray-900">สร้างรหัสส่วนลดใหม่</h3>',
-    html: `
+  Swal.fire(
+    withSwalTheme(
+      {
+        title: '<h3 class="text-xl font-black text-gray-900">สร้างรหัสส่วนลดใหม่</h3>',
+        html: `
       <div class="text-left mt-4 space-y-4">
         <div>
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">รหัสโปรโมชั่น (Code)</label>
@@ -75,7 +78,7 @@ const handleAddPromoCode = () => {
         </div>
         <div>
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">ส่วนลดเป็นเปอร์เซ็นต์ (เช่น 10, 50, 100)</label>
-          <input id="swal-discount" type="number" min="1" max="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-mfu-red rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-bold" placeholder="เช่น 100 = ลด 100%">
+          <input id="swal-discount" type="number" min="1" max="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-amber-800 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-bold" placeholder="เช่น 100 = ลด 100%">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">จำนวนสิทธิ์สูงสุด</label>
@@ -83,34 +86,47 @@ const handleAddPromoCode = () => {
         </div>
       </div>
     `,
-    showCancelButton: true,
-    confirmButtonText: "สร้างรหัส",
-    cancelButtonText: "ยกเลิก",
-    buttonsStyling: false,
-    customClass: {
-      popup: "rounded-[2rem] p-8 max-w-sm",
-      confirmButton: "bg-mfu-gold text-white rounded-xl px-5 py-3 font-bold shadow cursor-pointer",
-      cancelButton: "bg-gray-100 text-gray-700 rounded-xl px-5 py-3 font-bold ml-3 cursor-pointer",
-    },
-    preConfirm: () => {
-      const code = (document.getElementById("swal-code") as HTMLInputElement)?.value.toUpperCase().trim();
-      const discount = (document.getElementById("swal-discount") as HTMLInputElement)?.value;
-      const limit = (document.getElementById("swal-limit") as HTMLInputElement)?.value;
-      if (!code || !discount) {
-        Swal.showValidationMessage("กรุณากรอกรหัสและมูลค่าส่วนลด");
-        return false;
-      }
-      return { code, discount: parseFloat(discount), limit_count: parseInt(limit) || 100 };
-    },
-  }).then(async (result) => {
+        showCancelButton: true,
+        confirmButtonText: "สร้างรหัส",
+        cancelButtonText: "ยกเลิก",
+        preConfirm: () => {
+          const code = (
+            document.getElementById("swal-code") as HTMLInputElement
+          )?.value
+            .toUpperCase()
+            .trim();
+          const discount = (
+            document.getElementById("swal-discount") as HTMLInputElement
+          )?.value;
+          const limit = (document.getElementById("swal-limit") as HTMLInputElement)
+            ?.value;
+          if (!code || !discount) {
+            Swal.showValidationMessage("กรุณากรอกรหัสและมูลค่าส่วนลด");
+            return false;
+          }
+          return {
+            code,
+            discount: parseFloat(discount),
+            limit_count: parseInt(limit) || 100,
+          };
+        },
+      },
+      "gold"
+    )
+  ).then(async (result) => {
     if (!result.isConfirmed || !result.value) return;
     try {
       const res = await api.post("/api/admin/promocodes", result.value);
       promoCodes.value.unshift(res.data);
       saveLog("สร้างรหัสส่วนลด", `สร้างโค้ด: ${result.value.code}`);
-      Swal.fire({ icon: "success", title: "สร้างสำเร็จ!", showConfirmButton: false, timer: 1300 });
+      Swal.fire(
+        withSwalTheme(
+          { icon: "success", title: "สร้างสำเร็จ!", showConfirmButton: false, timer: 1300 },
+          "gold"
+        )
+      );
     } catch {
-      Swal.fire("ข้อผิดพลาด", "ไม่สามารถสร้างรหัสได้ (รหัสอาจซ้ำ)", "error");
+      Swal.fire(withSwalTheme({ icon: "error", title: "ข้อผิดพลาด", text: "ไม่สามารถสร้างรหัสได้ (รหัสอาจซ้ำ)" }));
     }
   });
 };
@@ -118,24 +134,33 @@ const handleAddPromoCode = () => {
 // ─── Toggle Status ────────────────────────────────────────────
 const togglePromoStatus = async (promo: PromoCode) => {
   const isEnable = !promo.is_active;
-  const result = await Swal.fire({
-    title: isEnable ? "เปิดใช้งานโค้ด?" : "ปิดใช้งานโค้ด?",
-    html: `โค้ด <strong>${promo.code}</strong> จะถูก${isEnable ? "เปิด" : "ปิด"}ใช้งาน`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "ยืนยัน",
-    cancelButtonText: "ยกเลิก",
-    confirmButtonColor: isEnable ? "#16a34a" : "#6b7280",
-  });
+  const result = await Swal.fire(
+    withSwalTheme(
+      {
+        title: isEnable ? "เปิดใช้งานโค้ด?" : "ปิดใช้งานโค้ด?",
+        html: `โค้ด <strong>${promo.code}</strong> จะถูก${isEnable ? "เปิด" : "ปิด"}ใช้งาน`,
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "ยืนยัน",
+        cancelButtonText: "ยกเลิก",
+      },
+      "gold"
+    )
+  );
 
   if (result.isConfirmed) {
     try {
       await api.put(`/api/admin/promocodes/${promo.id}/status`, { isActive: isEnable });
       promo.is_active = isEnable;
       saveLog("เปิด/ปิดโค้ดส่วนลด", `${isEnable ? "เปิด" : "ปิด"}โค้ด: ${promo.code}`);
-      Swal.fire({ icon: "success", title: "อัปเดตสำเร็จ", showConfirmButton: false, timer: 1000 });
+      Swal.fire(
+        withSwalTheme(
+          { icon: "success", title: "อัปเดตสำเร็จ", showConfirmButton: false, timer: 1000 },
+          "gold"
+        )
+      );
     } catch {
-      Swal.fire("ผิดพลาด", "ไม่สามารถอัปเดตสถานะได้", "error");
+      Swal.fire(withSwalTheme({ icon: "error", title: "ผิดพลาด", text: "ไม่สามารถอัปเดตสถานะได้" }));
     }
   }
 };
@@ -150,13 +175,15 @@ const usagePercent = (promo: PromoCode) => {
 <template>
   <div class="space-y-6 animate-fade-up">
     <!-- Header -->
-    <div class="ui-card ui-admin-header p-6">
+    <div class="ui-card ui-admin-header p-6 border-mfu-gold/25">
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
           <font-awesome-icon icon="ticket-alt" class="text-mfu-gold" />
           รหัสส่วนลด (Promo Codes)
         </h2>
-        <p class="text-sm text-gray-500 mt-1 font-medium">สร้างและจัดการโค้ดส่วนลดสำหรับผู้เช่าพื้นที่</p>
+        <p class="text-sm text-gray-500 mt-1 font-medium">
+          โทนทอง = โปรโมชัน/ส่วนลด · สร้างและเปิด–ปิดโค้ดสำหรับผู้เช่า
+        </p>
       </div>
       <button
         type="button"
@@ -208,23 +235,21 @@ const usagePercent = (promo: PromoCode) => {
     </div>
 
     <!-- Loading Skeleton -->
-    <div v-if="loading" class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden">
-      <div class="p-6 space-y-4">
-        <div v-for="i in 4" :key="i" class="flex items-center gap-4 animate-pulse">
-          <div class="h-8 bg-gray-200 rounded-lg w-24 shrink-0"></div>
-          <div class="flex-1 h-2 bg-gray-100 rounded-full"></div>
-          <div class="w-16 h-6 bg-gray-200 rounded-full"></div>
-          <div class="w-12 h-8 bg-gray-100 rounded-lg"></div>
-        </div>
+    <div v-if="loading" class="ui-table-card p-6 space-y-4">
+      <div v-for="i in 4" :key="i" class="flex items-center gap-4">
+        <div class="ui-skeleton h-8 w-24 rounded-lg shrink-0"></div>
+        <div class="ui-skeleton flex-1 h-2 rounded-full"></div>
+        <div class="ui-skeleton w-16 h-6 rounded-full"></div>
+        <div class="ui-skeleton w-12 h-8 rounded-lg"></div>
       </div>
     </div>
 
     <!-- Table -->
-    <div v-else-if="filteredCodes.length > 0" class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden">
-      <div class="overflow-x-auto">
+    <div v-else-if="filteredCodes.length > 0" class="ui-table-card">
+      <div class="ui-table-wrap max-h-[70vh] rounded-none border-0 shadow-none">
         <table class="w-full text-left border-collapse min-w-[600px]">
           <thead>
-            <tr class="bg-gray-50/80 text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
+            <tr class="text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
               <th class="px-6 py-4">Code</th>
               <th class="px-6 py-4 text-center">ส่วนลด</th>
               <th class="px-6 py-4 text-center">การใช้งาน</th>
@@ -250,7 +275,7 @@ const usagePercent = (promo: PromoCode) => {
 
               <!-- Discount -->
               <td class="px-6 py-4 text-center">
-                <span class="inline-flex items-center px-3 py-1 rounded-lg bg-red-50 border border-red-100 text-mfu-red font-black text-sm">
+                <span class="inline-flex items-center px-3 py-1 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 font-black text-sm">
                   {{ formatPromoPercent(promo.discount) }}
                 </span>
               </td>
@@ -288,18 +313,23 @@ const usagePercent = (promo: PromoCode) => {
     </div>
 
     <!-- Empty State -->
-    <div v-else class="bg-white rounded-3xl shadow-card border border-gray-200 py-20 flex flex-col items-center justify-center text-center">
-      <div class="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center text-3xl mb-5 border border-yellow-100">
-        <font-awesome-icon icon="ticket-alt" class="text-mfu-gold" />
+    <div v-else class="ui-table-card">
+      <div class="ui-empty">
+        <div class="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center text-3xl mb-5 border border-yellow-100 mx-auto">
+          <font-awesome-icon icon="ticket-alt" class="text-mfu-gold" />
+        </div>
+        <h3 class="text-xl font-black text-gray-700 mb-2">ยังไม่มีรหัสส่วนลด</h3>
+        <p class="text-sm text-gray-400 font-medium mb-6 max-w-xs mx-auto">
+          กดปุ่ม "สร้างรหัสใหม่" เพื่อเพิ่มรหัสโปรโมชั่นสำหรับผู้เช่า
+        </p>
+        <button
+          type="button"
+          @click="handleAddPromoCode"
+          class="ui-btn-primary bg-mfu-gold hover:bg-yellow-600"
+        >
+          <font-awesome-icon icon="plus" /> สร้างรหัสแรก
+        </button>
       </div>
-      <h3 class="text-xl font-black text-gray-700 mb-2">ยังไม่มีรหัสส่วนลด</h3>
-      <p class="text-sm text-gray-400 font-medium mb-6 max-w-xs">กดปุ่ม "สร้างรหัสใหม่" เพื่อเพิ่มรหัสโปรโมชั่นสำหรับผู้เช่า</p>
-      <button
-        @click="handleAddPromoCode"
-        class="px-6 py-3 bg-mfu-gold text-white font-bold rounded-xl hover:bg-yellow-600 transition-all cursor-pointer"
-      >
-        <font-awesome-icon icon="plus" class="mr-2" /> สร้างรหัสแรก
-      </button>
     </div>
   </div>
 </template>

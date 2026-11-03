@@ -130,39 +130,36 @@ onUnmounted(() => {
       </div>
 
       <div
-        class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto animate-fade-up"
+        class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto ui-motion-fade-up"
       >
-        <!-- MFU Logo in Hero -->
-        <div class="flex justify-center mb-6">
+        <div class="flex justify-center mb-5">
           <img
             src="/images/mfu-logo.png"
             alt="Mae Fah Luang University"
-            class="h-20 md:h-28 w-auto object-contain drop-shadow-md"
+            class="h-24 md:h-32 w-auto object-contain drop-shadow-md"
           />
         </div>
-        <span
-          class="inline-flex flex-col sm:flex-row sm:items-center sm:gap-2 py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-sm text-mfu-gold border border-mfu-gold/40 text-xs font-bold tracking-widest uppercase mb-6"
-        >
-          <span>{{ $t('hero.badge') }}</span>
-          <span class="hidden sm:inline opacity-50" aria-hidden="true">·</span>
-          <span class="whitespace-nowrap">{{ $t('hero.badge_org') }}</span>
-        </span>
-        <h1
-          class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight leading-[1.35] max-w-4xl mx-auto"
+        <p
+          class="text-mfu-gold text-lg md:text-2xl font-black tracking-[0.2em] uppercase mb-4"
           style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45)"
         >
-          <span class="block">{{ $t('hero.title') }}</span>
-          <span class="block whitespace-nowrap mt-1 md:mt-2">{{ $t('hero.title_org') }}</span>
+          MFU PROPERTY
+        </p>
+        <h1
+          class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4 tracking-tight leading-[1.35] max-w-3xl mx-auto"
+          style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45)"
+        >
+          {{ $t('hero.title') }}
         </h1>
         <p
-          class="text-base md:text-lg text-white/95 mb-12 font-medium max-w-3xl mx-auto leading-[1.85] px-2"
+          class="text-base md:text-lg text-white/95 mb-10 font-medium max-w-2xl mx-auto leading-relaxed px-2"
           style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5)"
         >
-          {{ $t('hero.subtitle') }} {{ $t('hero.subtitle_line2') }}
+          {{ $t('hero.subtitle') }}
         </p>
 
         <div
-          class="bg-white/95 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-card-float border border-gray-200/80 flex flex-col md:flex-row items-stretch md:items-center w-full max-w-5xl mx-auto transform translate-y-12 overflow-visible"
+          class="bg-white/95 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-card-float border border-gray-200/80 flex flex-col md:flex-row items-stretch md:items-center w-full max-w-5xl mx-auto transform translate-y-10 overflow-visible ui-motion-panel"
         >
           <form
             @submit.prevent="handleSearch"

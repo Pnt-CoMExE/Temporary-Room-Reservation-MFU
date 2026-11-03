@@ -26,6 +26,7 @@ Here are several proposed features to elevate the Temporary Rental Space Managem
 - **Database Query Indexing & Performance:** Configured PostgreSQL index migration scripts for key search columns (`bookings`, `users`, `room_pricing`) to optimize response times under heavy concurrent loads.
 - **Enhanced UI Feedback & Loading States:** Added submitting spinners, disabled button states during API requests, and user feedback popups across Vue components.
 - **Shared MFU design system (`frontend/src/assets/main.css`):** Tokens `mfu-red` / `mfu-gold` / `canvas` plus reusable `ui-btn-*`, `ui-input`, `ui-card*`, `ui-chip*`, skip-link / focus-visible across user + admin views.
+- **UX depth (dev):** Home brand-first hero · booking step groups · dashboard card hierarchy · sticky admin tables · `withSwalTheme` · promo=gold / add-ons=red.
 - **Full-Site Multi-Language Support (i18n TH/EN):** Implemented seamless Thai/English toggle with `vue-i18n` across all user-facing views, navbar, footers, modals, forms, and user dashboard.
 - **Universal Dynamic Data Translator Engine (`translator.ts`):** Built automated regex & dictionary translation engine converting 100% of all 100 backend database room names, room types, locations, time slots, and booking statuses dynamically with zero Thai remaining.
 - **8 Space Type Filter & Bilingual Search:** Expanded search filter dropdowns across `RoomListView.vue` and `HomeView.vue` to all 8 database space categories with instant bilingual search matching.

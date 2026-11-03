@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — UX depth pass 1–7 on `dev`]
+- Home hero brand-first · Booking form 4 steps + `*` legend · Dashboard card hierarchy
+- Admin tables sticky/`ui-empty`/`ui-skeleton` · motion fade/panel/card · `withSwalTheme` (+ gold promo)
+- Promo = gold · Add-ons = red · i18n TH/EN step keys
+
 ## [2026-11-03 — UX full polish pass on `dev`]
 - ขยาย `main.css`: `ui-label` / `ui-filter-panel` / `ui-chip*` / `ui-admin-header` · map hex → `mfu-red` / `mfu-gold` tokens
 - User: Login card + Google focus · Home/RoomList filter · RoomDetail/Booking CTA · InfoView · ConfirmDialog · LanguageSwitcher a11y

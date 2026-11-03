@@ -45,7 +45,7 @@ const goToRoom = () => {
   <div
     role="link"
     tabindex="0"
-    class="group ui-card-elevated rounded-4xl hover:shadow-card-hover transition-all duration-500 overflow-hidden border-2 border-gray-200/90 flex flex-col h-full cursor-pointer transform hover:-translate-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/40"
+    class="group ui-card-elevated ui-card-interactive rounded-4xl overflow-hidden border-2 border-gray-200/90 flex flex-col h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/40"
     @click="goToRoom"
     @keydown.enter.prevent="goToRoom"
     @keydown.space.prevent="goToRoom"

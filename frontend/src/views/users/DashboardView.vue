@@ -857,31 +857,28 @@ const formatDate = (dateString: string) =>
             <div
               v-for="booking in filteredBookings"
               :key="booking.id"
-              class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden hover:shadow-card-hover transition-all duration-300"
+              class="ui-card-elevated ui-card-interactive overflow-hidden"
               :class="
                 isBookingStatus(booking.status, 'cancelled') ? 'opacity-60 grayscale-50' : ''
               "
             >
-              <!-- Header -->
+              <!-- Header: room + status primary -->
               <div
-                class="px-5 md:px-6 py-3.5 border-b border-gray-100 bg-slate-50/80 flex justify-between items-start gap-3 flex-wrap"
+                class="px-5 md:px-6 py-4 border-b border-gray-100 bg-white flex justify-between items-start gap-3 flex-wrap"
               >
-                <div class="min-w-0">
-                  <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                    Booking ID
-                  </p>
-                  <p class="text-sm font-black text-gray-800 font-mono tracking-tight">
-                    {{ booking.id }}
-                  </p>
-                  <p
-                    v-if="booking.transactionId"
-                    class="mt-1 text-[11px] font-mono text-gray-500"
-                  >
-                    {{ $t("dashboard.transaction_id") }}:
-                    <span class="text-gray-700">{{ booking.transactionId }}</span>
+                <div class="min-w-0 grow">
+                  <h3 class="text-xl font-black text-gray-900 leading-snug">
+                    {{ translateRoomName(booking.roomName, locale) }}
+                  </h3>
+                  <p class="mt-1 text-[11px] font-mono text-gray-400">
+                    #{{ booking.id }}
+                    <template v-if="booking.transactionId">
+                      · {{ $t("dashboard.transaction_id") }}:
+                      {{ booking.transactionId }}
+                    </template>
                   </p>
                 </div>
-                <div class="flex items-center gap-2 flex-wrap justify-end">
+                <div class="flex items-center gap-2 flex-wrap justify-end shrink-0">
                   <BookingStatusBadge :status="booking.status" size="sm" />
                   <span
                     v-if="canLeaveReview(booking.status) && booking.hasFeedback"
@@ -897,11 +894,7 @@ const formatDate = (dateString: string) =>
               <div class="p-5 md:p-6">
                 <div class="flex flex-col lg:flex-row lg:items-start gap-5 lg:gap-8">
                   <div class="grow min-w-0">
-                    <h3 class="text-xl font-black text-gray-900 leading-snug">
-                      {{ translateRoomName(booking.roomName, locale) }}
-                    </h3>
-
-                    <div class="mt-3 flex flex-wrap gap-2">
+                    <div class="flex flex-wrap gap-2">
                       <span
                         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-100 text-xs font-bold"
                       >
@@ -972,16 +965,16 @@ const formatDate = (dateString: string) =>
                   </div>
 
                   <!-- Price summary (compact) -->
-                  <div class="w-full lg:w-64 shrink-0">
+                  <div class="w-full lg:w-60 shrink-0">
                     <button
                       type="button"
-                      class="w-full text-left rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-red-50/40 p-4 hover:border-mfu-red/30 hover:shadow-sm transition-all cursor-pointer"
+                      class="w-full text-left rounded-2xl border-2 border-mfu-red/15 bg-gradient-to-br from-white to-red-50/50 p-4 hover:border-mfu-red/35 hover:shadow-md transition-all cursor-pointer"
                       @click="togglePriceBreakdown(booking.id)"
                     >
                       <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                         {{ $t("dashboard.total_due") }}
                       </p>
-                      <p class="mt-1 text-3xl font-black text-mfu-red tabular-nums leading-none">
+                      <p class="mt-1 text-3xl md:text-4xl font-black text-mfu-red tabular-nums leading-none">
                         ฿{{ booking.totalPrice.toLocaleString() }}
                       </p>
                       <span
@@ -1162,14 +1155,14 @@ const formatDate = (dateString: string) =>
 
               <!-- Actions footer -->
               <div
-                class="px-5 md:px-6 py-3.5 border-t border-gray-100 bg-white flex flex-wrap items-center gap-2 justify-between"
+                class="px-5 md:px-6 py-4 border-t border-gray-100 bg-slate-50/60 flex flex-wrap items-center gap-2 justify-between"
               >
                 <div class="flex flex-wrap items-center gap-2">
                   <a
                     v-if="booking.memoDocumentUrl"
                     :href="booking.memoDocumentUrl"
                     target="_blank"
-                    class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 bg-slate-50 px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all"
+                    class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 bg-white px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 transition-all"
                   >
                     <font-awesome-icon icon="file-pdf" class="text-red-500" />
                     {{ $t("dashboard.memo_document") }}
@@ -1182,7 +1175,7 @@ const formatDate = (dateString: string) =>
                     v-if="isBookingStatus(booking.status, 'approved_pending_payment')"
                     type="button"
                     @click="openPayment(booking)"
-                    class="bg-sky-600 text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-md shadow-sky-200/60 hover:bg-sky-700 transition-all flex items-center gap-2 cursor-pointer"
+                    class="bg-sky-600 text-white px-6 py-3 rounded-xl font-black text-sm shadow-md shadow-sky-200/60 hover:bg-sky-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <font-awesome-icon
                       :icon="activePaymentProvider === 'stripe' ? 'wallet' : 'qrcode'"
