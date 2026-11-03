@@ -42,7 +42,7 @@
 ---
 
 CHAPTER 4
-RESULTS
+EXPERIMENT AND RESULT
 
 This chapter reports the Temporary Rental Space Management System as built for Mae Fah Luang University and the tests used to check it against the scope in Section 1.3 and the expected results in Section 1.6. Section 4.1 describes the delivered user and administrator behaviour. Sections 4.2–4.5 describe the test environment, the manual and automated results, five representative cases, and the defects corrected during the Docker trial.
 

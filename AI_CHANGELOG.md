@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — Chapter 4 title → Experiment and Result]
+- `CHAPTER_4_AND_5.md`: หัว Chapter 4 จาก `RESULTS` → `EXPERIMENT AND RESULT`
+- อัปเดตอ้างอิงใน `THESIS_CHAPTERS_CHECKLIST.md` และ `docs/README.md`
+
 ## [2026-11-03 — Admin MonthField (no native type=month)]
 - เพิ่ม `MonthField.vue`: ปฏิทินเดือน custom ตาม locale TH/EN (ปี ค.ศ.) · ค่ายังเป็น `YYYY-MM`
 - แทน `<input type="month">` ใน Admin Dashboard filter

@@ -32,7 +32,7 @@
 | [`product/planning.md`](./product/planning.md) | แผน 8 sprints |
 | [`product/schema.md`](./product/schema.md) | โครง DB |
 | [`product/THESIS_CHAPTERS_CHECKLIST.md`](./product/THESIS_CHAPTERS_CHECKLIST.md) | Checklist บท 3–5 (สอบ) |
-| [`product/CHAPTER_4_AND_5.md`](./product/CHAPTER_4_AND_5.md) | ร่างภาษาอังกฤษ Chapter 4 Results และ Chapter 5 สำหรับวางในเล่ม |
+| [`product/CHAPTER_4_AND_5.md`](./product/CHAPTER_4_AND_5.md) | ร่างภาษาอังกฤษ Chapter 4 Experiment and Result และ Chapter 5 Conclusion and Discussion สำหรับวางในเล่ม |
 
 ---
 
