@@ -5,6 +5,10 @@ import Swal from "sweetalert2";
 import api from "@/services/api";
 import { clearAuthSession } from "@/utils/auth";
 import LanguageSwitcher from "@/components/common/LanguageSwitcher.vue";
+import {
+  swalBrandColor,
+  swalDefaultCustomClass,
+} from "@/utils/swalTheme";
 
 interface Notification {
   id: number;
@@ -114,14 +118,8 @@ const confirmLogout = () => {
     cancelButtonText: t('common.cancel'),
     reverseButtons: true,
     buttonsStyling: false,
-    customClass: {
-      popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
-      actions: "flex flex-row gap-3 mt-8 w-full justify-center",
-      confirmButton:
-        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
-      cancelButton:
-        "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
-    },
+    confirmButtonColor: swalBrandColor,
+    customClass: { ...swalDefaultCustomClass },
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
@@ -169,26 +167,29 @@ const confirmLogout = () => {
           <div class="hidden md:flex items-center space-x-8">
             <RouterLink
               to="/home"
-              class="text-base font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
+              class="text-base font-bold text-gray-600 hover:text-mfu-red transition-colors relative group router-link-exact-active:text-mfu-red"
+              active-class="text-mfu-red"
             >
               {{ $t('nav.home') }}<span
-                class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
+                class="absolute -bottom-1 left-0 w-0 h-0.5 bg-mfu-red transition-all duration-300 group-hover:w-full group-[.router-link-active]:w-full"
               ></span>
             </RouterLink>
             <RouterLink
               to="/rooms"
-              class="text-base font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
+              class="text-base font-bold text-gray-600 hover:text-mfu-red transition-colors relative group"
+              active-class="text-mfu-red"
             >
               {{ $t('nav.rooms') }}<span
-                class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
+                class="absolute -bottom-1 left-0 w-0 h-0.5 bg-mfu-red transition-all duration-300 group-hover:w-full group-[.router-link-active]:w-full"
               ></span>
             </RouterLink>
             <RouterLink
               to="/dashboard"
-              class="text-base font-bold text-gray-600 hover:text-[#ba0b2f] transition-colors relative group"
+              class="text-base font-bold text-gray-600 hover:text-mfu-red transition-colors relative group"
+              active-class="text-mfu-red"
             >
               {{ $t('nav.dashboard') }}<span
-                class="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#ba0b2f] transition-all duration-300 group-hover:w-full"
+                class="absolute -bottom-1 left-0 w-0 h-0.5 bg-mfu-red transition-all duration-300 group-hover:w-full group-[.router-link-active]:w-full"
               ></span>
             </RouterLink>
 

@@ -9,13 +9,13 @@ const { t } = useI18n();
 import {
   getAwaitingReviewLabel,
   getBookingStatusBadgeClass,
-  getBookingStatusIcon,
   getBookingStatusLabel,
   getReviewedLabel,
   humanizeStatusInText,
   isBookingStatus,
   statusActionBtn,
 } from "@/utils/bookingStatus";
+import BookingStatusBadge from "@/components/common/BookingStatusBadge.vue";
 
 interface BookingItem {
   id: string;
@@ -766,9 +766,6 @@ const viewBookingHistory = async (booking: BookingItem) => {
   }
 };
 
-const getStatusText = (status: string) => getBookingStatusLabel(status, "th");
-const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
-const getStatusIcon = (status: string) => getBookingStatusIcon(status);
 </script>
 
 <template>
@@ -929,40 +926,29 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
               </td>
               <td class="px-6 py-6 text-center">
                 <div class="flex flex-col items-center justify-center gap-1.5">
-                  <button
+                  <BookingStatusBadge
                     v-if="isBookingStatus(booking.status, 'pending')"
+                    :status="booking.status"
+                    as="button"
+                    size="md"
+                    show-pointer
                     @click="openConfirm(booking.id, 'manage_pending')"
-                    :class="getStatusClass(booking.status)"
-                    class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-90 transition-all cursor-pointer"
-                  >
-                    <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
-                    {{ getStatusText(booking.status) }}
-                    <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
-                  </button>
+                  />
                   <!-- Awaiting Stripe — display only; admin cannot mark paid -->
                   <div
                     v-else-if="isBookingStatus(booking.status, 'approved_pending_payment')"
                     class="flex flex-col items-center gap-1"
                   >
-                    <span
-                      :class="getStatusClass(booking.status)"
-                      class="min-w-[7.5rem] px-4 py-2.5 rounded-xl text-sm font-black border-2 shadow-sm inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-default"
+                    <BookingStatusBadge
+                      :status="booking.status"
+                      size="md"
                       :title="t('admin.awaiting_stripe_hint')"
-                    >
-                      <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
-                      {{ getStatusText(booking.status) }}
-                    </span>
+                    />
                     <span class="text-[10px] text-sky-600 font-semibold">{{ t("admin.awaiting_stripe_hint_short") }}</span>
                   </div>
 
                   <div v-else class="flex flex-col items-center gap-2">
-                    <span
-                      :class="getStatusClass(booking.status)"
-                      class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm inline-flex items-center gap-2"
-                    >
-                      <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
-                      {{ getStatusText(booking.status) }}
-                    </span>
+                    <BookingStatusBadge :status="booking.status" size="md" />
 
                     <template v-if="isBookingStatus(booking.status, 'approved_paid') || isBookingStatus(booking.status, 'completed')">
                       <button

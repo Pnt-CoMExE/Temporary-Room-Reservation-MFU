@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -525,10 +525,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'overview'"
                 :class="
                   activeTab === 'overview'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                    : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
                 <font-awesome-icon icon="chart-pie" class="w-5" /> Dashboard
               </button>
@@ -536,10 +536,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'bookings'"
                 :class="
                   activeTab === 'bookings'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                    : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left group cursor-pointer"
+                class="ui-nav-item justify-between group"
               >
                 <div class="flex items-center gap-4">
                   <font-awesome-icon icon="clipboard-list" class="w-5" /> จัดการคำขอจอง
@@ -555,10 +555,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'rooms'"
                 :class="
                   activeTab === 'rooms'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
                 <font-awesome-icon icon="building" class="w-5" /> ข้อมูลห้องและพื้นที่
               </button>
@@ -566,10 +566,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'users'"
                 :class="
                   activeTab === 'users'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
                 <font-awesome-icon icon="users" class="w-5" /> จัดการผู้ใช้
               </button>
@@ -577,10 +577,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'promos'"
                 :class="
                   activeTab === 'promos'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
                 <font-awesome-icon icon="ticket-alt" class="w-5" /> รหัสส่วนลด
               </button>
@@ -588,10 +588,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'addons'"
                 :class="
                   activeTab === 'addons'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
                 <font-awesome-icon icon="box-open" class="w-5" /> อุปกรณ์เสริม
               </button>
@@ -599,10 +599,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'banners'"
                 :class="
                   activeTab === 'banners'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
                 <font-awesome-icon icon="bullhorn" class="w-5" /> การประกาศ
               </button>
@@ -610,10 +610,10 @@ const confirmLogout = () => {
                 @click="activeTab = 'logs'"
                 :class="
                   activeTab === 'logs'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
                 <font-awesome-icon icon="history" class="w-5" /> บันทึกกิจกรรม
               </button>

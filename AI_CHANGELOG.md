@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — UX system polish on `dev`]
+- Design tokens + shared UI classes ใน `main.css` (btn/input/nav/skip-link · reduced-motion · focus-visible)
+- `BookingStatusBadge` ใช้ร่วม User Dashboard + Admin Bookings · `swalTheme` ร่วม Navbar
+- User/Admin layout: skip-to-content · footer tagline · 404 i18n · RoomCard keyboard focus · admin sidebar `ui-nav-item`
+
 ## [2026-11-03 — Sync thesis checklist + Ch.4/5 SMTP/mock]
 - `THESIS_CHAPTERS_CHECKLIST.md`: 80 เคส · Stripe (ไม่มี mock UI) · Gmail SMTP UAT · TC-PAY-03/04
 - `CHAPTER_4_AND_5.md`: แก้ย่อหน้า Notifications/Mail/Payment/UAT/recommendations ให้ตรง SMTP จริง + mock 410

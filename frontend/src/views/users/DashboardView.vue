@@ -66,8 +66,6 @@ import {
 } from "@/utils/translator";
 import {
   getAwaitingReviewLabel,
-  getBookingStatusBadgeClass,
-  getBookingStatusIcon,
   getBookingStatusLabel,
   getReviewedBadgeClass,
   getReviewedLabel,
@@ -75,6 +73,7 @@ import {
   canLeaveReview,
   type BookingStatusKey,
 } from "@/utils/bookingStatus";
+import BookingStatusBadge from "@/components/common/BookingStatusBadge.vue";
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -671,7 +670,6 @@ const giveFeedback = (booking: BookingItem) => {
 
 const getStatusText = (status: string) =>
   getBookingStatusLabel(status, locale.value);
-const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
 
 const formatDate = (dateString: string) =>
   formatDateKey(dateString, locale.value === "en" ? "en-US" : "th-TH");
@@ -884,16 +882,7 @@ const formatDate = (dateString: string) =>
                   </p>
                 </div>
                 <div class="flex items-center gap-2 flex-wrap justify-end">
-                  <span
-                    :class="getStatusClass(booking.status)"
-                    class="px-3 py-1.5 rounded-full text-xs font-bold border shadow-sm inline-flex items-center gap-1.5"
-                  >
-                    <font-awesome-icon
-                      :icon="getBookingStatusIcon(booking.status)"
-                      class="text-[11px]"
-                    />
-                    {{ getStatusText(booking.status) }}
-                  </span>
+                  <BookingStatusBadge :status="booking.status" size="sm" />
                   <span
                     v-if="canLeaveReview(booking.status) && booking.hasFeedback"
                     :class="getReviewedBadgeClass()"

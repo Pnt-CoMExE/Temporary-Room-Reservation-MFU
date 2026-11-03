@@ -12,9 +12,11 @@
   --text-3xl: 1.9375rem;
   --text-4xl: 2.3125rem;
   --color-mfu-red: #ba0b2f;
+  --color-mfu-red-dark: #8c0823;
   --color-mfu-gold: #d4af37;
   --color-canvas: #f1f3f5;
   --color-surface: #ffffff;
+  --color-ink: #111827;
   --shadow-card: 0 8px 28px rgba(17, 24, 39, 0.10);
   --shadow-card-lg: 0 12px 36px rgba(17, 24, 39, 0.12);
   --shadow-card-float: 0 16px 48px rgba(17, 24, 39, 0.14);
@@ -25,6 +27,20 @@
   html {
     font-size: 18px;
     -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 
   body {
@@ -32,6 +48,7 @@
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    color: var(--color-ink);
   }
 
   /* Roomier form controls to match larger type */
@@ -58,6 +75,16 @@
   .swal2-styled {
     line-height: 1.4;
   }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-mfu-red) 45%, transparent);
+    outline-offset: 2px;
+  }
+
+  a:focus:not(:focus-visible),
+  button:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 @layer components {
@@ -75,5 +102,70 @@
 
   .ui-card-glass {
     @apply bg-white/95 backdrop-blur-xl border border-gray-200/80 shadow-card-float;
+  }
+
+  .ui-page {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .ui-page-wide {
+    @apply w-full max-w-[95rem] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .ui-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white
+      bg-mfu-red hover:bg-mfu-red-dark shadow-lg shadow-[#ba0b2f]/20
+      transition-all duration-300 cursor-pointer
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/40;
+  }
+
+  .ui-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold
+      bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200
+      transition-all duration-300 cursor-pointer
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300;
+  }
+
+  .ui-btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold
+      text-gray-600 hover:bg-red-50 hover:text-mfu-red transition-colors cursor-pointer
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/30;
+  }
+
+  .ui-input {
+    @apply w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold
+      rounded-xl outline-none transition-all
+      focus:ring-2 focus:ring-mfu-red/35 focus:border-mfu-red/40;
+  }
+
+  .ui-nav-item {
+    @apply w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm
+      transition-colors text-left cursor-pointer
+      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/35;
+  }
+
+  .ui-nav-item-active {
+    @apply bg-red-50 text-mfu-red;
+  }
+
+  .ui-nav-item-idle {
+    @apply text-gray-600 hover:bg-gray-50;
+  }
+
+  .ui-section-title {
+    @apply text-xl md:text-2xl font-extrabold text-gray-900 tracking-tight;
+  }
+
+  .ui-muted {
+    @apply text-sm text-gray-500 font-medium;
+  }
+
+  .ui-skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-50
+      focus:px-4 focus:py-2 focus:rounded-xl focus:bg-mfu-red focus:text-white focus:font-bold;
+  }
+
+  .ui-table-wrap {
+    @apply overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-card;
   }
 }

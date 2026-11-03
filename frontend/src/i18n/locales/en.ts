@@ -53,7 +53,15 @@ export default {
     footer_menu_rates: "Service Rates (PDF)",
     footer_menu_privacy: "Privacy Policy",
     footer_copyright: "© 2026 Mae Fah Luang University Property Management. All rights reserved.",
+    footer_tagline: "Search · Book · Approve · Pay — in one place",
     footer_dev_team: "Developed by CE Senior Project Team",
+  },
+  not_found: {
+    code: "ERROR",
+    title: "Page not found",
+    desc: "The page you are looking for may have been removed, renamed, or is temporarily unavailable.",
+    back_home: "Back to home",
+    go_back: "Go back",
   },
   info: {
     back_home: "Back to home",
@@ -330,5 +338,6 @@ export default {
     language: "Language",
     th: "TH",
     en: "EN",
+    skip_to_content: "Skip to main content",
   },
 };

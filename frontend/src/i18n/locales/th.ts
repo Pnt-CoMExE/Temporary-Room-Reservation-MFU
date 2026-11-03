@@ -53,7 +53,15 @@ export default {
     footer_menu_rates: "อัตราค่าบริการ (PDF)",
     footer_menu_privacy: "นโยบายความเป็นส่วนตัว",
     footer_copyright: "© 2026 ระบบบริหารจัดการพื้นที่เช่าชั่วคราว · มหาวิทยาลัยแม่ฟ้าหลวง",
+    footer_tagline: "ค้นหา · จอง · อนุมัติ · ชำระเงิน — ในที่เดียว",
     footer_dev_team: "Developed by CE Senior Project Team",
+  },
+  not_found: {
+    code: "ERROR",
+    title: "ไม่พบหน้าที่คุณค้นหา",
+    desc: "หน้าที่คุณกำลังมองหาอาจถูกลบ เปลี่ยนชื่อ หรือไม่มีอยู่ชั่วคราว",
+    back_home: "กลับหน้าหลัก",
+    go_back: "ย้อนกลับ",
   },
   info: {
     back_home: "กลับหน้าแรก",
@@ -330,5 +338,6 @@ export default {
     language: "ภาษา / Language",
     th: "TH",
     en: "EN",
+    skip_to_content: "ข้ามไปยังเนื้อหาหลัก",
   },
 };

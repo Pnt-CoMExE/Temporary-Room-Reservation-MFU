@@ -43,8 +43,12 @@ const goToRoom = () => {
 
 <template>
   <div
-    class="group bg-white rounded-4xl shadow-card-lg hover:shadow-card-hover transition-all duration-500 overflow-hidden border-2 border-gray-300/80 flex flex-col h-full cursor-pointer transform hover:-translate-y-2"
+    role="link"
+    tabindex="0"
+    class="group ui-card-elevated rounded-4xl hover:shadow-card-hover transition-all duration-500 overflow-hidden border-2 border-gray-200/90 flex flex-col h-full cursor-pointer transform hover:-translate-y-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/40"
     @click="goToRoom"
+    @keydown.enter.prevent="goToRoom"
+    @keydown.space.prevent="goToRoom"
   >
     <div class="relative h-56 md:h-64 overflow-hidden bg-gray-100">
       <img
