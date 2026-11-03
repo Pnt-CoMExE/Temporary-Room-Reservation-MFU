@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import { formatDateDMY, parseDateDMY, toDateKey } from "@/utils/dateKey";
+
+const { t } = useI18n();
 
 const props = withDefaults(
   defineProps<{
@@ -86,7 +89,7 @@ const onPickerInput = (e: Event) => {
       type="text"
       inputmode="numeric"
       autocomplete="off"
-      placeholder="วว/ดด/ปปปป"
+      :placeholder="t('common.date_placeholder')"
       :value="text"
       :required="required"
       :disabled="disabled"
@@ -100,7 +103,7 @@ const onPickerInput = (e: Event) => {
       class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-gray-500 hover:text-mfu-red hover:bg-red-50 flex items-center justify-center cursor-pointer disabled:opacity-40"
       :disabled="disabled"
       tabindex="-1"
-      aria-label="เลือกวันที่"
+      :aria-label="t('common.pick_date')"
       @click="openPicker"
     >
       <font-awesome-icon :icon="['far', 'calendar-alt']" />

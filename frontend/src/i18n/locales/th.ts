@@ -348,5 +348,7 @@ export default {
     th: "TH",
     en: "EN",
     skip_to_content: "ข้ามไปยังเนื้อหาหลัก",
+    date_placeholder: "วว/ดด/ปปปป",
+    pick_date: "เลือกวันที่",
   },
 };

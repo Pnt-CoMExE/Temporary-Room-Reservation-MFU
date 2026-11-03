@@ -348,5 +348,7 @@ export default {
     th: "TH",
     en: "EN",
     skip_to_content: "Skip to main content",
+    date_placeholder: "dd/mm/yyyy",
+    pick_date: "Pick a date",
   },
 };
