@@ -118,20 +118,16 @@ describe("Coverage A: payment ownership (mocked DB)", () => {
     expect(res.status).toBe(403);
   });
 
-  it("mock/simulate — คนอื่น → 403", async () => {
-    // Active adapter may not be mock_sandbox in test env — still ownership checked after provider check
-    mockedQuery.mockResolvedValueOnce({ rows: [ownedBooking] });
-
+  it("mock/simulate — ปิดแล้ว → 410 Gone", async () => {
     const res = await request(app)
       .post("/api/payment/mock/simulate")
       .set("Authorization", `Bearer ${otherToken}`)
       .send({ bookingId: 42 });
 
-    // 400 if mock_sandbox off, else 403 ownership
-    expect([400, 403]).toContain(res.status);
-    if (res.status === 403) {
-      expect(res.body.message).toMatch(/ไม่มีสิทธิ์/);
-    }
+    expect(res.status).toBe(410);
+    expect(String(res.body.message || res.body.error || "")).toMatch(
+      /Stripe|ปิด|removed|Gone|ไม่รองรับ/i
+    );
   });
 });
 
