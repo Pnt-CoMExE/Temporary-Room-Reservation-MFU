@@ -57,10 +57,10 @@ const handleAddBanner = () => {
     html: `
       <div class="text-left">
         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">หัวข้อแบนเนอร์</label>
-        <input id="swal-input-title" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-medium mb-4" placeholder="เช่น โปรโมชั่นต้อนรับเปิดเทอม">
+        <input id="swal-input-title" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-red outline-none transition-all font-medium mb-4" placeholder="เช่น โปรโมชั่นต้อนรับเปิดเทอม">
         
         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">ลิงก์เมื่อคลิก (ไม่บังคับ)</label>
-        <input id="swal-input-link" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-medium mb-4" placeholder="/rooms" value="/rooms">
+        <input id="swal-input-link" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-red outline-none transition-all font-medium mb-4" placeholder="/rooms" value="/rooms">
 
         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">อัปโหลดรูปภาพ</label>
       </div>
@@ -69,7 +69,7 @@ const handleAddBanner = () => {
     inputAttributes: {
       accept: "image/*",
       class:
-        "w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-[#ba0b2f] hover:file:bg-red-100 cursor-pointer",
+        "w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-mfu-red hover:file:bg-red-100 cursor-pointer",
     },
     showCancelButton: true,
     confirmButtonText: "อัปโหลดแบนเนอร์",
@@ -80,7 +80,7 @@ const handleAddBanner = () => {
       popup: "rounded-[2.5rem] p-8 max-w-md",
       actions: "flex flex-row gap-3 mt-8 w-full justify-center",
       confirmButton:
-        "bg-[#ba0b2f] text-white rounded-2xl px-6 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
+        "bg-mfu-red text-white rounded-2xl px-6 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
       cancelButton:
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-2xl px-6 py-3.5 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
@@ -207,7 +207,7 @@ const deleteBanner = (id, title) => {
       popup: "rounded-[2rem] p-8",
       actions: "flex gap-3 mt-6 w-full justify-center",
       confirmButton:
-        "bg-[#ba0b2f] text-white rounded-xl px-4 py-3 font-bold hover:bg-[#8c0823] transition-all flex-1 cursor-pointer",
+        "bg-mfu-red text-white rounded-xl px-4 py-3 font-bold hover:bg-mfu-red-dark transition-all flex-1 cursor-pointer",
       cancelButton:
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-4 py-3 font-bold hover:bg-gray-200 transition-all flex-1 cursor-pointer",
     },
@@ -260,15 +260,13 @@ const toggleBannerStatus = async (banner) => {
 <template>
   <div class="space-y-6 animate-fade-up">
     <!-- Header ภาพรวม -->
-    <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200"
-    >
+    <div class="ui-card ui-admin-header p-6">
       <div>
         <!-- ✨ เปลี่ยนหัวข้อเป็น การประกาศและโปรโมชั่น -->
         <h2
           class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
         >
-          <font-awesome-icon icon="bullhorn" class="text-[#ba0b2f]" />           การประกาศ
+          <font-awesome-icon icon="bullhorn" class="text-mfu-red" />           การประกาศ
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
           ควบคุมแบนเนอร์หน้าแรก และส่งการแจ้งเตือน (Broadcast)

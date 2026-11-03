@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -426,7 +426,7 @@ const confirmLogout = () => {
     html: `
       <div class="relative w-24 h-24 mx-auto mb-6">
         <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
-        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
+        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-mfu-red text-4xl">
           🚪
         </div>
       </div>
@@ -442,7 +442,7 @@ const confirmLogout = () => {
       popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
       actions: "flex flex-row gap-3 mt-8 w-full justify-center",
       confirmButton:
-        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gradient-to-r from-mfu-red to-mfu-red-dark text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
       cancelButton:
         "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
@@ -468,7 +468,7 @@ const confirmLogout = () => {
           />
         </picture>
         <div
-          class="absolute inset-0 bg-linear-to-b from-[#111827]/90 via-[#ba0b2f]/60 to-[#f8f9fa]"
+          class="absolute inset-0 bg-linear-to-b from-[#111827]/90 via-mfu-red/60 to-[#f8f9fa]"
         ></div>
       </div>
       <div
@@ -476,7 +476,7 @@ const confirmLogout = () => {
       >
         <div class="text-center md:text-left">
           <span
-            class="inline-block py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/30 text-xs font-bold tracking-widest uppercase mb-3 shadow-lg"
+            class="inline-block py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-md text-mfu-gold border border-mfu-gold/30 text-xs font-bold tracking-widest uppercase mb-3 shadow-lg"
             >Administrator Portal</span
           >
           <h1
@@ -500,7 +500,7 @@ const confirmLogout = () => {
           >
             <div class="text-center mb-8 border-b border-gray-100 pb-6">
               <div
-                class="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-lg border-4 border-white mb-4 bg-linear-to-tr from-[#ba0b2f] to-[#8c0823] flex items-center justify-center text-white text-3xl"
+                class="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-lg border-4 border-white mb-4 bg-linear-to-tr from-mfu-red to-mfu-red-dark flex items-center justify-center text-white text-3xl"
               >
                 <img
                   v-if="adminProfile.profilePicture"
@@ -515,7 +515,7 @@ const confirmLogout = () => {
                 {{ adminProfile.fullName }}
               </h3>
               <span
-                class="inline-block px-3 py-1 bg-red-50 text-[#ba0b2f] text-[10px] font-bold uppercase rounded-lg border border-red-100 tracking-wider"
+                class="inline-block px-3 py-1 bg-red-50 text-mfu-red text-[10px] font-bold uppercase rounded-lg border border-red-100 tracking-wider"
                 >{{ adminProfile.role }}</span
               >
             </div>
@@ -546,7 +546,7 @@ const confirmLogout = () => {
                 </div>
                 <div
                   v-if="pendingCount > 0"
-                  class="flex items-center justify-center min-w-5.5 h-5.5 px-1.5 bg-[#ba0b2f] text-white text-[11px] font-black rounded-full shadow-sm ring-2 ring-white"
+                  class="flex items-center justify-center min-w-5.5 h-5.5 px-1.5 bg-mfu-red text-white text-[11px] font-black rounded-full shadow-sm ring-2 ring-white"
                 >
                   {{ pendingCount }}
                 </div>
@@ -625,7 +625,7 @@ const confirmLogout = () => {
                 >
                   <div class="flex items-center gap-4">
                     <div
-                      class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:text-[#ba0b2f] transition-colors"
+                      class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:text-mfu-red transition-colors"
                     >
                       <font-awesome-icon icon="sign-out-alt" />
                     </div>
@@ -653,31 +653,31 @@ const confirmLogout = () => {
                   type="button"
                   @click="setFilterMode('latest')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'latest' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                  :class="filterMode === 'latest' ? 'ui-chip-active' : 'ui-chip-idle'"
                 >เดือนล่าสุด</button>
                 <button
                   type="button"
                   @click="setFilterMode('all')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'all' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                  :class="filterMode === 'all' ? 'ui-chip-active' : 'ui-chip-idle'"
                 >ทั้งหมด</button>
                 <button
                   type="button"
                   @click="setFilterMode('month')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'month' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                  :class="filterMode === 'month' ? 'ui-chip-active' : 'ui-chip-idle'"
                 >เลือกเดือน</button>
                 <button
                   type="button"
                   @click="setFilterMode('year')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'year' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                  :class="filterMode === 'year' ? 'ui-chip-active' : 'ui-chip-idle'"
                 >รายปี</button>
                 <button
                   type="button"
                   @click="setFilterMode('range')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'range' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
+                  :class="filterMode === 'range' ? 'ui-chip-active' : 'ui-chip-idle'"
                 >ช่วงวัน (เช่น รายสัปดาห์)</button>
               </div>
               <div class="flex flex-col lg:flex-row gap-3 lg:items-end">
@@ -798,7 +798,7 @@ const confirmLogout = () => {
                 ></div>
                 <div class="flex items-center gap-3 sm:gap-4 pr-3 min-w-0">
                   <div
-                    class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-red-50 text-[#ba0b2f] flex items-center justify-center text-lg sm:text-xl shrink-0"
+                    class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-red-50 text-mfu-red flex items-center justify-center text-lg sm:text-xl shrink-0"
                   >
                     <font-awesome-icon icon="wallet" />
                   </div>
@@ -807,7 +807,7 @@ const confirmLogout = () => {
                       {{ filterMode === 'all' ? 'รายได้รวมทั้งหมด' : filterMode === 'latest' ? 'รายได้รวมเดือนนี้' : 'รายได้ตามตัวกรอง' }}
                     </p>
                     <p
-                      class="font-black text-[#ba0b2f] tabular-nums leading-none whitespace-nowrap overflow-hidden text-ellipsis"
+                      class="font-black text-mfu-red tabular-nums leading-none whitespace-nowrap overflow-hidden text-ellipsis"
                       :style="{ fontSize: revenueAmountFontSize }"
                       :title="formatBahtFull(stats.rangeRevenue || stats.currentMonthRevenue || 0)"
                     >
@@ -826,7 +826,7 @@ const confirmLogout = () => {
                 <h3
                   class="text-lg font-bold text-gray-900 mb-6 flex flex-wrap items-center gap-2"
                 >
-                  <font-awesome-icon icon="chart-line" class="text-[#ba0b2f]" /> แนวโน้มรายได้
+                  <font-awesome-icon icon="chart-line" class="text-mfu-red" /> แนวโน้มรายได้
                   <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                     {{
                       filterMode === 'year' && Math.min(yearFrom, yearTo) === Math.max(yearFrom, yearTo)
@@ -849,7 +849,7 @@ const confirmLogout = () => {
                 <h3
                   class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
                 >
-                  <font-awesome-icon icon="chart-pie" class="text-[#d4af37]" />
+                  <font-awesome-icon icon="chart-pie" class="text-mfu-gold" />
                   สัดส่วนประเภทผู้เช่า
                 </h3>
                 <div class="w-full h-64">

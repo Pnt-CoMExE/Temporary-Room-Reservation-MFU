@@ -710,7 +710,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
         return `
           <div class="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(from)}">${from}</span>
-            <span class="text-[#ba0b2f] font-black text-lg sm:text-xl px-1">→</span>
+            <span class="text-mfu-red font-black text-lg sm:text-xl px-1">→</span>
             <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(to)}">${to}</span>
           </div>
           ${extra ? `<p class="text-sm text-gray-700 font-semibold mt-3 px-3 py-2 rounded-xl bg-rose-50 border border-rose-100"><span class="text-rose-700 font-black">เหตุผล:</span> ${extra.replace(/^\|\s*(?:เหตุผล|หมายเหตุ):\s*/, "")}</p>` : ""}
@@ -777,7 +777,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
         <h2
           class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
         >
-          <font-awesome-icon icon="clipboard-list" class="text-[#ba0b2f]" />
+          <font-awesome-icon icon="clipboard-list" class="text-mfu-red" />
           จัดการคำขอจองพื้นที่
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
@@ -803,7 +803,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
             v-model="searchQuery"
             type="text"
             placeholder="พิมพ์คำค้นหา..."
-            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+            class="ui-input pl-10"
           />
         </div>
       </div>
@@ -816,7 +816,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
           <input
             v-model="filterStartDate"
             type="date"
-            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+            class="ui-input"
           />
         </div>
         <div class="w-1/2 lg:w-auto">
@@ -827,7 +827,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
           <input
             v-model="filterEndDate"
             type="date"
-            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+            class="ui-input"
           />
         </div>
       </div>
@@ -919,7 +919,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
                 :class="
                   isBookingStatus(booking.status, 'cancelled')
                     ? 'text-gray-400'
-                    : 'text-[#ba0b2f]'
+                    : 'text-mfu-red'
                 "
               >
                 ฿{{ booking.totalPrice.toLocaleString() }}
@@ -985,7 +985,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
                     <font-awesome-icon
                       v-else
                       icon="user-edit"
-                      class="text-[#ba0b2f]"
+                      class="text-mfu-red"
                     />
                     โดย: {{ booking.actionBy }}
                   </div>

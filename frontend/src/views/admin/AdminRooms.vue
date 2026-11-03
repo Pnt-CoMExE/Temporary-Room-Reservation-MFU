@@ -91,7 +91,7 @@ const handleAddNewRoom = () => {
     allowOutsideClick: () => !Swal.isLoading(),
     customClass: {
       popup: "rounded-[2rem] p-8",
-      confirmButton: "bg-[#ba0b2f] text-white rounded-xl px-4 py-3 font-bold",
+      confirmButton: "bg-mfu-red text-white rounded-xl px-4 py-3 font-bold",
       cancelButton: "bg-gray-100 text-gray-700 rounded-xl px-4 py-3 font-bold",
     },
   }).then((result) => {
@@ -183,7 +183,7 @@ const handleManageImages = (room) => {
     },
     customClass: {
       popup: "rounded-[2.5rem] p-8 max-w-md",
-      confirmButton: "bg-[#ba0b2f] text-white rounded-2xl px-6 py-3.5 font-bold",
+      confirmButton: "bg-mfu-red text-white rounded-2xl px-6 py-3.5 font-bold",
       cancelButton: "bg-gray-100 text-gray-600 rounded-2xl px-6 py-3.5 font-bold",
     },
   }).then((result) => {
@@ -228,11 +228,11 @@ const handleEditRoom = (room: RoomItem) => {
           <div class="divide-y divide-gray-100">
             <div class="px-3 py-2.5 flex items-center gap-2 bg-red-50/40">
               <div class="w-[42%] min-w-0">
-                <p class="text-xs font-extrabold text-[#8c0823]">บุคคลภายใน</p>
+                <p class="text-xs font-extrabold text-mfu-red-dark">บุคคลภายใน</p>
                 <p class="text-[10px] font-medium text-red-700/70">MFU / ภายใน</p>
               </div>
               <div class="grid grid-cols-2 gap-2 w-[58%]">
-                <input id="edit-hi" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-red-100 rounded-lg text-sm font-bold text-[#ba0b2f] tabular-nums" value="${Number(room.price_half_day_internal || 0)}">
+                <input id="edit-hi" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-red-100 rounded-lg text-sm font-bold text-mfu-red tabular-nums" value="${Number(room.price_half_day_internal || 0)}">
                 <input id="edit-fi" type="number" min="0" class="w-full px-2.5 py-2 bg-white border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 tabular-nums" value="${Number(room.price_full_day_internal || 0)}">
               </div>
             </div>
@@ -269,7 +269,7 @@ const handleEditRoom = (room: RoomItem) => {
     width: "36rem",
     customClass: {
       popup: "rounded-[2rem] p-6",
-      confirmButton: "bg-[#ba0b2f] text-white rounded-xl px-5 py-3 font-bold cursor-pointer",
+      confirmButton: "bg-mfu-red text-white rounded-xl px-5 py-3 font-bold cursor-pointer",
       cancelButton: "bg-gray-100 text-gray-700 rounded-xl px-5 py-3 font-bold cursor-pointer",
     },
     preConfirm: async () => {
@@ -317,14 +317,12 @@ const handleEditRoom = (room: RoomItem) => {
 <template>
   <div class="space-y-6 animate-fade-up">
     <!-- Header -->
-    <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200"
-    >
+    <div class="ui-card ui-admin-header p-6">
       <div>
         <h2
           class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
         >
-          <font-awesome-icon icon="building" class="text-[#ba0b2f]" /> จัดการข้อมูลห้องและพื้นที่
+          <font-awesome-icon icon="building" class="text-mfu-red" /> จัดการข้อมูลห้องและพื้นที่
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
           นำเข้า Excel หรือแก้ไขชื่อ/ราคา/ความจุในตารางได้โดยตรง
@@ -332,7 +330,7 @@ const handleEditRoom = (room: RoomItem) => {
       </div>
       <button
         @click="handleAddNewRoom"
-        class="w-full sm:w-auto px-6 py-3 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+        class="ui-btn-primary w-full sm:w-auto"
       >
         <font-awesome-icon icon="file-import" /> นำเข้าไฟล์ข้อมูลใหม่
       </button>
@@ -348,7 +346,7 @@ const handleEditRoom = (room: RoomItem) => {
         <div class="flex flex-wrap items-center gap-2 text-xs font-semibold text-gray-600">
           <span class="text-gray-500">คีย์ราคา:</span>
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-gray-200">
-            <span class="w-1.5 h-1.5 rounded-full bg-[#ba0b2f]"></span>
+            <span class="w-1.5 h-1.5 rounded-full bg-mfu-red"></span>
             ครึ่งวัน
           </span>
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-white border border-gray-200">
@@ -378,7 +376,7 @@ const handleEditRoom = (room: RoomItem) => {
               <th class="px-4 py-4 text-left text-sm font-extrabold text-gray-700">ชื่อห้อง / พื้นที่</th>
               <th class="px-2 py-4 text-center text-sm font-extrabold text-gray-700">ความจุ</th>
               <th class="px-3 py-4 text-center bg-red-50/60">
-                <p class="text-sm font-extrabold text-[#8c0823]">บุคคลภายใน</p>
+                <p class="text-sm font-extrabold text-mfu-red-dark">บุคคลภายใน</p>
                 <p class="text-[11px] font-semibold text-red-700/70 mt-0.5 normal-case">ครึ่งวัน · เต็มวัน</p>
               </th>
               <th class="px-3 py-4 text-center bg-amber-50/70">
@@ -418,7 +416,7 @@ const handleEditRoom = (room: RoomItem) => {
                       class="w-full h-full object-cover transition-transform group-hover/img:scale-110"
                     />
                     <div
-                      class="absolute inset-0 bg-[#ba0b2f]/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold"
+                      class="absolute inset-0 bg-mfu-red/60 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold"
                     >
                       รูป
                     </div>
@@ -435,7 +433,7 @@ const handleEditRoom = (room: RoomItem) => {
                       <button
                         type="button"
                         @click="handleEditRoom(room)"
-                        class="shrink-0 text-[10px] font-bold text-[#ba0b2f] bg-red-50 border border-red-100 px-2 py-0.5 rounded-md hover:bg-red-100 cursor-pointer"
+                        class="shrink-0 text-[10px] font-bold text-mfu-red bg-red-50 border border-red-100 px-2 py-0.5 rounded-md hover:bg-red-100 cursor-pointer"
                       >
                         แก้ไข
                       </button>
@@ -456,7 +454,7 @@ const handleEditRoom = (room: RoomItem) => {
                 <div class="space-y-1.5">
                   <div class="flex items-center justify-between gap-2 rounded-lg bg-white/80 border border-red-100 px-2 py-1">
                     <span class="text-[10px] font-bold text-red-700/80 shrink-0">ครึ่ง</span>
-                    <span class="text-sm font-black text-[#ba0b2f] tabular-nums">฿{{ Number(room.price_half_day_internal || 0).toLocaleString() }}</span>
+                    <span class="text-sm font-black text-mfu-red tabular-nums">฿{{ Number(room.price_half_day_internal || 0).toLocaleString() }}</span>
                   </div>
                   <div class="flex items-center justify-between gap-2 rounded-lg bg-white/60 border border-gray-100 px-2 py-1">
                     <span class="text-[10px] font-bold text-gray-500 shrink-0">เต็ม</span>

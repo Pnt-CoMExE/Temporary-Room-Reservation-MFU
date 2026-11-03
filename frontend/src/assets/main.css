@@ -114,7 +114,7 @@
 
   .ui-btn-primary {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold text-white
-      bg-mfu-red hover:bg-mfu-red-dark shadow-lg shadow-[#ba0b2f]/20
+      bg-mfu-red hover:bg-mfu-red-dark shadow-lg shadow-mfu-red/20
       transition-all duration-300 cursor-pointer
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/40;
   }
@@ -167,5 +167,29 @@
 
   .ui-table-wrap {
     @apply overflow-x-auto rounded-2xl border border-gray-200 bg-white shadow-card;
+  }
+
+  .ui-label {
+    @apply block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2;
+  }
+
+  .ui-filter-panel {
+    @apply bg-white/95 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-card-float border border-gray-200/80;
+  }
+
+  .ui-chip {
+    @apply px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap;
+  }
+
+  .ui-chip-active {
+    @apply bg-mfu-red text-white shadow-sm;
+  }
+
+  .ui-chip-idle {
+    @apply bg-gray-100 text-gray-600 hover:bg-gray-200;
+  }
+
+  .ui-admin-header {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8;
   }
 }

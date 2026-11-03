@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — UX full polish pass on `dev`]
+- ขยาย `main.css`: `ui-label` / `ui-filter-panel` / `ui-chip*` / `ui-admin-header` · map hex → `mfu-red` / `mfu-gold` tokens
+- User: Login card + Google focus · Home/RoomList filter · RoomDetail/Booking CTA · InfoView · ConfirmDialog · LanguageSwitcher a11y
+- Admin: Rooms/Users/Promo/Addons/Banners/ActivityLog headers + shared `ui-btn`/`ui-input` · Dashboard filter chips
+
 ## [2026-11-03 — UX system polish on `dev`]
 - Design tokens + shared UI classes ใน `main.css` (btn/input/nav/skip-link · reduced-motion · focus-visible)
 - `BookingStatusBadge` ใช้ร่วม User Dashboard + Admin Bookings · `swalTheme` ร่วม Navbar

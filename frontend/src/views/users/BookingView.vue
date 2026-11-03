@@ -416,7 +416,7 @@ const submitBooking = async () => {
       confirmButtonText: t('booking.go_to_dashboard'),
       customClass: {
         popup: "rounded-[2rem] p-10 border-t-8 border-green-500",
-        confirmButton: "bg-[#ba0b2f] text-white font-bold rounded-xl px-10 py-4 mt-4 cursor-pointer w-full",
+        confirmButton: "bg-mfu-red text-white font-bold rounded-xl px-10 py-4 mt-4 cursor-pointer w-full",
       },
     }).then(() => router.push("/dashboard"));
   } catch (err: any) {
@@ -448,7 +448,7 @@ const submitBooking = async () => {
           />
         </picture>
         <div
-          class="absolute inset-0 bg-linear-to-b from-black/80 via-[#ba0b2f]/40 to-[#f8f9fa]"
+          class="absolute inset-0 bg-linear-to-b from-black/80 via-mfu-red/40 to-[#f8f9fa]"
         ></div>
       </div>
       <div
@@ -466,7 +466,7 @@ const submitBooking = async () => {
         </div>
         <button
           @click="router.push('/rooms')"
-          class="bg-white/10 backdrop-blur-md hover:bg-white hover:text-[#ba0b2f] text-white px-6 py-2.5 rounded-full font-bold transition-all border border-white/30 flex items-center gap-2 shadow-lg cursor-pointer"
+          class="bg-white/10 backdrop-blur-md hover:bg-white hover:text-mfu-red text-white px-6 py-2.5 rounded-full font-bold transition-all border border-white/30 flex items-center gap-2 shadow-lg cursor-pointer"
         >
           <font-awesome-icon icon="arrow-left" /> {{ $t('booking.back_to_rooms') }}
         </button>
@@ -476,7 +476,7 @@ const submitBooking = async () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24">
       <div v-if="loading" class="flex justify-center items-center py-20">
         <div
-          class="animate-spin rounded-full h-12 w-12 border-4 border-t-[#ba0b2f] border-gray-200"
+          class="animate-spin rounded-full h-12 w-12 border-4 border-t-mfu-red border-gray-200"
         ></div>
       </div>
 
@@ -496,7 +496,7 @@ const submitBooking = async () => {
               ></div>
               <div class="absolute bottom-4 left-4 text-white">
                 <span
-                  class="bg-[#ba0b2f] px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider mb-2 inline-block"
+                  class="bg-mfu-red px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider mb-2 inline-block"
                   >Booking Summary</span
                 >
               </div>
@@ -506,7 +506,7 @@ const submitBooking = async () => {
                 {{ translateRoomName(room?.name, locale) }}
               </h3>
               <p class="text-sm text-gray-500 mb-6 flex items-start gap-2">
-                <font-awesome-icon icon="map-marker-alt" class="text-[#d4af37]" />
+                <font-awesome-icon icon="map-marker-alt" class="text-mfu-gold" />
                 {{ translateLocation(room?.location, locale) }}
               </p>
 
@@ -556,7 +556,7 @@ const submitBooking = async () => {
 
                 <!-- ✨ แสดงราคาสุทธิ -->
                 <div class="text-center mt-2">
-                  <p class="text-4xl font-black text-[#ba0b2f]">
+                  <p class="text-4xl font-black text-mfu-red">
                     ฿{{ finalPrice.toLocaleString() }}
                   </p>
                 </div>
@@ -574,7 +574,7 @@ const submitBooking = async () => {
               class="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-4 border-b border-gray-100 pb-4"
             >
               <span
-                class="w-10 h-10 bg-[#ba0b2f] text-white rounded-full flex items-center justify-center text-lg"
+                class="w-10 h-10 bg-mfu-red text-white rounded-full flex items-center justify-center text-lg"
                 >1</span
               >
               {{ $t('booking.step_1') }}
@@ -586,7 +586,7 @@ const submitBooking = async () => {
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
                     >{{ $t('booking.applicant_name') }}
-                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-mfu-red normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
                   </label>
                   <input
                     type="text"
@@ -603,7 +603,7 @@ const submitBooking = async () => {
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
                     >{{ $t('booking.organization_type') }}
-                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-mfu-red normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
                   </label>
                   <input
                     type="text"
@@ -618,7 +618,7 @@ const submitBooking = async () => {
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
                     >{{ $t('booking.phone_number') }}
-                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-mfu-red normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
                   </label>
                   <input
                     type="tel"
@@ -626,7 +626,7 @@ const submitBooking = async () => {
                     required
                     inputmode="tel"
                     :placeholder="$t('booking.phone_placeholder')"
-                    class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
+                    class="ui-input py-3.5 shadow-sm"
                   />
                 </div>
 
@@ -634,14 +634,14 @@ const submitBooking = async () => {
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
                     >{{ $t('booking.booking_date') }}
-                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-mfu-red normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
                   </label>
                   <input
                     type="date"
                     v-model="bookingForm.date"
                     :min="today"
                     required
-                    class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
+                    class="ui-input py-3.5 shadow-sm"
                   />
                   <p
                     v-if="dateStatus === 'full'"
@@ -656,13 +656,13 @@ const submitBooking = async () => {
                   <label
                     class="block text-xs font-bold text-gray-500 mb-2 uppercase"
                     >{{ $t('booking.duration') }}
-                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-[#ba0b2f] normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
+                    <span class="ml-1 inline-flex items-center rounded-md bg-red-100 px-1.5 py-0.5 text-[10px] font-black text-mfu-red normal-case tracking-normal">{{ $t('booking.required_badge') }}</span>
                   </label>
                   <select
                     v-model="bookingForm.duration"
                     :disabled="dateStatus === 'full'"
                     required
-                    class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm disabled:opacity-50"
+                    class="ui-input py-3.5 shadow-sm disabled:opacity-50"
                   >
                     <option value="" disabled>{{ $t('booking.select_duration') }}</option>
                     <option
@@ -695,16 +695,16 @@ const submitBooking = async () => {
                   <label
                     class="block text-sm font-bold text-gray-800 mb-2"
                     >{{ $t('booking.objective') }}
-                    <span class="ml-2 inline-flex items-center rounded-md bg-red-100 px-2 py-0.5 text-xs font-black text-[#ba0b2f]">{{ $t('booking.required_badge') }}</span>
+                    <span class="ml-2 inline-flex items-center rounded-md bg-red-100 px-2 py-0.5 text-xs font-black text-mfu-red">{{ $t('booking.required_badge') }}</span>
                   </label>
                   <textarea
                     v-model="bookingForm.objective"
                     required
                     rows="3"
                     :placeholder="$t('booking.objective_placeholder')"
-                    class="w-full px-4 py-3.5 bg-gray-50 border-2 border-red-100 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] focus:border-[#ba0b2f] outline-none transition-all shadow-sm resize-none"
+                    class="w-full px-4 py-3.5 bg-gray-50 border-2 border-red-100 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-mfu-red focus:border-mfu-red outline-none transition-all shadow-sm resize-none"
                   ></textarea>
-                  <p class="text-xs font-semibold text-[#ba0b2f]/80 mt-1.5">{{ $t('booking.required_field_hint') }}</p>
+                  <p class="text-xs font-semibold text-mfu-red/80 mt-1.5">{{ $t('booking.required_field_hint') }}</p>
                 </div>
               </div>
 
@@ -714,10 +714,10 @@ const submitBooking = async () => {
                   class="block text-sm font-bold text-gray-800 mb-2"
                 >
                   {{ $t('booking.memo_title') }}
-                  <span class="ml-2 inline-flex items-center rounded-md bg-red-100 px-2 py-0.5 text-xs font-black text-[#ba0b2f]">{{ $t('booking.required_badge') }}</span>
+                  <span class="ml-2 inline-flex items-center rounded-md bg-red-100 px-2 py-0.5 text-xs font-black text-mfu-red">{{ $t('booking.required_badge') }}</span>
                 </label>
                 <div
-                  class="relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer hover:border-[#ba0b2f] hover:bg-red-50/30"
+                  class="relative border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer hover:border-mfu-red hover:bg-red-50/30"
                   :class="
                     memoFileName
                       ? 'border-green-400 bg-green-50/50'
@@ -750,11 +750,11 @@ const submitBooking = async () => {
                       <font-awesome-icon icon="times" class="mr-1" />{{ $t('booking.change_file') }}
                     </button>
                   </template>
-                  <template v-else><font-awesome-icon icon="cloud-upload-alt" class="text-3xl text-[#ba0b2f]/50 mb-2" />
+                  <template v-else><font-awesome-icon icon="cloud-upload-alt" class="text-3xl text-mfu-red/50 mb-2" />
                     <p class="font-bold text-gray-700 text-sm">
                       {{ $t('booking.memo_hint') }}
                     </p>
-                    <p class="text-xs font-semibold text-[#ba0b2f] mt-2">{{ $t('booking.required_field_hint') }}</p>
+                    <p class="text-xs font-semibold text-mfu-red mt-2">{{ $t('booking.required_field_hint') }}</p>
                   </template>
                 </div>
               </div>
@@ -765,7 +765,7 @@ const submitBooking = async () => {
                   class="text-3xl font-extrabold text-gray-900 mb-2 flex items-center gap-4"
                 >
                   <span
-                    class="w-11 h-11 bg-[#d4af37] text-white rounded-full flex items-center justify-center text-lg shrink-0"
+                    class="w-11 h-11 bg-mfu-gold text-white rounded-full flex items-center justify-center text-lg shrink-0"
                     >2</span
                   >
                   <span class="leading-tight">{{ $t('booking.step_2') }}</span>
@@ -817,7 +817,7 @@ const submitBooking = async () => {
                   class="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-4 border-b border-gray-100 pb-4"
                 >
                   <span
-                    class="w-10 h-10 bg-[#d4af37] text-white rounded-full flex items-center justify-center text-lg"
+                    class="w-10 h-10 bg-mfu-gold text-white rounded-full flex items-center justify-center text-lg"
                     >3</span
                   >
                   {{ $t('booking.step_3') }}
@@ -830,7 +830,7 @@ const submitBooking = async () => {
                       type="text"
                       v-model="bookingForm.promoCode"
                       :placeholder="$t('booking.promo_placeholder')"
-                      class="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 text-gray-900 font-bold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none uppercase shadow-sm"
+                      class="ui-input py-3.5 shadow-sm font-bold uppercase"
                       :disabled="isPromoApplied"
                     />
                   </div>
@@ -875,7 +875,7 @@ const submitBooking = async () => {
                   type="checkbox"
                   v-model="bookingForm.acceptTerms"
                   id="terms"
-                  class="mt-1 w-5 h-5 text-[#ba0b2f] rounded border-gray-300 focus:ring-[#ba0b2f] cursor-pointer"
+                  class="mt-1 w-5 h-5 text-mfu-red rounded border-gray-300 focus:ring-mfu-red cursor-pointer"
                 />
                 <label
                   for="terms"
@@ -888,7 +888,7 @@ const submitBooking = async () => {
               <button
                 type="submit"
                 :disabled="!bookingForm.acceptTerms || dateStatus === 'full' || submitting"
-                class="w-full py-5 bg-[#ba0b2f] disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-black rounded-2xl shadow-xl hover:bg-[#8c0823] transition-all uppercase tracking-widest text-lg cursor-pointer transform hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                class="ui-btn-primary w-full py-5 rounded-2xl shadow-xl uppercase tracking-widest text-lg transform hover:-translate-y-0.5 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none disabled:hover:translate-y-0"
               >
                 <template v-if="submitting">
                   <font-awesome-icon icon="spinner" spin /> {{ $t('booking.submitting') }}

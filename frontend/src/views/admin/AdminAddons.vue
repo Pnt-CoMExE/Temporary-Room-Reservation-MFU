@@ -138,7 +138,7 @@ const handleAddAddon = () => {
     customClass: {
       popup: "rounded-[2rem] p-6",
       confirmButton:
-        "bg-[#ba0b2f] text-white rounded-xl px-5 py-3 font-bold cursor-pointer",
+        "bg-mfu-red text-white rounded-xl px-5 py-3 font-bold cursor-pointer",
       cancelButton:
         "bg-gray-100 text-gray-700 rounded-xl px-5 py-3 font-bold cursor-pointer",
     },
@@ -194,12 +194,10 @@ onMounted(loadAddons);
 
 <template>
   <div class="space-y-6 animate-fade-up">
-    <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200"
-    >
+    <div class="ui-card ui-admin-header p-6">
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
-          <font-awesome-icon icon="box-open" class="text-[#d4af37]" />
+          <font-awesome-icon icon="box-open" class="text-mfu-gold" />
           อุปกรณ์เสริม (Add-ons)
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
@@ -210,7 +208,7 @@ onMounted(loadAddons);
       </div>
       <button
         type="button"
-        class="w-full sm:w-auto px-6 py-3 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+        class="ui-btn-primary w-full sm:w-auto disabled:opacity-50"
         :disabled="creating"
         @click="handleAddAddon"
       >
@@ -234,7 +232,7 @@ onMounted(loadAddons);
       <p class="text-sm text-gray-400 mb-5">กด「เพิ่ม Add-on」เพื่อสร้างรายการแรก</p>
       <button
         type="button"
-        class="px-5 py-2.5 bg-[#ba0b2f] text-white font-bold rounded-xl cursor-pointer"
+        class="ui-btn-primary"
         @click="handleAddAddon"
       >
         เพิ่ม Add-on
@@ -277,10 +275,10 @@ onMounted(loadAddons);
                     <input
                       v-model="row.draftName"
                       type="text"
-                      class="w-full max-w-xs px-3 py-2 rounded-xl border bg-white text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-[#ba0b2f]/30"
+                      class="w-full max-w-xs px-3 py-2 rounded-xl border bg-white text-sm font-bold text-gray-900 outline-none focus:ring-2 focus:ring-mfu-red/30"
                       :class="
                         row.draftName.trim() !== row.name
-                          ? 'border-[#ba0b2f]/40 ring-1 ring-[#ba0b2f]/20'
+                          ? 'border-mfu-red/40 ring-1 ring-mfu-red/20'
                           : 'border-gray-200'
                       "
                       :title="row.draftName"
@@ -293,10 +291,10 @@ onMounted(loadAddons);
                 <input
                   v-model="row.draftUnit"
                   type="text"
-                  class="w-14 px-2 py-2 rounded-xl border bg-white text-xs font-bold text-gray-700 text-center outline-none focus:ring-2 focus:ring-[#ba0b2f]/30"
+                  class="w-14 px-2 py-2 rounded-xl border bg-white text-xs font-bold text-gray-700 text-center outline-none focus:ring-2 focus:ring-mfu-red/30"
                   :class="
                     row.draftUnit.trim() !== row.unit_name
-                      ? 'border-[#ba0b2f]/40 ring-1 ring-[#ba0b2f]/20'
+                      ? 'border-mfu-red/40 ring-1 ring-mfu-red/20'
                       : 'border-gray-200'
                   "
                 />
@@ -309,10 +307,10 @@ onMounted(loadAddons);
                     type="number"
                     min="0"
                     step="1"
-                    class="w-[5.5rem] pl-6 pr-2 py-2 rounded-xl border bg-white text-sm font-bold text-gray-900 tabular-nums outline-none focus:ring-2 focus:ring-[#ba0b2f]/30"
+                    class="w-[5.5rem] pl-6 pr-2 py-2 rounded-xl border bg-white text-sm font-bold text-gray-900 tabular-nums outline-none focus:ring-2 focus:ring-mfu-red/30"
                     :class="
                       Number(row.draftPrice) !== Number(row.price_per_unit)
-                        ? 'border-[#ba0b2f]/40 ring-1 ring-[#ba0b2f]/20'
+                        ? 'border-mfu-red/40 ring-1 ring-mfu-red/20'
                         : 'border-gray-200'
                     "
                   />
@@ -336,7 +334,7 @@ onMounted(loadAddons);
                   class="px-4 py-2 rounded-xl text-sm font-bold cursor-pointer transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                   :class="
                     isDirty(row)
-                      ? 'bg-[#ba0b2f] text-white hover:bg-[#8c0823] shadow-sm'
+                      ? 'bg-mfu-red text-white hover:bg-mfu-red-dark shadow-sm'
                       : 'bg-gray-100 text-gray-400 border border-gray-200'
                   "
                   :disabled="savingId === row.id || !isDirty(row)"

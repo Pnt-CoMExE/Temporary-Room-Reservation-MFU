@@ -138,7 +138,7 @@ const amenities = [
       class="flex flex-col justify-center items-center h-screen"
     >
       <div
-        class="animate-spin rounded-full h-14 w-14 border-4 border-gray-200 border-t-[#ba0b2f]"
+        class="animate-spin rounded-full h-14 w-14 border-4 border-gray-200 border-t-mfu-red"
       ></div>
     </div>
 
@@ -147,23 +147,20 @@ const amenities = [
       v-else-if="fetchError || !room"
       class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4"
     >
-      <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-[#ba0b2f] text-4xl mb-6 border border-red-100">
+      <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center text-mfu-red text-4xl mb-6 border border-red-100">
         <font-awesome-icon icon="exclamation-triangle" />
       </div>
       <h2 class="text-2xl font-extrabold text-gray-900 mb-3">{{ $t('room.room_not_found_title') }}</h2>
       <p class="text-gray-500 font-medium mb-8 max-w-sm">{{ $t('room.room_not_found_desc') }}</p>
-      <button
-        @click="goBack"
-        class="px-6 py-3 bg-[#ba0b2f] text-white font-bold rounded-xl hover:bg-[#8c0823] transition-all cursor-pointer"
-      >
-        <font-awesome-icon icon="arrow-left" class="mr-2" />{{ $t('room.back_to_all_rooms') }}
+      <button type="button" @click="goBack" class="ui-btn-primary">
+        <font-awesome-icon icon="arrow-left" />{{ $t('room.back_to_all_rooms') }}
       </button>
     </div>
 
     <div v-else-if="room" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       <button
         @click="goBack"
-        class="mb-8 flex items-center text-gray-500 hover:text-[#ba0b2f] font-bold transition-all group cursor-pointer"
+        class="mb-8 flex items-center text-gray-500 hover:text-mfu-red font-bold transition-all group cursor-pointer"
       >
         <div
           class="w-8 h-8 rounded-full bg-white shadow-sm border border-gray-200 flex items-center justify-center mr-3 group-hover:-translate-x-1 transition-transform"
@@ -187,7 +184,7 @@ const amenities = [
         ></div>
         <div class="absolute bottom-0 left-0 p-8 md:p-12 text-white">
           <span
-            class="inline-block px-3 py-1 bg-[#ba0b2f] text-xs font-bold uppercase tracking-wider rounded-lg mb-4"
+            class="inline-block px-3 py-1 bg-mfu-red text-xs font-bold uppercase tracking-wider rounded-lg mb-4"
             >{{ displayRoomType }}</span
           >
           <h1
@@ -197,12 +194,12 @@ const amenities = [
           </h1>
           <div class="flex flex-wrap gap-4 text-sm font-medium">
             <span class="flex items-center gap-2"
-              ><font-awesome-icon icon="map-marker-alt" class="text-[#d4af37]" />
+              ><font-awesome-icon icon="map-marker-alt" class="text-mfu-gold" />
               {{ displayRoomLocation }}</span
             >
             <span class="text-gray-400">|</span>
             <span class="flex items-center gap-2"
-              ><font-awesome-icon icon="users" class="text-[#d4af37]" /> {{ $t('room.capacity') }}
+              ><font-awesome-icon icon="users" class="text-mfu-gold" /> {{ $t('room.capacity') }}
               {{ room.capacity }} {{ $t('room.people') }}</span
             >
           </div>
@@ -215,7 +212,7 @@ const amenities = [
             <h3
               class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"
             >
-              <font-awesome-icon icon="info-circle" class="text-[#ba0b2f]" /> {{ $t('room.details') }}
+              <font-awesome-icon icon="info-circle" class="text-mfu-red" /> {{ $t('room.details') }}
             </h3>
             <p
               class="text-gray-600 leading-relaxed text-lg bg-white p-6 rounded-2xl border border-gray-200 shadow-card"
@@ -228,7 +225,7 @@ const amenities = [
             <h3
               class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2"
             >
-              <font-awesome-icon :icon="['far', 'calendar-check']" class="text-[#ba0b2f]" />
+              <font-awesome-icon :icon="['far', 'calendar-check']" class="text-mfu-red" />
               {{ $t('room.status_unavailable') }}
             </h3>
             <div
@@ -242,7 +239,7 @@ const amenities = [
               >
                 <div class="flex items-center gap-4">
                   <div
-                    class="w-10 h-10 rounded-full bg-red-50 text-[#ba0b2f] flex items-center justify-center"
+                    class="w-10 h-10 rounded-full bg-red-50 text-mfu-red flex items-center justify-center"
                   >
                     <font-awesome-icon :icon="['far', 'clock']" />
                   </div>
@@ -301,18 +298,18 @@ const amenities = [
                 </div>
               </div>
               <div
-                class="p-4 rounded-2xl border-2 border-[#ba0b2f]/40 bg-[#ba0b2f]/5"
+                class="p-4 rounded-2xl border-2 border-mfu-red/40 bg-mfu-red/5"
               >
                 <div class="flex items-center justify-between gap-3">
                   <div>
-                    <p class="text-[10px] font-bold uppercase tracking-widest text-[#ba0b2f]">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-mfu-red">
                       {{ $t('room.full_day') }}
                     </p>
-                    <p class="text-xs text-[#8c0823]/80 font-medium mt-0.5">
+                    <p class="text-xs text-mfu-red-dark/80 font-medium mt-0.5">
                       {{ $t('room.full_day_hint') }}
                     </p>
                   </div>
-                  <span class="text-2xl font-black text-[#ba0b2f] tabular-nums"
+                  <span class="text-2xl font-black text-mfu-red tabular-nums"
                     >฿{{ (displayPrices.full || 0).toLocaleString() }}</span
                   >
                 </div>
@@ -320,8 +317,9 @@ const amenities = [
             </div>
 
             <button
+              type="button"
               @click="goToBooking"
-              class="w-full py-4 rounded-xl font-bold text-white text-lg transition-all duration-300 shadow-lg shadow-red-200 bg-[#ba0b2f] hover:bg-[#8c0823] transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer"
+              class="ui-btn-primary w-full py-4 text-lg shadow-red-200 transform hover:-translate-y-0.5"
             >
               {{ $t('room.book_now') }} <font-awesome-icon icon="arrow-right" class="text-sm" />
             </button>

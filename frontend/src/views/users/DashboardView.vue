@@ -330,7 +330,7 @@ const openStripePayment = async (booking: BookingItem) => {
   const result = await Swal.fire({
     title: `<span class="font-extrabold text-xl text-gray-900">${t("dashboard.stripe_pay_title")}</span>`,
     html: `
-      <p class="text-sm text-gray-500 mb-2 font-medium">${t("dashboard.net_total")}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
+      <p class="text-sm text-gray-500 mb-2 font-medium">${t("dashboard.net_total")}: <span class="text-mfu-red font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
       <div class="bg-indigo-50 p-4 rounded-xl text-left border border-indigo-100 text-xs text-indigo-800 font-medium mb-4">
         ${t("dashboard.stripe_pay_desc")}
       </div>
@@ -389,7 +389,7 @@ const openPromptPayPayment = async (booking: BookingItem) => {
   const { value: slipFile } = await Swal.fire({
     title: `<span class="font-extrabold text-2xl text-gray-900">${t("dashboard.scan_to_pay")}</span>`,
     html: `
-      <p class="text-sm text-gray-500 mb-4 font-medium">${t("dashboard.net_total")}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
+      <p class="text-sm text-gray-500 mb-4 font-medium">${t("dashboard.net_total")}: <span class="text-mfu-red font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
       <div class="bg-white p-4 rounded-3xl border border-gray-200 mb-4 inline-block mx-auto shadow-sm">
         <img src="${qrDataUrl}" class="w-52 h-52 mx-auto" alt="Payment QR Code" />
       </div>
@@ -450,7 +450,7 @@ const confirmLogout = () => {
     html: `
       <div class="relative w-24 h-24 mx-auto mb-6">
         <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
-        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
+        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-mfu-red text-4xl">
           🚪
         </div>
       </div>
@@ -466,7 +466,7 @@ const confirmLogout = () => {
       popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
       actions: "flex flex-row gap-3 mt-8 w-full justify-center",
       confirmButton:
-        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gradient-to-r from-mfu-red to-mfu-red-dark text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200/50 hover:shadow-xl hover:shadow-red-200 hover:-translate-y-0.5 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
       cancelButton:
         "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 hover:text-gray-900 transition-all duration-300 flex-1 whitespace-nowrap cursor-pointer",
     },
@@ -562,13 +562,13 @@ const giveFeedback = (booking: BookingItem) => {
           <span class="star-icon text-yellow-400 text-3xl drop-shadow-sm transition-transform cursor-pointer" data-value="5">★</span>
         </div>
         
-        <p id="rating-text" class="text-sm font-black text-[#ba0b2f]">${t('dashboard.review_star_5')}</p>
+        <p id="rating-text" class="text-sm font-black text-mfu-red">${t('dashboard.review_star_5')}</p>
         <input type="hidden" id="feedback-rating" value="5">
       </div>
 
       <div class="text-left border-t border-gray-100 pt-6">
         <label class="block text-sm font-bold text-gray-700 mb-2">${t('dashboard.review_comment_label')}</label>
-        <textarea id="feedback-comment" rows="3" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 font-medium rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-inner" placeholder="${t('dashboard.review_comment_placeholder')}"></textarea>
+        <textarea id="feedback-comment" rows="3" class="ui-input shadow-inner" placeholder="${t('dashboard.review_comment_placeholder')}"></textarea>
       </div>
     `,
     showCancelButton: true,
@@ -579,7 +579,7 @@ const giveFeedback = (booking: BookingItem) => {
       popup: "rounded-[2.5rem] p-8 max-w-md",
       actions: "flex flex-row gap-3 mt-6 w-full justify-center",
       confirmButton:
-        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-6 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gradient-to-r from-mfu-red to-mfu-red-dark text-white rounded-2xl px-6 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
       cancelButton:
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-2xl px-6 py-3.5 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
@@ -612,7 +612,7 @@ const giveFeedback = (booking: BookingItem) => {
           ratingText.className =
             value <= 2
               ? "text-sm font-black text-gray-500"
-              : "text-sm font-black text-[#ba0b2f]";
+              : "text-sm font-black text-mfu-red";
         }
       };
 
@@ -688,7 +688,7 @@ const formatDate = (dateString: string) =>
           />
         </picture>
         <div
-          class="absolute inset-0 bg-linear-to-b from-black/80 via-[#ba0b2f]/40 to-[#f8f9fa]"
+          class="absolute inset-0 bg-linear-to-b from-black/80 via-mfu-red/40 to-[#f8f9fa]"
         ></div>
       </div>
       <div
@@ -706,7 +706,7 @@ const formatDate = (dateString: string) =>
         </div>
         <RouterLink
           to="/rooms"
-          class="mt-6 md:mt-0 bg-white text-[#ba0b2f] px-8 py-3.5 rounded-full font-black hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2 transform hover:-translate-y-1"
+          class="mt-6 md:mt-0 bg-white text-mfu-red px-8 py-3.5 rounded-full font-black hover:bg-gray-100 transition-all shadow-lg flex items-center gap-2 transform hover:-translate-y-1"
         >
           <font-awesome-icon icon="plus" /> {{ $t('dashboard.new_booking') }}
         </RouterLink>
@@ -746,7 +746,7 @@ const formatDate = (dateString: string) =>
                 @click="activeTab = 'bookings'"
                 :class="
                   activeTab === 'bookings'
-                    ? 'bg-red-50 text-[#ba0b2f]'
+                    ? 'bg-red-50 text-mfu-red'
                     : 'text-gray-600 hover:bg-gray-50'
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
@@ -757,7 +757,7 @@ const formatDate = (dateString: string) =>
                 @click="activeTab = 'profile'"
                 :class="
                   activeTab === 'profile'
-                    ? 'bg-red-50 text-[#ba0b2f]'
+                    ? 'bg-red-50 text-mfu-red'
                     : 'text-gray-600 hover:bg-gray-50'
                 "
                 class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
@@ -767,9 +767,9 @@ const formatDate = (dateString: string) =>
               <div class="pt-6 mt-6 border-t border-gray-100">
                 <button
                   @click="confirmLogout"
-                  class="group w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-gray-600 bg-white border border-gray-200 hover:bg-red-50 hover:text-[#ba0b2f] hover:border-red-100 transition-all duration-300 font-bold text-sm shadow-sm hover:shadow-md cursor-pointer"
+                  class="group w-full flex items-center justify-center gap-2 px-5 py-2.5 rounded-full text-gray-600 bg-white border border-gray-200 hover:bg-red-50 hover:text-mfu-red hover:border-red-100 transition-all duration-300 font-bold text-sm shadow-sm hover:shadow-md cursor-pointer"
                 >
-                  <font-awesome-icon icon="sign-out-alt" class="text-gray-400 group-hover:text-[#ba0b2f] transition-colors" />
+                  <font-awesome-icon icon="sign-out-alt" class="text-gray-400 group-hover:text-mfu-red transition-colors" />
                   {{ $t('nav.logout') }}
                 </button>
               </div>
@@ -787,7 +787,7 @@ const formatDate = (dateString: string) =>
               <h2
                 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
               >
-                <font-awesome-icon icon="history" class="text-[#ba0b2f]" />
+                <font-awesome-icon icon="history" class="text-mfu-red" />
                 {{ $t('dashboard.my_bookings_title') }}
               </h2>
             </div>
@@ -806,7 +806,7 @@ const formatDate = (dateString: string) =>
                     v-model="searchQuery"
                     type="text"
                     :placeholder="$t('dashboard.search_placeholder')"
-                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+                    class="ui-input pl-10"
                   />
                 </div>
               </div>
@@ -817,7 +817,7 @@ const formatDate = (dateString: string) =>
                 >
                 <select
                   v-model="filterStatus"
-                  class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+                  class="ui-input"
                 >
                   <option value="">{{ $t('dashboard.tab_all') }}</option>
                   <option value="pending">{{ $t('dashboard.status_pending') }}</option>
@@ -837,7 +837,7 @@ const formatDate = (dateString: string) =>
                   <input
                     v-model="filterStartDate"
                     type="date"
-                    class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+                    class="ui-input"
                   />
                 </div>
                 <div class="w-1/2 md:w-auto">
@@ -848,7 +848,7 @@ const formatDate = (dateString: string) =>
                   <input
                     v-model="filterEndDate"
                     type="date"
-                    class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+                    class="ui-input"
                   />
                 </div>
               </div>
@@ -905,7 +905,7 @@ const formatDate = (dateString: string) =>
                       <span
                         class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 text-amber-900 border border-amber-100 text-xs font-bold"
                       >
-                        <font-awesome-icon :icon="['far', 'calendar']" class="text-[#d4af37]" />
+                        <font-awesome-icon :icon="['far', 'calendar']" class="text-mfu-gold" />
                         {{ formatDate(booking.bookingDate) }}
                       </span>
                       <span
@@ -975,17 +975,17 @@ const formatDate = (dateString: string) =>
                   <div class="w-full lg:w-64 shrink-0">
                     <button
                       type="button"
-                      class="w-full text-left rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-red-50/40 p-4 hover:border-[#ba0b2f]/30 hover:shadow-sm transition-all cursor-pointer"
+                      class="w-full text-left rounded-2xl border border-gray-200 bg-gradient-to-br from-white to-red-50/40 p-4 hover:border-mfu-red/30 hover:shadow-sm transition-all cursor-pointer"
                       @click="togglePriceBreakdown(booking.id)"
                     >
                       <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
                         {{ $t("dashboard.total_due") }}
                       </p>
-                      <p class="mt-1 text-3xl font-black text-[#ba0b2f] tabular-nums leading-none">
+                      <p class="mt-1 text-3xl font-black text-mfu-red tabular-nums leading-none">
                         ฿{{ booking.totalPrice.toLocaleString() }}
                       </p>
                       <span
-                        class="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold text-[#ba0b2f]"
+                        class="mt-3 inline-flex items-center gap-1.5 text-[11px] font-bold text-mfu-red"
                       >
                         {{
                           expandedPriceId === booking.id
@@ -1149,7 +1149,7 @@ const formatDate = (dateString: string) =>
                     </div>
 
                     <div
-                      class="flex justify-between gap-4 text-base font-black text-[#ba0b2f] border-t border-gray-200 pt-3 mt-2"
+                      class="flex justify-between gap-4 text-base font-black text-mfu-red border-t border-gray-200 pt-3 mt-2"
                     >
                       <span>{{ $t("dashboard.total_due") }}</span>
                       <span class="tabular-nums"
@@ -1234,17 +1234,17 @@ const formatDate = (dateString: string) =>
             <h2
               class="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-3 border-b border-gray-100 pb-4"
             >
-              <font-awesome-icon icon="user-edit" class="text-[#ba0b2f]" /> {{ $t('dashboard.profile_tab') }}
+              <font-awesome-icon icon="user-edit" class="text-mfu-red" /> {{ $t('dashboard.profile_tab') }}
             </h2>
             <form @submit.prevent="saveProfile" class="space-y-8">
               <div
                 class="bg-red-50/50 p-6 rounded-2xl border border-red-100 relative overflow-hidden"
               >
                 <div
-                  class="absolute left-0 top-0 bottom-0 w-1.5 bg-[#ba0b2f]"
+                  class="absolute left-0 top-0 bottom-0 w-1.5 bg-mfu-red"
                 ></div>
                 <h4
-                  class="text-sm font-bold text-[#ba0b2f] mb-4 flex items-center gap-2"
+                  class="text-sm font-bold text-mfu-red mb-4 flex items-center gap-2"
                 >
                   <font-awesome-icon icon="lock" /> {{ $t('dashboard.system_info_title') }}
                 </h4>
@@ -1296,7 +1296,7 @@ const formatDate = (dateString: string) =>
                       type="text"
                       v-model="userProfile.fullName"
                       required
-                      class="w-full px-4 py-3.5 bg-white border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
+                      class="ui-input py-3.5 bg-white shadow-sm"
                       :placeholder="$t('dashboard.name_placeholder')"
                     />
                   </div>
@@ -1309,7 +1309,7 @@ const formatDate = (dateString: string) =>
                       type="tel"
                       v-model="userProfile.phone"
                       required
-                      class="w-full px-4 py-3.5 bg-white border border-gray-200 text-gray-900 font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all shadow-sm"
+                      class="ui-input py-3.5 bg-white shadow-sm"
                       :placeholder="$t('dashboard.phone_placeholder')"
                     />
                   </div>
@@ -1319,7 +1319,7 @@ const formatDate = (dateString: string) =>
               <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
                 <button
                   type="submit"
-                  class="bg-[#ba0b2f] text-white px-8 py-3.5 rounded-xl font-bold hover:bg-[#8c0823] shadow-lg shadow-red-200 transition-all flex items-center gap-2 cursor-pointer transform hover:-translate-y-0.5"
+                  class="ui-btn-primary shadow-red-200 transform hover:-translate-y-0.5"
                 >
                   {{ $t('dashboard.save_profile') }} <font-awesome-icon icon="save" />
                 </button>

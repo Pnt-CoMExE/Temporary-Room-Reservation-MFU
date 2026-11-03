@@ -106,7 +106,7 @@ const confirmLogout = () => {
     html: `
       <div class="relative w-24 h-24 mx-auto mb-6">
         <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
-        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
+        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-mfu-red text-4xl">
           🚪
         </div>
       </div>
@@ -153,11 +153,11 @@ const confirmLogout = () => {
                 class="flex flex-col transform group-hover:scale-105 transition-transform duration-300"
               >
                 <span
-                  class="text-2xl font-extrabold text-[#ba0b2f] leading-none tracking-tight"
+                  class="text-2xl font-extrabold text-mfu-red leading-none tracking-tight"
                   >MFU</span
                 >
                 <span
-                  class="text-xs font-bold text-[#d4af37] tracking-[0.2em] mt-0.5"
+                  class="text-xs font-bold text-mfu-gold tracking-[0.2em] mt-0.5"
                   >PROPERTY</span
                 >
               </div>
@@ -202,7 +202,7 @@ const confirmLogout = () => {
                 <img v-if="profileImage" :src="profileImage" referrerpolicy="no-referrer" class="w-9 h-9 rounded-full shadow-sm object-cover border border-gray-200" />
                 <div v-else class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 border border-gray-200"><FontAwesomeIcon :icon="['fas', 'user']" class="text-sm" /></div>
                 <span class="text-sm font-bold text-gray-500">
-                  {{ $t('nav.welcome') }} <span class="text-[#ba0b2f]">{{ userName }}</span>
+                  {{ $t('nav.welcome') }} <span class="text-mfu-red">{{ userName }}</span>
                 </span>
               </div>
 
@@ -210,12 +210,12 @@ const confirmLogout = () => {
               <div class="relative">
                 <button
                   @click="toggleNotif"
-                  class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 hover:bg-red-50 hover:text-[#ba0b2f] flex items-center justify-center transition-colors relative cursor-pointer outline-none"
+                  class="w-10 h-10 rounded-full bg-gray-50 text-gray-600 hover:bg-red-50 hover:text-mfu-red flex items-center justify-center transition-colors relative cursor-pointer outline-none"
                 >
                   <FontAwesomeIcon :icon="['fas', 'bell']" />
                   <span
                     v-if="notifications.some((n) => !n.read)"
-                    class="absolute top-2 right-2.5 w-2 h-2 bg-[#ba0b2f] rounded-full border border-white"
+                    class="absolute top-2 right-2.5 w-2 h-2 bg-mfu-red rounded-full border border-white"
                   ></span>
                 </button>
 
@@ -231,7 +231,7 @@ const confirmLogout = () => {
                     <button
                       v-if="notifications.length > 0"
                       @click="markAllAsRead"
-                      class="text-xs font-bold text-[#ba0b2f] hover:underline cursor-pointer"
+                      class="text-xs font-bold text-mfu-red hover:underline cursor-pointer"
                     >
                       {{ $t('nav.mark_all_read') }}
                     </button>
@@ -286,9 +286,9 @@ const confirmLogout = () => {
 
               <button
                 @click="confirmLogout"
-                class="group bg-white text-gray-600 px-5 py-3 rounded-full font-bold hover:bg-red-50 hover:text-[#ba0b2f] transition-all duration-300 border border-gray-200 hover:border-red-100 text-base flex items-center gap-2 shadow-sm hover:shadow-md cursor-pointer"                  >
+                class="group bg-white text-gray-600 px-5 py-3 rounded-full font-bold hover:bg-red-50 hover:text-mfu-red transition-all duration-300 border border-gray-200 hover:border-red-100 text-base flex items-center gap-2 shadow-sm hover:shadow-md cursor-pointer"                  >
                   <FontAwesomeIcon
-                    :icon="['fas', 'sign-out-alt']" class="text-gray-400 group-hover:text-[#ba0b2f] transition-colors"
+                    :icon="['fas', 'sign-out-alt']" class="text-gray-400 group-hover:text-mfu-red transition-colors"
                   />
                 {{ $t('nav.logout') }}
               </button>
@@ -305,12 +305,12 @@ const confirmLogout = () => {
               <FontAwesomeIcon :icon="['fas', 'bell']" />
               <span
                 v-if="notifications.some((n) => !n.read)"
-                class="absolute top-2 right-2.5 w-2 h-2 bg-[#ba0b2f] rounded-full border border-white"
+                class="absolute top-2 right-2.5 w-2 h-2 bg-mfu-red rounded-full border border-white"
               ></span>
             </button>
             <button
               @click="isMenuOpen = !isMenuOpen"
-              class="text-gray-600 hover:text-[#ba0b2f] focus:outline-none p-2 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center transition-colors cursor-pointer"
+              class="text-gray-600 hover:text-mfu-red focus:outline-none p-2 w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center transition-colors cursor-pointer"
             >
               <FontAwesomeIcon v-if="!isMenuOpen" :icon="['fas', 'bars']" class="text-lg" />
               <FontAwesomeIcon v-else :icon="['fas', 'times']" class="text-lg" />
@@ -328,25 +328,25 @@ const confirmLogout = () => {
           <RouterLink
             to="/home"
             @click="closeMenu"
-            class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-[#ba0b2f] rounded-xl font-bold transition-colors"
+            class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-mfu-red rounded-xl font-bold transition-colors"
             >{{ $t('nav.home') }}</RouterLink
           >
           <RouterLink
             to="/rooms"
             @click="closeMenu"
-            class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-[#ba0b2f] rounded-xl font-bold transition-colors"
+            class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-mfu-red rounded-xl font-bold transition-colors"
             >{{ $t('nav.rooms') }}</RouterLink
           >
           <RouterLink
             to="/dashboard"
             @click="closeMenu"
-            class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-[#ba0b2f] rounded-xl font-bold transition-colors"
+            class="block px-4 py-3.5 text-gray-700 hover:bg-red-50 hover:text-mfu-red rounded-xl font-bold transition-colors"
             >{{ $t('nav.dashboard') }}</RouterLink
           >
           <div class="pt-4 border-t border-gray-100 mt-2">
             <button
               @click="confirmLogout"
-              class="w-full bg-linear-to-r from-[#ba0b2f] to-[#8c0823] text-white py-4 rounded-xl font-bold shadow-md flex justify-center items-center gap-2 active:scale-95 transition-transform cursor-pointer"
+              class="w-full bg-linear-to-r from-mfu-red to-mfu-red-dark text-white py-4 rounded-xl font-bold shadow-md flex justify-center items-center gap-2 active:scale-95 transition-transform cursor-pointer"
             >
               <FontAwesomeIcon :icon="['fas', 'sign-out-alt']" class="mr-2" /> {{ $t('nav.logout') }}
             </button>

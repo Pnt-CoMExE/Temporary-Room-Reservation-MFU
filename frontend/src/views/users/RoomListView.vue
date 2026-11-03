@@ -108,7 +108,7 @@ const filteredRooms = computed(() => {
           />
         </picture>
         <div
-          class="absolute inset-0 bg-linear-to-b from-black/60 via-[#ba0b2f]/30 to-[#f8f9fa]"
+          class="absolute inset-0 bg-linear-to-b from-black/60 via-mfu-red/30 to-[#f8f9fa]"
         ></div>
       </div>
       <div
@@ -130,21 +130,19 @@ const filteredRooms = computed(() => {
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-24 w-full grow">
-      <div
-        class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 lg:p-8 shadow-card-float border border-gray-200/80 mb-12 -mt-24 relative z-20"
-      >
+      <div class="ui-filter-panel mb-12 -mt-24 relative z-20">
         <!-- ✨ เปลี่ยนเป็น Grid 5 คอลัมน์สำหรับเพิ่มช่องวันที่ -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <div>
             <label
               class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-              ><font-awesome-icon icon="search" class="text-[#ba0b2f] mr-1" /> {{ $t('hero.search_btn') }}</label
+              ><font-awesome-icon icon="search" class="text-mfu-red mr-1" /> {{ $t('hero.search_btn') }}</label
             >
             <input
               type="text"
               v-model="searchQuery"
               :placeholder="$t('hero.search_placeholder')"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-semibold"
+              class="ui-input"
             />
           </div>
 
@@ -152,25 +150,25 @@ const filteredRooms = computed(() => {
           <div>
             <label
               class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-              ><font-awesome-icon :icon="['far', 'calendar-alt']" class="text-[#ba0b2f] mr-1" />
+              ><font-awesome-icon :icon="['far', 'calendar-alt']" class="text-mfu-red mr-1" />
               {{ $t('booking.booking_date') }}</label
             >
             <input
               type="date"
               v-model="selectedDate"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-semibold"
+              class="ui-input"
             />
           </div>
 
           <div>
             <label
               class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-              ><font-awesome-icon icon="building" class="text-[#ba0b2f] mr-1" />
+              ><font-awesome-icon icon="building" class="text-mfu-red mr-1" />
               {{ $t('room.type') }}</label
             >
             <select
               v-model="selectedType"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-semibold appearance-none"
+              class="ui-input appearance-none"
             >
               <option value="">{{ $t('room.filter_all') }}</option>
               <option value="ห้องประชุม">{{ $t('room.filter_meeting') }}</option>
@@ -186,11 +184,11 @@ const filteredRooms = computed(() => {
           <div>
             <label
               class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-              ><font-awesome-icon icon="users" class="text-[#ba0b2f] mr-1" /> {{ $t('room.capacity') }}</label
+              ><font-awesome-icon icon="users" class="text-mfu-red mr-1" /> {{ $t('room.capacity') }}</label
             >
             <select
               v-model="selectedCapacity"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-semibold appearance-none"
+              class="ui-input appearance-none"
             >
               <option value="">{{ $t('room.filter_all') }}</option>
               <option value="small">1 - 50 {{ $t('room.people') }}</option>
@@ -201,12 +199,12 @@ const filteredRooms = computed(() => {
           <div>
             <label
               class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2"
-              ><font-awesome-icon icon="sort-amount-down" class="text-[#ba0b2f] mr-1" />
+              ><font-awesome-icon icon="sort-amount-down" class="text-mfu-red mr-1" />
               {{ $t('room.sort_label') }}</label
             >
             <select
               v-model="sortBy"
-              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all font-semibold appearance-none"
+              class="ui-input appearance-none"
             >
               <option value="default">{{ $t('room.sort_default') }}</option>
               <option value="price_asc">{{ $t('room.sort_price_asc') }}</option>
@@ -222,7 +220,7 @@ const filteredRooms = computed(() => {
         class="flex flex-col justify-center items-center py-24"
       >
         <div
-          class="animate-spin rounded-full h-14 w-14 border-4 border-gray-200 border-t-[#ba0b2f] mb-4"
+          class="animate-spin rounded-full h-14 w-14 border-4 border-gray-200 border-t-mfu-red mb-4"
         ></div>
         <p class="text-gray-500 font-bold">{{ $t('common.loading') }}</p>
       </div>
@@ -232,7 +230,7 @@ const filteredRooms = computed(() => {
         <h3 class="text-2xl font-bold text-gray-800 mb-2">{{ error }}</h3>
         <button
           @click="fetchRooms"
-          class="mt-4 px-6 py-2 bg-[#ba0b2f] text-white rounded-full font-bold hover:bg-[#8c0823] transition-colors"
+          class="ui-btn-primary rounded-full mt-4"
         >
           {{ $t('common.back') }}
         </button>
@@ -244,7 +242,7 @@ const filteredRooms = computed(() => {
         >
           <p class="text-gray-600 font-medium text-lg">
             {{ $t('room.rooms_found') }}
-            <span class="text-[#ba0b2f] text-2xl font-black mx-1">{{
+            <span class="text-mfu-red text-2xl font-black mx-1">{{
               filteredRooms.length
             }}</span>
             {{ $t('room.rooms_unit') }}
@@ -265,7 +263,7 @@ const filteredRooms = computed(() => {
               selectedCapacity = '';
               sortBy = 'default';
             "
-            class="text-sm font-bold text-[#ba0b2f] hover:text-[#8c0823] hover:underline flex items-center gap-1 transition-colors cursor-pointer"
+            class="text-sm font-bold text-mfu-red hover:text-mfu-red-dark hover:underline flex items-center gap-1 transition-colors cursor-pointer"
           >
             <font-awesome-icon icon="times-circle" /> {{ $t('room.clear_filter') }}
           </button>

@@ -78,7 +78,7 @@ const roleLabel: Record<string, string> = {
   external: "บุคคลภายนอก",
 };
 const roleBadgeClass: Record<string, string> = {
-  admin: "bg-red-50 text-[#ba0b2f] border-red-200",
+  admin: "bg-red-50 text-mfu-red border-red-200",
   internal: "bg-blue-50 text-blue-700 border-blue-200",
   co_op: "bg-yellow-50 text-yellow-700 border-yellow-200",
   external: "bg-gray-50 text-gray-600 border-gray-200",
@@ -174,12 +174,10 @@ const setAdminRole = async (user: UserItem) => {
 
 <template>
   <div class="space-y-6 animate-fade-up">
-    <div
-      class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200"
-    >
+    <div class="ui-card ui-admin-header p-6">
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
-          <font-awesome-icon icon="users" class="text-[#ba0b2f]" />
+          <font-awesome-icon icon="users" class="text-mfu-red" />
           จัดการผู้ใช้ / แอดมิน
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
@@ -205,7 +203,7 @@ const setAdminRole = async (user: UserItem) => {
             v-model="searchQuery"
             type="text"
             placeholder="ค้นหาชื่อ หรืออีเมล..."
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#ba0b2f]/30"
+            class="ui-input pl-10"
           />
         </div>
         <div class="flex gap-1.5 flex-wrap">
@@ -219,12 +217,8 @@ const setAdminRole = async (user: UserItem) => {
             }"
             :key="role"
             @click="filterRole = role"
-            :class="
-              filterRole === role
-                ? 'bg-[#ba0b2f] text-white shadow-sm'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            "
-            class="px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap"
+            :class="filterRole === role ? 'ui-chip-active' : 'ui-chip-idle'"
+            class="ui-chip"
           >
             {{ label }}
             <span class="ml-1 opacity-80">({{ roleCounts[role] || 0 }})</span>
@@ -286,7 +280,7 @@ const setAdminRole = async (user: UserItem) => {
                   />
                   <div
                     v-else
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-[#ba0b2f] to-[#8c0823] flex items-center justify-center text-white font-black text-sm"
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-mfu-red to-mfu-red-dark flex items-center justify-center text-white font-black text-sm"
                   >
                     {{ user.firstname.charAt(0) }}{{ user.lastname.charAt(0) }}
                   </div>

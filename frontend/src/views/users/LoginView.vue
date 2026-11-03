@@ -71,7 +71,7 @@ const loginWithGoogle = () => {
           />
         </picture>
       <div
-        class="absolute inset-0 bg-linear-to-b from-[#ba0b2f]/30 via-black/60 to-black/90"
+        class="absolute inset-0 bg-linear-to-b from-mfu-red/30 via-black/60 to-black/90"
       ></div>
     </div>
 
@@ -90,21 +90,21 @@ const loginWithGoogle = () => {
         <h1
           class="text-4xl font-extrabold text-white tracking-wider drop-shadow-lg"
         >
-          <span class="text-[#d4af37]">MFU</span> PROPERTY
+          <span class="text-mfu-gold">MFU</span> PROPERTY
         </h1>
         <p class="text-gray-300 mt-2 text-sm font-medium px-2 leading-relaxed">
           <span class="block">{{ $t('hero.badge') }}</span>
-          <span class="block whitespace-nowrap text-[#d4af37]/90 mt-0.5">{{ $t('hero.badge_org') }}</span>
+          <span class="block whitespace-nowrap text-mfu-gold/90 mt-0.5">{{ $t('hero.badge_org') }}</span>
         </p>
       </div>
 
       <!-- 📦 กล่อง Login Card -->
       <div
-        class="bg-white/95 backdrop-blur-xl rounded-4xl shadow-card-float p-8 sm:p-10 border border-gray-200/90 transform transition-all hover:scale-[1.01] animate-fade-up min-h-80 flex flex-col justify-center"
+        class="ui-card-glass rounded-4xl p-8 sm:p-10 transform transition-all hover:scale-[1.01] animate-fade-up min-h-80 flex flex-col justify-center"
       >
         <div class="text-center mb-8">
           <div
-            class="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner border-4 border-white transition-all duration-300 text-[#ba0b2f] bg-red-50"
+            class="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner border-4 border-white transition-all duration-300 text-mfu-red bg-red-50"
           >
             <FontAwesomeIcon :icon="['fas', 'fingerprint']" class="text-3xl" />
           </div>
@@ -117,8 +117,9 @@ const loginWithGoogle = () => {
         <div class="relative">
           <div class="space-y-4 animate-fade-up">
             <button
+              type="button"
               @click="loginWithGoogle"
-              class="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-card group cursor-pointer"
+              class="w-full flex items-center justify-center gap-3 px-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-card group cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/40"
             >
               <img
                 class="h-5 w-5 transition-transform group-hover:scale-110"

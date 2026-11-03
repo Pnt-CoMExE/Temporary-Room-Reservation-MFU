@@ -71,15 +71,15 @@ const handleAddPromoCode = () => {
       <div class="text-left mt-4 space-y-4">
         <div>
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">รหัสโปรโมชั่น (Code)</label>
-          <input id="swal-code" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none font-black tracking-widest uppercase text-lg" placeholder="เช่น SAVE50">
+          <input id="swal-code" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-black tracking-widest uppercase text-lg" placeholder="เช่น SAVE50">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">ส่วนลดเป็นเปอร์เซ็นต์ (เช่น 10, 50, 100)</label>
-          <input id="swal-discount" type="number" min="1" max="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-[#ba0b2f] rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none font-bold" placeholder="เช่น 100 = ลด 100%">
+          <input id="swal-discount" type="number" min="1" max="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-mfu-red rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-bold" placeholder="เช่น 100 = ลด 100%">
         </div>
         <div>
           <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">จำนวนสิทธิ์สูงสุด</label>
-          <input id="swal-limit" type="number" min="1" value="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-[#d4af37] outline-none font-bold">
+          <input id="swal-limit" type="number" min="1" value="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-bold">
         </div>
       </div>
     `,
@@ -89,7 +89,7 @@ const handleAddPromoCode = () => {
     buttonsStyling: false,
     customClass: {
       popup: "rounded-[2rem] p-8 max-w-sm",
-      confirmButton: "bg-[#d4af37] text-white rounded-xl px-5 py-3 font-bold shadow cursor-pointer",
+      confirmButton: "bg-mfu-gold text-white rounded-xl px-5 py-3 font-bold shadow cursor-pointer",
       cancelButton: "bg-gray-100 text-gray-700 rounded-xl px-5 py-3 font-bold ml-3 cursor-pointer",
     },
     preConfirm: () => {
@@ -150,17 +150,18 @@ const usagePercent = (promo: PromoCode) => {
 <template>
   <div class="space-y-6 animate-fade-up">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-3xl shadow-card border border-gray-200">
+    <div class="ui-card ui-admin-header p-6">
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
-          <font-awesome-icon icon="ticket-alt" class="text-[#d4af37]" />
+          <font-awesome-icon icon="ticket-alt" class="text-mfu-gold" />
           รหัสส่วนลด (Promo Codes)
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">สร้างและจัดการโค้ดส่วนลดสำหรับผู้เช่าพื้นที่</p>
       </div>
       <button
+        type="button"
         @click="handleAddPromoCode"
-        class="w-full sm:w-auto px-6 py-3 bg-[#d4af37] text-white font-bold rounded-xl hover:bg-yellow-600 transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+        class="ui-btn-primary w-full sm:w-auto bg-mfu-gold hover:bg-yellow-600 shadow-lg"
       >
         <font-awesome-icon icon="plus" /> สร้างรหัสใหม่
       </button>
@@ -176,8 +177,8 @@ const usagePercent = (promo: PromoCode) => {
         <p class="text-2xl font-black text-green-600">{{ activeCount }}</p>
         <p class="text-xs font-bold text-gray-500 mt-1">กำลังใช้งาน</p>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-card border border-[#d4af37]/40 text-center">
-        <p class="text-2xl font-black text-[#d4af37]">{{ totalUsed }}</p>
+      <div class="bg-white rounded-2xl p-5 shadow-card border border-mfu-gold/40 text-center">
+        <p class="text-2xl font-black text-mfu-gold">{{ totalUsed }}</p>
         <p class="text-xs font-bold text-gray-500 mt-1">ครั้งที่ใช้ไป</p>
       </div>
     </div>
@@ -190,7 +191,7 @@ const usagePercent = (promo: PromoCode) => {
           v-model="searchQuery"
           type="text"
           placeholder="ค้นหารหัสโปรโมชั่น..."
-          class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#d4af37]/30"
+          class="ui-input pl-10 focus:ring-mfu-gold/35 focus:border-mfu-gold/40"
         />
       </div>
       <div class="flex gap-1.5">
@@ -198,7 +199,7 @@ const usagePercent = (promo: PromoCode) => {
           v-for="(label, val) in { all: 'ทั้งหมด', active: 'เปิดใช้งาน', inactive: 'ปิดใช้งาน' }"
           :key="val"
           @click="filterStatus = val as typeof filterStatus"
-          :class="filterStatus === val ? 'bg-[#d4af37] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+          :class="filterStatus === val ? 'bg-mfu-gold text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
           class="px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap"
         >
           {{ label }}
@@ -241,7 +242,7 @@ const usagePercent = (promo: PromoCode) => {
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-lg bg-yellow-50 border border-yellow-200 flex items-center justify-center shrink-0">
-                    <font-awesome-icon icon="ticket-alt" class="text-[#d4af37] text-xs" />
+                    <font-awesome-icon icon="ticket-alt" class="text-mfu-gold text-xs" />
                   </div>
                   <span class="font-black text-gray-900 tracking-widest text-base">{{ promo.code }}</span>
                 </div>
@@ -249,7 +250,7 @@ const usagePercent = (promo: PromoCode) => {
 
               <!-- Discount -->
               <td class="px-6 py-4 text-center">
-                <span class="inline-flex items-center px-3 py-1 rounded-lg bg-red-50 border border-red-100 text-[#ba0b2f] font-black text-sm">
+                <span class="inline-flex items-center px-3 py-1 rounded-lg bg-red-50 border border-red-100 text-mfu-red font-black text-sm">
                   {{ formatPromoPercent(promo.discount) }}
                 </span>
               </td>
@@ -289,13 +290,13 @@ const usagePercent = (promo: PromoCode) => {
     <!-- Empty State -->
     <div v-else class="bg-white rounded-3xl shadow-card border border-gray-200 py-20 flex flex-col items-center justify-center text-center">
       <div class="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center text-3xl mb-5 border border-yellow-100">
-        <font-awesome-icon icon="ticket-alt" class="text-[#d4af37]" />
+        <font-awesome-icon icon="ticket-alt" class="text-mfu-gold" />
       </div>
       <h3 class="text-xl font-black text-gray-700 mb-2">ยังไม่มีรหัสส่วนลด</h3>
       <p class="text-sm text-gray-400 font-medium mb-6 max-w-xs">กดปุ่ม "สร้างรหัสใหม่" เพื่อเพิ่มรหัสโปรโมชั่นสำหรับผู้เช่า</p>
       <button
         @click="handleAddPromoCode"
-        class="px-6 py-3 bg-[#d4af37] text-white font-bold rounded-xl hover:bg-yellow-600 transition-all cursor-pointer"
+        class="px-6 py-3 bg-mfu-gold text-white font-bold rounded-xl hover:bg-yellow-600 transition-all cursor-pointer"
       >
         <font-awesome-icon icon="plus" class="mr-2" /> สร้างรหัสแรก
       </button>
