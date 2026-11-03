@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — Date display DD/MM/YYYY system-wide]
+- `formatDateDMY` / `parseDateDMY` ใน `dateKey.ts` · `DateField` แทน `<input type="date">` (ค่า API ยังเป็น YYYY-MM-DD)
+- ใช้ใน Home/RoomList/Booking/Dashboard/Admin filters · ข้อความวันที่ในตาราง/การ์ด/notif เป็น วัน/เดือน/ปี
+
 ## [2026-11-03 — UX depth pass 1–7 on `dev`]
 - Home hero brand-first · Booking form 4 steps + `*` legend · Dashboard card hierarchy
 - Admin tables sticky/`ui-empty`/`ui-skeleton` · motion fade/panel/card · `withSwalTheme` (+ gold promo)

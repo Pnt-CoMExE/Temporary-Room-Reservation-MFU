@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import RoomCard from "@/components/room/RoomCard.vue";
+import DateField from "@/components/common/DateField.vue";
 import api from "@/services/api";
 import { resolveRoomImage } from "@/utils/roomImage";
 
@@ -199,10 +200,9 @@ onUnmounted(() => {
                   class="block text-xs font-bold text-gray-500 mb-1 leading-normal"
                   >{{ $t('booking.booking_date') }}</label
                 >
-                <input
-                  type="date"
+                <DateField
                   v-model="searchParams.date"
-                  class="w-full min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm md:text-[15px] text-gray-800 font-semibold outline-none leading-relaxed"
+                  input-class="w-full min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm md:text-[15px] text-gray-800 font-semibold outline-none leading-relaxed shadow-none"
                 />
               </div>
             </div>

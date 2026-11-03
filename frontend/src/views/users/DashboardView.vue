@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 import api from "@/services/api";
 import { clearAuthSession, getStoredUserId } from "@/utils/auth";
 import { formatDateKey, toDateKey } from "@/utils/dateKey";
+import DateField from "@/components/common/DateField.vue";
 import QRCode from "qrcode";
 import { generatePromptPayPayload } from "@/services/promptpay";
 
@@ -834,22 +835,14 @@ const formatDate = (dateString: string) =>
                     class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
                     >{{ $t('dashboard.start_date') }}</label
                   >
-                  <input
-                    v-model="filterStartDate"
-                    type="date"
-                    class="ui-input"
-                  />
+                  <DateField v-model="filterStartDate" input-class="ui-input" />
                 </div>
                 <div class="w-1/2 md:w-auto">
                   <label
                     class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
                     >{{ $t('dashboard.end_date') }}</label
                   >
-                  <input
-                    v-model="filterEndDate"
-                    type="date"
-                    class="ui-input"
-                  />
+                  <DateField v-model="filterEndDate" input-class="ui-input" />
                 </div>
               </div>
             </div>

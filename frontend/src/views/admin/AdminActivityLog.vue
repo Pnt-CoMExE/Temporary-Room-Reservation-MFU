@@ -18,7 +18,17 @@ onMounted(async () => {
     const res = await api.get("/api/admin/logs");
     logs.value = res.data.map((log: any) => ({
       id: log.id,
-      timestamp: new Date(log.created_at).toLocaleString("th-TH"),
+      timestamp: (() => {
+        const d = new Date(log.created_at);
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        const time = d.toLocaleTimeString("th-TH", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        return `${dd}/${mm}/${yyyy} ${time}`;
+      })(),
       adminName: log.admin_name,
       action: log.action,
       details: log.details

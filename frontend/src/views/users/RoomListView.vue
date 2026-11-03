@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
 import api from "@/services/api";
 import RoomCard from "@/components/room/RoomCard.vue";
+import DateField from "@/components/common/DateField.vue";
 import { resolveRoomImage } from "@/utils/roomImage";
 
 interface RoomItem {
@@ -153,11 +154,7 @@ const filteredRooms = computed(() => {
               ><font-awesome-icon :icon="['far', 'calendar-alt']" class="text-mfu-red mr-1" />
               {{ $t('booking.booking_date') }}</label
             >
-            <input
-              type="date"
-              v-model="selectedDate"
-              class="ui-input"
-            />
+            <DateField v-model="selectedDate" />
           </div>
 
           <div>

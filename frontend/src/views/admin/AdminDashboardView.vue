@@ -39,6 +39,7 @@ ChartJS.register(
 
 import api from "@/services/api";
 import { toDateKey } from "@/utils/dateKey";
+import DateField from "@/components/common/DateField.vue";
 
 interface BookingInfo {
   id: string;
@@ -714,18 +715,16 @@ const confirmLogout = () => {
                 <template v-if="filterMode === 'range'">
                   <div class="flex flex-col gap-1">
                     <label class="text-[10px] font-black text-gray-400 uppercase">วันเริ่มต้น</label>
-                    <input
+                    <DateField
                       v-model="filterFrom"
-                      type="date"
-                      class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                      input-class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-full"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
                     <label class="text-[10px] font-black text-gray-400 uppercase">วันสิ้นสุด</label>
-                    <input
+                    <DateField
                       v-model="filterTo"
-                      type="date"
-                      class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                      input-class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-full"
                     />
                   </div>
                 </template>

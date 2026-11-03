@@ -9,6 +9,7 @@ import { resolveRoomImage } from "@/utils/roomImage";
 import { resolveAddonImage } from "@/utils/addonImage";
 import { toDateKey } from "@/utils/dateKey";
 import { withSwalTheme, swalConfirmBtnClass } from "@/utils/swalTheme";
+import DateField from "@/components/common/DateField.vue";
 
 const { t, locale } = useI18n();
 
@@ -600,12 +601,10 @@ const submitBooking = async () => {
                     <label class="ui-label"
                       >{{ $t("booking.booking_date") }} <span class="ui-req">*</span></label
                     >
-                    <input
-                      type="date"
+                    <DateField
                       v-model="bookingForm.date"
                       :min="today"
                       required
-                      class="ui-input py-3.5 shadow-sm"
                     />
                     <p
                       v-if="dateStatus === 'full'"

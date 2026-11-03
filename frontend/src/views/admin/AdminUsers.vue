@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from "vue";
 import Swal from "sweetalert2";
 import api from "@/services/api";
+import { formatDateDMY } from "@/utils/dateKey";
 
 interface UserItem {
   id: number;
@@ -84,12 +85,7 @@ const roleBadgeClass: Record<string, string> = {
   external: "bg-gray-50 text-gray-600 border-gray-200",
 };
 
-const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString("th-TH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+const formatDate = (d: string) => formatDateDMY(d);
 
 const toggleActive = async (user: UserItem) => {
   const next = !user.is_active;

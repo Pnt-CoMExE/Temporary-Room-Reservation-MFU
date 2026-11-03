@@ -16,6 +16,8 @@ import {
   statusActionBtn,
 } from "@/utils/bookingStatus";
 import BookingStatusBadge from "@/components/common/BookingStatusBadge.vue";
+import DateField from "@/components/common/DateField.vue";
+import { formatDateDMY } from "@/utils/dateKey";
 
 interface BookingItem {
   id: string;
@@ -809,22 +811,14 @@ const viewBookingHistory = async (booking: BookingItem) => {
             class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
             >วันที่เริ่มต้น</label
           >
-          <input
-            v-model="filterStartDate"
-            type="date"
-            class="ui-input"
-          />
+          <DateField v-model="filterStartDate" input-class="ui-input" />
         </div>
         <div class="w-1/2 lg:w-auto">
           <label
             class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
             >ถึงวันที่</label
           >
-          <input
-            v-model="filterEndDate"
-            type="date"
-            class="ui-input"
-          />
+          <DateField v-model="filterEndDate" input-class="ui-input" />
         </div>
       </div>
     </div>
@@ -882,7 +876,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
                   {{ booking.roomName }}
                 </p>
                 <p class="text-xs text-gray-400 mt-1">
-                  <font-awesome-icon :icon="['far', 'calendar-alt']" /> {{ booking.date }} |
+                  <font-awesome-icon :icon="['far', 'calendar-alt']" /> {{ formatDateDMY(booking.date) }} |
                   <font-awesome-icon :icon="['far', 'clock']" /> {{ booking.duration }}
                 </p>
                 <div class="flex flex-wrap gap-1.5 mt-1.5">
