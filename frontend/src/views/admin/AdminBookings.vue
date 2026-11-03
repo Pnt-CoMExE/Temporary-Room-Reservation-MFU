@@ -4,18 +4,21 @@ import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { getStoredUserId } from "@/utils/auth";
+import { withSwalTheme } from "@/utils/swalTheme";
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 import {
   getAwaitingReviewLabel,
   getBookingStatusBadgeClass,
-  getBookingStatusIcon,
   getBookingStatusLabel,
   getReviewedLabel,
   humanizeStatusInText,
   isBookingStatus,
   statusActionBtn,
 } from "@/utils/bookingStatus";
+import BookingStatusBadge from "@/components/common/BookingStatusBadge.vue";
+import DateField from "@/components/common/DateField.vue";
+import { formatDateDMY } from "@/utils/dateKey";
 
 interface BookingItem {
   id: string;
@@ -46,10 +49,25 @@ interface BookingItem {
   priceFullExternal?: number;
 }
 
-const ORG_LABEL: Record<string, string> = {
-  internal: "ภายใน (Internal)",
-  co_op: "ร่วมจัด / Coop",
-  external: "ภายนอก (External)",
+const getOrgLabel = (org: string) =>
+  ({
+    internal: t("admin.org_internal"),
+    co_op: t("admin.org_coop"),
+    external: t("admin.org_external"),
+  })[org] || org;
+
+const getDurationLabel = (duration: string) => {
+  const normalized = String(duration || "").toLowerCase();
+  if (normalized === "full" || normalized.includes("เต็มวัน") || normalized.includes("full")) {
+    return t("admin.duration_full");
+  }
+  if (normalized.includes("morning") || normalized.includes("เช้า")) {
+    return t("admin.duration_half_am");
+  }
+  if (normalized.includes("afternoon") || normalized.includes("บ่าย")) {
+    return t("admin.duration_half_pm");
+  }
+  return duration;
 };
 
 const pickTierPrice = (item: BookingItem, org: string): number => {
@@ -89,7 +107,7 @@ const previewHtmlForUrl = (
     return `
       <div class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-4 py-5 text-center">
         <p class="text-xs font-bold text-gray-400">${title}</p>
-        <p class="text-[11px] text-gray-400 mt-1">ไม่มีไฟล์แนบ</p>
+        <p class="text-[11px] text-gray-400 mt-1">${t("admin.no_attachment")}</p>
       </div>`;
   }
 
@@ -115,7 +133,7 @@ const previewHtmlForUrl = (
   const openBtn = `
     <a href="${url}" target="_blank" rel="noopener noreferrer"
        class="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold ${accentMap.btn} transition-colors">
-      เปิดเต็มจอ
+      ${t("admin.open_fullscreen")}
     </a>`;
 
   if (isPreviewableImage(url, opts?.mime)) {
@@ -144,7 +162,7 @@ const previewHtmlForUrl = (
             <iframe src="${viewerSrc}" title="${title}" class="w-full h-64 border-0 bg-white"></iframe>
           </object>
           <noscript>
-            <div class="p-6 text-center text-sm text-gray-500">เปิดไฟล์ด้วยปุ่มด้านบน</div>
+            <div class="p-6 text-center text-sm text-gray-500">${t("admin.open_with_button_above")}</div>
           </noscript>
         </div>
       </div>`;
@@ -154,7 +172,7 @@ const previewHtmlForUrl = (
     <div class="rounded-2xl border ${accentMap.ring} bg-white p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <p class="text-xs font-extrabold text-gray-800">${title}</p>
-        <p class="text-[11px] text-gray-500 mt-0.5">พรีวิวในหน้านี้ไม่รองรับชนิดไฟล์นี้</p>
+        <p class="text-[11px] text-gray-500 mt-0.5">${t("admin.preview_unsupported")}</p>
       </div>
       ${openBtn}
     </div>`;
@@ -201,7 +219,7 @@ const updateBookingStatus = async (id, status, remark = "", organizationType?: s
     });
 
     item.status = status;
-    item.actionBy = localStorage.getItem("userName") || "เจ้าหน้าที่ จัดการทรัพย์สิน";
+    item.actionBy = localStorage.getItem("userName") || t("admin.property_staff");
     if (organizationType) item.organizationType = organizationType;
     if (data?.totalPrice != null) item.totalPrice = Number(data.totalPrice);
     if (data?.roomPrice != null) item.roomPrice = Number(data.roomPrice);
@@ -211,28 +229,28 @@ const updateBookingStatus = async (id, status, remark = "", organizationType?: s
       item.tempDocFile = undefined;
     }
 
-    Swal.fire({
+    Swal.fire(withSwalTheme({
       icon: "success",
-      title: "ดำเนินการสำเร็จ!",
+      title: t("admin.updated"),
       showConfirmButton: false,
       timer: 1500,
-    });
+    }));
   } catch (err: any) {
     console.error("Error updating status:", err);
     const msg =
-      err?.response?.data?.message || "ไม่สามารถอัปเดตสถานะได้";
-    Swal.fire({
+      err?.response?.data?.message || t("admin.swal_update_fail");
+    Swal.fire(withSwalTheme({
       icon: "error",
-      title: "เกิดข้อผิดพลาด",
+      title: t("admin.error"),
       text: msg,
-    });
+    }));
   }
 };
 
 const saveLog = async (action, details) => {
   try {
     await api.post("/api/admin/logs", {
-      adminName: localStorage.getItem("userName") || "เจ้าหน้าที่ จัดการทรัพย์สิน",
+      adminName: localStorage.getItem("userName") || t("admin.property_staff"),
       action,
       details
     });
@@ -276,20 +294,24 @@ const exportPermission = (id) => {
     saveLog("โหลดใบขออนุญาต", `ดาวน์โหลดเอกสารของรายการ: ${id}`);
     openConfirm(id, "manage_pending");
   } else {
-    Swal.fire("ข้อผิดพลาด", "ไม่พบข้อมูลอ้างอิงของระบบ", "error");
+    Swal.fire(withSwalTheme({
+      icon: "error",
+      title: t("admin.error"),
+      text: t("admin.swal_reference_missing"),
+    }));
   }
 };
 
 const importPermission = (id) => {
-  Swal.fire({
-    title: "แนบใบอนุมัติ",
-    text: `อัปโหลดไฟล์ที่เซ็นอนุมัติแล้วสำหรับรายการ ${id} (PDF, Word, รูปภาพ)`,
+  Swal.fire(withSwalTheme({
+    title: t("admin.swal_attach_approval"),
+    text: t("admin.swal_attach_hint", { id }),
     icon: "info",
     input: "file",
     inputAttributes: { accept: ".pdf, .doc, .docx, image/*" },
     showCancelButton: true,
-    confirmButtonText: "อัปโหลดเอกสาร",
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t("admin.upload_document"),
+    cancelButtonText: t("admin.cancel"),
     reverseButtons: false,
     buttonsStyling: false,
     customClass: {
@@ -298,7 +320,7 @@ const importPermission = (id) => {
       confirmButton: statusActionBtn.primary,
       cancelButton: statusActionBtn.secondary,
     },
-  }).then((result) => {
+  })).then((result) => {
     if (result.value) {
       const item = bookings.value.find((b) => b.id === id);
       if (item) {
@@ -307,14 +329,14 @@ const importPermission = (id) => {
       }
 
       saveLog("แนบใบอนุมัติ", `เตรียมเอกสารอนุมัติสำหรับรายการ: ${id} แล้ว`);
-      Swal.fire({
+      Swal.fire(withSwalTheme({
         icon: "success",
-        title: "แนบไฟล์แล้ว!",
-        text: "กรุณากด 'อนุมัติ' เพื่อส่งข้อมูลเข้าสู่ระบบ",
+        title: t("admin.swal_attach_success"),
+        text: t("admin.swal_attach_success_hint"),
         showConfirmButton: true,
-        confirmButtonText: "ดำเนินการต่อ",
+        confirmButtonText: t("admin.continue"),
         confirmButtonColor: "#059669"
-      }).then(() => {
+      })).then(() => {
         openConfirm(id, "manage_pending");
       });
     } else {
@@ -327,25 +349,25 @@ const openConfirm = (id, type) => {
   const item = bookings.value.find((b) => b.id === id);
 
   if (type === "manage_pending") {
-    Swal.fire({
-      title: "จัดการคำขอจองพื้นที่",
+    Swal.fire(withSwalTheme({
+      title: t("admin.swal_manage_request"),
       html: `
-        <p class="mb-5 text-gray-500 text-sm font-medium">จัดการเอกสาร หรือเลือกว่าจะ "อนุมัติ" หรือ "ปฏิเสธ" คำขอรหัส <b>${id}</b></p>
+        <p class="mb-5 text-gray-500 text-sm font-medium">${t("admin.swal_manage_hint", { id })}</p>
         <div class="flex flex-col sm:flex-row justify-center gap-3 mb-4 border-b border-gray-100 pb-6">
           <button id="btn-export-doc" class="bg-blue-50 text-blue-600 px-4 py-3 rounded-xl text-xs font-bold border border-blue-100 hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full sm:w-1/2">
-            <font-awesome-icon icon="file-download" /> ใบขออนุญาต
+            <font-awesome-icon icon="file-download" /> ${t("admin.btn_docs")}
           </button>
           <button id="btn-import-doc" class="bg-purple-50 text-purple-600 px-4 py-3 rounded-xl text-xs font-bold border border-purple-100 hover:bg-purple-600 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm w-full sm:w-1/2 ${hasApprovalDoc(item) ? "ring-2 ring-purple-400 bg-purple-100" : ""}">
-            <font-awesome-icon icon="file-upload" /> ${hasApprovalDoc(item) ? "แนบใบอนุมัติ ✓" : "แนบใบอนุมัติ"}
+            <font-awesome-icon icon="file-upload" /> ${hasApprovalDoc(item) ? `${t("admin.swal_attach_approval")} ✓` : t("admin.swal_attach_approval")}
           </button>
         </div>
-        ${!hasApprovalDoc(item) ? '<p class="text-xs text-red-500 mb-2 font-bold"><font-awesome-icon icon="exclamation-circle" /> บังคับแนบใบอนุมัติก่อน จึงจะสามารถกดอนุมัติได้</p>' : ""}
+        ${!hasApprovalDoc(item) ? `<p class="text-xs text-red-500 mb-2 font-bold"><font-awesome-icon icon="exclamation-circle" /> ${t("admin.approval_required_hint")}</p>` : ""}
       `,
       showDenyButton: true,
       showCancelButton: true,
-      confirmButtonText: "อนุมัติ",
-      denyButtonText: "ปฏิเสธ",
-      cancelButtonText: "ยกเลิก",
+      confirmButtonText: t("admin.approve_btn"),
+      denyButtonText: t("admin.disapprove_btn"),
+      cancelButtonText: t("admin.cancel"),
       reverseButtons: false,
       buttonsStyling: false,
       customClass: {
@@ -375,28 +397,28 @@ const openConfirm = (id, type) => {
             importPermission(id);
           });
       },
-    }).then((result) => {
+    })).then((result) => {
       if (item) {
         if (result.isConfirmed) {
           if (!hasApprovalDoc(item)) {
-            Swal.fire({
+            Swal.fire(withSwalTheme({
               icon: "warning",
-              title: "ต้องแนบใบอนุมัติ",
-              text: "กรุณาแนบใบอนุมัติก่อนกดอนุมัติ",
-              confirmButtonText: "ตกลง",
-            }).then(() => openConfirm(id, "manage_pending"));
+              title: t("admin.approval_required_title"),
+              text: t("admin.approval_required_text"),
+              confirmButtonText: t("common.confirm"),
+            })).then(() => openConfirm(id, "manage_pending"));
             return;
           }
           openApproveConfirm(id);
         } else if (result.isDenied) {
           // ✨ เพิ่มส่วนให้แอดมินกรอกเหตุผลที่ปฏิเสธ ✨
-          Swal.fire({
-            title: "ระบุเหตุผลที่ไม่อนุมัติ",
+          Swal.fire(withSwalTheme({
+            title: t("admin.swal_deny_reason"),
             input: "textarea",
-            inputPlaceholder: "เช่น เอกสารไม่ครบถ้วน...",
+            inputPlaceholder: t("admin.deny_reason_placeholder"),
             showCancelButton: true,
-            confirmButtonText: "ยืนยันการปฏิเสธ",
-            cancelButtonText: "ยกเลิก",
+            confirmButtonText: t("admin.confirm_denial"),
+            cancelButtonText: t("admin.cancel"),
             confirmButtonColor: "#ba0b2f",
             customClass: {
               popup: "rounded-3xl",
@@ -404,11 +426,11 @@ const openConfirm = (id, type) => {
             },
             preConfirm: (remark) => {
               if (!remark) {
-                Swal.showValidationMessage("กรุณาระบุเหตุผล");
+                Swal.showValidationMessage(t("admin.deny_reason_required"));
               }
               return remark;
             },
-          }).then((remarkResult) => {
+          })).then((remarkResult) => {
             if (remarkResult.isConfirmed) {
               updateBookingStatus(id, "disapproved", remarkResult.value);
               saveLog(
@@ -421,7 +443,7 @@ const openConfirm = (id, type) => {
       }
     });
   } else if (type === "payment") {
-    Swal.fire({
+    Swal.fire(withSwalTheme({
       title: t("admin.awaiting_stripe_title"),
       text: t("admin.awaiting_stripe_hint"),
       icon: "info",
@@ -431,7 +453,7 @@ const openConfirm = (id, type) => {
         popup: "rounded-[2rem] p-8",
         confirmButton: statusActionBtn.secondary,
       },
-    });
+    }));
   }
 };
 
@@ -475,47 +497,47 @@ const openApproveConfirm = (id: string) => {
       <input type="radio" name="org-rate" value="${value}" class="mt-1 accent-emerald-600" ${checked ? "checked" : ""} />
       <span class="min-w-0 flex-1">
         <span class="block text-sm font-extrabold text-gray-900">${label}</span>
-        <span class="block text-xs text-gray-500 mt-0.5">ค่าห้อง ฿${roomPrice.toLocaleString()}</span>
-        <span class="block text-sm font-black text-emerald-700 mt-1 tabular-nums">ประมาณรวม ฿${estimateTotal(value).toLocaleString()}</span>
+        <span class="block text-xs text-gray-500 mt-0.5">${t("admin.room_fee_value", { amount: roomPrice.toLocaleString() })}</span>
+        <span class="block text-sm font-black text-emerald-700 mt-1 tabular-nums">${t("admin.estimated_total", { amount: estimateTotal(value).toLocaleString() })}</span>
       </span>
     </label>`;
 
-  Swal.fire({
+  Swal.fire(withSwalTheme({
     title: `<div class="text-left">
-      <p class="text-xl font-black text-gray-900">ยืนยันการอนุมัติ</p>
-      <p class="text-xs font-medium text-gray-500 mt-1">ตรวจเอกสารและเลือกเรทราคาก่อนยืนยัน</p>
+      <p class="text-xl font-black text-gray-900">${t("admin.swal_approve_confirm")}</p>
+      <p class="text-xs font-medium text-gray-500 mt-1">${t("admin.swal_approve_subtitle")}</p>
     </div>`,
     width: 640,
     html: `
       <div class="text-left space-y-4 text-sm max-h-[70vh] overflow-y-auto pr-1">
         <div class="rounded-2xl border border-gray-200 bg-slate-50/80 p-4">
-          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">รายละเอียดการจอง</p>
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-3">${t("admin.booking_details")}</p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2.5">
             <div>
-              <p class="text-[10px] font-bold text-gray-400">รหัสจอง</p>
+              <p class="text-[10px] font-bold text-gray-400">${t("admin.col_booking")}</p>
               <p class="font-mono text-sm font-black text-gray-900">${item.id}</p>
             </div>
             <div>
-              <p class="text-[10px] font-bold text-gray-400">ผู้จอง</p>
+              <p class="text-[10px] font-bold text-gray-400">${t("admin.col_renter")}</p>
               <p class="text-sm font-bold text-gray-900">${item.userName}</p>
             </div>
             <div class="sm:col-span-2">
-              <p class="text-[10px] font-bold text-gray-400">ห้อง / พื้นที่</p>
+              <p class="text-[10px] font-bold text-gray-400">${t("admin.room_space")}</p>
               <p class="text-sm font-bold text-gray-900">${item.roomName}</p>
             </div>
             <div>
-              <p class="text-[10px] font-bold text-gray-400">วันที่ / ช่วง</p>
-              <p class="text-sm font-semibold text-gray-800">${item.date} · ${item.duration}</p>
+              <p class="text-[10px] font-bold text-gray-400">${t("admin.col_date_slot")}</p>
+              <p class="text-sm font-semibold text-gray-800">${formatDateDMY(item.date)} · ${getDurationLabel(item.duration)}</p>
             </div>
             <div>
-              <p class="text-[10px] font-bold text-gray-400">เรทเดิม / ยอด</p>
-              <p class="text-sm font-semibold text-gray-800">${ORG_LABEL[currentOrg] || currentOrg}</p>
-              <p class="text-xs text-gray-500">ห้อง ฿${oldRoom.toLocaleString()} · รวม ฿${oldTotal.toLocaleString()}</p>
+              <p class="text-[10px] font-bold text-gray-400">${t("admin.current_rate_total")}</p>
+              <p class="text-sm font-semibold text-gray-800">${getOrgLabel(currentOrg)}</p>
+              <p class="text-xs text-gray-500">${t("admin.room_total_value", { room: oldRoom.toLocaleString(), total: oldTotal.toLocaleString() })}</p>
             </div>
             ${
               item.objective
                 ? `<div class="sm:col-span-2">
-                    <p class="text-[10px] font-bold text-gray-400">วัตถุประสงค์</p>
+                    <p class="text-[10px] font-bold text-gray-400">${t("admin.purpose")}</p>
                     <p class="text-sm text-gray-700 leading-snug">${item.objective}</p>
                   </div>`
                 : ""
@@ -524,28 +546,28 @@ const openApproveConfirm = (id: string) => {
         </div>
 
         <div>
-          <p class="text-sm font-extrabold text-gray-800 mb-2">เลือกเรทราคา <span class="text-xs font-medium text-gray-400">(ตามหนังสืออนุมัติ)</span></p>
+          <p class="text-sm font-extrabold text-gray-800 mb-2">${t("admin.select_rate")} <span class="text-xs font-medium text-gray-400">(${t("admin.according_to_approval")})</span></p>
           <div class="grid grid-cols-1 gap-2">
-            ${rateCard("internal", "บุคคลภายใน", priceInternal, currentOrg === "internal")}
-            ${rateCard("co_op", "หน่วยงานร่วมจัด / Coop", priceCoop, currentOrg === "co_op")}
-            ${rateCard("external", "บุคคลภายนอก", priceExternal, currentOrg === "external")}
+            ${rateCard("internal", t("admin.org_internal"), priceInternal, currentOrg === "internal")}
+            ${rateCard("co_op", t("admin.org_coop"), priceCoop, currentOrg === "co_op")}
+            ${rateCard("external", t("admin.org_external"), priceExternal, currentOrg === "external")}
           </div>
           <p class="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mt-2 font-medium">
-            เลือกเรทได้เฉพาะตอนยืนยันอนุมัตินี้ครั้งเดียว · บันทึกใน Activity Log
+            ${t("admin.rate_once_hint")}
           </p>
         </div>
 
         <div class="space-y-3">
-          <p class="text-sm font-extrabold text-gray-800">เอกสารแนบ</p>
-          ${previewHtmlForUrl(memoUrl, "หนังสือบันทึกข้อความ", { accent: "blue" })}
-          ${previewHtmlForUrl(approvalPreviewUrl, "ใบอนุมัติ", {
+          <p class="text-sm font-extrabold text-gray-800">${t("admin.attachments")}</p>
+          ${previewHtmlForUrl(memoUrl, t("admin.memo_document"), { accent: "blue" })}
+          ${previewHtmlForUrl(approvalPreviewUrl, t("admin.approval_document"), {
             mime: approvalMime,
             accent: "emerald",
           })}
           ${
             !approvalPreviewUrl
               ? `<div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-bold text-rose-700">
-                   ยังไม่มีใบอนุมัติ — ย้อนกลับไปแนบไฟล์ก่อนจึงจะยืนยันได้
+                   ${t("admin.approval_missing_hint")}
                  </div>`
               : ""
           }
@@ -553,8 +575,8 @@ const openApproveConfirm = (id: string) => {
       </div>
     `,
     showCancelButton: true,
-    confirmButtonText: "ยืนยันอนุมัติ",
-    cancelButtonText: "ย้อนกลับ",
+    confirmButtonText: t("admin.confirm_approval"),
+    cancelButtonText: t("common.back"),
     confirmButtonColor: "#059669",
     focusConfirm: false,
     customClass: {
@@ -579,7 +601,7 @@ const openApproveConfirm = (id: string) => {
     },
     preConfirm: () => {
       if (!hasApprovalDoc(item)) {
-        Swal.showValidationMessage("ต้องแนบใบอนุมัติก่อนยืนยัน");
+        Swal.showValidationMessage(t("admin.approval_required_before_confirm"));
         return false;
       }
       const selected = (
@@ -588,12 +610,12 @@ const openApproveConfirm = (id: string) => {
         ) as HTMLInputElement | null
       )?.value;
       if (!selected) {
-        Swal.showValidationMessage("กรุณาเลือกเรทราคา");
+        Swal.showValidationMessage(t("admin.rate_required"));
         return false;
       }
       return selected;
     },
-  }).then((result) => {
+  })).then((result) => {
     if (approvalPreviewUrl.startsWith("blob:")) {
       try {
         URL.revokeObjectURL(approvalPreviewUrl);
@@ -612,25 +634,25 @@ const openApproveConfirm = (id: string) => {
 const viewFeedback = (booking) => {
   if (booking.hasFeedback && booking.feedbackData) {
     const stars = "⭐".repeat(booking.feedbackData.rating);
-    Swal.fire({
-      title: "รีวิวจากผู้ใช้งาน",
+    Swal.fire(withSwalTheme({
+      title: t("admin.swal_feedback_title"),
       html: `
         <div class="text-center mb-4">
           <p class="text-3xl mb-2">${stars}</p>
-          <p class="text-sm font-bold text-gray-500">(${booking.feedbackData.rating} ดาว)</p>
+          <p class="text-sm font-bold text-gray-500">${t("admin.feedback_rating", { rating: booking.feedbackData.rating })}</p>
         </div>
         <div class="bg-gray-50 p-4 rounded-xl border border-gray-200 text-left">
-          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">ความคิดเห็น</p>
-          <p class="text-gray-800 font-medium">"${booking.feedbackData.comment || "ไม่ได้ระบุความคิดเห็น"}"</p>
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">${t("admin.feedback_comment")}</p>
+          <p class="text-gray-800 font-medium">"${booking.feedbackData.comment || t("admin.feedback_empty")}"</p>
         </div>
       `,
-      confirmButtonText: "ปิดหน้าต่าง",
+      confirmButtonText: t("admin.close_window"),
       confirmButtonColor: "#ba0b2f",
       customClass: {
         popup: "rounded-3xl p-6",
         confirmButton: "rounded-xl w-full mt-4 font-bold cursor-pointer",
       },
-    });
+    }));
   }
 };
 
@@ -641,12 +663,12 @@ const viewBookingHistory = async (booking: BookingItem) => {
     });
     const rows = [...(res.data || [])];
     if (!rows.length) {
-      Swal.fire({
+      Swal.fire(withSwalTheme({
         icon: "info",
-        title: "ยังไม่มีประวัติ",
-        text: `รายการ ${booking.id} ยังไม่มี activity log`,
+        title: t("admin.no_history"),
+        text: t("admin.no_history_text", { id: booking.id }),
         confirmButtonColor: "#ba0b2f",
-      });
+      }));
       return;
     }
 
@@ -706,21 +728,24 @@ const viewBookingHistory = async (booking: BookingItem) => {
       if (fromTo) {
         const from = fromTo[1];
         const to = fromTo[2];
+        const fromLabel = getBookingStatusLabel(from, locale.value);
+        const toLabel = getBookingStatusLabel(to, locale.value);
         const extra = (fromTo[3] || "").trim();
         return `
           <div class="mt-3 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-            <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(from)}">${from}</span>
-            <span class="text-[#ba0b2f] font-black text-lg sm:text-xl px-1">→</span>
-            <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(to)}">${to}</span>
+            <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(from)}">${fromLabel}</span>
+            <span class="text-mfu-red font-black text-lg sm:text-xl px-1">→</span>
+            <span class="inline-flex justify-center px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(to)}">${toLabel}</span>
           </div>
-          ${extra ? `<p class="text-sm text-gray-700 font-semibold mt-3 px-3 py-2 rounded-xl bg-rose-50 border border-rose-100"><span class="text-rose-700 font-black">เหตุผล:</span> ${extra.replace(/^\|\s*(?:เหตุผล|หมายเหตุ):\s*/, "")}</p>` : ""}
+          ${extra ? `<p class="text-sm text-gray-700 font-semibold mt-3 px-3 py-2 rounded-xl bg-rose-50 border border-rose-100"><span class="text-rose-700 font-black">${t("admin.reason")}:</span> ${extra.replace(/^\|\s*(?:เหตุผล|หมายเหตุ):\s*/, "")}</p>` : ""}
         `;
       }
       const setOnly = details.match(/ตั้งสถานะเป็น「([^」]+)」(.*)$/);
       if (setOnly) {
+        const statusLabel = getBookingStatusLabel(setOnly[1], locale.value);
         return `
           <div class="mt-3">
-            <span class="inline-flex px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(setOnly[1])}">${setOnly[1]}</span>
+            <span class="inline-flex px-3 py-1.5 rounded-xl text-sm font-black border ${getBookingStatusBadgeClass(setOnly[1])}">${statusLabel}</span>
           </div>
         `;
       }
@@ -737,18 +762,18 @@ const viewBookingHistory = async (booking: BookingItem) => {
         <p class="text-base font-black text-gray-900 leading-snug">${l.action || "-"}</p>
         ${renderTransitionHtml(l.displayDetails || "")}
         <div class="mt-4 pt-3 border-t-2 border-gray-200 flex flex-wrap items-center justify-between gap-2 text-sm font-bold text-gray-600">
-          <span class="inline-flex items-center gap-1.5"><span class="text-gray-400 font-semibold">โดย</span> ${l.admin_name || "ระบบ"}</span>
-          <span>${l.created_at ? new Date(l.created_at).toLocaleString("th-TH") : ""}</span>
+          <span class="inline-flex items-center gap-1.5"><span class="text-gray-400 font-semibold">${t("admin.by")}</span> ${l.admin_name || t("admin.system")}</span>
+          <span>${l.created_at ? new Date(l.created_at).toLocaleString(locale.value === "en" ? "en-GB" : "th-TH") : ""}</span>
         </div>
       </div>`
       )
       .join("");
 
-    Swal.fire({
-      title: `<span class="text-xl font-black text-gray-900 tracking-tight">ประวัติรายการ ${booking.id}</span>`,
+    Swal.fire(withSwalTheme({
+      title: `<span class="text-xl font-black text-gray-900 tracking-tight">${t("admin.history_for", { id: booking.id })}</span>`,
       html: `<div class="max-h-[28rem] overflow-y-auto px-1 py-1 text-left bg-[#f1f3f5] rounded-2xl p-3">${html}</div>`,
       width: 560,
-      confirmButtonText: "ปิด",
+      confirmButtonText: t("admin.close_window"),
       confirmButtonColor: "#ba0b2f",
       customClass: {
         popup: "rounded-3xl p-7",
@@ -756,35 +781,28 @@ const viewBookingHistory = async (booking: BookingItem) => {
         confirmButton:
           "rounded-xl w-full mt-3 py-3 text-base font-black cursor-pointer",
       },
-    });
+    }));
   } catch (err) {
-    Swal.fire({
+    Swal.fire(withSwalTheme({
       icon: "error",
-      title: "โหลดประวัติไม่สำเร็จ",
+      title: t("admin.history_load_fail"),
       confirmButtonColor: "#ba0b2f",
-    });
+    }));
   }
 };
 
-const getStatusText = (status: string) => getBookingStatusLabel(status, "th");
-const getStatusClass = (status: string) => getBookingStatusBadgeClass(status);
-const getStatusIcon = (status: string) => getBookingStatusIcon(status);
 </script>
 
 <template>
   <div class="space-y-6 animate-fade-up">
-    <div
-      class="bg-white p-6 rounded-3xl shadow-card border border-gray-200 flex flex-col justify-between gap-6"
-    >
+    <div class="ui-card ui-admin-header p-6">
       <div>
-        <h2
-          class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
-        >
-          <font-awesome-icon icon="clipboard-list" class="text-[#ba0b2f]" />
-          จัดการคำขอจองพื้นที่
+        <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
+          <font-awesome-icon icon="clipboard-list" class="text-mfu-red" />
+          {{ $t("admin.bookings_title") }}
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          ตรวจสอบสถานะ จัดการเอกสารขออนุญาต และอนุมัติการจอง
+          {{ $t("admin.bookings_subtitle") }}
         </p>
       </div>
     </div>
@@ -795,7 +813,7 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
       <div class="flex-1">
         <label
           class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
-          >ค้นหา (ID, ชื่อผู้จอง, ห้อง)</label
+          >{{ $t("admin.search_bookings") }}</label
         >
         <div class="relative">
           <font-awesome-icon
@@ -805,8 +823,8 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="พิมพ์คำค้นหา..."
-            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
+            :placeholder="$t('admin.search_placeholder')"
+            class="ui-input pl-10"
           />
         </div>
       </div>
@@ -814,42 +832,32 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
         <div class="w-1/2 lg:w-auto">
           <label
             class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
-            >วันที่เริ่มต้น</label
+            >{{ $t("admin.date_from") }}</label
           >
-          <input
-            v-model="filterStartDate"
-            type="date"
-            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
-          />
+          <DateField v-model="filterStartDate" input-class="ui-input" />
         </div>
         <div class="w-1/2 lg:w-auto">
           <label
             class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-1"
-            >ถึงวันที่</label
+            >{{ $t("admin.date_to") }}</label
           >
-          <input
-            v-model="filterEndDate"
-            type="date"
-            class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 text-gray-900 text-sm font-semibold rounded-xl focus:ring-2 focus:ring-[#ba0b2f] outline-none transition-all"
-          />
+          <DateField v-model="filterEndDate" input-class="ui-input" />
         </div>
       </div>
     </div>
 
-    <div
-      class="bg-white rounded-3xl shadow-card border border-gray-200 overflow-hidden"
-    >
-      <div class="overflow-x-auto">
+    <div class="ui-table-card">
+      <div class="ui-table-wrap max-h-[70vh] rounded-none border-0 shadow-none">
         <table class="w-full text-left border-collapse min-w-225">
           <thead>
             <tr
-              class="bg-gray-50 text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
+              class="text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
             >
-              <th class="px-6 py-5">Booking ID</th>
-              <th class="px-6 py-5">ผู้จอง</th>
-              <th class="px-6 py-5">ห้องที่จอง</th>
-              <th class="px-6 py-5 text-right">ยอดชำระ</th>
-              <th class="px-6 py-5 text-center">สถานะ / จัดการคำขอ</th>
+              <th class="px-6 py-5">{{ $t("admin.col_booking") }}</th>
+              <th class="px-6 py-5">{{ $t("admin.col_renter") }}</th>
+              <th class="px-6 py-5">{{ $t("admin.col_date_slot") }}</th>
+              <th class="px-6 py-5 text-right">{{ $t("admin.col_amount") }}</th>
+              <th class="px-6 py-5 text-center">{{ $t("admin.col_status") }} / {{ $t("admin.col_actions") }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
@@ -891,8 +899,8 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                   {{ booking.roomName }}
                 </p>
                 <p class="text-xs text-gray-400 mt-1">
-                  <font-awesome-icon :icon="['far', 'calendar-alt']" /> {{ booking.date }} |
-                  <font-awesome-icon :icon="['far', 'clock']" /> {{ booking.duration }}
+                  <font-awesome-icon :icon="['far', 'calendar-alt']" /> {{ formatDateDMY(booking.date) }} |
+                  <font-awesome-icon :icon="['far', 'clock']" /> {{ getDurationLabel(booking.duration) }}
                 </p>
                 <div class="flex flex-wrap gap-1.5 mt-1.5">
                   <a
@@ -903,7 +911,7 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                     class="inline-flex items-center gap-1.5 text-[10px] font-bold text-blue-600 bg-blue-50 px-2.5 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition-all"
                   >
                     <font-awesome-icon icon="file-pdf" />
-                    หนังสือบันทึกข้อความ
+                    {{ $t("admin.memo_document") }}
                   </a>
                   <a
                     v-if="booking.approvalDocumentUrl"
@@ -913,7 +921,7 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                     class="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100 hover:bg-emerald-100 transition-all"
                   >
                     <font-awesome-icon icon="file-signature" />
-                    ใบอนุมัติ
+                    {{ $t("admin.approval_document") }}
                   </a>
                 </div>
               </td>
@@ -922,47 +930,36 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                 :class="
                   isBookingStatus(booking.status, 'cancelled')
                     ? 'text-gray-400'
-                    : 'text-[#ba0b2f]'
+                    : 'text-mfu-red'
                 "
               >
                 ฿{{ booking.totalPrice.toLocaleString() }}
               </td>
               <td class="px-6 py-6 text-center">
                 <div class="flex flex-col items-center justify-center gap-1.5">
-                  <button
+                  <BookingStatusBadge
                     v-if="isBookingStatus(booking.status, 'pending')"
+                    :status="booking.status"
+                    as="button"
+                    size="md"
+                    show-pointer
                     @click="openConfirm(booking.id, 'manage_pending')"
-                    :class="getStatusClass(booking.status)"
-                    class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2 hover:shadow-md hover:opacity-90 transition-all cursor-pointer"
-                  >
-                    <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
-                    {{ getStatusText(booking.status) }}
-                    <font-awesome-icon icon="mouse-pointer" class="text-[10px] opacity-50" />
-                  </button>
+                  />
                   <!-- Awaiting Stripe — display only; admin cannot mark paid -->
                   <div
                     v-else-if="isBookingStatus(booking.status, 'approved_pending_payment')"
                     class="flex flex-col items-center gap-1"
                   >
-                    <span
-                      :class="getStatusClass(booking.status)"
-                      class="min-w-[7.5rem] px-4 py-2.5 rounded-xl text-sm font-black border-2 shadow-sm inline-flex items-center justify-center gap-2 whitespace-nowrap cursor-default"
+                    <BookingStatusBadge
+                      :status="booking.status"
+                      size="md"
                       :title="t('admin.awaiting_stripe_hint')"
-                    >
-                      <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
-                      {{ getStatusText(booking.status) }}
-                    </span>
+                    />
                     <span class="text-[10px] text-sky-600 font-semibold">{{ t("admin.awaiting_stripe_hint_short") }}</span>
                   </div>
 
                   <div v-else class="flex flex-col items-center gap-2">
-                    <span
-                      :class="getStatusClass(booking.status)"
-                      class="px-4 py-2 rounded-xl text-sm font-bold border shadow-sm inline-flex items-center gap-2"
-                    >
-                      <font-awesome-icon :icon="getStatusIcon(booking.status)" class="text-[11px] opacity-80" />
-                      {{ getStatusText(booking.status) }}
-                    </span>
+                    <BookingStatusBadge :status="booking.status" size="md" />
 
                     <template v-if="isBookingStatus(booking.status, 'approved_paid') || isBookingStatus(booking.status, 'completed')">
                       <button
@@ -970,16 +967,16 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                         type="button"
                         @click="viewFeedback(booking)"
                         class="mt-0.5 px-3 py-1.5 rounded-lg text-[11px] font-bold bg-violet-600 text-white hover:bg-violet-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
-                        :title="getReviewedLabel('th')"
+                        :title="getReviewedLabel(locale)"
                       >
                         <font-awesome-icon icon="star" class="text-[10px]" />
-                        ดูรีวิว
+                        {{ $t("admin.btn_review") }}
                       </button>
                       <span
                         v-else
                         class="text-[10px] text-slate-400 font-semibold"
                       >
-                        {{ getAwaitingReviewLabel("th") }}
+                        {{ getAwaitingReviewLabel(locale) }}
                       </span>
                     </template>
                   </div>
@@ -999,9 +996,9 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                     <font-awesome-icon
                       v-else
                       icon="user-edit"
-                      class="text-[#ba0b2f]"
+                      class="text-mfu-red"
                     />
-                    โดย: {{ booking.actionBy }}
+                    {{ $t("admin.by") }}: {{ booking.actionBy }}
                   </div>
 
                   <button
@@ -1009,7 +1006,7 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
                     @click="viewBookingHistory(booking)"
                     class="mt-1 text-[10px] font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded-lg hover:bg-slate-50 cursor-pointer"
                   >
-                    <font-awesome-icon icon="history" class="mr-1" />ดูประวัติ
+                    <font-awesome-icon icon="history" class="mr-1" />{{ $t("admin.btn_history") }}
                   </button>
                 </div>
               </td>
@@ -1022,7 +1019,7 @@ const getStatusIcon = (status: string) => getBookingStatusIcon(status);
           class="text-center py-10 text-gray-400 font-bold"
         >
           <font-awesome-icon icon="search-minus" class="text-4xl mb-3 opacity-50" />
-          <p>ไม่พบคำขอจองที่ตรงกับเงื่อนไข</p>
+          <p>{{ $t("admin.empty_bookings") }}</p>
         </div>
       </div>
     </div>

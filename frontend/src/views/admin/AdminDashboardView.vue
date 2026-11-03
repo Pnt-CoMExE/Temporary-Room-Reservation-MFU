@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
+import { withSwalTheme } from "@/utils/swalTheme";
 import AdminBookings from "./AdminBookings.vue";
 import AdminRooms from "./AdminRooms.vue";
 import AdminBanners from "./AdminBanners.vue";
@@ -11,8 +12,7 @@ import AdminPromoCodes from "./AdminPromoCodes.vue";
 import AdminAddons from "./AdminAddons.vue";
 import AdminActivityLog from "./AdminActivityLog.vue";
 
-const { t, locale } = useI18n();
-locale.value = "th";
+const { t } = useI18n();
 
 // ✨ นำเข้า Chart.js
 import { Bar, Doughnut } from "vue-chartjs";
@@ -39,6 +39,7 @@ ChartJS.register(
 
 import api from "@/services/api";
 import { toDateKey } from "@/utils/dateKey";
+import DateField from "@/components/common/DateField.vue";
 
 interface BookingInfo {
   id: string;
@@ -251,7 +252,7 @@ const fetchAdminData = async () => {
       userName: b.partner_name || `${b.firstname} ${b.lastname}`,
       roomName: b.room_name,
       date: toDateKey(b.booking_date) || "N/A",
-      duration: b.time_slot === 'full' ? 'เต็มวัน' : b.time_slot === 'half_morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย',
+      duration: b.time_slot === 'full' ? t('admin.duration_full') : b.time_slot === 'half_morning' ? t('admin.duration_half_am') : t('admin.duration_half_pm'),
       totalPrice: parseFloat(b.total_price),
       roomPrice: parseFloat(b.room_price) || 0,
       addonsPrice: parseFloat(b.addons_price) || 0,
@@ -323,7 +324,7 @@ const fetchAdminData = async () => {
       barChartData.value = {
         labels: revenueData.map((r: any) => r.label),
         datasets: [{
-          label: "รายได้ (บาท)",
+          label: t("admin.revenue_label"),
           backgroundColor: "#ba0b2f",
           borderRadius: 6,
           data: revenueData.map((r: any) => r.revenue),
@@ -336,7 +337,7 @@ const fetchAdminData = async () => {
     } else {
       barChartData.value = {
         labels: [],
-        datasets: [{ label: "รายได้ (บาท)", backgroundColor: "#ba0b2f", borderRadius: 6, data: [] }],
+        datasets: [{ label: t("admin.revenue_label"), backgroundColor: "#ba0b2f", borderRadius: 6, data: [] }],
       };
       revenueMonths.value = [];
       revenueChartGranularity.value = "month";
@@ -409,7 +410,7 @@ const barChartOptions = ref<ChartOptions<'bar'>>({
 
 // ข้อมูลกราฟโดนัท
 const doughnutChartData = ref({
-  labels: ["บุคคลภายนอก", "หน่วยงานภายใน", "ร่วมจัด (Co-op)"],
+  labels: [t("admin.org_external"), t("admin.org_internal"), t("admin.org_coop")],
   datasets: [
     { backgroundColor: ["#ba0b2f", "#1f2937", "#d4af37"], data: [55, 30, 15] },
   ],
@@ -422,11 +423,12 @@ const doughnutChartOptions = ref<ChartOptions<'doughnut'>>({
 });
 
 const confirmLogout = () => {
-  Swal.fire({
+  Swal.fire(
+    withSwalTheme({
     html: `
       <div class="relative w-24 h-24 mx-auto mb-6">
         <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
-        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-[#ba0b2f] text-4xl">
+        <div class="relative flex items-center justify-center w-full h-full bg-white rounded-full shadow-sm border-[4px] border-red-50 text-mfu-red text-4xl">
           🚪
         </div>
       </div>
@@ -442,11 +444,12 @@ const confirmLogout = () => {
       popup: "rounded-[2rem] p-8 max-w-sm border border-gray-100 shadow-2xl",
       actions: "flex flex-row gap-3 mt-8 w-full justify-center",
       confirmButton:
-        "bg-gradient-to-r from-[#ba0b2f] to-[#8c0823] text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
+        "bg-gradient-to-r from-mfu-red to-mfu-red-dark text-white rounded-2xl px-5 py-3.5 font-bold shadow-lg shadow-red-200 hover:-translate-y-0.5 transition-all flex-1 whitespace-nowrap cursor-pointer",
       cancelButton:
         "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
-  }).then((result) => {
+  })
+  ).then((result) => {
     if (result.isConfirmed) {
       localStorage.clear();
       router.push("/");
@@ -468,7 +471,7 @@ const confirmLogout = () => {
           />
         </picture>
         <div
-          class="absolute inset-0 bg-linear-to-b from-[#111827]/90 via-[#ba0b2f]/60 to-[#f8f9fa]"
+          class="absolute inset-0 bg-linear-to-b from-[#111827]/90 via-mfu-red/60 to-[#f8f9fa]"
         ></div>
       </div>
       <div
@@ -476,7 +479,7 @@ const confirmLogout = () => {
       >
         <div class="text-center md:text-left">
           <span
-            class="inline-block py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-md text-[#d4af37] border border-[#d4af37]/30 text-xs font-bold tracking-widest uppercase mb-3 shadow-lg"
+            class="inline-block py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-md text-mfu-gold border border-mfu-gold/30 text-xs font-bold tracking-widest uppercase mb-3 shadow-lg"
             >Administrator Portal</span
           >
           <h1
@@ -500,7 +503,7 @@ const confirmLogout = () => {
           >
             <div class="text-center mb-8 border-b border-gray-100 pb-6">
               <div
-                class="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-lg border-4 border-white mb-4 bg-linear-to-tr from-[#ba0b2f] to-[#8c0823] flex items-center justify-center text-white text-3xl"
+                class="w-24 h-24 mx-auto rounded-full overflow-hidden shadow-lg border-4 border-white mb-4 bg-linear-to-tr from-mfu-red to-mfu-red-dark flex items-center justify-center text-white text-3xl"
               >
                 <img
                   v-if="adminProfile.profilePicture"
@@ -515,7 +518,7 @@ const confirmLogout = () => {
                 {{ adminProfile.fullName }}
               </h3>
               <span
-                class="inline-block px-3 py-1 bg-red-50 text-[#ba0b2f] text-[10px] font-bold uppercase rounded-lg border border-red-100 tracking-wider"
+                class="inline-block px-3 py-1 bg-red-50 text-mfu-red text-[10px] font-bold uppercase rounded-lg border border-red-100 tracking-wider"
                 >{{ adminProfile.role }}</span
               >
             </div>
@@ -525,28 +528,28 @@ const confirmLogout = () => {
                 @click="activeTab = 'overview'"
                 :class="
                   activeTab === 'overview'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                    : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
-                <font-awesome-icon icon="chart-pie" class="w-5" /> Dashboard
+                <font-awesome-icon icon="chart-pie" class="w-5" /> {{ $t("admin.nav_dashboard") }}
               </button>
               <button
                 @click="activeTab = 'bookings'"
                 :class="
                   activeTab === 'bookings'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                    : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center justify-between px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left group cursor-pointer"
+                class="ui-nav-item justify-between group"
               >
                 <div class="flex items-center gap-4">
-                  <font-awesome-icon icon="clipboard-list" class="w-5" /> จัดการคำขอจอง
+                  <font-awesome-icon icon="clipboard-list" class="w-5" /> {{ $t("admin.manage_bookings") }}
                 </div>
                 <div
                   v-if="pendingCount > 0"
-                  class="flex items-center justify-center min-w-5.5 h-5.5 px-1.5 bg-[#ba0b2f] text-white text-[11px] font-black rounded-full shadow-sm ring-2 ring-white"
+                  class="flex items-center justify-center min-w-5.5 h-5.5 px-1.5 bg-mfu-red text-white text-[11px] font-black rounded-full shadow-sm ring-2 ring-white"
                 >
                   {{ pendingCount }}
                 </div>
@@ -555,67 +558,67 @@ const confirmLogout = () => {
                 @click="activeTab = 'rooms'"
                 :class="
                   activeTab === 'rooms'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
-                <font-awesome-icon icon="building" class="w-5" /> ข้อมูลห้องและพื้นที่
+                <font-awesome-icon icon="building" class="w-5" /> {{ $t("admin.nav_rooms_short") }}
               </button>
               <button
                 @click="activeTab = 'users'"
                 :class="
                   activeTab === 'users'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
-                <font-awesome-icon icon="users" class="w-5" /> จัดการผู้ใช้
+                <font-awesome-icon icon="users" class="w-5" /> {{ $t("admin.nav_users_short") }}
               </button>
               <button
                 @click="activeTab = 'promos'"
                 :class="
                   activeTab === 'promos'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
-                <font-awesome-icon icon="ticket-alt" class="w-5" /> รหัสส่วนลด
+                <font-awesome-icon icon="ticket-alt" class="w-5" /> {{ $t("admin.nav_promo_short") }}
               </button>
               <button
                 @click="activeTab = 'addons'"
                 :class="
                   activeTab === 'addons'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
-                <font-awesome-icon icon="box-open" class="w-5" /> อุปกรณ์เสริม
+                <font-awesome-icon icon="box-open" class="w-5" /> {{ $t("admin.nav_addons_short") }}
               </button>
               <button
                 @click="activeTab = 'banners'"
                 :class="
                   activeTab === 'banners'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
-                <font-awesome-icon icon="bullhorn" class="w-5" /> การประกาศ
+                <font-awesome-icon icon="bullhorn" class="w-5" /> {{ $t("admin.banners_title") }}
               </button>
               <button
                 @click="activeTab = 'logs'"
                 :class="
                   activeTab === 'logs'
-                    ? 'bg-red-50 text-[#ba0b2f]'
-                    : 'text-gray-600 hover:bg-gray-50'
+                    ? 'ui-nav-item-active'
+                     : 'ui-nav-item-idle'
                 "
-                class="w-full flex items-center gap-4 px-5 py-3.5 rounded-xl font-bold text-sm transition-colors text-left cursor-pointer"
+                class="ui-nav-item"
               >
-                <font-awesome-icon icon="history" class="w-5" /> บันทึกกิจกรรม
+                <font-awesome-icon icon="history" class="w-5" /> {{ $t("admin.nav_logs_short") }}
               </button>
 
               <div class="pt-6 mt-6 border-t border-gray-100">
@@ -625,11 +628,11 @@ const confirmLogout = () => {
                 >
                   <div class="flex items-center gap-4">
                     <div
-                      class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:text-[#ba0b2f] transition-colors"
+                      class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center group-hover:bg-red-100 group-hover:text-mfu-red transition-colors"
                     >
                       <font-awesome-icon icon="sign-out-alt" />
                     </div>
-                    <span>ออกจากระบบ</span>
+                    <span>{{ $t("admin.nav_logout") }}</span>
                   </div>
                 </button>
               </div>
@@ -653,36 +656,36 @@ const confirmLogout = () => {
                   type="button"
                   @click="setFilterMode('latest')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'latest' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
-                >เดือนล่าสุด</button>
+                  :class="filterMode === 'latest' ? 'ui-chip-active' : 'ui-chip-idle'"
+                >{{ $t("admin.filter_latest") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('all')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'all' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
-                >ทั้งหมด</button>
+                  :class="filterMode === 'all' ? 'ui-chip-active' : 'ui-chip-idle'"
+                >{{ $t("admin.filter_all") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('month')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'month' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
-                >เลือกเดือน</button>
+                  :class="filterMode === 'month' ? 'ui-chip-active' : 'ui-chip-idle'"
+                >{{ $t("admin.filter_month") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('year')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'year' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
-                >รายปี</button>
+                  :class="filterMode === 'year' ? 'ui-chip-active' : 'ui-chip-idle'"
+                >{{ $t("admin.filter_year") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('range')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
-                  :class="filterMode === 'range' ? 'bg-[#ba0b2f] text-white' : 'bg-gray-100 text-gray-600'"
-                >ช่วงวัน (เช่น รายสัปดาห์)</button>
+                  :class="filterMode === 'range' ? 'ui-chip-active' : 'ui-chip-idle'"
+                >{{ $t("admin.filter_range") }}</button>
               </div>
               <div class="flex flex-col lg:flex-row gap-3 lg:items-end">
                 <div v-if="filterMode === 'month'" class="flex flex-col gap-1">
-                  <label class="text-[10px] font-black text-gray-400 uppercase">เดือน</label>
+                  <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.month_label") }}</label>
                   <input
                     v-model="filterMonth"
                     type="month"
@@ -691,7 +694,7 @@ const confirmLogout = () => {
                 </div>
                 <template v-if="filterMode === 'year'">
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">จากปี</label>
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.year_from") }}</label>
                     <input
                       v-model.number="yearFrom"
                       type="number"
@@ -701,7 +704,7 @@ const confirmLogout = () => {
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">ถึงปี</label>
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.year_to") }}</label>
                     <input
                       v-model.number="yearTo"
                       type="number"
@@ -713,19 +716,17 @@ const confirmLogout = () => {
                 </template>
                 <template v-if="filterMode === 'range'">
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">วันเริ่มต้น</label>
-                    <input
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.date_from") }}</label>
+                    <DateField
                       v-model="filterFrom"
-                      type="date"
-                      class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                      input-class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-full"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">วันสิ้นสุด</label>
-                    <input
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.date_to") }}</label>
+                    <DateField
                       v-model="filterTo"
-                      type="date"
-                      class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
+                      input-class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-full"
                     />
                   </div>
                 </template>
@@ -744,7 +745,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      รออนุมัติ
+                      {{ $t("admin.kpi_pending") }}
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.pendingCount }}
@@ -763,7 +764,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      อนุมัติแล้ว
+                      {{ $t("admin.kpi_approved") }}
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.approvedCount || stats.approvedToday }}
@@ -782,7 +783,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      ชำระเงินแล้ว
+                      {{ $t("admin.kpi_paid") }}
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.paidCount || 0 }}
@@ -798,16 +799,16 @@ const confirmLogout = () => {
                 ></div>
                 <div class="flex items-center gap-3 sm:gap-4 pr-3 min-w-0">
                   <div
-                    class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-red-50 text-[#ba0b2f] flex items-center justify-center text-lg sm:text-xl shrink-0"
+                    class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-red-50 text-mfu-red flex items-center justify-center text-lg sm:text-xl shrink-0"
                   >
                     <font-awesome-icon icon="wallet" />
                   </div>
                   <div class="min-w-0 flex-1 overflow-hidden">
                     <p class="text-xs sm:text-sm font-bold text-gray-500 mb-1 truncate">
-                      {{ filterMode === 'all' ? 'รายได้รวมทั้งหมด' : filterMode === 'latest' ? 'รายได้รวมเดือนนี้' : 'รายได้ตามตัวกรอง' }}
+                      {{ filterMode === 'all' ? $t('admin.revenue_all') : filterMode === 'latest' ? $t('admin.monthly_revenue') : $t('admin.revenue_filtered') }}
                     </p>
                     <p
-                      class="font-black text-[#ba0b2f] tabular-nums leading-none whitespace-nowrap overflow-hidden text-ellipsis"
+                      class="font-black text-mfu-red tabular-nums leading-none whitespace-nowrap overflow-hidden text-ellipsis"
                       :style="{ fontSize: revenueAmountFontSize }"
                       :title="formatBahtFull(stats.rangeRevenue || stats.currentMonthRevenue || 0)"
                     >
@@ -826,16 +827,16 @@ const confirmLogout = () => {
                 <h3
                   class="text-lg font-bold text-gray-900 mb-6 flex flex-wrap items-center gap-2"
                 >
-                  <font-awesome-icon icon="chart-line" class="text-[#ba0b2f]" /> แนวโน้มรายได้
+                  <font-awesome-icon icon="chart-line" class="text-mfu-red" /> {{ $t("admin.revenue_trend") }}
                   <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                     {{
                       filterMode === 'year' && Math.min(yearFrom, yearTo) === Math.max(yearFrom, yearTo)
-                        ? `รายเดือนทั้งปี ${Math.min(yearFrom, yearTo)}`
+                        ? $t('admin.chart_monthly_year', { y: Math.min(yearFrom, yearTo) })
                         : filterMode === 'year'
-                          ? `รายปี ${Math.min(yearFrom, yearTo)}–${Math.max(yearFrom, yearTo)}`
+                          ? $t('admin.chart_year_range', { a: Math.min(yearFrom, yearTo), b: Math.max(yearFrom, yearTo) })
                           : revenueChartGranularity === 'year'
-                            ? 'รายปี (แท่งเดือนเกิน 12)'
-                            : 'รายเดือน (สูงสุด 12)'
+                            ? $t('admin.chart_by_year')
+                            : $t('admin.chart_by_month')
                     }}
                   </span>
                 </h3>
@@ -849,8 +850,8 @@ const confirmLogout = () => {
                 <h3
                   class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
                 >
-                  <font-awesome-icon icon="chart-pie" class="text-[#d4af37]" />
-                  สัดส่วนประเภทผู้เช่า
+                  <font-awesome-icon icon="chart-pie" class="text-mfu-gold" />
+                  {{ $t("admin.renter_proportions") }}
                 </h3>
                 <div class="w-full h-64">
                   <Doughnut
@@ -869,7 +870,7 @@ const confirmLogout = () => {
                 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
               >
                 <font-awesome-icon icon="fire-alt" class="text-orange-500" />
-                อัตราการใช้งานห้องและพื้นที่
+                {{ $t("admin.space_utilization") }}
               </h3>
               <div class="space-y-5">
                 <div v-for="(room, index) in popularRooms" :key="index">
@@ -879,7 +880,7 @@ const confirmLogout = () => {
                     }}</span
                     ><span class="text-sm font-bold text-gray-900"
                       >{{ room.usage }}%
-                      <span class="text-gray-400 font-semibold text-xs">({{ room.count }} จอง)</span></span
+                      <span class="text-gray-400 font-semibold text-xs">{{ $t("admin.booking_count_suffix", { n: room.count }) }}</span></span
                     >
                   </div>
                   <div
@@ -896,7 +897,7 @@ const confirmLogout = () => {
                   v-if="popularRooms.length === 0"
                   class="text-sm text-gray-400 font-medium text-center py-4"
                 >
-                  ไม่มีข้อมูลการจองในช่วงที่เลือก
+                  {{ $t("admin.empty_usage") }}
                 </p>
               </div>
             </div>

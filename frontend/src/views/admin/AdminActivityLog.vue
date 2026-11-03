@@ -18,7 +18,17 @@ onMounted(async () => {
     const res = await api.get("/api/admin/logs");
     logs.value = res.data.map((log: any) => ({
       id: log.id,
-      timestamp: new Date(log.created_at).toLocaleString("th-TH"),
+      timestamp: (() => {
+        const d = new Date(log.created_at);
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        const time = d.toLocaleTimeString("th-TH", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        return `${dd}/${mm}/${yyyy} ${time}`;
+      })(),
       adminName: log.admin_name,
       action: log.action,
       details: log.details
@@ -51,18 +61,16 @@ const getIcon = (action: string) => {
 <template>
   <div class="space-y-6 animate-fade-up">
     <!-- Header -->
-    <div
-      class="bg-white p-6 rounded-3xl shadow-card border border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4"
-    >
+    <div class="ui-card ui-admin-header p-6">
       <div>
         <h2
           class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
         >
-          <FontAwesomeIcon :icon="['fas', 'clipboard-check']" class="text-[#ba0b2f]" />
-          ประวัติการทำงานระบบ
+          <FontAwesomeIcon :icon="['fas', 'clipboard-check']" class="text-mfu-red" />
+          {{ $t("admin.logs_title") }}
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          บันทึกกิจกรรมทั้งหมดที่เกิดขึ้นโดยผู้ดูแลระบบ (ดึงข้อมูลจาก Database)
+          {{ $t("admin.logs_subtitle") }}
         </p>
       </div>
     </div>
@@ -81,7 +89,7 @@ const getIcon = (action: string) => {
         >
           <FontAwesomeIcon :icon="['fas', 'history']" class="text-gray-300" />
         </div>
-        <p>ยังไม่มีประวัติการทำงานในระบบ</p>
+        <p>{{ $t("admin.empty_logs") }}</p>
       </div>
 
       <div v-else class="space-y-4">
@@ -114,8 +122,8 @@ const getIcon = (action: string) => {
             <p
               class="text-[11px] text-gray-500 font-bold mt-2 uppercase tracking-widest flex items-center gap-1.5"
             >
-              <FontAwesomeIcon :icon="['fas', 'user-shield']" class="text-[#ba0b2f] mr-1" />
-              ดำเนินการโดย:
+              <FontAwesomeIcon :icon="['fas', 'user-shield']" class="text-mfu-red mr-1" />
+              {{ $t("admin.acted_by") }}
               <span class="text-gray-700">{{ log.adminName }}</span>
             </p>
           </div>

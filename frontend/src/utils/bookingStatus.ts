@@ -17,11 +17,11 @@ export const statusActionBtn = {
   approve:
     "bg-emerald-600 text-white rounded-xl px-6 py-3 font-bold hover:bg-emerald-700 shadow-md transition-all cursor-pointer",
   reject:
-    "bg-[#ba0b2f] text-white rounded-xl px-6 py-3 font-bold hover:bg-[#8c0823] shadow-md transition-all cursor-pointer",
+    "bg-mfu-red text-white rounded-xl px-6 py-3 font-bold hover:bg-mfu-red-dark shadow-md transition-all cursor-pointer",
   cancel:
     "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-6 py-3 font-bold hover:bg-gray-200 transition-all cursor-pointer",
   primary:
-    "bg-[#ba0b2f] text-white rounded-xl px-4 py-3 font-bold hover:bg-[#8c0823] shadow-md transition-all flex-1 whitespace-nowrap cursor-pointer",
+    "bg-mfu-red text-white rounded-xl px-4 py-3 font-bold hover:bg-mfu-red-dark shadow-md transition-all flex-1 whitespace-nowrap cursor-pointer",
   secondary:
     "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-4 py-3 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
   confirmPayment:

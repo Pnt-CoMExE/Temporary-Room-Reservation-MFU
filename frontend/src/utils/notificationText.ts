@@ -1,4 +1,5 @@
 import { translateRoomName, translateStatus } from "@/utils/translator";
+import { formatDateDMY } from "@/utils/dateKey";
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
@@ -74,8 +75,5 @@ export function notificationTime(
   const days = Math.floor(hours / 24);
   if (days < 7) return t("notif.days_ago", { n: days });
 
-  return date.toLocaleDateString(locale === "en" ? "en-US" : "th-TH", {
-    day: "numeric",
-    month: "short",
-  });
+  return formatDateDMY(date);
 }

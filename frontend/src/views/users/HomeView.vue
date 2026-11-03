@@ -2,6 +2,7 @@
 import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import RoomCard from "@/components/room/RoomCard.vue";
+import DateField from "@/components/common/DateField.vue";
 import api from "@/services/api";
 import { resolveRoomImage } from "@/utils/roomImage";
 
@@ -125,44 +126,41 @@ onUnmounted(() => {
         <!-- Darker scrim so seal/logo behind text doesn't fight the copy -->
         <div class="absolute inset-0 bg-black/55"></div>
         <div
-          class="absolute inset-0 bg-linear-to-b from-[#ba0b2f]/25 via-transparent to-[#f8f9fa]"
+          class="absolute inset-0 bg-linear-to-b from-mfu-red/25 via-transparent to-[#f8f9fa]"
         ></div>
       </div>
 
       <div
-        class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto animate-fade-up"
+        class="relative z-10 text-center px-4 w-full max-w-5xl mx-auto ui-motion-fade-up"
       >
-        <!-- MFU Logo in Hero -->
-        <div class="flex justify-center mb-6">
+        <div class="flex justify-center mb-5">
           <img
             src="/images/mfu-logo.png"
             alt="Mae Fah Luang University"
-            class="h-20 md:h-28 w-auto object-contain drop-shadow-md"
+            class="h-24 md:h-32 w-auto object-contain drop-shadow-md"
           />
         </div>
-        <span
-          class="inline-flex flex-col sm:flex-row sm:items-center sm:gap-2 py-1.5 px-4 rounded-full bg-black/40 backdrop-blur-sm text-[#d4af37] border border-[#d4af37]/40 text-xs font-bold tracking-widest uppercase mb-6"
-        >
-          <span>{{ $t('hero.badge') }}</span>
-          <span class="hidden sm:inline opacity-50" aria-hidden="true">·</span>
-          <span class="whitespace-nowrap">{{ $t('hero.badge_org') }}</span>
-        </span>
-        <h1
-          class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-5 tracking-tight leading-[1.35] max-w-4xl mx-auto"
+        <p
+          class="text-mfu-gold text-lg md:text-2xl font-black tracking-[0.2em] uppercase mb-4"
           style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45)"
         >
-          <span class="block">{{ $t('hero.title') }}</span>
-          <span class="block whitespace-nowrap mt-1 md:mt-2">{{ $t('hero.title_org') }}</span>
+          MFU PROPERTY
+        </p>
+        <h1
+          class="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white mb-4 tracking-tight leading-[1.35] max-w-3xl mx-auto"
+          style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45)"
+        >
+          {{ $t('hero.title') }}
         </h1>
         <p
-          class="text-base md:text-lg text-white/95 mb-12 font-medium max-w-3xl mx-auto leading-[1.85] px-2"
+          class="text-base md:text-lg text-white/95 mb-10 font-medium max-w-2xl mx-auto leading-relaxed px-2"
           style="text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5)"
         >
-          {{ $t('hero.subtitle') }} {{ $t('hero.subtitle_line2') }}
+          {{ $t('hero.subtitle') }}
         </p>
 
         <div
-          class="bg-white/95 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-card-float border border-gray-200/80 flex flex-col md:flex-row items-stretch md:items-center w-full max-w-5xl mx-auto transform translate-y-12 overflow-visible"
+          class="bg-white/95 backdrop-blur-xl p-3 md:rounded-full rounded-3xl shadow-card-float border border-gray-200/80 flex flex-col md:flex-row items-stretch md:items-center w-full max-w-5xl mx-auto transform translate-y-10 overflow-visible ui-motion-panel"
         >
           <form
             @submit.prevent="handleSearch"
@@ -172,7 +170,7 @@ onUnmounted(() => {
               class="flex-[1.4] min-w-0 px-5 md:px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 rounded-t-3xl md:rounded-l-full md:rounded-tr-none cursor-text transition-colors group"
             >
               <div
-                class="text-[#ba0b2f] mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
+                class="text-mfu-red mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
               >
                 <font-awesome-icon icon="search" />
               </div>
@@ -193,7 +191,7 @@ onUnmounted(() => {
               class="flex-1 min-w-0 px-5 md:px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-text transition-colors group"
             >
               <div
-                class="text-[#ba0b2f] mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
+                class="text-mfu-red mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
               >
                 <font-awesome-icon :icon="['far', 'calendar-alt']" />
               </div>
@@ -202,10 +200,9 @@ onUnmounted(() => {
                   class="block text-xs font-bold text-gray-500 mb-1 leading-normal"
                   >{{ $t('booking.booking_date') }}</label
                 >
-                <input
-                  type="date"
+                <DateField
                   v-model="searchParams.date"
-                  class="w-full min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm md:text-[15px] text-gray-800 font-semibold outline-none leading-relaxed"
+                  input-class="w-full min-w-0 bg-transparent border-none p-0 focus:ring-0 text-sm md:text-[15px] text-gray-800 font-semibold outline-none leading-relaxed shadow-none"
                 />
               </div>
             </div>
@@ -213,7 +210,7 @@ onUnmounted(() => {
               class="flex-[1.2] min-w-0 px-5 md:px-6 py-4 md:py-3 flex items-center hover:bg-gray-50/50 cursor-pointer transition-colors group relative"
             >
               <div
-                class="text-[#ba0b2f] mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
+                class="text-mfu-red mr-3 md:mr-4 text-xl md:text-2xl shrink-0 group-hover:scale-110 transition-transform duration-300"
               >
                 <font-awesome-icon icon="layer-group" />
               </div>
@@ -241,7 +238,7 @@ onUnmounted(() => {
             <div class="p-2 w-full md:w-auto mt-2 md:mt-0">
               <button
                 type="submit"
-                class="w-full md:w-auto bg-[#ba0b2f] hover:bg-[#8c0823] text-white text-base font-bold py-4 px-8 rounded-2xl md:rounded-full transition-all duration-300 shadow-md hover:shadow-xl flex justify-center items-center gap-2 transform hover:-translate-y-0.5"
+                class="ui-btn-primary w-full md:w-auto py-4 px-8 rounded-2xl md:rounded-full shadow-md hover:shadow-xl transform hover:-translate-y-0.5"
               >
                 <span>{{ $t('hero.search_btn') }}</span>
                 <font-awesome-icon icon="arrow-right" class="ml-1" />
@@ -282,7 +279,7 @@ onUnmounted(() => {
               ></div>
               <div class="absolute bottom-0 left-0 p-6 md:p-10 w-full">
                 <span
-                  class="inline-block px-3 py-1 bg-[#ba0b2f] text-white text-[10px] font-bold uppercase tracking-wider rounded-md mb-3"
+                  class="inline-block px-3 py-1 bg-mfu-red text-white text-[10px] font-bold uppercase tracking-wider rounded-md mb-3"
                   >Announcement</span
                 >
                 <h2
@@ -298,13 +295,13 @@ onUnmounted(() => {
         <!-- ปุ่มเลื่อนซ้าย/ขวา -->
         <button
           @click="prevBanner"
-          class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-[#ba0b2f] cursor-pointer"
+          class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-mfu-red cursor-pointer"
         >
           <font-awesome-icon icon="chevron-left" />
         </button>
         <button
           @click="nextBanner"
-          class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-[#ba0b2f] cursor-pointer"
+          class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/30 backdrop-blur-sm text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all hover:bg-mfu-red cursor-pointer"
         >
           <font-awesome-icon icon="chevron-right" />
         </button>
@@ -318,7 +315,7 @@ onUnmounted(() => {
             class="w-2.5 h-2.5 rounded-full transition-all cursor-pointer"
             :class="
               currentBanner === index
-                ? 'bg-[#d4af37] w-8'
+                ? 'bg-mfu-gold w-8'
                 : 'bg-white/50 hover:bg-white/80'
             "
           ></button>
@@ -334,7 +331,7 @@ onUnmounted(() => {
             class="text-3xl font-extrabold text-gray-900 flex items-center gap-3"
           >
             {{ $t('home.featured_title') }}
-            <span class="text-[#d4af37] text-2xl">
+            <span class="text-mfu-gold text-2xl">
               <font-awesome-icon icon="star" />
             </span>
           </h2>
@@ -344,7 +341,7 @@ onUnmounted(() => {
         </div>
         <router-link
           to="/rooms"
-          class="group text-sm font-bold text-[#ba0b2f] hover:text-[#8c0823] transition-all flex items-center gap-2 bg-red-50 hover:bg-red-100 px-5 py-2.5 rounded-full"
+          class="group text-sm font-bold text-mfu-red hover:text-mfu-red-dark transition-all flex items-center gap-2 bg-red-50 hover:bg-red-100 px-5 py-2.5 rounded-full"
         >
           {{ $t('home.view_all') }}
           <font-awesome-icon icon="arrow-right" class="transform group-hover:translate-x-1 transition-transform" />
@@ -384,7 +381,7 @@ onUnmounted(() => {
     <div class="bg-canvas py-24 border-t border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <span
-          class="text-[#ba0b2f] font-bold tracking-wider text-sm uppercase mb-2 block"
+          class="text-mfu-red font-bold tracking-wider text-sm uppercase mb-2 block"
           >{{ $t('home.how_it_works_badge') }}</span
         >
         <h2 class="text-3xl font-extrabold text-gray-900 mb-4">
@@ -398,7 +395,7 @@ onUnmounted(() => {
           <!-- step cards -->
           <div class="flex flex-col items-center relative z-10 group bg-white rounded-3xl border border-gray-200 shadow-card px-6 py-10 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
             <div
-              class="w-24 h-24 bg-white border-4 border-gray-200 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
+              class="w-24 h-24 bg-white border-4 border-gray-200 text-mfu-red rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
             >
               <font-awesome-icon icon="search" />
             </div>
@@ -412,7 +409,7 @@ onUnmounted(() => {
 
           <div class="flex flex-col items-center relative z-10 group bg-white rounded-3xl border border-gray-200 shadow-card px-6 py-10 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
             <div
-              class="w-24 h-24 bg-white border-4 border-gray-200 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
+              class="w-24 h-24 bg-white border-4 border-gray-200 text-mfu-red rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
             >
               <font-awesome-icon icon="file-signature" />
             </div>
@@ -426,7 +423,7 @@ onUnmounted(() => {
 
           <div class="flex flex-col items-center relative z-10 group bg-white rounded-3xl border border-gray-200 shadow-card px-6 py-10 hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300">
             <div
-              class="w-24 h-24 bg-white border-4 border-gray-200 text-[#ba0b2f] rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
+              class="w-24 h-24 bg-white border-4 border-gray-200 text-mfu-red rounded-full flex items-center justify-center text-3xl mb-6 shadow-card transition-all duration-300 group-hover:scale-110 group-hover:border-red-200 group-hover:bg-red-50"
             >
               <font-awesome-icon icon="qrcode" />
             </div>
@@ -443,14 +440,14 @@ onUnmounted(() => {
 
     <!-- ✨ Big Footer ✨ -->
     <footer
-      class="bg-[#111827] text-white py-16 mt-auto border-t-[6px] border-[#ba0b2f]"
+      class="bg-[#111827] text-white py-16 mt-auto border-t-[6px] border-mfu-red"
     >
       <div
         class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-12"
       >
         <div>
           <h3 class="text-2xl font-extrabold tracking-wider mb-4">
-            <span class="text-[#d4af37]">MFU</span> PROPERTY
+            <span class="text-mfu-gold">MFU</span> PROPERTY
           </h3>
           <p class="text-gray-400 text-sm leading-relaxed mb-6 whitespace-pre-line">
             {{ $t('home.footer_desc') }}
@@ -460,14 +457,14 @@ onUnmounted(() => {
               href="https://www.facebook.com/MaeFahLuangUniversity"
               target="_blank"
               rel="noopener noreferrer"
-              class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#ba0b2f] transition-colors"
+              class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-mfu-red transition-colors"
               ><font-awesome-icon :icon="['fab', 'facebook-f']" />
             </a>
             <a
               href="https://www.mfu.ac.th"
               target="_blank"
               rel="noopener noreferrer"
-              class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-[#ba0b2f] transition-colors"
+              class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-mfu-red transition-colors"
               ><font-awesome-icon icon="globe" />
             </a>
           </div>
@@ -481,15 +478,15 @@ onUnmounted(() => {
           </h4>
           <ul class="text-gray-400 text-sm space-y-4">
             <li class="flex items-start gap-3">
-              <font-awesome-icon icon="phone" class="mt-1 text-[#d4af37]" />
+              <font-awesome-icon icon="phone" class="mt-1 text-mfu-gold" />
               <span>053-916-000</span>
             </li>
             <li class="flex items-start gap-3">
-              <font-awesome-icon icon="envelope" class="mt-1 text-[#d4af37]" />
+              <font-awesome-icon icon="envelope" class="mt-1 text-mfu-gold" />
               <span>property@mfu.ac.th</span>
             </li>
             <li class="flex items-start gap-3">
-              <font-awesome-icon icon="map-marker-alt" class="mt-1 text-[#d4af37]" />
+              <font-awesome-icon icon="map-marker-alt" class="mt-1 text-mfu-gold" />
               <span class="leading-relaxed whitespace-pre-line"
                 >{{ $t('home.footer_contact_address') }}</span
               >
@@ -507,7 +504,7 @@ onUnmounted(() => {
             <li>
               <router-link
                 to="/rooms"
-                class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
+                class="hover:text-mfu-gold transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
                 {{ $t('home.footer_menu_search') }}</router-link
               >
@@ -515,7 +512,7 @@ onUnmounted(() => {
             <li>
               <router-link
                 to="/info/manual"
-                class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
+                class="hover:text-mfu-gold transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
                 {{ $t('home.footer_menu_manual') }}</router-link
               >
@@ -523,7 +520,7 @@ onUnmounted(() => {
             <li>
               <router-link
                 to="/info/rates"
-                class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
+                class="hover:text-mfu-gold transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
                 {{ $t('home.footer_menu_rates') }}</router-link
               >
@@ -531,7 +528,7 @@ onUnmounted(() => {
             <li>
               <router-link
                 to="/info/privacy"
-                class="hover:text-[#d4af37] transition-colors flex items-center gap-2"
+                class="hover:text-mfu-gold transition-colors flex items-center gap-2"
                 ><font-awesome-icon icon="angle-right" class="text-xs" />
                 {{ $t('home.footer_menu_privacy') }}</router-link
               >

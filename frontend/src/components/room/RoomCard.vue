@@ -43,8 +43,12 @@ const goToRoom = () => {
 
 <template>
   <div
-    class="group bg-white rounded-4xl shadow-card-lg hover:shadow-card-hover transition-all duration-500 overflow-hidden border-2 border-gray-300/80 flex flex-col h-full cursor-pointer transform hover:-translate-y-2"
+    role="link"
+    tabindex="0"
+    class="group ui-card-elevated ui-card-interactive rounded-4xl overflow-hidden border-2 border-gray-200/90 flex flex-col h-full cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-mfu-red/40"
     @click="goToRoom"
+    @keydown.enter.prevent="goToRoom"
+    @keydown.space.prevent="goToRoom"
   >
     <div class="relative h-56 md:h-64 overflow-hidden bg-gray-100">
       <img
@@ -76,7 +80,7 @@ const goToRoom = () => {
       </div>
 
       <div
-        class="absolute bottom-4 left-4 px-4 py-2 bg-[#ba0b2f] text-white rounded-lg text-sm font-bold shadow-lg transform translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
+        class="absolute bottom-4 left-4 px-4 py-2 bg-mfu-red text-white rounded-lg text-sm font-bold shadow-lg transform translate-y-2 opacity-90 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
       >
         {{ displayType }}
       </div>
@@ -84,11 +88,11 @@ const goToRoom = () => {
 
     <div class="p-6 lg:p-8 flex-1 flex flex-col relative">
       <div
-        class="absolute top-0 left-8 right-8 h-0.5 bg-linear-to-r from-[#ba0b2f] to-[#d4af37] rounded-b-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        class="absolute top-0 left-8 right-8 h-0.5 bg-linear-to-r from-mfu-red to-[#d4af37] rounded-b-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
       ></div>
 
       <h3
-        class="text-xl font-extrabold text-gray-900 mb-4 line-clamp-2 group-hover:text-[#ba0b2f] transition-colors duration-300 leading-snug"
+        class="text-xl font-extrabold text-gray-900 mb-4 line-clamp-2 group-hover:text-mfu-red transition-colors duration-300 leading-snug"
       >
         {{ displayName }}
       </h3>
@@ -123,14 +127,14 @@ const goToRoom = () => {
           >
             {{ $t('room.half_day') }} ({{ $t('room.price_internal') }})
           </p>
-          <p class="text-lg font-black text-[#ba0b2f]">
+          <p class="text-lg font-black text-mfu-red">
             ฿{{ room.priceHalfDayInternal?.toLocaleString() || "0" }}
           </p>
         </div>
 
         <button
           @click="goToRoom"
-          class="w-12 h-12 bg-red-50 hover:bg-[#ba0b2f] text-[#ba0b2f] hover:text-white rounded-full transition-all duration-300 flex justify-center items-center group/btn shadow-sm hover:shadow-md hover:-translate-y-1"
+          class="w-12 h-12 bg-red-50 hover:bg-mfu-red text-mfu-red hover:text-white rounded-full transition-all duration-300 flex justify-center items-center group/btn shadow-sm hover:shadow-md hover:-translate-y-1"
           :title="$t('room.details')"
         >
           <FontAwesomeIcon

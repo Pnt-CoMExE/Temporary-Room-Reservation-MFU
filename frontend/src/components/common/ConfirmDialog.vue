@@ -3,32 +3,27 @@
     <Transition name="dialog">
       <div
         v-if="visible"
-        class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40 backdrop-blur-sm"
+        class="fixed inset-0 z-[9998] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+        role="dialog"
+        aria-modal="true"
         @click.self="$emit('cancel')"
       >
-        <div class="bg-white rounded-2xl shadow-card-lg border border-gray-200 p-6 mx-4 w-full max-w-md">
+        <div class="ui-card-elevated p-6 mx-auto w-full max-w-md">
           <div class="flex items-center gap-3 mb-4">
-            <span class="text-2xl">{{ icon }}</span>
+            <span class="text-2xl" aria-hidden="true">{{ icon }}</span>
             <h3 class="text-lg font-semibold text-gray-900">{{ title }}</h3>
           </div>
           <p class="text-gray-600 text-base mb-6 leading-relaxed">
             {{ message }}
           </p>
           <div class="flex justify-end gap-3">
-            <button
-              @click="$emit('cancel')"
-              class="px-5 py-2.5 text-base font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-            >
+            <button type="button" class="ui-btn-secondary" @click="$emit('cancel')">
               {{ cancelText }}
             </button>
             <button
+              type="button"
+              :class="danger ? 'ui-btn-primary bg-red-600 hover:bg-red-700 shadow-red-200' : 'ui-btn-primary'"
               @click="$emit('confirm')"
-              :class="[
-                'px-5 py-2.5 text-base font-medium text-white rounded-lg transition-colors',
-                danger
-                  ? 'bg-red-600 hover:bg-red-700'
-                  : 'bg-[#ba0b2f] hover:bg-[#980926]',
-              ]"
             >
               {{ confirmText }}
             </button>
@@ -42,28 +37,28 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    visible: boolean
-    title?: string
-    message?: string
-    confirmText?: string
-    cancelText?: string
-    icon?: string
-    danger?: boolean
+    visible: boolean;
+    title?: string;
+    message?: string;
+    confirmText?: string;
+    cancelText?: string;
+    icon?: string;
+    danger?: boolean;
   }>(),
   {
-    title: 'ยืนยันการดำเนินการ',
-    message: 'คุณแน่ใจหรือไม่?',
-    confirmText: 'ยืนยัน',
-    cancelText: 'ยกเลิก',
-    icon: '⚠️',
+    title: "ยืนยันการดำเนินการ",
+    message: "คุณแน่ใจหรือไม่?",
+    confirmText: "ยืนยัน",
+    cancelText: "ยกเลิก",
+    icon: "⚠️",
     danger: false,
   }
-)
+);
 
 defineEmits<{
-  confirm: []
-  cancel: []
-}>()
+  confirm: [];
+  cancel: [];
+}>();
 </script>
 
 <style scoped>

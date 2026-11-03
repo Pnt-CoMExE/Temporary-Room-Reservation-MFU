@@ -8,14 +8,33 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 export const MEMO_PDF = path.join(here, "..", "fixtures", "memo.pdf");
 export const APPROVAL_PDF = path.join(here, "..", "fixtures", "approval.pdf");
 
+/** Convert YYYY-MM-DD → DD/MM/YYYY for DateField text input. */
+function toDMY(iso: string): string {
+  const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return iso;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+}
+
 export async function fillAndSubmitBookingForm(page: Page, opts?: { date?: string }) {
   const date = opts?.date ?? bookingDateKey(45);
 
   await page.locator('input[type="tel"]').fill("0812345678");
-  await page.locator('input[type="date"]').fill(date);
+  // DateField is text-only DMY (+ optional calendar); no native type=date
+  const dateInput = page.locator('input[placeholder*="วว/ดด"], input[placeholder*="dd/mm"]').first();
+  await dateInput.fill(toDMY(date));
+  await dateInput.blur();
 
   const duration = page.locator("select").first();
-  await duration.selectOption("half_morning");
+  // Slots enable only after availability loads; prior E2E runs may have taken morning
+  await expect(
+    duration.locator(
+      'option[value="half_morning"]:not([disabled]), option[value="half_afternoon"]:not([disabled])'
+    ).first()
+  ).toBeAttached({ timeout: 15000 });
+  const morningDisabled = await duration
+    .locator('option[value="half_morning"]')
+    .isDisabled();
+  await duration.selectOption(morningDisabled ? "half_afternoon" : "half_morning");
 
   await page.locator("textarea").first().fill("E2E automated booking — QA suite");
 

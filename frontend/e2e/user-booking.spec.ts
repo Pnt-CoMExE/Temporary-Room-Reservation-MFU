@@ -12,14 +12,17 @@ test.describe("User booking happy path", () => {
   test("submit booking and see pending on dashboard", async ({ page, context }) => {
     await injectSession(page, context, "internal");
 
-    const date = bookingDateKey(50);
+    // Offset from "now" so re-runs do not collide with prior pending bookings
+    const date = bookingDateKey(55 + (Date.now() % 20));
     await openBookingForm(page, 1);
     await fillAndSubmitBookingForm(page, { date });
 
     await page.goto("/dashboard");
     await expect(page).toHaveURL(/dashboard/);
-    await expect(
-      page.getByText(/รออนุมัติ|BK-/i).first()
-    ).toBeVisible({ timeout: 20000 });
+    // Prefer booking id — status filter <option> "รออนุมัติ" is hidden and matched first
+    await expect(page.getByText(/#?BK-/i).first()).toBeVisible({
+      timeout: 20000,
+    });
   });
 });
+
