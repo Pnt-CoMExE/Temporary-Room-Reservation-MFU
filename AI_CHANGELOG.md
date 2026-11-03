@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — Sync thesis checklist + Ch.4/5 SMTP/mock]
+- `THESIS_CHAPTERS_CHECKLIST.md`: 80 เคส · Stripe (ไม่มี mock UI) · Gmail SMTP UAT · TC-PAY-03/04
+- `CHAPTER_4_AND_5.md`: แก้ย่อหน้า Notifications/Mail/Payment/UAT/recommendations ให้ตรง SMTP จริง + mock 410
+
 ## [2026-11-03 — README SMTP + refresh flow test docs]
 - GitHub `README.md`: เพิ่ม **§3.4 SMTP** (Gmail App Password + MFU SMTP) · อัปเดต payment (Stripe-only) · ลิงก์ manual suite 80 เคสตามโฟลว์
 - `test-cases/05-payment.md` / `12-edge-email.md` / README โฟลว์ / tracker: จุดตรวจวัน+slot · ลิงก์ SMTP · TC-PAY-03/04
