@@ -627,5 +627,7 @@ export default {
     date_placeholder: "dd/mm/yyyy",
     pick_date: "Pick a date",
     date_format_hint: "Enter date as day/month/year (dd/mm/yyyy)",
+    prev_month: "Previous month",
+    next_month: "Next month",
   },
 };

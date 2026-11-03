@@ -629,5 +629,7 @@ export default {
     date_placeholder: "วว/ดด/ปปปป",
     pick_date: "เลือกวันที่",
     date_format_hint: "กรอกวันที่เป็น วัน/เดือน/ปี (วว/ดด/ปปปป)",
+    prev_month: "เดือนก่อนหน้า",
+    next_month: "เดือนถัดไป",
   },
 };

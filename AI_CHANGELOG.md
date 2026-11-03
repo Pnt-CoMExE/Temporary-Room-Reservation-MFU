@@ -2,6 +2,15 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — Booking E2E after DateField calendar]
+- แก้ `e2e/helpers/booking.ts` ให้กรอก DMY แทน `type=date` · เลือก slot ที่ยังว่าง · assertion หา `BK-` แทน option ที่ซ่อน
+- ตรวจปฏิทิน: กดช่องแล้วเด้ง · หัวเดือนใช้ปี ค.ศ. (`calendar: gregory`) · เลือกวันแล้วได้ `DD/MM/YYYY`
+- `npm run test:e2e -- e2e/user-booking.spec.ts` → 2 passed
+
+## [2026-11-03 — DateField custom calendar popover]
+- `DateField`: คงช่องพิมพ์ DD/MM/YYYY + ปุ่มปฏิทินเปิด popover เลือกวัน (ไม่ใช้ native `type="date"`)
+- กด/โฟกัสที่ช่องวันที่แล้วเด้งปฏิทิน · เคารพ `min`/`max` · ปิดด้วยคลิกนอก/Esc · locale TH/EN · API ยังเป็น YYYY-MM-DD
+
 ## [2026-11-03 — Admin i18n 1A + DateField 2A]
 - **1A:** แอดมินไม่ล็อก locale เป็น TH · ขยาย `admin.*` ใน `th.ts`/`en.ts` · ผูก i18n + `withSwalTheme` ครบ Admin Dashboard/Bookings/Rooms/Users/Promo/Addons/Banners/ActivityLog
 - **2A:** `DateField` เป็นช่องข้อความอย่างเดียว (ไม่มี native date picker) · `common.date_placeholder` / `date_format_hint`
