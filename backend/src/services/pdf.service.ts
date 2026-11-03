@@ -1,6 +1,11 @@
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";
+import {
+  formatBookingDateEn,
+  timeSlotLabelEn,
+  toReceiptEnglish,
+} from "../utils/bookingFormat";
 
 export interface BookingReceiptData {
   bookingNo: string;
@@ -19,6 +24,7 @@ export interface BookingReceiptData {
   paidAt?: string;
 }
 
+/** Space Permit PDF is English-only (Helvetica) so Thai never becomes tofu/mojibake. */
 export async function generateBookingPDFReceipt(
   data: BookingReceiptData,
   outputPath?: string
@@ -27,6 +33,14 @@ export async function generateBookingPDFReceipt(
     try {
       const doc = new PDFDocument({ margin: 40, size: "A4" });
       const buffers: Buffer[] = [];
+
+      const bookingDate = formatBookingDateEn(data.bookingDate);
+      const timeSlot = timeSlotLabelEn(data.timeSlot);
+      const roomName = toReceiptEnglish(data.roomName, "MFU Meeting Space");
+      const location = toReceiptEnglish(data.location, "MFU Campus");
+      const emailLocal = String(data.userEmail || "").split("@")[0] || "Applicant";
+      const userName = toReceiptEnglish(data.userName, emailLocal);
+      const orgType = String(data.organizationType || "internal").toUpperCase();
 
       doc.on("data", (chunk) => buffers.push(chunk));
       doc.on("end", () => {
@@ -41,11 +55,7 @@ export async function generateBookingPDFReceipt(
         resolve(pdfBuffer);
       });
 
-      // Header Banner
-      doc
-        .fillColor("#003366")
-        .rect(0, 0, 595.28, 80)
-        .fill();
+      doc.fillColor("#003366").rect(0, 0, 595.28, 80).fill();
 
       doc
         .fillColor("#FFFFFF")
@@ -56,12 +66,14 @@ export async function generateBookingPDFReceipt(
       doc
         .fontSize(12)
         .font("Helvetica")
-        .text("Temporary Rental Space Management System - Space Use Permit & Receipt", 40, 45);
+        .text(
+          "Temporary Rental Space Management System - Space Use Permit & Receipt",
+          40,
+          45
+        );
 
-      // Reset text color
       doc.fillColor("#333333");
 
-      // Document Title
       doc
         .fontSize(16)
         .font("Helvetica-Bold")
@@ -75,7 +87,6 @@ export async function generateBookingPDFReceipt(
 
       doc.moveDown(1.5);
 
-      // Section 1: Customer & Booking Info
       doc
         .strokeColor("#CCCCCC")
         .lineWidth(1)
@@ -92,24 +103,22 @@ export async function generateBookingPDFReceipt(
 
       doc.fontSize(10).font("Helvetica").fillColor("#333333");
 
-      const infoRows = [
+      const infoRows: Array<[string, string, string, string]> = [
         ["Booking Reference:", data.bookingNo, "User Email:", data.userEmail],
-        ["Applicant Name:", data.userName, "Organization:", data.organizationType.toUpperCase()],
-        ["Reserved Space:", data.roomName, "Location:", data.location || "MFU Campus"],
-        ["Reservation Date:", data.bookingDate, "Time Slot:", data.timeSlot.toUpperCase()],
+        ["Applicant Name:", userName, "Organization:", orgType],
+        ["Reserved Space:", roomName, "Location:", location],
+        ["Reservation Date:", bookingDate, "Time Slot:", timeSlot],
       ];
 
       let rowY = startY + 25;
       infoRows.forEach(([l1, v1, l2, v2]) => {
         doc.font("Helvetica-Bold").text(l1, 40, rowY, { width: 120 });
         doc.font("Helvetica").text(v1, 160, rowY, { width: 130 });
-
         doc.font("Helvetica-Bold").text(l2, 300, rowY, { width: 100 });
         doc.font("Helvetica").text(v2, 400, rowY, { width: 155 });
         rowY += 20;
       });
 
-      // Section 2: Pricing Table
       rowY += 15;
       doc
         .fillColor("#003366")
@@ -118,7 +127,6 @@ export async function generateBookingPDFReceipt(
         .text("PAYMENT SUMMARY", 40, rowY);
 
       rowY += 20;
-      // Table Header Bar
       doc.fillColor("#F0F4F8").rect(40, rowY, 515, 22).fill();
       doc.fillColor("#003366").font("Helvetica-Bold").fontSize(10);
       doc.text("Description", 50, rowY + 6);
@@ -126,13 +134,15 @@ export async function generateBookingPDFReceipt(
 
       rowY += 28;
       doc.fillColor("#333333").font("Helvetica").fontSize(10);
-      doc.text(`Room Rental Fee (${data.roomName})`, 50, rowY);
+      doc.text(`Room Rental Fee (${roomName})`, 50, rowY, { width: 360 });
       doc.text(`THB ${data.roomPrice.toFixed(2)}`, 430, rowY, { align: "right" });
 
       if (data.addonsPrice > 0) {
         rowY += 20;
         doc.text("Equipment & Add-ons Fee", 50, rowY);
-        doc.text(`THB ${data.addonsPrice.toFixed(2)}`, 430, rowY, { align: "right" });
+        doc.text(`THB ${data.addonsPrice.toFixed(2)}`, 430, rowY, {
+          align: "right",
+        });
       }
 
       rowY += 25;
@@ -141,14 +151,12 @@ export async function generateBookingPDFReceipt(
       rowY += 10;
       doc.fillColor("#003366").font("Helvetica-Bold").fontSize(12);
       doc.text("TOTAL AMOUNT PAID:", 50, rowY);
-      doc.text(`THB ${data.totalPrice.toFixed(2)}`, 400, rowY, { align: "right" });
+      doc.text(`THB ${data.totalPrice.toFixed(2)}`, 400, rowY, {
+        align: "right",
+      });
 
-      // Verification Badge
       rowY += 40;
-      doc
-        .fillColor("#E6F4EA")
-        .rect(40, rowY, 515, 45)
-        .fill();
+      doc.fillColor("#E6F4EA").rect(40, rowY, 515, 45).fill();
 
       doc
         .fillColor("#137333")
@@ -159,9 +167,15 @@ export async function generateBookingPDFReceipt(
       doc
         .fontSize(9)
         .font("Helvetica")
-        .text(`Verified at: ${data.paidAt || new Date().toLocaleString()}`, 55, rowY + 30);
+        .text(
+          `Verified at: ${
+            data.paidAt ||
+            new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok" })
+          }`,
+          55,
+          rowY + 30
+        );
 
-      // Official Stamp / Signature Footer
       const footerY = 700;
       doc
         .strokeColor("#CCCCCC")
@@ -173,11 +187,15 @@ export async function generateBookingPDFReceipt(
         .fillColor("#555555")
         .fontSize(9)
         .font("Helvetica")
-        .text("Authorized Signature", 350, footerY + 5, { width: 170, align: "center" });
+        .text("Authorized Signature", 350, footerY + 5, {
+          width: 170,
+          align: "center",
+        });
 
-      doc
-        .fontSize(9)
-        .text("MFU Asset Management Division", 350, footerY + 18, { width: 170, align: "center" });
+      doc.fontSize(9).text("MFU Asset Management Division", 350, footerY + 18, {
+        width: 170,
+        align: "center",
+      });
 
       doc.end();
     } catch (err) {

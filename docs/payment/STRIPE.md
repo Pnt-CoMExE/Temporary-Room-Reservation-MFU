@@ -101,10 +101,15 @@ APP_URL=https://your-domain
 
 ---
 
+## เมล + PDF หลังชำระสำเร็จ
+
+หลัง confirm สำเร็จ ระบบส่งเมลใบอนุญาตพร้อม PDF (`permitEmail.service` + `pdf.service`)  
+PDF เป็น**ภาษาอังกฤษทั้งหมด** (Helvetica) — ตัดอักษรไทยออก / คงรหัสห้อง เช่น `E2`, `C3-101` · วันที่อังกฤษ · ช่วงเวลา Morning/Afternoon/Full พร้อมนาฬิกา (ไม่โชว์ `HALF_AFTERNOON` ดิบ · ไม่มี tofu/mojibake)
+
 ## Checklist Test ด่วน
 
 - [ ] Test mode ใน Dashboard
 - [ ] `STRIPE_SECRET_KEY=sk_test_...`
 - [ ] `PAYMENT_PROVIDER=stripe`
 - [ ] Restart backend
-- [ ] จ่าย `4242...` สำเร็จ + สถานะชำระแล้ว
+- [ ] จ่าย `4242...` สำเร็จ + สถานะชำระแล้ว + เมล/PDF อังกฤษอ่านได้ ไม่มีตัวเพี้ยน

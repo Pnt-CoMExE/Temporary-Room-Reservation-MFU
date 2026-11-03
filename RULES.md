@@ -194,9 +194,9 @@ cd frontend && npm run typecheck
 
 ### UAT
 
-- อ้างอิง `docs/testing/TEST_CASE_TRACKER.md` (+ `docs/testing/test-cases/` รายบุคคล)
-- บันทึกผลใน `docs/testing/UAT_ROUND1_RESULTS.md`
+- อ้างอิงและบันทึกผลใน `docs/testing/TEST_CASE_TRACKER.md` (+ `docs/testing/test-cases/` ตามโฟลว์) — เอกสารหลัก
 - Bug ใช้ `docs/testing/UAT_BUG_REPORT_TEMPLATE.md`
+- ลงนาม UAT: `docs/testing/UAT_SIGNOFF.md`
 
 ### E2E / Load
 

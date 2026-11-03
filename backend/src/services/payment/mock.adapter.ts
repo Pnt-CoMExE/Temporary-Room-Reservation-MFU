@@ -9,8 +9,9 @@ export class MockPaymentAdapter implements IPaymentAdapter {
   readonly providerId = "mock_sandbox";
   readonly providerName = "Mock Sandbox Payment Gateway (UAT Testing)";
 
+  /** Product path uses Stripe; mock stays only for automated unit tests. */
   isEnabled(): boolean {
-    return process.env.PAYMENT_PROVIDER === "mock_sandbox" || process.env.NODE_ENV === "test";
+    return process.env.NODE_ENV === "test";
   }
 
   async createPaymentSession(request: PaymentSessionRequest): Promise<PaymentSessionResponse> {

@@ -38,7 +38,8 @@
 | TC-UDASH-07 | TC-U-28 | แก้ไขเบอร์โทร |
 | TC-PAY-01 | TC-P-R4-01 | ชำระผ่าน Stripe checkout |
 | TC-PAY-02 | TC-P-R4-02 | อ่าน Transaction ID หลัง callback |
-| TC-PAY-03 | TC-U-24b | จำลองชำระ Mock Sandbox |
+| TC-PAY-03 | — | เมล+PDF ใบอนุญาตหลัง Stripe จ่ายสำเร็จ |
+| TC-PAY-04 | — | PDF ใบอนุญาตเป็นอังกฤษ อ่านได้ครบ |
 | TC-ADM-DASH-01 | TC-A-01 | Dashboard สถิติ |
 | TC-ADM-DASH-02 | TC-A-02 | Sidebar ครบ |
 | TC-ADM-BOOK-01 | TC-A-03 | ดูรายการคำขอจอง |

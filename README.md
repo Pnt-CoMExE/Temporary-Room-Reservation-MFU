@@ -18,7 +18,7 @@ Web system for searching, booking, approving, and paying for temporary rental sp
 
 1. [Prerequisites](#1-prerequisites)
 2. [Clone and install](#2-clone-and-install)
-3. [Configure `.env` (required)](#3-configure-env-required)
+3. [Configure `.env` (required)](#3-configure-env-required) — includes [SMTP setup](#34-smtp-email-notifications-recommended-for-uat)
 4. [Database + seed / import rooms](#4-database--seed--import-rooms)
 5. [Run development](#5-run-development)
 6. [Run with Docker (near-production)](#6-run-with-docker-near-production)
@@ -41,7 +41,8 @@ Web system for searching, booking, approving, and paying for temporary rental sp
 | **Git** | Clone from GitHub |
 | **Google Cloud account** | OAuth 2.0 client for login |
 | **Docker Desktop** (recommended) | Full UAT stack |
-| **Stripe test keys** (if not using mock) | See [`docs/payment/STRIPE.md`](docs/payment/STRIPE.md) |
+| **Stripe test keys** | See [`docs/payment/STRIPE.md`](docs/payment/STRIPE.md) |
+| **Gmail / SMTP** (recommended for UAT email) | App Password — see [§3.4](#34-smtp-email-notifications-recommended-for-uat) |
 
 ---
 
@@ -82,13 +83,13 @@ Edit `backend/.env` — **never commit a real `.env` file**.
 | `GOOGLE_CLIENT_ID` | Yes | Google Cloud Console → OAuth client |
 | `GOOGLE_CLIENT_SECRET` | Yes | Google Cloud Console |
 | `GOOGLE_CALLBACK_URL` | Yes | Must match Authorized redirect URI, e.g. `http://localhost:3000/api/auth/google/callback` |
-| `PAYMENT_PROVIDER` | Yes | Fast UAT: `mock_sandbox` · Stripe test: `stripe` |
-| `STRIPE_SECRET_KEY` | If Stripe | `sk_test_…` |
-| `STRIPE_PUBLISHABLE_KEY` | If Stripe | `pk_test_…` |
+| `PAYMENT_PROVIDER` | Yes | Use `stripe` (product path) |
+| `STRIPE_SECRET_KEY` | Yes (Stripe) | `sk_test_…` for UAT |
+| `STRIPE_PUBLISHABLE_KEY` | Recommended | `pk_test_…` |
 | `STRIPE_WEBHOOK_SECRET` | Recommended with webhooks | `whsec_…` |
 | `DEV_ADMIN_EMAILS` | UAT | Google emails that become Admin on login (comma-separated) |
 | `DEV_INTERNAL_EMAILS` | UAT | Force `internal` when you lack `@mfu.ac.th` |
-| `SMTP_*` / `EMAIL_FROM` | Optional | If unset → email logs to console |
+| `SMTP_*` / `EMAIL_FROM` | Recommended for UAT | See [§3.4](#34-smtp-email-notifications-recommended-for-uat) · if unset → emails log to console only |
 | `REDIS_URL` | Optional | If unset → memory store for session / rate-limit |
 
 Detailed walkthrough: [`docs/ops/SETUP_FROM_ENV_EXAMPLE.md`](docs/ops/SETUP_FROM_ENV_EXAMPLE.md)
@@ -110,6 +111,54 @@ cp .env.production.example .env.production
 At minimum set: `POSTGRES_PASSWORD`, `JWT_SECRET`, `SESSION_SECRET`, Google OAuth, `FRONTEND_URL`, `GOOGLE_CALLBACK_URL`, `PAYMENT_PROVIDER`  
 
 Deploy guides: [`docs/ops/CITS_RUNBOOK.md`](docs/ops/CITS_RUNBOOK.md) · [`docs/ops/GO_LIVE_CHECKLIST.md`](docs/ops/GO_LIVE_CHECKLIST.md)
+
+### 3.4 SMTP email notifications (recommended for UAT)
+
+Without SMTP, the API still builds status emails but only **prints them to the backend console**.  
+With SMTP, users receive real inbox messages (booking submitted, approve/reject, **paid + Space Permit PDF**).
+
+#### Gmail App Password (easiest for local / demo)
+
+1. Use a Google account with **2-Step Verification** turned on  
+2. Open [Google App Passwords](https://myaccount.google.com/apppasswords) → create a password for “Mail”  
+3. Put values in `backend/.env` (use the **16-character App Password**, not your normal Gmail password):
+
+```env
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your.gmail@gmail.com
+SMTP_PASS=xxxx xxxx xxxx xxxx
+EMAIL_FROM="MFU Space Reservation <your.gmail@gmail.com>"
+```
+
+4. Restart the backend (`cd backend && npm run dev`)  
+5. On startup you should see SMTP verify success (not “console only”)  
+6. Smoke-check: submit a booking or complete Stripe test payment → open the booker’s inbox (and spam folder once)
+
+| Variable | Required for real mail? | Notes |
+|----------|-------------------------|--------|
+| `SMTP_HOST` | Yes | e.g. `smtp.gmail.com` |
+| `SMTP_PORT` | Yes | `587` (STARTTLS) typical |
+| `SMTP_USER` | Yes | Full mailbox address |
+| `SMTP_PASS` | Yes | Gmail **App Password** (spaces OK) |
+| `EMAIL_FROM` | Recommended | Display name + address; often same as `SMTP_USER` for Gmail |
+
+#### University / production SMTP
+
+```env
+SMTP_HOST=smtp.mfu.ac.th
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+EMAIL_FROM=no-reply@mfu.ac.th
+```
+
+Ask CITS / mail admins for host, port, and whether TLS/auth is required. Do **not** commit real passwords.
+
+#### Related test cases
+
+- Status emails: **TC-EMAIL-01**, **TC-EMAIL-02** — [`docs/testing/test-cases/12-edge-email.md`](docs/testing/test-cases/12-edge-email.md)  
+- Paid email + English PDF permit: **TC-PAY-03**, **TC-PAY-04** — [`docs/testing/test-cases/05-payment.md`](docs/testing/test-cases/05-payment.md)
 
 ---
 
@@ -202,7 +251,7 @@ $env:DB_HOST="localhost"; $env:DB_PORT="5433"; $env:DB_NAME="mfu_reservation"; $
 npm run seed:demo
 ```
 
-Docker UAT checklist: [`docs/testing/UAT_DOCKER_CHECKLIST.md`](docs/testing/UAT_DOCKER_CHECKLIST.md)
+Manual test suite (source of truth): [`docs/testing/TEST_CASE_TRACKER.md`](docs/testing/TEST_CASE_TRACKER.md)
 
 ---
 
@@ -222,9 +271,10 @@ Docker UAT checklist: [`docs/testing/UAT_DOCKER_CHECKLIST.md`](docs/testing/UAT_
 
 | Mode | Setting | When to use |
 |------|---------|-------------|
-| **Mock** | `PAYMENT_PROVIDER=mock_sandbox` | Demo / UAT without real money |
-| **Stripe Test** | `PAYMENT_PROVIDER=stripe` + `sk_test_` / `pk_test_` | Real gateway testing |
+| **Stripe Test** | `PAYMENT_PROVIDER=stripe` + `sk_test_` / `pk_test_` | Default UAT path — card `4242…` |
 | **Stripe Live** | `sk_live_` + HTTPS + webhook | Real production — see [`docs/payment/STRIPE.md`](docs/payment/STRIPE.md) |
+
+After a successful Stripe payment the booker receives email + an **English** Space Permit PDF (readable date/slot; Thai room names become room codes / ASCII fallbacks). Mock checkout was removed from the product UI.
 
 ### Sample promo codes (after seed)
 
@@ -247,8 +297,8 @@ Use when handing the project to another team / unit, or before going live.
 
 - [ ] Google OAuth works (login succeeds)
 - [ ] Callback URL matches the domain you will open
-- [ ] Payment mode chosen: mock or Stripe test/live per policy
-- [ ] (If available) MFU SMTP for notification email
+- [ ] Stripe configured (`PAYMENT_PROVIDER=stripe` + test or live keys)
+- [ ] SMTP configured for real notification email ([§3.4](#34-smtp-email-notifications-recommended-for-uat)) — or accept console-only logs
 
 ### C. Data
 
@@ -264,8 +314,8 @@ cd backend && npm test && npm run typecheck
 cd ../frontend && npm run typecheck && npm run build
 ```
 
-- [ ] Main flow: Login → find room → book + attach PDF → Admin approve + pick rate → pay → status updates
-- [ ] Test evidence: [`docs/testing/TEST_CASE_TRACKER.md`](docs/testing/TEST_CASE_TRACKER.md)
+- [ ] Main flow: Login → find room → book + attach PDF → Admin approve + pick rate → Stripe pay → email + PDF permit
+- [ ] Manual suite **80/80**: [`docs/testing/TEST_CASE_TRACKER.md`](docs/testing/TEST_CASE_TRACKER.md) · by flow: [`docs/testing/test-cases/README.md`](docs/testing/test-cases/README.md)
 
 ### E. Production / server
 
@@ -304,6 +354,17 @@ cd frontend && npm run build
 ```
 
 E2E (Playwright): see [`docs/testing/QA_AUTOMATION_GUIDE.md`](docs/testing/QA_AUTOMATION_GUIDE.md)
+
+### Manual UAT (by flow)
+
+Source of truth: **80 cases, all passed**
+
+| Flow | Doc |
+|------|-----|
+| Index | [`docs/testing/test-cases/README.md`](docs/testing/test-cases/README.md) |
+| Full tracker | [`docs/testing/TEST_CASE_TRACKER.md`](docs/testing/TEST_CASE_TRACKER.md) |
+| Payment + PDF permit | [`docs/testing/test-cases/05-payment.md`](docs/testing/test-cases/05-payment.md) |
+| Status email | [`docs/testing/test-cases/12-edge-email.md`](docs/testing/test-cases/12-edge-email.md) |
 
 ---
 
@@ -376,7 +437,9 @@ Temporary-Room-Reservation-MFU/
 | Stripe | [`docs/payment/STRIPE.md`](docs/payment/STRIPE.md) |
 | DB schema | [`docs/product/schema.md`](docs/product/schema.md) |
 | Features | [`docs/product/features.md`](docs/product/features.md) |
-| Test Case Tracker | [`docs/testing/TEST_CASE_TRACKER.md`](docs/testing/TEST_CASE_TRACKER.md) |
+| Test Case Tracker (80/80) | [`docs/testing/TEST_CASE_TRACKER.md`](docs/testing/TEST_CASE_TRACKER.md) |
+| Test cases by flow | [`docs/testing/test-cases/README.md`](docs/testing/test-cases/README.md) |
+| SMTP setup | [§3.4 in this README](#34-smtp-email-notifications-recommended-for-uat) |
 | Team / AI rules | [`RULES.md`](RULES.md) |
 
 ---
@@ -391,7 +454,8 @@ Temporary-Room-Reservation-MFU/
 | No rooms in the app | `npm run import:rooms` |
 | Payment UI broken | `PAYMENT_PROVIDER` · Stripe keys · see `STRIPE.md` |
 | PDF attach / preview broken | `backend/uploads` folder · same origin via Vite proxy or Docker |
-| Email not delivered | SMTP unset → check backend console logs |
+| Email not delivered | Set SMTP ([§3.4](#34-smtp-email-notifications-recommended-for-uat)) · Gmail needs App Password · else check backend console logs |
+| PDF permit looks garbled | Re-pay / new email after latest build · PDF is English-only (TC-PAY-04) |
 
 ---
 
@@ -402,7 +466,8 @@ Temporary-Room-Reservation-MFU/
 | Frontend | Vue 3, Vite, TypeScript, Tailwind, Vue-i18n, Chart.js |
 | Backend | Node.js, Express 5, TypeScript, PostgreSQL, Redis (optional) |
 | Auth | Google OAuth 2.0, JWT (HttpOnly cookie) |
-| Payment | Stripe (+ `mock_sandbox` for UAT) |
+| Payment | Stripe (test / live) |
+| Email | Nodemailer SMTP (`SMTP_*` — see §3.4) |
 | Deploy | Docker Compose, Nginx, GitHub Actions CI |
 
 ---

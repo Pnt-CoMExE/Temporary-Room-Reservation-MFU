@@ -134,19 +134,14 @@ const flows = [
     file: "05-payment",
     title: "5. Payment — ชำระเงิน",
     phase: "ผู้ใช้",
-    blurb: "Stripe checkout + Transaction ID · Mock Sandbox",
+    blurb: "Stripe checkout · Transaction ID · เมล+PDF ใบอนุญาตหลังจ่าย (ไม่มี mock)",
     sections: [
       {
         heading: "Stripe",
         cases: [
           { id: "TC-PAY-01", old: "TC-P-R4-01", name: "ชำระผ่าน Stripe checkout", page: "`/dashboard`", steps: "`PAYMENT_PROVIDER=stripe` → ชำระ → checkout → callback", expect: "สถานะชำระแล้ว (`approved_paid`)", result: "✅", evidence: "`evidence/CoM/TC-P-R4-01.png`" },
           { id: "TC-PAY-02", old: "TC-P-R4-02", name: "อ่าน Transaction ID หลัง callback", page: "`/dashboard`", steps: "ต่อจาก TC-PAY-01", expect: "มี Tx ID + สถานะจ่ายแล้ว", result: "✅", evidence: "`evidence/CoM/TC-P-R4-02.png`" },
-        ],
-      },
-      {
-        heading: "Mock (UAT ไม่ตัดบัตร)",
-        cases: [
-          { id: "TC-PAY-03", old: "TC-U-24b", name: "จำลองชำระ Mock Sandbox", page: "`/dashboard`", steps: "`PAYMENT_PROVIDER=mock_sandbox` → จำลองชำระ", expect: "อัปเดตสถานะโดยไม่โอนจริง", result: "✅", evidence: "`evidence/Parttime/TC-U-24b.png`" },
+          { id: "TC-PAY-03", old: "—", name: "เมล+PDF ใบอนุญาตหลัง Stripe จ่ายสำเร็จ", page: "อีเมล", steps: "ชำระ Stripe สำเร็จ → เปิด inbox ผู้จอง", expect: "ได้เมลยืนยันชำระเงิน + แนบ PDF ใบอนุญาต/ใบเสร็จ", result: "⬜", evidence: "", note: "mock ถูกถอดแล้ว · ใช้ SMTP จริง" },
         ],
       },
     ],
@@ -474,7 +469,7 @@ function writeTracker(flowsList, total) {
     "|--|------|------------|",
     "| Frontend | `http://localhost:5173` | `http://localhost:8080` |",
     "| API | `http://localhost:3000` | `http://localhost:8080/api` |",
-    "| Payment | `stripe` หรือ `mock_sandbox` | ตั้งใน `.env` |",
+    "| Payment | `stripe` | ตั้งใน `.env` |",
     "| Admin bootstrap | `DEV_ADMIN_EMAILS` | เหมือนกัน |",
     "",
     "Role จากอีเมล: `@mfu.ac.th` → internal · อื่นๆ → external · admin = promote / `DEV_ADMIN_EMAILS`",

@@ -2,6 +2,60 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — README SMTP + refresh flow test docs]
+- GitHub `README.md`: เพิ่ม **§3.4 SMTP** (Gmail App Password + MFU SMTP) · อัปเดต payment (Stripe-only) · ลิงก์ manual suite 80 เคสตามโฟลว์
+- `test-cases/05-payment.md` / `12-edge-email.md` / README โฟลว์ / tracker: จุดตรวจวัน+slot · ลิงก์ SMTP · TC-PAY-03/04
+
+## [2026-11-03 — Drop stale UAT Docker/Round1 docs]
+- ถอนเนื้อหาเก่า: `UAT_DOCKER_CHECKLIST` / `UAT_DOCKER_ROUND_RESULTS` / `UAT_ROUND1_RESULTS` → stub ชี้ `TEST_CASE_TRACKER.md`
+- อัปเดต `docs/README.md`, root `README.md`, `RULES.md` ให้ใช้ tracker ล่าสุดเป็นเอกสารหลัก (80/80)
+
+## [2026-11-03 — TC-PAY-03/04 closed]
+- ผู้ใช้ยืนยันเมล+PDF ครบถ้วน · ติ๊ก TC-PAY-03 ✅ · รวม **80/80 ผ่าน**
+
+## [2026-11-03 — Browser check + resend permit email]
+- เข้าเบราว์เซอร์จอหลักได้: แอดมิน Paniti · แท็บจัดการคำขอจอง · รายการ paid หลายใบ
+- resend `sendPaidPermitEmailForBooking(57)` → `BK-20261103-3TSY` สำเร็จ (`result: true`) รอเปิด Gmail ตรวจแนบ PDF (TC-PAY-03)
+
+## [2026-11-03 — Verify TC-PAY-04 pass]
+- รัน `generateBookingPDFReceipt` ด้วย input ไทย → เปิด PDF ใน Edge ตรวจครบ: วัน `Wed, 4 Nov 2026` · slot Afternoon+นาฬิกา · ห้อง `A` / `E2` · ไม่มี tofu · ยอด 1700
+- หลักฐาน `docs/testing/evidence/CoM/TC-PAY-04.webp` · ผ่าน TC-PAY-04 · คง ⬜ แค่ TC-PAY-03 (เมล inbox จริง)
+
+## [2026-11-03 — Add TC-PAY-04 English PDF receipt]
+- เพิ่ม `TC-PAY-04` ตรวจ PDF ใบอนุญาตอังกฤษ (วัน/ช่วงเวลา/ไม่มี tofu) ใน `05-payment.md` + tracker + id-map
+- รวมเคส **80** (ผ่าน 78 · ยังไม่เทส TC-PAY-03/04) · อัปเดต CHAPTER_4_AND_5 ส่วน payment
+
+## [2026-11-03 — PDF receipt English-only]
+- PDF ใบอนุญาตเป็นอังกฤษล้วน (Helvetica) — ไม่ฝังฟอนต์ไทย (NotoSansThai ไม่มี Latin ครบ ทำให้ "Room Rental Fee" เป็นกล่อง)
+- `toReceiptEnglish()` คงรหัสห้อง/ตัวอักษรละติน · ชื่อไทยล้วน → fallback เช่น `MFU Meeting Space` / local-part อีเมล
+- วันที่/ช่วงเวลายัง format ใน PDF เอง (ไม่โชว์ GMT / `HALF_AFTERNOON`)
+
+## [2026-11-03 — PDF Thai font + harden date/slot]
+- (แทนที่ด้วย English-only ด้านบน) เคยลองฝัง NotoSansThai + harden date/slot
+
+## [2026-11-03 — Fix booking date in email + PDF]
+- แก้วันที่จองโชว์เป็น `Wed Nov 04… GMT` → จัดรูปแบบไทย/อังกฤษผ่าน `bookingFormat.ts` (อ่าน DATE แบบ UTC ไม่เลื่อนวัน)
+- PDF ใบอนุญาต: วันเป็นอังกฤษอ่านง่าย · ช่วงเวลาเป็น Morning/Afternoon/Full พร้อมนาฬิกา (ไม่ใช้ `.toUpperCase()` รหัสดิบ)
+
+## [2026-11-03 — Email time slots include clock hours]
+- ป้ายช่วงเวลาในเมล: ครึ่งวันเช้า (08:00-12:00) · บ่าย (13:00-17:00) · เต็มวัน (08:00-17:00) ให้ตรงหน้าจอง
+
+## [2026-11-03 — Time slot on all booking emails]
+- เมลแจ้งผลพิจารณา + เมลหลังชำระเงิน: เพิ่ม**วันที่จอง**และ**ช่วงเวลา**ในเนื้อหา/หัวข้อ (เมลยืนยันส่งคำขอมีอยู่แล้ว)
+
+## [2026-11-03 — Stripe paid email + drop mock payment]
+- หลัง Stripe ชำระสำเร็จ (`applyVerifiedPayment`): ส่งเมล + PDF ใบอนุญาตเหมือนยืนยันสลิป (กันส่งซ้ำถ้าจ่ายแล้ว)
+- ปิดโหมด mock: UI จำลองจ่ายเอาออก · `POST /mock/simulate` → 410 · mock adapter เปิดเฉพาะ `NODE_ENV=test`
+- แชร์ logic ที่ `permitEmail.service.ts` · อัปเดตเคส TC-PAY-03 เป็นเมลหลัง Stripe
+
+## [2026-11-03 — Fix booking status emails]
+- เมลยืนยันส่งคำขอ: เพิ่ม**ช่วงเวลา** (ครึ่งเช้า/บ่าย/เต็มวัน)
+- เมลแจ้งผลพิจารณา: รองรับ `approved_pending_payment` เป็นอนุมัติ (เดิมเช็กแค่ `approved` เลยขึ้นไม่อนุมัติผิด)
+- กรณีไม่อนุมัติ: แสดง**เหตุผล**ชัดเจนในเนื้อเมล (ไม่มีเหตุผล → แจ้งว่าไม่ระบุ)
+
+## [2026-10-30 — Rewrite CHAPTER_4_AND_5.md]
+- เขียนใหม่ทั้งไฟล์ให้ตรง suite ปัจจุบัน: **79** เคสผ่านครบ · รหัสตามโฟลว์ (`TC-BOOK-04` ฯลฯ) · ไม่กล่าวถึงเคสข้าม PromptPay/สลิป · อัปเดตตารางสรุป + figure guide + checklist
+
 ## [2026-10-30 — Test cases readability pass]
 - จัดโฟลว์ใหม่ให้อ่านง่าย: เฟส ผู้ใช้ → แอดมิน → ข้ามระบบ · แยกหัวข้อย่อยในแต่ละไฟล์ · เรียงเคสตามลำดับใช้งาน (เช่น Booking happy path ก่อน error)
 - ตารางบางลง (ตัดคอลัมน์รหัสเก่าออกจากตารางหลัก → อยู่ที่ `_id-map.md`) · Tracker แบ่ง section + สารบัญ · README มีลำดับรันแนะนำ

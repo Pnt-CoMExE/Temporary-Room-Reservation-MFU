@@ -35,6 +35,9 @@ RUN npm ci --only=production
 # Copy compiled JS from builder (no source TS, no devDeps)
 COPY --from=builder /app/dist ./dist
 
+# Thai-capable fonts for PDF receipts (PDFKit Helvetica cannot render Thai)
+COPY --from=builder /app/assets/fonts ./assets/fonts
+
 # Create uploads directory for document/slip storage
 RUN mkdir -p /app/uploads
 

@@ -69,7 +69,7 @@
 - อัปเดต Seed Demo Data: แก้ไขอีเมล Admin เป็น `admin.demo@property.mfu.ac.th` ✅
 - ชุดทดสอบ Unit Tests: ผ่านครบ **169/169 Tests** (เพิ่ม `resolveUserType.test.ts` 6 tests) ✅
 - ลบสคริปต์ seed เก่าที่ซ้ำซ้อน (`seed-banners.ts`, `seed-promos.ts`, `seed-logs.ts`) — ใช้ `seed:demo` แทน ✅
-- จัดทำเอกสาร UAT: `testing/UAT_ROUND1_RESULTS.md`, `testing/UAT_BUG_REPORT_TEMPLATE.md`, `testing/UAT_SIGNOFF.md` ✅
+- จัดทำเอกสาร UAT: `testing/TEST_CASE_TRACKER.md` (หลัก), `testing/UAT_BUG_REPORT_TEMPLATE.md`, `testing/UAT_SIGNOFF.md` ✅
 
 **รอดำเนินการ (ต้องมีผู้ทดสอบจริง):**
 - ทดสอบการเข้าสู่ระบบด้วย Google OAuth — การจำแนก Role อัตโนมัติตามโดเมนอีเมล (`@property.mfu.ac.th` → admin, `@mfu.ac.th` → internal, โดเมนอื่น → external)

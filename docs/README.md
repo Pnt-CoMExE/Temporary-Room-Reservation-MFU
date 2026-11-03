@@ -1,7 +1,7 @@
 # Documentation — MFU Space Reservation
 
 **โครงการ:** ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง  
-**อัปเดตโครงสร้าง:** 2026-10-30
+**อัปเดตโครงสร้าง:** 2026-11-03
 
 เริ่มจากตารางนี้ — เปิดเฉพาะหมวดที่ต้องการ
 
@@ -42,7 +42,7 @@
 |------|----------|
 | [`payment/STRIPE.md`](./payment/STRIPE.md) | คู่มือ Stripe demo/test + Transaction ID / webhook |
 
-UAT ชั่วคราวยังใช้ `PAYMENT_PROVIDER=mock_sandbox` ได้ · Production = Stripe ตามนโยบายทีม
+Payment path ปัจจุบัน = **Stripe** (`docs/payment/STRIPE.md`)
 
 ---
 
@@ -50,16 +50,14 @@ UAT ชั่วคราวยังใช้ `PAYMENT_PROVIDER=mock_sandbox` �
 
 | ไฟล์ | คำอธิบาย |
 |------|----------|
-| [`testing/TEST_CASE_TRACKER.md`](./testing/TEST_CASE_TRACKER.md) | **ตาราง Test Case ทั้งหมด** |
-| [`testing/test-cases/`](./testing/test-cases/) | จัดตามโฟลว์ (`01-auth` … `12-edge-email`) + รหัส TC ใหม่ |
+| [`testing/TEST_CASE_TRACKER.md`](./testing/TEST_CASE_TRACKER.md) | **เอกสารหลัก** — ตาราง Test Case ทั้งหมด (**80/80 ผ่าน**) |
+| [`testing/test-cases/`](./testing/test-cases/) | จัดตามโฟลว์ (`01-auth` … `12-edge-email`) + รหัส TC · Payment มี TC-PAY-03/04 · Email ตรวจวัน/slot |
+| [Root README §3.4 SMTP](../README.md#34-smtp-email-notifications-recommended-for-uat) | Setup Gmail App Password / MFU SMTP สำหรับ UAT เมลจริง |
 | [`testing/evidence/`](./testing/evidence/) | Screenshot หลักฐาน |
 | [`testing/TESTING_PLAN.md`](./testing/TESTING_PLAN.md) | แผน Unit / Integration / E2E |
 | [`testing/QA_AUTOMATION_GUIDE.md`](./testing/QA_AUTOMATION_GUIDE.md) | Playwright E2E |
-| [`testing/UAT_DOCKER_CHECKLIST.md`](./testing/UAT_DOCKER_CHECKLIST.md) | เทสบน Docker |
 | [`testing/UAT_BUG_REPORT_TEMPLATE.md`](./testing/UAT_BUG_REPORT_TEMPLATE.md) | แบบฟอร์มบั๊ก |
 | [`testing/UAT_SIGNOFF.md`](./testing/UAT_SIGNOFF.md) | ลงนามรับ UAT |
-| [`testing/UAT_ROUND1_RESULTS.md`](./testing/UAT_ROUND1_RESULTS.md) | ผลรอบ 1 |
-| [`testing/UAT_DOCKER_ROUND_RESULTS.md`](./testing/UAT_DOCKER_ROUND_RESULTS.md) | ผลรอบ Docker |
 
 ---
 
@@ -94,3 +92,6 @@ UAT ชั่วคราวยังใช้ `PAYMENT_PROVIDER=mock_sandbox` �
 |--------|--------|
 | `payment_gateway.md` | ตัดแล้ว — ทีมเลือก **Stripe** ไม่เก็บคู่มือ Opn/SCB/KBank/KTB |
 | `UAT_TEST_SCENARIOS.md` | รวมเข้า `testing/TEST_CASE_TRACKER.md` แล้ว |
+| `testing/UAT_DOCKER_CHECKLIST.md` | stub — อิง `TEST_CASE_TRACKER.md` แทน (รายการค้างเก่าไม่ใช้) |
+| `testing/UAT_DOCKER_ROUND_RESULTS.md` | stub — อิง tracker ล่าสุด |
+| `testing/UAT_ROUND1_RESULTS.md` | stub — อิง tracker ล่าสุด |

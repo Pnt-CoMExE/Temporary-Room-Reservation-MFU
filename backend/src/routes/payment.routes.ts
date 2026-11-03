@@ -108,6 +108,7 @@ router.post("/checkout", verifyToken, async (req: any, res: Response) => {
 
 /**
  * Apply verified payment callback → bookings + payments row (Transaction ID)
+ * Stripe: also emails Space Permit PDF (once, when newly marked paid).
  */
 async function applyVerifiedPayment(
   result: {
@@ -118,23 +119,33 @@ async function applyVerifiedPayment(
   },
   providerId: string
 ) {
-  let booking: { id: number; booking_no: string; total_price: number } | null = null;
+  let booking: {
+    id: number;
+    booking_no: string;
+    total_price: number;
+    status?: string;
+    payment_status?: string;
+  } | null = null;
 
   if (result.bookingId) {
     const byId = await query(
-      "SELECT id, booking_no, total_price FROM bookings WHERE id = $1",
+      "SELECT id, booking_no, total_price, status, payment_status FROM bookings WHERE id = $1",
       [result.bookingId]
     );
     booking = byId.rows[0] || null;
   }
   if (!booking && result.bookingNo) {
     const byNo = await query(
-      "SELECT id, booking_no, total_price FROM bookings WHERE booking_no = $1",
+      "SELECT id, booking_no, total_price, status, payment_status FROM bookings WHERE booking_no = $1",
       [result.bookingNo]
     );
     booking = byNo.rows[0] || null;
   }
   if (!booking) return null;
+
+  const alreadyPaid =
+    String(booking.status) === "approved_paid" &&
+    String(booking.payment_status) === "verified";
 
   const txId = result.transactionId || `${providerId}_${Date.now()}`;
   const amount = result.amount != null ? Number(result.amount) : Number(booking.total_price);
@@ -164,6 +175,14 @@ async function applyVerifiedPayment(
     throw err;
   } finally {
     client.release();
+  }
+
+  // Stripe paid → same permit email as admin slip verify (skip if already paid / non-stripe)
+  if (!alreadyPaid && providerId === "stripe") {
+    const { sendPaidPermitEmailForBooking } = await import(
+      "../services/payment/permitEmail.service"
+    );
+    void sendPaidPermitEmailForBooking(booking.id);
   }
 
   return {
@@ -425,81 +444,12 @@ router.get("/stripe/demo-checkout", async (req: any, res: Response) => {
 
 
 /**
- * POST /api/payment/mock/simulate
- * จำลองการชำระเงินสำหรับ UAT — ไม่มีการโอนเงินจริง
- * ตั้ง PAYMENT_PROVIDER=mock_sandbox ใน .env ก่อนใช้งาน
+ * POST /api/payment/mock/simulate — removed (use Stripe)
  */
-router.post("/mock/simulate", verifyToken, async (req: any, res: Response) => {
-  try {
-    const activeAdapter = paymentGateway.getActiveAdapter();
-    if (activeAdapter.providerId !== "mock_sandbox") {
-      return res.status(400).json({
-        message: "โหมดจำลองการชำระเงินไม่ได้เปิดใช้งาน กรุณาตั้ง PAYMENT_PROVIDER=mock_sandbox",
-      });
-    }
-
-    const { bookingId } = req.body;
-    if (!bookingId) {
-      return res.status(400).json({ message: "กรุณาระบุ bookingId" });
-    }
-
-    const bookingRes = await query(
-      "SELECT id, booking_no, total_price, status, user_id FROM bookings WHERE id = $1",
-      [bookingId]
-    );
-
-    if (bookingRes.rows.length === 0) {
-      return res.status(404).json({ message: "ไม่พบข้อมูลการจอง" });
-    }
-
-    const booking = bookingRes.rows[0];
-
-    if (booking.user_id !== req.user?.userId) {
-      return res.status(403).json({ message: "ไม่มีสิทธิ์ดำเนินการกับการจองนี้" });
-    }
-
-    if (booking.status !== "approved_pending_payment") {
-      return res.status(400).json({ message: "การจองนี้ยังไม่พร้อมสำหรับการชำระเงิน" });
-    }
-
-    const session = await paymentGateway.createPaymentSession({
-      bookingId: booking.id,
-      bookingNo: booking.booking_no,
-      amount: Number(booking.total_price),
-      customerEmail: req.user?.email,
-    });
-
-    const webhookResult = await paymentGateway.handleWebhook("mock_sandbox", {
-      bookingId: booking.id,
-      bookingNo: booking.booking_no,
-      amount: Number(booking.total_price),
-      transactionId: session.transactionId,
-      simulateStatus: "success",
-    });
-
-    if (!webhookResult.success) {
-      return res.status(500).json({ message: "การจำลองชำระเงินล้มเหลว" });
-    }
-
-    await query(
-      `UPDATE bookings
-       SET payment_status = 'pending_verification',
-           payment_slip_url = '/uploads/mock-payment-simulated'
-       WHERE id = $1`,
-      [bookingId]
-    );
-
-    res.json({
-      message: "[UAT] จำลองการชำระเงินสำเร็จ — รอเจ้าหน้าที่ตรวจสอบและยืนยัน",
-      bookingNo: booking.booking_no,
-      transactionId: session.transactionId,
-      paymentStatus: "pending_verification",
-      mode: "mock_sandbox",
-    });
-  } catch (err: any) {
-    console.error("[payment/mock/simulate] Error:", err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการจำลองการชำระเงิน" });
-  }
+router.post("/mock/simulate", verifyToken, (_req: any, res: Response) => {
+  res.status(410).json({
+    message: "โหมดจำลองชำระเงินถูกปิดแล้ว กรุณาใช้ Stripe (PAYMENT_PROVIDER=stripe)",
+  });
 });
 
 
@@ -583,10 +533,9 @@ router.post(
   }
 );
 
-import { generateBookingPDFReceipt } from "../services/pdf.service";
-import { sendPaymentApprovedWithPermitEmail } from "../services/email.service";
 import { adminNameFromReq, logAdminAction } from "../services/auditLog.service";
 import { createNotification } from "../services/notification.service";
+import { sendPaidPermitEmailForBooking } from "../services/payment/permitEmail.service";
 
 /**
  * POST /api/payment/verify
@@ -622,54 +571,17 @@ router.post("/verify", verifyToken, verifyAdmin, async (req: any, res: Response)
 
     const booking = updateRes.rows[0];
 
-    // If verified, generate PDF permit and send via email
     if (isVerified) {
-      try {
-        const userRes = await query("SELECT email, firstname, lastname FROM users WHERE id = $1", [booking.user_id]);
-        const roomRes = await query("SELECT name, location FROM rooms WHERE id = $1", [booking.room_id]);
-
-        const user = userRes.rows[0] || {};
-        const room = roomRes.rows[0] || {};
-
-        const pdfBuffer = await generateBookingPDFReceipt({
-          bookingNo: booking.booking_no,
-          userName: `${user.firstname || "ผู้ใช้"} ${user.lastname || ""}`.trim(),
-          userEmail: user.email || "",
-          organizationType: booking.organization_type || "internal",
-          roomName: room.name || "พื้นที่อเนกประสงค์",
-          location: room.location,
-          bookingDate: String(booking.booking_date).match(/^(\d{4}-\d{2}-\d{2})/)?.[1]
-            || String(booking.booking_date).split("T")[0],
-          timeSlot: booking.time_slot,
-          roomPrice: Number(booking.room_price || 0),
-          addonsPrice: Number(booking.addons_price || 0),
-          totalPrice: Number(booking.total_price || 0),
-          paymentStatus: "verified",
-          paidAt: new Date().toLocaleString("th-TH"),
-        });
-
-        if (user.email) {
-          await sendPaymentApprovedWithPermitEmail(
-            user.email,
-            booking.booking_no,
-            room.name || "พื้นที่จอง",
-            pdfBuffer
-          );
-        }
-      } catch (pdfErr) {
-        console.error("[payment/verify] PDF generation/email error:", pdfErr);
-      }
+      await sendPaidPermitEmailForBooking(Number(booking.id));
+    } else {
+      await createNotification({
+        userId: Number(booking.user_id),
+        type: "booking_status",
+        title: "ปฏิเสธการชำระเงิน",
+        body: `รายการ ${booking.booking_no} การชำระเงินไม่ผ่าน${remark ? `: ${remark}` : ""}`,
+        link: "/dashboard",
+      });
     }
-
-    await createNotification({
-      userId: Number(booking.user_id),
-      type: "booking_status",
-      title: isVerified ? "ยืนยันการชำระเงินแล้ว" : "ปฏิเสธการชำระเงิน",
-      body: isVerified
-        ? `รายการ ${booking.booking_no} ชำระเงินสำเร็จ — ตรวจสอบใบอนุญาตในอีเมล`
-        : `รายการ ${booking.booking_no} การชำระเงินไม่ผ่าน${remark ? `: ${remark}` : ""}`,
-      link: "/dashboard",
-    });
 
     await logAdminAction(
       adminNameFromReq(req),

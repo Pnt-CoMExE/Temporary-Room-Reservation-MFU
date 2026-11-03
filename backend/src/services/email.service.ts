@@ -1,4 +1,7 @@
 import { env } from "../config/env";
+import { formatBookingDateTh, timeSlotLabelTh } from "../utils/bookingFormat";
+
+export { timeSlotLabelTh, formatBookingDateTh } from "../utils/bookingFormat";
 
 export interface EmailAttachment {
   filename: string;
@@ -11,6 +14,39 @@ export interface EmailOptions {
   subject: string;
   html: string;
   attachments?: EmailAttachment[];
+}
+
+const APPROVED_STATUSES = new Set([
+  "approved",
+  "approved_pending_payment",
+  "approved_paid",
+  "pending_verification",
+  "completed",
+]);
+
+function isApprovedStatus(status: string): boolean {
+  return APPROVED_STATUSES.has(String(status || "").trim());
+}
+
+function statusLabelForEmail(status: string): { text: string; color: string; approved: boolean } {
+  const s = String(status || "").trim();
+  if (s === "approved_pending_payment") {
+    return { text: "อนุมัติแล้ว — รอชำระเงิน", color: "#16a34a", approved: true };
+  }
+  if (s === "approved_paid" || s === "completed") {
+    return { text: "อนุมัติแล้ว — ชำระเงินแล้ว", color: "#16a34a", approved: true };
+  }
+  if (s === "pending_verification") {
+    return { text: "อนุมัติแล้ว — รอตรวจสอบการชำระเงิน", color: "#16a34a", approved: true };
+  }
+  if (s === "approved") {
+    return { text: "อนุมัติแล้ว", color: "#16a34a", approved: true };
+  }
+  if (s === "disapproved") {
+    return { text: "ไม่อนุมัติ", color: "#dc2626", approved: false };
+  }
+  // Unknown status: do not claim "disapproved"
+  return { text: s || "อัปเดตสถานะ", color: "#374151", approved: isApprovedStatus(s) };
 }
 
 export async function sendEmail(options: EmailOptions): Promise<boolean> {
@@ -60,9 +96,12 @@ export async function sendBookingSubmittedEmail(
   userEmail: string,
   bookingNo: string,
   roomName: string,
-  bookingDate: string
+  bookingDate: string,
+  timeSlot?: string
 ): Promise<boolean> {
-  const subject = `[MFU Space Reservation] ยืนยันการส่งคำขอจองห้อง - ${bookingNo}`;
+  const slotLabel = timeSlotLabelTh(String(timeSlot || ""));
+  const dateLabel = formatBookingDateTh(bookingDate);
+  const subject = `[MFU Space Reservation] ยืนยันการส่งคำขอจองห้อง - ${bookingNo} (${slotLabel})`;
   const html = `
     <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
       <h2 style="color: #ba0b2f;">ส่งคำขอจองห้องเรียบร้อยแล้ว</h2>
@@ -71,7 +110,8 @@ export async function sendBookingSubmittedEmail(
       <ul>
         <li><strong>รหัสการจอง:</strong> ${bookingNo}</li>
         <li><strong>ห้อง/พื้นที่:</strong> ${roomName}</li>
-        <li><strong>วันที่จอง:</strong> ${bookingDate}</li>
+        <li><strong>วันที่จอง:</strong> ${dateLabel}</li>
+        <li><strong>ช่วงเวลา:</strong> ${slotLabel}</li>
         <li><strong>สถานะ:</strong> รอการอนุมัติ (Pending)</li>
       </ul>
       <p>กรุณารอการตรวจสอบและอนุมัติจากเจ้าหน้าที่บริหารจัดการทรัพย์สิน มฟล.</p>
@@ -87,21 +127,48 @@ export async function sendBookingStatusEmail(
   bookingNo: string,
   roomName: string,
   status: string,
-  remarks?: string
+  remarks?: string,
+  bookingDate?: string,
+  timeSlot?: string
 ): Promise<boolean> {
-  const isApproved = status === "approved" || status === "approved_paid";
-  const statusText = isApproved ? "อนุมัติแล้ว (Approved)" : "ไม่อนุมัติ (Disapproved)";
-  const color = isApproved ? "#16a34a" : "#dc2626";
+  const { text: statusText, color, approved } = statusLabelForEmail(status);
+  const reason = String(remarks || "").trim();
+  const slotLabel = timeSlotLabelTh(String(timeSlot || ""));
+  const dateLabel = formatBookingDateTh(bookingDate);
 
-  const subject = `[MFU Space Reservation] แจ้งผลการพิจารณาการจองห้อง - ${bookingNo} [${statusText}]`;
+  const subject = `[MFU Space Reservation] แจ้งผลการพิจารณาการจองห้อง - ${bookingNo} [${statusText}] (${slotLabel})`;
+
+  let reasonBlock = "";
+  if (!approved) {
+    reasonBlock = reason
+      ? `<p style="margin-top: 16px; padding: 12px; background: #fef2f2; border-left: 4px solid #dc2626;">
+           <strong>เหตุผลที่ไม่อนุมัติ:</strong><br/>${reason}
+         </p>`
+      : `<p style="margin-top: 16px; padding: 12px; background: #fef2f2; border-left: 4px solid #dc2626;">
+           <strong>เหตุผลที่ไม่อนุมัติ:</strong> ไม่ระบุเหตุผล
+         </p>`;
+  } else if (reason) {
+    reasonBlock = `<p><strong>หมายเหตุเพิ่มเติม:</strong> ${reason}</p>`;
+  }
+
+  const nextStep = approved
+    ? status === "approved_pending_payment" || status === "approved"
+      ? `<p>คุณสามารถเข้าสู่ระบบที่แดชบอร์ดเพื่อชำระเงินค่าบริการได้</p>`
+      : ""
+    : `<p>หากมีข้อสงสัย กรุณาติดต่อเจ้าหน้าที่บริหารจัดการทรัพย์สิน มฟล.</p>`;
+
   const html = `
     <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
       <h2 style="color: ${color};">ผลการพิจารณาคำขอจองห้อง: ${statusText}</h2>
       <p>เรียน คุณผู้ใช้,</p>
       <p>คำขอจองห้องรหัส <strong>${bookingNo}</strong> สำหรับห้อง <strong>${roomName}</strong> ได้รับการพิจารณาเรียบร้อยแล้ว</p>
-      <p><strong>สถานะปัจจุบัน:</strong> <span style="color: ${color}; font-weight: bold;">${statusText}</span></p>
-      ${remarks ? `<p><strong>หมายเหตุเพิ่มเติม:</strong> ${remarks}</p>` : ""}
-      ${isApproved ? `<p>คุณสามารถเข้าสู่ระบบเพื่อสแกน QR Code ชำระเงินค่าบริการได้ทันทีที่แดชบอร์ด</p>` : ""}
+      <ul>
+        <li><strong>วันที่จอง:</strong> ${dateLabel}</li>
+        <li><strong>ช่วงเวลา:</strong> ${slotLabel}</li>
+        <li><strong>สถานะปัจจุบัน:</strong> <span style="color: ${color}; font-weight: bold;">${statusText}</span></li>
+      </ul>
+      ${reasonBlock}
+      ${nextStep}
       <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
       <p style="font-size: 12px; color: #888;">ระบบบริหารจัดการพื้นที่เช่าชั่วคราว มหาวิทยาลัยแม่ฟ้าหลวง</p>
     </div>
@@ -113,14 +180,22 @@ export async function sendPaymentApprovedWithPermitEmail(
   userEmail: string,
   bookingNo: string,
   roomName: string,
-  pdfBuffer: Buffer
+  pdfBuffer: Buffer,
+  bookingDate?: string,
+  timeSlot?: string
 ): Promise<boolean> {
-  const subject = `[MFU Space Reservation] ยืนยันการชำระเงินและใบอนุญาตใช้งานพื้นที่ - ${bookingNo}`;
+  const slotLabel = timeSlotLabelTh(String(timeSlot || ""));
+  const dateLabel = formatBookingDateTh(bookingDate);
+  const subject = `[MFU Space Reservation] ยืนยันการชำระเงินและใบอนุญาตใช้งานพื้นที่ - ${bookingNo} (${slotLabel})`;
   const html = `
     <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
       <h2 style="color: #16a34a;">ยืนยันการชำระเงินเรียบร้อยแล้ว</h2>
       <p>เรียน คุณผู้ใช้,</p>
       <p>เจ้าหน้าที่ได้ตรวจสอบและยืนยันการชำระเงินสำหรับรายการจอง <strong>${bookingNo}</strong> (${roomName}) เรียบร้อยแล้ว</p>
+      <ul>
+        <li><strong>วันที่จอง:</strong> ${dateLabel}</li>
+        <li><strong>ช่วงเวลา:</strong> ${slotLabel}</li>
+      </ul>
       <p>ระบบได้แนบเอกสาร <strong>"ใบอนุญาตใช้งานพื้นที่และใบเสร็จรับเงิน (Space Permit & Official Receipt)"</strong> มาพร้อมกับอีเมลนี้ กรุณาเก็บไว้เป็นหลักฐานในการเข้าใช้งานพื้นที่</p>
       <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
       <p style="font-size: 12px; color: #888;">ส่วนจัดการทรัพย์สิน มหาวิทยาลัยแม่ฟ้าหลวง</p>

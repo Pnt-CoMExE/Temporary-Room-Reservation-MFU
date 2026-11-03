@@ -6,6 +6,11 @@
 |--------|------|
 | ตารางรวม + สภาพแวดล้อม | [`../TEST_CASE_TRACKER.md`](../TEST_CASE_TRACKER.md) |
 | แผนที่รหัสใหม่ ↔ เดิม (หลักฐาน) | [`_id-map.md`](./_id-map.md) |
+| Setup SMTP (GitHub README) | [`../../../README.md#34-smtp-email-notifications-recommended-for-uat`](../../../README.md#34-smtp-email-notifications-recommended-for-uat) |
+
+**อัปเดต:** 2026-11-03 · รวม **80** เคส (ผ่านครบ)  
+**Payment (05):** 4 เคส — Stripe + เมล/PDF ใบอนุญาตอังกฤษ (TC-PAY-03/04) · ไม่ใช้ mock ใน product path  
+**Email (12):** ตรวจวัน/ช่วงเวลาในเมล · เมลหลังจ่ายดูที่โฟลว์ 05
 
 ## เฟส A — ผู้ใช้
 
@@ -15,7 +20,7 @@
 | 02 | Home / Rooms — ค้นหาห้อง | [`02-home-rooms.md`](./02-home-rooms.md) | 6 |
 | 03 | Booking — ส่งคำขอจอง | [`03-booking.md`](./03-booking.md) | 10 |
 | 04 | User Dashboard — ติดตามคำขอ | [`04-user-dashboard.md`](./04-user-dashboard.md) | 7 |
-| 05 | Payment — ชำระเงิน | [`05-payment.md`](./05-payment.md) | 3 |
+| 05 | Payment — ชำระเงิน (Stripe · เมล+PDF EN) | [`05-payment.md`](./05-payment.md) | 4 |
 
 ## เฟส B — แอดมิน
 
@@ -32,9 +37,9 @@
 | # | โฟลว์ | ไฟล์ | เคส |
 |---|--------|------|------|
 | 11 | i18n — ภาษาไทย / อังกฤษ | [`11-i18n.md`](./11-i18n.md) | 7 |
-| 12 | Edge / Email / Responsive | [`12-edge-email.md`](./12-edge-email.md) | 4 |
+| 12 | Edge / Email / Responsive (วัน+slot ในเมล) | [`12-edge-email.md`](./12-edge-email.md) | 4 |
 
-**รวมทั้งหมด: 79 เคส** (ผ่านครบ)
+**รวมทั้งหมด: 80 เคส** (ผ่านครบ)
 
 ### ลำดับแนะนำตอนรัน
 

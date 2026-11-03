@@ -321,9 +321,6 @@ const saveProfile = async () => {
 };
 
 const openPayment = async (booking: BookingItem) => {
-  if (activePaymentProvider.value === "mock_sandbox") {
-    return openMockPayment(booking);
-  }
   if (activePaymentProvider.value === "stripe") {
     return openStripePayment(booking);
   }
@@ -363,50 +360,6 @@ const openStripePayment = async (booking: BookingItem) => {
       icon: "error",
       title: t("dashboard.stripe_pay_error"),
       text: err.response?.data?.message || err.message || "",
-      confirmButtonColor: "#ba0b2f",
-    });
-  }
-};
-
-const openMockPayment = async (booking: BookingItem) => {
-  const result = await Swal.fire({
-    title: `<span class="font-extrabold text-xl text-gray-900">${t("dashboard.mock_pay_title")}</span>`,
-    html: `
-      <p class="text-sm text-gray-500 mb-2 font-medium">${t("dashboard.net_total")}: <span class="text-[#ba0b2f] font-black text-2xl ml-1">฿${booking.totalPrice.toLocaleString()}</span></p>
-      <div class="bg-amber-50 p-4 rounded-xl text-left border border-amber-100 text-xs text-amber-800 font-medium mb-4">
-        🧪 ${t("dashboard.mock_pay_desc")}
-      </div>
-    `,
-    showCancelButton: true,
-    confirmButtonText: t("dashboard.mock_pay_btn"),
-    cancelButtonText: t("dashboard.close_window"),
-    confirmButtonColor: "#2563eb",
-    customClass: {
-      popup: "rounded-[2.5rem] p-8 max-w-md",
-      confirmButton: "rounded-xl px-6 py-3 font-bold cursor-pointer",
-      cancelButton: "rounded-xl px-6 py-3 font-bold cursor-pointer",
-    },
-  });
-
-  if (!result.isConfirmed) return;
-
-  try {
-    await api.post("/api/payment/mock/simulate", { bookingId: booking.dbId });
-    await fetchBookings();
-    Swal.fire({
-      icon: "success",
-      title: `<div class="px-2 leading-relaxed">
-        <p class="text-xl font-extrabold text-gray-900 mb-2">${t("dashboard.mock_pay_success")}</p>
-        <p class="text-base font-semibold text-gray-500">${t("dashboard.mock_pay_success_sub")}</p>
-      </div>`,
-      confirmButtonColor: "#ba0b2f",
-      customClass: { popup: "rounded-[2rem] max-w-md", title: "w-full" },
-    });
-  } catch (err: any) {
-    Swal.fire({
-      icon: "error",
-      title: t("booking.submit_error_title"),
-      text: err.response?.data?.message || "เกิดข้อผิดพลาด",
       confirmButtonColor: "#ba0b2f",
     });
   }
@@ -1243,20 +1196,12 @@ const formatDate = (dateString: string) =>
                     class="bg-sky-600 text-white px-5 py-2.5 rounded-xl font-black text-sm shadow-md shadow-sky-200/60 hover:bg-sky-700 transition-all flex items-center gap-2 cursor-pointer"
                   >
                     <font-awesome-icon
-                      :icon="
-                        activePaymentProvider === 'mock_sandbox'
-                          ? 'flask'
-                          : activePaymentProvider === 'stripe'
-                            ? 'wallet'
-                            : 'qrcode'
-                      "
+                      :icon="activePaymentProvider === 'stripe' ? 'wallet' : 'qrcode'"
                     />
                     {{
-                      activePaymentProvider === "mock_sandbox"
-                        ? $t("dashboard.mock_pay")
-                        : activePaymentProvider === "stripe"
-                          ? $t("dashboard.stripe_pay")
-                          : $t("dashboard.scan_pay")
+                      activePaymentProvider === "stripe"
+                        ? $t("dashboard.stripe_pay")
+                        : $t("dashboard.scan_pay")
                     }}
                   </button>
 

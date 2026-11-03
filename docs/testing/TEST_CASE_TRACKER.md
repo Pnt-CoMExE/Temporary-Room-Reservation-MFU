@@ -1,6 +1,6 @@
 # Test Case Tracker
 
-**อัปเดต:** 2026-10-30  ·  **รวม:** 79 เคส (ผ่านครบ)
+**อัปเดต:** 2026-11-03  ·  **รวม:** 80 เคส (ผ่านครบ)
 
 ดัชนีไฟล์: [`test-cases/README.md`](./test-cases/README.md)  ·  แผนที่รหัส: [`test-cases/_id-map.md`](./test-cases/_id-map.md)
 
@@ -27,7 +27,7 @@
 |--|------|------------|
 | Frontend | `http://localhost:5173` | `http://localhost:8080` |
 | API | `http://localhost:3000` | `http://localhost:8080/api` |
-| Payment | `stripe` หรือ `mock_sandbox` | ตั้งใน `.env` |
+| Payment | `stripe` | ตั้งใน `.env` |
 | Admin bootstrap | `DEV_ADMIN_EMAILS` | เหมือนกัน |
 
 Role จากอีเมล: `@mfu.ac.th` → internal · อื่นๆ → external · admin = promote / `DEV_ADMIN_EMAILS`
@@ -167,7 +167,8 @@ Role จากอีเมล: `@mfu.ac.th` → internal · อื่นๆ → 
 
 ## 5. Payment — ชำระเงิน
 
-*ผู้ใช้* — Stripe checkout + Transaction ID · Mock Sandbox
+*ผู้ใช้* — Stripe checkout · Transaction ID · เมล+PDF ใบอนุญาตหลังจ่าย (ไม่มี mock) · PDF อังกฤษ  
+SMTP: [README §3.4](../../README.md#34-smtp-email-notifications-recommended-for-uat)
 
 รายละเอียดเต็ม: [`test-cases/05-payment.md`](./test-cases/05-payment.md)
 
@@ -177,12 +178,8 @@ Role จากอีเมล: `@mfu.ac.th` → internal · อื่นๆ → 
 |-----|---------|------|---------|---------|----|---------|
 | TC-PAY-01 | ชำระผ่าน Stripe checkout | `/dashboard` | `PAYMENT_PROVIDER=stripe` → ชำระ → checkout → callback | สถานะชำระแล้ว (`approved_paid`) | ✅ | `evidence/CoM/TC-P-R4-01.png` |
 | TC-PAY-02 | อ่าน Transaction ID หลัง callback | `/dashboard` | ต่อจาก TC-PAY-01 | มี Tx ID + สถานะจ่ายแล้ว | ✅ | `evidence/CoM/TC-P-R4-02.png` |
-
-### Mock (UAT ไม่ตัดบัตร)
-
-| TC# | ชื่อเคส | หน้า | ขั้นตอน | คาดหวัง | ผล | หลักฐาน |
-|-----|---------|------|---------|---------|----|---------|
-| TC-PAY-03 | จำลองชำระ Mock Sandbox | `/dashboard` | `PAYMENT_PROVIDER=mock_sandbox` → จำลองชำระ | อัปเดตสถานะโดยไม่โอนจริง | ✅ | `evidence/Parttime/TC-U-24b.png` |
+| TC-PAY-03 | เมล+PDF ใบอนุญาตหลัง Stripe จ่ายสำเร็จ | อีเมล | ชำระ Stripe สำเร็จ → เปิด inbox ผู้จอง | ได้เมลยืนยันชำระเงิน + แนบ PDF ใบอนุญาต/ใบเสร็จ | ✅ |  |
+| TC-PAY-04 | PDF ใบอนุญาตเป็นอังกฤษ อ่านได้ครบ | PDF ในเมล | เปิดแนบจาก TC-PAY-03 → เทียบเช็กลิสต์ใน `05-payment.md` | วัน/ช่วงเวลาถูกต้อง · ไม่มี tofu/mojibake · ยอดตรง | ✅ | `evidence/CoM/TC-PAY-04.webp` |
 
 ---
 
@@ -349,17 +346,19 @@ Role จากอีเมล: `@mfu.ac.th` → internal · อื่นๆ → 
 
 ### อีเมล
 
+รายละเอียดเต็ม + จุดตรวจวัน/slot: [`test-cases/12-edge-email.md`](./test-cases/12-edge-email.md) · SMTP: [README §3.4](../../README.md#34-smtp-email-notifications-recommended-for-uat)
+
 | TC# | ชื่อเคส | หน้า | ขั้นตอน | คาดหวัง | ผล | หลักฐาน |
 |-----|---------|------|---------|---------|----|---------|
-| TC-EMAIL-01 | อีเมลยืนยันหลังจอง | อีเมล / console | ส่งจอง → ดู inbox หรือ backend log | มีอีเมลยืนยัน (หรือ log ถ้ายังไม่มี SMTP) | ✅ | `evidence/Parttime/TC-E-07.png` |
-| TC-EMAIL-02 | อีเมลแจ้งผลอนุมัติ/ปฏิเสธ | อีเมล / console | Admin อนุมัติหรือปฏิเสธ → ดู inbox | มีอีเมลแจ้งผล (หรือ log) | ✅ | `evidence/Parttime/TC-E-08.png` |
+| TC-EMAIL-01 | อีเมลยืนยันหลังจอง | อีเมล / console | ส่งจอง → inbox หรือ log | มีวันจองอ่านง่าย + ช่วงเวลาพร้อมนาฬิกา (หรือ log ถ้าไม่มี SMTP) | ✅ | `evidence/Parttime/TC-E-07.png` |
+| TC-EMAIL-02 | อีเมลแจ้งผลอนุมัติ/ปฏิเสธ | อีเมล / console | Admin อนุมัติ/ปฏิเสธ → inbox | สถานะถูก · มีวัน/slot · ปฏิเสธมีเหตุผล | ✅ | `evidence/Parttime/TC-E-08.png` |
 
 ---
 
 ## สรุป
 
-| รวม | **79** |
-| ผ่าน | **79** |
+| รวม | **80** |
+| ผ่าน | **80** |
 
 ก่อนเทส (ถ้าต้องการข้อมูลตัวอย่าง): `cd backend && npm run seed:demo`
 

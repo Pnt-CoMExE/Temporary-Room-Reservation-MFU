@@ -99,8 +99,15 @@ describe("Modular Payment Gateway System", () => {
   });
 
   describe("Mock Sandbox Adapter", () => {
-    it("should handle mock checkout and simulate successful webhook verification", async () => {
+    it("is disabled outside unit tests (product uses Stripe)", async () => {
       process.env.PAYMENT_PROVIDER = "mock_sandbox";
+      process.env.NODE_ENV = "development";
+      const adapter = new MockPaymentAdapter();
+      expect(adapter.isEnabled()).toBe(false);
+    });
+
+    it("can still simulate webhook when NODE_ENV=test", async () => {
+      process.env.NODE_ENV = "test";
       const adapter = new MockPaymentAdapter();
       expect(adapter.isEnabled()).toBe(true);
 

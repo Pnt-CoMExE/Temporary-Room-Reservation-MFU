@@ -3,7 +3,7 @@
 ใช้คู่กับ [`../ops/SETUP_FROM_ENV_EXAMPLE.md`](../ops/SETUP_FROM_ENV_EXAMPLE.md) และ [`../testing/TEST_CASE_TRACKER.md`](../testing/TEST_CASE_TRACKER.md)
 
 **ฉบับภาษาอังกฤษสำหรับวางในเล่ม (Chapter 4 Results + Chapter 5 Conclusion and Discussion):** [`CHAPTER_4_AND_5.md`](./CHAPTER_4_AND_5.md)  
-ตัวเลขในฉบับนั้น: manual 83 เคส = ผ่าน 79 / ข้าม 4 / ไม่ผ่าน 0 · backend `npm test` 204/204 ณ 7 October 2026 (TC-Z-02)
+ตัวเลขในฉบับนั้น: manual **79** เคส = ผ่าน 79 / ไม่ผ่าน 0 (จัดตามโฟลว์) · backend `npm test` 204/204 ณ 7 October 2026 (TC-AUTH-09)
 
 ---
 
@@ -26,7 +26,7 @@
 | หัวข้อ | สิ่งที่ใส่ในรายงาน |
 |--------|-------------------|
 | Checklist ตาม Scope | อ้างตาราง TC ใน tracker · ครบ User / Admin / i18n / Error / Payment / AuthZ |
-| ตัวอย่าง Test Case | คัดลอก 3–5 แถวจาก tracker (เช่น TC-U-12, TC-A-05, TC-P-R4-01, TC-Z-01, TC-A-23) |
+| ตัวอย่าง Test Case | คัดลอก 3–5 แถวจาก tracker (เช่น TC-BOOK-04, TC-ADM-BOOK-04, TC-PAY-01, TC-AUTH-08, TC-ADM-ROOM-03) |
 | ลิงก์ฉบับเต็ม | `docs/testing/TEST_CASE_TRACKER.md` + โฟลเดอร์ `docs/testing/evidence/` |
 | Import Excel | เคส TC-A-23 … TC-A-26 (เทมเพลต / ผิดรูปแบบ / จำนวน / ราคา) |
 
