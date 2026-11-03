@@ -40,6 +40,7 @@ ChartJS.register(
 import api from "@/services/api";
 import { toDateKey } from "@/utils/dateKey";
 import DateField from "@/components/common/DateField.vue";
+import MonthField from "@/components/common/MonthField.vue";
 
 interface BookingInfo {
   id: string;
@@ -686,11 +687,7 @@ const confirmLogout = () => {
               <div class="flex flex-col lg:flex-row gap-3 lg:items-end">
                 <div v-if="filterMode === 'month'" class="flex flex-col gap-1">
                   <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.month_label") }}</label>
-                  <input
-                    v-model="filterMonth"
-                    type="month"
-                    class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold"
-                  />
+                  <MonthField v-model="filterMonth" />
                 </div>
                 <template v-if="filterMode === 'year'">
                   <div class="flex flex-col gap-1">

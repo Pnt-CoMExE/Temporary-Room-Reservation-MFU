@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — Admin MonthField (no native type=month)]
+- เพิ่ม `MonthField.vue`: ปฏิทินเดือน custom ตาม locale TH/EN (ปี ค.ศ.) · ค่ายังเป็น `YYYY-MM`
+- แทน `<input type="month">` ใน Admin Dashboard filter
+
 ## [2026-11-03 — Booking E2E after DateField calendar]
 - แก้ `e2e/helpers/booking.ts` ให้กรอก DMY แทน `type=date` · เลือก slot ที่ยังว่าง · assertion หา `BK-` แทน option ที่ซ่อน
 - ตรวจปฏิทิน: กดช่องแล้วเด้ง · หัวเดือนใช้ปี ค.ศ. (`calendar: gregory`) · เลือกวันแล้วได้ `DD/MM/YYYY`

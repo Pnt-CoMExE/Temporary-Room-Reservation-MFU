@@ -631,5 +631,9 @@ export default {
     date_format_hint: "กรอกวันที่เป็น วัน/เดือน/ปี (วว/ดด/ปปปป)",
     prev_month: "เดือนก่อนหน้า",
     next_month: "เดือนถัดไป",
+    pick_month: "เลือกเดือน",
+    this_month: "เดือนนี้",
+    prev_year: "ปีก่อนหน้า",
+    next_year: "ปีถัดไป",
   },
 };

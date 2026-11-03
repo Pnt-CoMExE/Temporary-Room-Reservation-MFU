@@ -629,5 +629,9 @@ export default {
     date_format_hint: "Enter date as day/month/year (dd/mm/yyyy)",
     prev_month: "Previous month",
     next_month: "Next month",
+    pick_month: "Pick a month",
+    this_month: "This month",
+    prev_year: "Previous year",
+    next_year: "Next year",
   },
 };
