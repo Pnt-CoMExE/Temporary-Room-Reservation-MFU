@@ -67,10 +67,10 @@ const getIcon = (action: string) => {
           class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
         >
           <FontAwesomeIcon :icon="['fas', 'clipboard-check']" class="text-mfu-red" />
-          ประวัติการทำงานระบบ
+          {{ $t("admin.logs_title") }}
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          บันทึกกิจกรรมทั้งหมดที่เกิดขึ้นโดยผู้ดูแลระบบ (ดึงข้อมูลจาก Database)
+          {{ $t("admin.logs_subtitle") }}
         </p>
       </div>
     </div>
@@ -89,7 +89,7 @@ const getIcon = (action: string) => {
         >
           <FontAwesomeIcon :icon="['fas', 'history']" class="text-gray-300" />
         </div>
-        <p>ยังไม่มีประวัติการทำงานในระบบ</p>
+        <p>{{ $t("admin.empty_logs") }}</p>
       </div>
 
       <div v-else class="space-y-4">
@@ -123,7 +123,7 @@ const getIcon = (action: string) => {
               class="text-[11px] text-gray-500 font-bold mt-2 uppercase tracking-widest flex items-center gap-1.5"
             >
               <FontAwesomeIcon :icon="['fas', 'user-shield']" class="text-mfu-red mr-1" />
-              ดำเนินการโดย:
+              {{ $t("admin.acted_by") }}
               <span class="text-gray-700">{{ log.adminName }}</span>
             </p>
           </div>

@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { formatDateDMY } from "@/utils/dateKey";
+import { withSwalTheme } from "@/utils/swalTheme";
+
+const { t } = useI18n();
 
 interface UserItem {
   id: number;
@@ -72,12 +76,13 @@ const roleCounts = computed(() => {
   return counts;
 });
 
-const roleLabel: Record<string, string> = {
-  admin: "ผู้ดูแลระบบ",
-  internal: "บุคลากร MFU",
-  co_op: "หน่วยงานร่วมจัด",
-  external: "บุคคลภายนอก",
-};
+const roleLabel = (type: string) =>
+  ({
+    admin: t("admin.role_admin"),
+    internal: t("admin.role_internal"),
+    co_op: t("admin.role_coop"),
+    external: t("admin.role_external"),
+  } as Record<string, string>)[type] || type;
 const roleBadgeClass: Record<string, string> = {
   admin: "bg-red-50 text-mfu-red border-red-200",
   internal: "bg-blue-50 text-blue-700 border-blue-200",
@@ -89,32 +94,37 @@ const formatDate = (d: string) => formatDateDMY(d);
 
 const toggleActive = async (user: UserItem) => {
   const next = !user.is_active;
-  const { isConfirmed } = await Swal.fire({
-    title: next ? "เปิดใช้งานบัญชี?" : "ปิดใช้งานบัญชี?",
-    html: `<p class="text-sm text-gray-600">${user.firstname} ${user.lastname}<br/><b>${user.email}</b></p>
-           <p class="text-xs text-gray-500 mt-2">${next ? "ผู้ใช้จะเข้าสู่ระบบได้ตามปกติ" : "ผู้ใช้จะไม่สามารถ Login ด้วย Google ได้"}</p>`,
-    icon: "warning",
-    showCancelButton: true,
-    confirmButtonText: next ? "เปิดใช้งาน" : "ปิดใช้งาน",
-    cancelButtonText: "ยกเลิก",
-    confirmButtonColor: next ? "#059669" : "#ba0b2f",
-  });
+  const { isConfirmed } = await Swal.fire(
+    withSwalTheme({
+      title: next ? t("admin.swal_enable_account") : t("admin.swal_disable_account"),
+      html: `<p class="text-sm text-gray-600">${user.firstname} ${user.lastname}<br/><b>${user.email}</b></p>
+           <p class="text-xs text-gray-500 mt-2">${next ? t("admin.swal_account_enable_hint") : t("admin.swal_account_disable_hint")}</p>`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: next ? t("admin.enable") : t("admin.disable"),
+      cancelButtonText: t("admin.cancel"),
+    })
+  );
   if (!isConfirmed) return;
   try {
     await api.put(`/api/admin/users/${user.id}/active`, { isActive: next });
     user.is_active = next;
-    Swal.fire({
-      icon: "success",
-      title: next ? "เปิดใช้งานแล้ว" : "ปิดใช้งานแล้ว",
-      timer: 1200,
-      showConfirmButton: false,
-    });
+    Swal.fire(
+      withSwalTheme({
+        icon: "success",
+        title: next ? t("admin.enable") : t("admin.disable"),
+        timer: 1200,
+        showConfirmButton: false,
+      })
+    );
   } catch (err: any) {
-    Swal.fire({
-      icon: "error",
-      title: "ไม่สำเร็จ",
-      text: err.response?.data?.message || "อัปเดตสถานะบัญชีไม่สำเร็จ",
-    });
+    Swal.fire(
+      withSwalTheme({
+        icon: "error",
+        title: t("admin.error"),
+        text: err.response?.data?.message || t("admin.error"),
+      })
+    );
   }
 };
 
@@ -131,39 +141,46 @@ const canPromoteToAdmin = (email: string): boolean =>
 const setAdminRole = async (user: UserItem) => {
   const promoting = user.user_type !== "admin";
   if (promoting && !canPromoteToAdmin(user.email)) {
-    Swal.fire({
-      icon: "info",
-      title: "ตั้ง Admin ไม่ได้",
-      text: "อนุญาตเฉพาะบัญชี @mfu.ac.th — บุคคลภายนอกและโดเมนอื่นตั้งไม่ได้",
-    });
+    Swal.fire(
+      withSwalTheme({
+        icon: "info",
+        title: t("admin.not_mfu_email_title"),
+        text: t("admin.not_mfu_email_title"),
+      })
+    );
     return;
   }
   const nextRole = promoting ? "admin" : baseRoleForEmail(user.email);
-  const { isConfirmed } = await Swal.fire({
-    title: nextRole === "admin" ? "ตั้งเป็น Admin?" : "ถอดสิทธิ์ Admin?",
-    text: `${user.email} → ${nextRole}`,
-    icon: "question",
-    showCancelButton: true,
-    confirmButtonText: "ยืนยัน",
-    cancelButtonText: "ยกเลิก",
-    confirmButtonColor: "#ba0b2f",
-  });
+  const { isConfirmed } = await Swal.fire(
+    withSwalTheme({
+      title: nextRole === "admin" ? t("admin.swal_make_admin") : t("admin.swal_remove_admin"),
+      text: `${user.email} → ${nextRole}`,
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonText: t("admin.confirm"),
+      cancelButtonText: t("admin.cancel"),
+    })
+  );
   if (!isConfirmed) return;
   try {
     await api.put(`/api/admin/users/${user.id}/role`, { userType: nextRole });
     user.user_type = nextRole;
-    Swal.fire({
-      icon: "success",
-      title: "อัปเดตสิทธิ์แล้ว",
-      timer: 1200,
-      showConfirmButton: false,
-    });
+    Swal.fire(
+      withSwalTheme({
+        icon: "success",
+        title: t("admin.updated"),
+        timer: 1200,
+        showConfirmButton: false,
+      })
+    );
   } catch (err: any) {
-    Swal.fire({
-      icon: "error",
-      title: "ไม่สำเร็จ",
-      text: err.response?.data?.message || "เปลี่ยนสิทธิ์ไม่สำเร็จ",
-    });
+    Swal.fire(
+      withSwalTheme({
+        icon: "error",
+        title: t("admin.error"),
+        text: err.response?.data?.message || t("admin.error"),
+      })
+    );
   }
 };
 </script>
@@ -174,17 +191,19 @@ const setAdminRole = async (user: UserItem) => {
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
           <font-awesome-icon icon="users" class="text-mfu-red" />
-          จัดการผู้ใช้ / แอดมิน
+          {{ $t("admin.users_title") }}
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          เน้นสถิติการจอง และเปิด/ปิดบัญชีแอดมินโดยไม่ต้องแก้โค้ด
+          {{ $t("admin.users_subtitle") }}
         </p>
       </div>
       <div
         class="flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full border border-gray-200"
       >
         <font-awesome-icon icon="users" class="text-gray-400 text-sm" />
-        <span class="text-sm font-black text-gray-700">{{ users.length }} บัญชี</span>
+        <span class="text-sm font-black text-gray-700">{{
+          $t("admin.accounts_count", { n: users.length })
+        }}</span>
       </div>
     </div>
 
@@ -198,25 +217,29 @@ const setAdminRole = async (user: UserItem) => {
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="ค้นหาชื่อ หรืออีเมล..."
+            :placeholder="$t('admin.search_users')"
             class="ui-input pl-10"
           />
         </div>
         <div class="flex gap-1.5 flex-wrap">
           <button
-            v-for="(label, role) in {
-              all: 'ทั้งหมด',
-              admin: 'Admin',
-              internal: 'บุคลากร',
-              co_op: 'Co-op',
-              external: 'ภายนอก',
-            }"
+            v-for="role in ['all', 'admin', 'internal', 'co_op', 'external']"
             :key="role"
             @click="filterRole = role"
             :class="filterRole === role ? 'ui-chip-active' : 'ui-chip-idle'"
             class="ui-chip"
           >
-            {{ label }}
+            {{
+              role === "all"
+                ? $t("admin.filter_all")
+                : role === "admin"
+                  ? $t("admin.filter_admin")
+                  : role === "internal"
+                    ? $t("admin.filter_internal")
+                    : role === "co_op"
+                      ? $t("admin.filter_coop")
+                      : $t("admin.filter_external")
+            }}
             <span class="ml-1 opacity-80">({{ roleCounts[role] || 0 }})</span>
           </button>
         </div>
@@ -236,7 +259,8 @@ const setAdminRole = async (user: UserItem) => {
     <div v-else-if="filteredUsers.length === 0" class="ui-table-card">
       <div class="ui-empty">
         <font-awesome-icon icon="users" class="text-4xl mb-3 opacity-40" />
-        <p>ไม่พบผู้ใช้ตามตัวกรอง</p>
+        <p>{{ $t("admin.empty_users") }}</p>
+        <p class="text-sm font-medium mt-2">{{ $t("admin.empty_users_hint") }}</p>
       </div>
     </div>
 
@@ -247,12 +271,12 @@ const setAdminRole = async (user: UserItem) => {
             <tr
               class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
             >
-              <th class="px-4 py-4">ผู้ใช้</th>
-              <th class="px-4 py-4">อีเมล</th>
-              <th class="px-4 py-4 text-center">ประเภท</th>
-              <th class="px-4 py-4 text-center border-l border-gray-100">สถิติการจอง</th>
-              <th class="px-4 py-4 text-center border-l border-gray-100">สถานะบัญชี</th>
-              <th class="px-4 py-4 text-center border-l border-gray-100">จัดการ</th>
+              <th class="px-4 py-4">{{ $t("admin.col_user") }}</th>
+              <th class="px-4 py-4">{{ $t("admin.col_email") }}</th>
+              <th class="px-4 py-4 text-center">{{ $t("admin.col_type") }}</th>
+              <th class="px-4 py-4 text-center border-l border-gray-100">{{ $t("admin.col_booking_stats") }}</th>
+              <th class="px-4 py-4 text-center border-l border-gray-100">{{ $t("admin.col_account_status") }}</th>
+              <th class="px-4 py-4 text-center border-l border-gray-100">{{ $t("admin.col_actions") }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -284,7 +308,7 @@ const setAdminRole = async (user: UserItem) => {
                       {{ user.firstname }} {{ user.lastname }}
                     </p>
                     <p class="text-[11px] text-gray-400 font-medium">
-                      สมัคร {{ formatDate(user.created_at) }}
+                      {{ $t("admin.joined", { date: formatDate(user.created_at) }) }}
                     </p>
                   </div>
                 </div>
@@ -297,7 +321,7 @@ const setAdminRole = async (user: UserItem) => {
                   :class="roleBadgeClass[user.user_type] || 'bg-gray-100 text-gray-600 border-gray-200'"
                   class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black border"
                 >
-                  {{ roleLabel[user.user_type] || user.user_type }}
+                  {{ roleLabel(user.user_type) }}
                 </span>
               </td>
               <td class="px-4 py-3.5 text-center border-l border-gray-100">
@@ -305,10 +329,12 @@ const setAdminRole = async (user: UserItem) => {
                   <span class="text-base font-black text-gray-900">{{
                     user.total_bookings
                   }}</span>
-                  <span class="text-[10px] text-gray-500 font-bold"
-                    >ทั้งหมด · อนุมัติ {{ user.approved_bookings }} · ชำระแล้ว
-                    {{ user.paid_bookings || 0 }}</span
-                  >
+                  <span class="text-[10px] text-gray-500 font-bold">{{
+                    $t("admin.stats_line", {
+                      a: user.approved_bookings,
+                      p: user.paid_bookings || 0,
+                    })
+                  }}</span>
                 </div>
               </td>
               <td class="px-4 py-3.5 text-center border-l border-gray-100">
@@ -320,7 +346,7 @@ const setAdminRole = async (user: UserItem) => {
                       : 'bg-slate-100 text-slate-500 border-slate-200'
                   "
                 >
-                  {{ user.is_active ? "เปิดใช้งาน" : "ปิดใช้งาน" }}
+                  {{ user.is_active ? $t("admin.active") : $t("admin.inactive") }}
                 </span>
               </td>
               <td class="px-4 py-3.5 text-center border-l border-gray-100">
@@ -334,21 +360,25 @@ const setAdminRole = async (user: UserItem) => {
                         : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
                     "
                   >
-                    {{ user.is_active ? "ปิดใช้งาน" : "เปิดใช้งาน" }}
+                    {{ user.is_active ? $t("admin.disable") : $t("admin.enable") }}
                   </button>
                   <button
                     v-if="user.user_type === 'admin' || canPromoteToAdmin(user.email)"
                     @click="setAdminRole(user)"
                     class="px-3 py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
                   >
-                    {{ user.user_type === "admin" ? "ถอด Admin" : "ตั้งเป็น Admin" }}
+                    {{
+                      user.user_type === "admin"
+                        ? $t("admin.remove_admin")
+                        : $t("admin.make_admin")
+                    }}
                   </button>
                   <span
                     v-else
                     class="px-2 py-1 text-[10px] font-semibold text-gray-400"
-                    title="ตั้ง Admin ได้เฉพาะ @mfu.ac.th"
+                    :title="$t('admin.not_mfu_email_title')"
                   >
-                    ไม่ใช่ @mfu.ac.th
+                    {{ $t("admin.not_mfu_email") }}
                   </span>
                 </div>
               </td>

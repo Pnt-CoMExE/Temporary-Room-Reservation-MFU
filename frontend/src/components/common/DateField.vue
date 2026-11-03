@@ -31,13 +31,7 @@ const emit = defineEmits<{
   "update:modelValue": [value: string];
 }>();
 
-const iso = computed({
-  get: () => toDateKey(props.modelValue),
-  set: (v: string) => emit("update:modelValue", toDateKey(v)),
-});
-
 const text = ref(formatDateDMY(props.modelValue));
-const picker = ref<HTMLInputElement | null>(null);
 
 watch(
   () => props.modelValue,
@@ -47,8 +41,16 @@ watch(
   }
 );
 
+const hintId = computed(() => (props.id ? `${props.id}-hint` : undefined));
+
 const commitText = () => {
-  const parsed = parseDateDMY(text.value);
+  const raw = text.value.trim();
+  if (!raw) {
+    emit("update:modelValue", "");
+    text.value = "";
+    return;
+  }
+  const parsed = parseDateDMY(raw);
   if (!parsed) {
     text.value = formatDateDMY(props.modelValue);
     return;
@@ -64,60 +66,27 @@ const commitText = () => {
   emit("update:modelValue", parsed);
   text.value = formatDateDMY(parsed);
 };
-
-const openPicker = () => {
-  if (props.disabled) return;
-  const el = picker.value;
-  if (!el) return;
-  try {
-    el.showPicker?.();
-  } catch {
-    el.click();
-  }
-};
-
-const onPickerInput = (e: Event) => {
-  const v = (e.target as HTMLInputElement).value;
-  emit("update:modelValue", toDateKey(v));
-};
 </script>
 
 <template>
-  <div class="relative">
+  <div>
     <input
       :id="id"
       type="text"
       inputmode="numeric"
       autocomplete="off"
       :placeholder="t('common.date_placeholder')"
+      :aria-describedby="hintId"
       :value="text"
       :required="required"
       :disabled="disabled"
-      :class="[inputClass, 'pr-11']"
+      :class="inputClass"
       @input="text = ($event.target as HTMLInputElement).value"
       @blur="commitText"
       @keydown.enter.prevent="commitText"
     />
-    <button
-      type="button"
-      class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg text-gray-500 hover:text-mfu-red hover:bg-red-50 flex items-center justify-center cursor-pointer disabled:opacity-40"
-      :disabled="disabled"
-      tabindex="-1"
-      :aria-label="t('common.pick_date')"
-      @click="openPicker"
-    >
-      <font-awesome-icon :icon="['far', 'calendar-alt']" />
-    </button>
-    <input
-      ref="picker"
-      type="date"
-      class="sr-only"
-      tabindex="-1"
-      :value="iso"
-      :min="min || undefined"
-      :max="max || undefined"
-      :disabled="disabled"
-      @input="onPickerInput"
-    />
+    <p v-if="hintId" :id="hintId" class="sr-only">
+      {{ t("common.date_format_hint") }}
+    </p>
   </div>
 </template>

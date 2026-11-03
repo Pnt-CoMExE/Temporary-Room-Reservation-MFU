@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import api from "@/services/api";
 import { formatPromoPercent } from "@/utils/bookingStatus";
 import { withSwalTheme } from "@/utils/swalTheme";
+
+const { t } = useI18n();
 
 interface PromoCode {
   id: number;
@@ -69,26 +72,26 @@ const handleAddPromoCode = () => {
   Swal.fire(
     withSwalTheme(
       {
-        title: '<h3 class="text-xl font-black text-gray-900">สร้างรหัสส่วนลดใหม่</h3>',
+        title: `<h3 class="text-xl font-black text-gray-900">${t("admin.swal_create_promo")}</h3>`,
         html: `
       <div class="text-left mt-4 space-y-4">
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">รหัสโปรโมชั่น (Code)</label>
-          <input id="swal-code" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-black tracking-widest uppercase text-lg" placeholder="เช่น SAVE50">
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">${t("admin.swal_promo_code")}</label>
+          <input id="swal-code" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-black tracking-widest uppercase text-lg" placeholder="SAVE50">
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">ส่วนลดเป็นเปอร์เซ็นต์ (เช่น 10, 50, 100)</label>
-          <input id="swal-discount" type="number" min="1" max="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-amber-800 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-bold" placeholder="เช่น 100 = ลด 100%">
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">${t("admin.swal_promo_discount")}</label>
+          <input id="swal-discount" type="number" min="1" max="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-amber-800 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-bold" placeholder="100">
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">จำนวนสิทธิ์สูงสุด</label>
+          <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">${t("admin.swal_promo_limit")}</label>
           <input id="swal-limit" type="number" min="1" value="100" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-gold outline-none font-bold">
         </div>
       </div>
     `,
         showCancelButton: true,
-        confirmButtonText: "สร้างรหัส",
-        cancelButtonText: "ยกเลิก",
+        confirmButtonText: t("admin.create_promo"),
+        cancelButtonText: t("admin.cancel"),
         preConfirm: () => {
           const code = (
             document.getElementById("swal-code") as HTMLInputElement
@@ -101,7 +104,7 @@ const handleAddPromoCode = () => {
           const limit = (document.getElementById("swal-limit") as HTMLInputElement)
             ?.value;
           if (!code || !discount) {
-            Swal.showValidationMessage("กรุณากรอกรหัสและมูลค่าส่วนลด");
+            Swal.showValidationMessage(t("admin.swal_promo_required"));
             return false;
           }
           return {
@@ -121,12 +124,23 @@ const handleAddPromoCode = () => {
       saveLog("สร้างรหัสส่วนลด", `สร้างโค้ด: ${result.value.code}`);
       Swal.fire(
         withSwalTheme(
-          { icon: "success", title: "สร้างสำเร็จ!", showConfirmButton: false, timer: 1300 },
+          {
+            icon: "success",
+            title: t("admin.swal_promo_create_ok"),
+            showConfirmButton: false,
+            timer: 1300,
+          },
           "gold"
         )
       );
     } catch {
-      Swal.fire(withSwalTheme({ icon: "error", title: "ข้อผิดพลาด", text: "ไม่สามารถสร้างรหัสได้ (รหัสอาจซ้ำ)" }));
+      Swal.fire(
+        withSwalTheme({
+          icon: "error",
+          title: t("admin.error"),
+          text: t("admin.swal_promo_create_fail"),
+        })
+      );
     }
   });
 };
@@ -137,12 +151,17 @@ const togglePromoStatus = async (promo: PromoCode) => {
   const result = await Swal.fire(
     withSwalTheme(
       {
-        title: isEnable ? "เปิดใช้งานโค้ด?" : "ปิดใช้งานโค้ด?",
-        html: `โค้ด <strong>${promo.code}</strong> จะถูก${isEnable ? "เปิด" : "ปิด"}ใช้งาน`,
+        title: isEnable ? t("admin.swal_promo_enable") : t("admin.swal_promo_disable"),
+        html: t("admin.swal_promo_toggle_html", {
+          code: promo.code,
+          action: isEnable
+            ? t("admin.swal_promo_action_on")
+            : t("admin.swal_promo_action_off"),
+        }),
         icon: "question",
         showCancelButton: true,
-        confirmButtonText: "ยืนยัน",
-        cancelButtonText: "ยกเลิก",
+        confirmButtonText: t("admin.confirm"),
+        cancelButtonText: t("admin.cancel"),
       },
       "gold"
     )
@@ -155,12 +174,23 @@ const togglePromoStatus = async (promo: PromoCode) => {
       saveLog("เปิด/ปิดโค้ดส่วนลด", `${isEnable ? "เปิด" : "ปิด"}โค้ด: ${promo.code}`);
       Swal.fire(
         withSwalTheme(
-          { icon: "success", title: "อัปเดตสำเร็จ", showConfirmButton: false, timer: 1000 },
+          {
+            icon: "success",
+            title: t("admin.updated"),
+            showConfirmButton: false,
+            timer: 1000,
+          },
           "gold"
         )
       );
     } catch {
-      Swal.fire(withSwalTheme({ icon: "error", title: "ผิดพลาด", text: "ไม่สามารถอัปเดตสถานะได้" }));
+      Swal.fire(
+        withSwalTheme({
+          icon: "error",
+          title: t("admin.error"),
+          text: t("admin.swal_promo_update_fail"),
+        })
+      );
     }
   }
 };
@@ -179,10 +209,10 @@ const usagePercent = (promo: PromoCode) => {
       <div>
         <h2 class="text-2xl font-extrabold text-gray-900 flex items-center gap-3">
           <font-awesome-icon icon="ticket-alt" class="text-mfu-gold" />
-          รหัสส่วนลด (Promo Codes)
+          {{ $t("admin.promo_title") }}
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          โทนทอง = โปรโมชัน/ส่วนลด · สร้างและเปิด–ปิดโค้ดสำหรับผู้เช่า
+          {{ $t("admin.promo_subtitle") }}
         </p>
       </div>
       <button
@@ -190,7 +220,7 @@ const usagePercent = (promo: PromoCode) => {
         @click="handleAddPromoCode"
         class="ui-btn-primary w-full sm:w-auto bg-mfu-gold hover:bg-yellow-600 shadow-lg"
       >
-        <font-awesome-icon icon="plus" /> สร้างรหัสใหม่
+        <font-awesome-icon icon="plus" /> {{ $t("admin.create_promo") }}
       </button>
     </div>
 
@@ -198,15 +228,15 @@ const usagePercent = (promo: PromoCode) => {
     <div class="grid grid-cols-3 gap-4">
       <div class="bg-white rounded-2xl p-5 shadow-card border border-gray-200 text-center">
         <p class="text-2xl font-black text-gray-900">{{ promoCodes.length }}</p>
-        <p class="text-xs font-bold text-gray-500 mt-1">โค้ดทั้งหมด</p>
+        <p class="text-xs font-bold text-gray-500 mt-1">{{ $t("admin.promo_total") }}</p>
       </div>
       <div class="bg-white rounded-2xl p-5 shadow-card border border-green-200 text-center">
         <p class="text-2xl font-black text-green-600">{{ activeCount }}</p>
-        <p class="text-xs font-bold text-gray-500 mt-1">กำลังใช้งาน</p>
+        <p class="text-xs font-bold text-gray-500 mt-1">{{ $t("admin.promo_active") }}</p>
       </div>
       <div class="bg-white rounded-2xl p-5 shadow-card border border-mfu-gold/40 text-center">
         <p class="text-2xl font-black text-mfu-gold">{{ totalUsed }}</p>
-        <p class="text-xs font-bold text-gray-500 mt-1">ครั้งที่ใช้ไป</p>
+        <p class="text-xs font-bold text-gray-500 mt-1">{{ $t("admin.promo_used") }}</p>
       </div>
     </div>
 
@@ -217,19 +247,25 @@ const usagePercent = (promo: PromoCode) => {
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="ค้นหารหัสโปรโมชั่น..."
+          :placeholder="$t('admin.search_promo')"
           class="ui-input pl-10 focus:ring-mfu-gold/35 focus:border-mfu-gold/40"
         />
       </div>
       <div class="flex gap-1.5">
         <button
-          v-for="(label, val) in { all: 'ทั้งหมด', active: 'เปิดใช้งาน', inactive: 'ปิดใช้งาน' }"
+          v-for="val in ['all', 'active', 'inactive'] as const"
           :key="val"
-          @click="filterStatus = val as typeof filterStatus"
+          @click="filterStatus = val"
           :class="filterStatus === val ? 'bg-mfu-gold text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
           class="px-3 py-2 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap"
         >
-          {{ label }}
+          {{
+            val === "all"
+              ? $t("admin.filter_all")
+              : val === "active"
+                ? $t("admin.filter_active")
+                : $t("admin.filter_inactive")
+          }}
         </button>
       </div>
     </div>
@@ -250,10 +286,10 @@ const usagePercent = (promo: PromoCode) => {
         <table class="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr class="text-[10px] font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200">
-              <th class="px-6 py-4">Code</th>
-              <th class="px-6 py-4 text-center">ส่วนลด</th>
-              <th class="px-6 py-4 text-center">การใช้งาน</th>
-              <th class="px-6 py-4 text-center border-l border-gray-100">สถานะ (เปิด/ปิด)</th>
+              <th class="px-6 py-4">{{ $t("admin.col_code") }}</th>
+              <th class="px-6 py-4 text-center">{{ $t("admin.col_discount") }}</th>
+              <th class="px-6 py-4 text-center">{{ $t("admin.col_usage") }}</th>
+              <th class="px-6 py-4 text-center border-l border-gray-100">{{ $t("admin.col_status_toggle") }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -290,8 +326,8 @@ const usagePercent = (promo: PromoCode) => {
                   ></div>
                 </div>
                 <p class="text-[10px] text-gray-500 font-bold text-center">
-                  {{ promo.used_count }} / {{ promo.limit_count }} สิทธิ์
-                  <span v-if="usagePercent(promo) >= 100" class="text-red-500 ml-1">(เต็มโควตา)</span>
+                  {{ promo.used_count }} / {{ promo.limit_count }} {{ $t("admin.quota_units") }}
+                  <span v-if="usagePercent(promo) >= 100" class="text-red-500 ml-1">{{ $t("admin.quota_full") }}</span>
                 </p>
               </td>
 
@@ -301,7 +337,7 @@ const usagePercent = (promo: PromoCode) => {
                   @click="togglePromoStatus(promo)"
                   class="text-3xl transition-colors outline-none cursor-pointer"
                   :class="promo.is_active ? 'text-green-500 hover:text-green-600' : 'text-gray-300 hover:text-gray-400'"
-                  :title="promo.is_active ? 'คลิกเพื่อปิดใช้งาน' : 'คลิกเพื่อเปิดใช้งาน'"
+                  :title="promo.is_active ? $t('admin.click_to_disable') : $t('admin.click_to_enable')"
                 >
                   <font-awesome-icon :icon="promo.is_active ? 'toggle-on' : 'toggle-off'" />
                 </button>
@@ -318,16 +354,16 @@ const usagePercent = (promo: PromoCode) => {
         <div class="w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center text-3xl mb-5 border border-yellow-100 mx-auto">
           <font-awesome-icon icon="ticket-alt" class="text-mfu-gold" />
         </div>
-        <h3 class="text-xl font-black text-gray-700 mb-2">ยังไม่มีรหัสส่วนลด</h3>
+        <h3 class="text-xl font-black text-gray-700 mb-2">{{ $t("admin.empty_promo") }}</h3>
         <p class="text-sm text-gray-400 font-medium mb-6 max-w-xs mx-auto">
-          กดปุ่ม "สร้างรหัสใหม่" เพื่อเพิ่มรหัสโปรโมชั่นสำหรับผู้เช่า
+          {{ $t("admin.empty_promo_hint") }}
         </p>
         <button
           type="button"
           @click="handleAddPromoCode"
           class="ui-btn-primary bg-mfu-gold hover:bg-yellow-600"
         >
-          <font-awesome-icon icon="plus" /> สร้างรหัสแรก
+          <font-awesome-icon icon="plus" /> {{ $t("admin.create_first_promo") }}
         </button>
       </div>
     </div>

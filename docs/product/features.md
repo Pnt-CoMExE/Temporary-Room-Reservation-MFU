@@ -12,25 +12,24 @@ Here are several proposed features to elevate the Temporary Rental Space Managem
 - **Automated PDF Invoice/Receipt Generation:** Automatically generate and email official PDF tax invoices or receipts to users upon successful payment.
 - **Digital QR Code Check-in/Check-out:** Issue a digital QR code pass to the user upon approval. They can scan this at the venue or with campus security to confirm their arrival and departure.
 - **Real-Time Inventory Tracking for Add-ons:** Automatically track the exact inventory of equipment (e.g., projectors, microphones). For example, if MFU only has 10 microphones, the system prevents booking an 11th one across overlapping room reservations.
-- **Automated Refund Processing:** Integrate refund logic with Opn Payments. If a user cancels within the allowed policy timeframe, trigger partial or full refunds automatically without manual accounting work.
+- **Automated Refund Processing:** Integrate refund logic with the active payment provider. If a user cancels within the allowed policy timeframe, trigger partial or full refunds automatically without manual accounting work.
 
 ## 3. Communication & Support
 - **In-App Chatbot / FAQ Assistant:** Implement a simple chatbot or a floating widget to instantly answer common user questions about pricing, policies, or space capacities.
 - **LINE Notify Integration:** In addition to email notifications, send instant alerts to the Admin's LINE group when a new booking needs approval, and send LINE reminders to users 24 hours before their event.
 
 ## 4. Recently Implemented Advanced Features
-- **Automated Email Notifications:** System automatically dispatches confirmation emails upon booking creation and status update emails (Approved / Disapproved with remarks) upon administrator review.
-- **Dynamic PromptPay EMVCo QR Code Payment:** Integrated client-side PromptPay EMVCo QR payload generator with `qrcode` library to display dynamic QR codes with exact booking amounts in user `DashboardView.vue`.
-- **Batch PDF Memorandum ZIP Export for Admin:** Built high-performance ZIP archive streaming endpoint (`POST /api/admin/bookings/export-zip`) using `archiver` allowing admins to download selected PDF memorandum documents in one click.
-- **API Rate Limiting Protection:** Integrated `express-rate-limit` middleware across general endpoints, authentication routes (`/api/auth`), and booking creation (`/api/bookings`) to prevent spam and brute-force attempts.
-- **Database Query Indexing & Performance:** Configured PostgreSQL index migration scripts for key search columns (`bookings`, `users`, `room_pricing`) to optimize response times under heavy concurrent loads.
-- **Enhanced UI Feedback & Loading States:** Added submitting spinners, disabled button states during API requests, and user feedback popups across Vue components.
+- **Automated Email Notifications:** Confirmation and status emails (approved / disapproved with remarks); after Stripe payment, English Space Permit PDF by email (TC-PAY-03/04).
+- **Stripe checkout (acceptance path):** Primary online payment is Stripe test/live via `PAYMENT_PROVIDER=stripe`. Booking returns to paid status with a stored transaction id. See `docs/payment/STRIPE.md`.
+- **Optional PromptPay / slip path:** Code for PromptPay QR + slip upload remains for an alternate provider setting; it is **not** the documented UAT acceptance path (80-case suite uses Stripe).
+- **Mock payment removed from product UI:** `POST /api/payment/mock/simulate` returns **HTTP 410** — do not document mock sandbox as an active UAT UI.
+- **Batch PDF Memorandum ZIP Export for Admin:** `POST /api/admin/bookings/export-zip` streams selected memo PDFs.
+- **API Rate Limiting Protection:** `express-rate-limit` on general, auth, and booking routes.
+- **Database Query Indexing & Performance:** PostgreSQL indexes on key booking/user/pricing columns.
+- **Enhanced UI Feedback & Loading States:** Spinners, disabled buttons, and SweetAlert feedback across Vue views.
 - **Shared MFU design system (`frontend/src/assets/main.css`):** Tokens `mfu-red` / `mfu-gold` / `canvas` plus reusable `ui-btn-*`, `ui-input`, `ui-card*`, `ui-chip*`, skip-link / focus-visible across user + admin views.
-- **UX depth (dev):** Home brand-first hero · booking step groups · dashboard card hierarchy · sticky admin tables · `withSwalTheme` · promo=gold / add-ons=red.
-- **Full-Site Multi-Language Support (i18n TH/EN):** Implemented seamless Thai/English toggle with `vue-i18n` across all user-facing views, navbar, footers, modals, forms, and user dashboard.
-- **Universal Dynamic Data Translator Engine (`translator.ts`):** Built automated regex & dictionary translation engine converting 100% of all 100 backend database room names, room types, locations, time slots, and booking statuses dynamically with zero Thai remaining.
-- **8 Space Type Filter & Bilingual Search:** Expanded search filter dropdowns across `RoomListView.vue` and `HomeView.vue` to all 8 database space categories with instant bilingual search matching.
-- **Role mapping (`resolveUserType.ts`):** Exact `@mfu.ac.th` → internal; students (`@lamduan.mfu.ac.th`) and other domains → external; admin via Admin UI promote (DB, **only `@mfu.ac.th`**) or `DEV_ADMIN_EMAILS` for UAT bootstrap.
-- **Mock Payment Sandbox (UAT):** `POST /api/payment/mock/simulate` endpoint and Dashboard UI for instant payment simulation when `PAYMENT_PROVIDER=mock_sandbox`.
-- **Integrated Slip Upload in Payment Modal:** User Dashboard payment flow now combines PromptPay QR display and slip upload in a single modal dialog.
-
+- **UX depth (dev):** Home brand-first hero · booking step groups · dashboard card hierarchy · sticky admin tables · `withSwalTheme` · promo=gold / add-ons=red · dates as DD/MM/YYYY.
+- **Full-Site Multi-Language Support (i18n TH/EN):** Toggle across user-facing views; admin screens bilingual via `admin.*` keys.
+- **Universal Dynamic Data Translator Engine (`translator.ts`):** Room names, types, locations, slots, and statuses for EN display.
+- **8 Space Type Filter & Bilingual Search:** Filters on `RoomListView` / `HomeView` for all space categories.
+- **Role mapping (`resolveUserType.ts`):** Exact `@mfu.ac.th` → internal; `@lamduan.mfu.ac.th` / others → external; admin via promote (DB, **only `@mfu.ac.th`**) or `DEV_ADMIN_EMAILS` for UAT bootstrap.

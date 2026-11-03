@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — Admin i18n 1A + DateField 2A]
+- **1A:** แอดมินไม่ล็อก locale เป็น TH · ขยาย `admin.*` ใน `th.ts`/`en.ts` · ผูก i18n + `withSwalTheme` ครบ Admin Dashboard/Bookings/Rooms/Users/Promo/Addons/Banners/ActivityLog
+- **2A:** `DateField` เป็นช่องข้อความอย่างเดียว (ไม่มี native date picker) · `common.date_placeholder` / `date_format_hint`
+- `docs/product/features.md`: Stripe เป็น acceptance path · mock 410 · PromptPay เป็นทางเลือก
+
 ## [2026-11-03 — Date display DD/MM/YYYY system-wide]
 - `formatDateDMY` / `parseDateDMY` ใน `dateKey.ts` · `DateField` แทน `<input type="date">` (ค่า API ยังเป็น YYYY-MM-DD)
 - ใช้ใน Home/RoomList/Booking/Dashboard/Admin filters · ข้อความวันที่ในตาราง/การ์ด/notif เป็น วัน/เดือน/ปี

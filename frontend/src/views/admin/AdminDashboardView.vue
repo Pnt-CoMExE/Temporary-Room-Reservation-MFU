@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
+import { withSwalTheme } from "@/utils/swalTheme";
 import AdminBookings from "./AdminBookings.vue";
 import AdminRooms from "./AdminRooms.vue";
 import AdminBanners from "./AdminBanners.vue";
@@ -11,8 +12,7 @@ import AdminPromoCodes from "./AdminPromoCodes.vue";
 import AdminAddons from "./AdminAddons.vue";
 import AdminActivityLog from "./AdminActivityLog.vue";
 
-const { t, locale } = useI18n();
-locale.value = "th";
+const { t } = useI18n();
 
 // ✨ นำเข้า Chart.js
 import { Bar, Doughnut } from "vue-chartjs";
@@ -252,7 +252,7 @@ const fetchAdminData = async () => {
       userName: b.partner_name || `${b.firstname} ${b.lastname}`,
       roomName: b.room_name,
       date: toDateKey(b.booking_date) || "N/A",
-      duration: b.time_slot === 'full' ? 'เต็มวัน' : b.time_slot === 'half_morning' ? 'ครึ่งวันเช้า' : 'ครึ่งวันบ่าย',
+      duration: b.time_slot === 'full' ? t('admin.duration_full') : b.time_slot === 'half_morning' ? t('admin.duration_half_am') : t('admin.duration_half_pm'),
       totalPrice: parseFloat(b.total_price),
       roomPrice: parseFloat(b.room_price) || 0,
       addonsPrice: parseFloat(b.addons_price) || 0,
@@ -324,7 +324,7 @@ const fetchAdminData = async () => {
       barChartData.value = {
         labels: revenueData.map((r: any) => r.label),
         datasets: [{
-          label: "รายได้ (บาท)",
+          label: t("admin.revenue_label"),
           backgroundColor: "#ba0b2f",
           borderRadius: 6,
           data: revenueData.map((r: any) => r.revenue),
@@ -337,7 +337,7 @@ const fetchAdminData = async () => {
     } else {
       barChartData.value = {
         labels: [],
-        datasets: [{ label: "รายได้ (บาท)", backgroundColor: "#ba0b2f", borderRadius: 6, data: [] }],
+        datasets: [{ label: t("admin.revenue_label"), backgroundColor: "#ba0b2f", borderRadius: 6, data: [] }],
       };
       revenueMonths.value = [];
       revenueChartGranularity.value = "month";
@@ -410,7 +410,7 @@ const barChartOptions = ref<ChartOptions<'bar'>>({
 
 // ข้อมูลกราฟโดนัท
 const doughnutChartData = ref({
-  labels: ["บุคคลภายนอก", "หน่วยงานภายใน", "ร่วมจัด (Co-op)"],
+  labels: [t("admin.org_external"), t("admin.org_internal"), t("admin.org_coop")],
   datasets: [
     { backgroundColor: ["#ba0b2f", "#1f2937", "#d4af37"], data: [55, 30, 15] },
   ],
@@ -423,7 +423,8 @@ const doughnutChartOptions = ref<ChartOptions<'doughnut'>>({
 });
 
 const confirmLogout = () => {
-  Swal.fire({
+  Swal.fire(
+    withSwalTheme({
     html: `
       <div class="relative w-24 h-24 mx-auto mb-6">
         <div class="absolute inset-0 bg-red-100 rounded-full animate-pulse"></div>
@@ -447,7 +448,8 @@ const confirmLogout = () => {
       cancelButton:
         "bg-gray-50 text-gray-600 rounded-2xl px-5 py-3.5 font-bold hover:bg-gray-100 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
-  }).then((result) => {
+  })
+  ).then((result) => {
     if (result.isConfirmed) {
       localStorage.clear();
       router.push("/");
@@ -531,7 +533,7 @@ const confirmLogout = () => {
                 "
                 class="ui-nav-item"
               >
-                <font-awesome-icon icon="chart-pie" class="w-5" /> Dashboard
+                <font-awesome-icon icon="chart-pie" class="w-5" /> {{ $t("admin.nav_dashboard") }}
               </button>
               <button
                 @click="activeTab = 'bookings'"
@@ -543,7 +545,7 @@ const confirmLogout = () => {
                 class="ui-nav-item justify-between group"
               >
                 <div class="flex items-center gap-4">
-                  <font-awesome-icon icon="clipboard-list" class="w-5" /> จัดการคำขอจอง
+                  <font-awesome-icon icon="clipboard-list" class="w-5" /> {{ $t("admin.manage_bookings") }}
                 </div>
                 <div
                   v-if="pendingCount > 0"
@@ -561,7 +563,7 @@ const confirmLogout = () => {
                 "
                 class="ui-nav-item"
               >
-                <font-awesome-icon icon="building" class="w-5" /> ข้อมูลห้องและพื้นที่
+                <font-awesome-icon icon="building" class="w-5" /> {{ $t("admin.nav_rooms_short") }}
               </button>
               <button
                 @click="activeTab = 'users'"
@@ -572,7 +574,7 @@ const confirmLogout = () => {
                 "
                 class="ui-nav-item"
               >
-                <font-awesome-icon icon="users" class="w-5" /> จัดการผู้ใช้
+                <font-awesome-icon icon="users" class="w-5" /> {{ $t("admin.nav_users_short") }}
               </button>
               <button
                 @click="activeTab = 'promos'"
@@ -583,7 +585,7 @@ const confirmLogout = () => {
                 "
                 class="ui-nav-item"
               >
-                <font-awesome-icon icon="ticket-alt" class="w-5" /> รหัสส่วนลด
+                <font-awesome-icon icon="ticket-alt" class="w-5" /> {{ $t("admin.nav_promo_short") }}
               </button>
               <button
                 @click="activeTab = 'addons'"
@@ -594,7 +596,7 @@ const confirmLogout = () => {
                 "
                 class="ui-nav-item"
               >
-                <font-awesome-icon icon="box-open" class="w-5" /> อุปกรณ์เสริม
+                <font-awesome-icon icon="box-open" class="w-5" /> {{ $t("admin.nav_addons_short") }}
               </button>
               <button
                 @click="activeTab = 'banners'"
@@ -605,7 +607,7 @@ const confirmLogout = () => {
                 "
                 class="ui-nav-item"
               >
-                <font-awesome-icon icon="bullhorn" class="w-5" /> การประกาศ
+                <font-awesome-icon icon="bullhorn" class="w-5" /> {{ $t("admin.banners_title") }}
               </button>
               <button
                 @click="activeTab = 'logs'"
@@ -616,7 +618,7 @@ const confirmLogout = () => {
                 "
                 class="ui-nav-item"
               >
-                <font-awesome-icon icon="history" class="w-5" /> บันทึกกิจกรรม
+                <font-awesome-icon icon="history" class="w-5" /> {{ $t("admin.nav_logs_short") }}
               </button>
 
               <div class="pt-6 mt-6 border-t border-gray-100">
@@ -630,7 +632,7 @@ const confirmLogout = () => {
                     >
                       <font-awesome-icon icon="sign-out-alt" />
                     </div>
-                    <span>ออกจากระบบ</span>
+                    <span>{{ $t("admin.nav_logout") }}</span>
                   </div>
                 </button>
               </div>
@@ -655,35 +657,35 @@ const confirmLogout = () => {
                   @click="setFilterMode('latest')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
                   :class="filterMode === 'latest' ? 'ui-chip-active' : 'ui-chip-idle'"
-                >เดือนล่าสุด</button>
+                >{{ $t("admin.filter_latest") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('all')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
                   :class="filterMode === 'all' ? 'ui-chip-active' : 'ui-chip-idle'"
-                >ทั้งหมด</button>
+                >{{ $t("admin.filter_all") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('month')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
                   :class="filterMode === 'month' ? 'ui-chip-active' : 'ui-chip-idle'"
-                >เลือกเดือน</button>
+                >{{ $t("admin.filter_month") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('year')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
                   :class="filterMode === 'year' ? 'ui-chip-active' : 'ui-chip-idle'"
-                >รายปี</button>
+                >{{ $t("admin.filter_year") }}</button>
                 <button
                   type="button"
                   @click="setFilterMode('range')"
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
                   :class="filterMode === 'range' ? 'ui-chip-active' : 'ui-chip-idle'"
-                >ช่วงวัน (เช่น รายสัปดาห์)</button>
+                >{{ $t("admin.filter_range") }}</button>
               </div>
               <div class="flex flex-col lg:flex-row gap-3 lg:items-end">
                 <div v-if="filterMode === 'month'" class="flex flex-col gap-1">
-                  <label class="text-[10px] font-black text-gray-400 uppercase">เดือน</label>
+                  <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.month_label") }}</label>
                   <input
                     v-model="filterMonth"
                     type="month"
@@ -692,7 +694,7 @@ const confirmLogout = () => {
                 </div>
                 <template v-if="filterMode === 'year'">
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">จากปี</label>
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.year_from") }}</label>
                     <input
                       v-model.number="yearFrom"
                       type="number"
@@ -702,7 +704,7 @@ const confirmLogout = () => {
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">ถึงปี</label>
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.year_to") }}</label>
                     <input
                       v-model.number="yearTo"
                       type="number"
@@ -714,14 +716,14 @@ const confirmLogout = () => {
                 </template>
                 <template v-if="filterMode === 'range'">
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">วันเริ่มต้น</label>
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.date_from") }}</label>
                     <DateField
                       v-model="filterFrom"
                       input-class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-full"
                     />
                   </div>
                   <div class="flex flex-col gap-1">
-                    <label class="text-[10px] font-black text-gray-400 uppercase">วันสิ้นสุด</label>
+                    <label class="text-[10px] font-black text-gray-400 uppercase">{{ $t("admin.date_to") }}</label>
                     <DateField
                       v-model="filterTo"
                       input-class="border border-gray-200 rounded-xl px-3 py-2 text-sm font-bold w-full"
@@ -743,7 +745,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      รออนุมัติ
+                      {{ $t("admin.kpi_pending") }}
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.pendingCount }}
@@ -762,7 +764,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      อนุมัติแล้ว
+                      {{ $t("admin.kpi_approved") }}
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.approvedCount || stats.approvedToday }}
@@ -781,7 +783,7 @@ const confirmLogout = () => {
                   </div>
                   <div>
                     <p class="text-sm font-bold text-gray-500 mb-1">
-                      ชำระเงินแล้ว
+                      {{ $t("admin.kpi_paid") }}
                     </p>
                     <p class="text-3xl font-black text-gray-900">
                       {{ stats.paidCount || 0 }}
@@ -803,7 +805,7 @@ const confirmLogout = () => {
                   </div>
                   <div class="min-w-0 flex-1 overflow-hidden">
                     <p class="text-xs sm:text-sm font-bold text-gray-500 mb-1 truncate">
-                      {{ filterMode === 'all' ? 'รายได้รวมทั้งหมด' : filterMode === 'latest' ? 'รายได้รวมเดือนนี้' : 'รายได้ตามตัวกรอง' }}
+                      {{ filterMode === 'all' ? $t('admin.revenue_all') : filterMode === 'latest' ? $t('admin.monthly_revenue') : $t('admin.revenue_filtered') }}
                     </p>
                     <p
                       class="font-black text-mfu-red tabular-nums leading-none whitespace-nowrap overflow-hidden text-ellipsis"
@@ -825,16 +827,16 @@ const confirmLogout = () => {
                 <h3
                   class="text-lg font-bold text-gray-900 mb-6 flex flex-wrap items-center gap-2"
                 >
-                  <font-awesome-icon icon="chart-line" class="text-mfu-red" /> แนวโน้มรายได้
+                  <font-awesome-icon icon="chart-line" class="text-mfu-red" /> {{ $t("admin.revenue_trend") }}
                   <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
                     {{
                       filterMode === 'year' && Math.min(yearFrom, yearTo) === Math.max(yearFrom, yearTo)
-                        ? `รายเดือนทั้งปี ${Math.min(yearFrom, yearTo)}`
+                        ? $t('admin.chart_monthly_year', { y: Math.min(yearFrom, yearTo) })
                         : filterMode === 'year'
-                          ? `รายปี ${Math.min(yearFrom, yearTo)}–${Math.max(yearFrom, yearTo)}`
+                          ? $t('admin.chart_year_range', { a: Math.min(yearFrom, yearTo), b: Math.max(yearFrom, yearTo) })
                           : revenueChartGranularity === 'year'
-                            ? 'รายปี (แท่งเดือนเกิน 12)'
-                            : 'รายเดือน (สูงสุด 12)'
+                            ? $t('admin.chart_by_year')
+                            : $t('admin.chart_by_month')
                     }}
                   </span>
                 </h3>
@@ -849,7 +851,7 @@ const confirmLogout = () => {
                   class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
                 >
                   <font-awesome-icon icon="chart-pie" class="text-mfu-gold" />
-                  สัดส่วนประเภทผู้เช่า
+                  {{ $t("admin.renter_proportions") }}
                 </h3>
                 <div class="w-full h-64">
                   <Doughnut
@@ -868,7 +870,7 @@ const confirmLogout = () => {
                 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2"
               >
                 <font-awesome-icon icon="fire-alt" class="text-orange-500" />
-                อัตราการใช้งานห้องและพื้นที่
+                {{ $t("admin.space_utilization") }}
               </h3>
               <div class="space-y-5">
                 <div v-for="(room, index) in popularRooms" :key="index">
@@ -878,7 +880,7 @@ const confirmLogout = () => {
                     }}</span
                     ><span class="text-sm font-bold text-gray-900"
                       >{{ room.usage }}%
-                      <span class="text-gray-400 font-semibold text-xs">({{ room.count }} จอง)</span></span
+                      <span class="text-gray-400 font-semibold text-xs">{{ $t("admin.booking_count_suffix", { n: room.count }) }}</span></span
                     >
                   </div>
                   <div
@@ -895,7 +897,7 @@ const confirmLogout = () => {
                   v-if="popularRooms.length === 0"
                   class="text-sm text-gray-400 font-medium text-center py-4"
                 >
-                  ไม่มีข้อมูลการจองในช่วงที่เลือก
+                  {{ $t("admin.empty_usage") }}
                 </p>
               </div>
             </div>

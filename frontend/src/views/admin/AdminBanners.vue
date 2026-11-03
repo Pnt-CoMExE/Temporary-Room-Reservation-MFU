@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import Swal from "sweetalert2";
 import { withSwalTheme } from "@/utils/swalTheme";
 import api from "@/services/api";
+
+const { t } = useI18n();
 
 interface Banner {
   id: number;
@@ -33,8 +36,8 @@ const loadBanners = async () => {
     Swal.fire(
       withSwalTheme({
         icon: "error",
-        title: "โหลดแบนเนอร์ไม่สำเร็จ",
-        text: "ไม่สามารถดึงรายการแบนเนอร์ได้",
+        title: t("admin.swal_load_banner_fail"),
+        text: t("admin.swal_load_banner_fail"),
       })
     );
   }
@@ -55,17 +58,16 @@ const saveLog = async (action: string, details: string) => {
 const handleAddBanner = () => {
   Swal.fire(
     withSwalTheme({
-    title:
-      '<h3 class="text-2xl font-black text-gray-900 mb-2">เพิ่มแบนเนอร์ใหม่</h3>',
+    title: `<h3 class="text-2xl font-black text-gray-900 mb-2">${t("admin.swal_add_banner")}</h3>`,
     html: `
       <div class="text-left">
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">หัวข้อแบนเนอร์</label>
-        <input id="swal-input-title" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-red outline-none transition-all font-medium mb-4" placeholder="เช่น โปรโมชั่นต้อนรับเปิดเทอม">
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">${t("admin.swal_banner_title")}</label>
+        <input id="swal-input-title" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-red outline-none transition-all font-medium mb-4">
         
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">ลิงก์เมื่อคลิก (ไม่บังคับ)</label>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">${t("admin.swal_banner_link")}</label>
         <input id="swal-input-link" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-mfu-red outline-none transition-all font-medium mb-4" placeholder="/rooms" value="/rooms">
 
-        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">อัปโหลดรูปภาพ</label>
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">${t("admin.swal_banner_upload")}</label>
       </div>
     `,
     input: "file",
@@ -75,8 +77,8 @@ const handleAddBanner = () => {
         "w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-mfu-red hover:file:bg-red-100 cursor-pointer",
     },
     showCancelButton: true,
-    confirmButtonText: "อัปโหลดแบนเนอร์",
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t("admin.upload"),
+    cancelButtonText: t("admin.cancel"),
     reverseButtons: true,
     customClass: {
       popup: "rounded-[2.5rem] p-8 max-w-md border border-gray-100 shadow-2xl",
@@ -87,7 +89,7 @@ const handleAddBanner = () => {
       const title = titleEl?.value?.trim() || "";
       const link = linkEl?.value?.trim() || "/rooms";
       if (!title || !file) {
-        Swal.showValidationMessage("กรุณากรอกหัวข้อและเลือกรูปภาพ");
+        Swal.showValidationMessage(t("admin.swal_banner_required"));
         return false;
       }
       return { title, link, file };
@@ -109,8 +111,8 @@ const handleAddBanner = () => {
       Swal.fire(
         withSwalTheme({
           icon: "success",
-          title: "อัปโหลดสำเร็จ!",
-          text: "แบนเนอร์จะแสดงบนหน้าแรกทันที",
+          title: t("admin.swal_banner_ok"),
+          text: t("admin.swal_banner_ok_text"),
           showConfirmButton: false,
           timer: 1500,
         })
@@ -119,8 +121,8 @@ const handleAddBanner = () => {
       Swal.fire(
         withSwalTheme({
           icon: "error",
-          title: "อัปโหลดไม่สำเร็จ",
-          text: err?.message || "ไม่สามารถอัปโหลดแบนเนอร์ได้",
+          title: t("admin.swal_banner_fail"),
+          text: err?.message || t("admin.swal_banner_fail"),
         })
       );
     }
@@ -128,25 +130,25 @@ const handleAddBanner = () => {
 };
 
 const handleBroadcast = () => {
-  Swal.fire({
-    title:
-      '<h3 class="text-2xl font-black text-gray-900 mb-1">ส่งประกาศแจ้งเตือน</h3>',
+  Swal.fire(
+    withSwalTheme({
+    title: `<h3 class="text-2xl font-black text-gray-900 mb-1">${t("admin.swal_broadcast")}</h3>`,
     html: `
-      <p class="text-sm text-gray-500 mb-6 font-medium">ส่งข้อความแจ้งเตือนในแอปไปยังผู้ใช้งานที่เปิดใช้งานทุกคน (กระดิ่งแจ้งเตือน)</p>
+      <p class="text-sm text-gray-500 mb-6 font-medium">${t("admin.swal_broadcast_hint")}</p>
       <div class="text-left space-y-4">
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">หัวข้อประกาศ</label>
-          <input id="swal-b-title" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold" placeholder="เช่น แจ้งปิดปรับปรุงระบบชั่วคราว">
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">${t("admin.swal_broadcast_title_label")}</label>
+          <input id="swal-b-title" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-bold">
         </div>
         <div>
-          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">รายละเอียดข้อความ</label>
-          <textarea id="swal-b-desc" rows="4" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium resize-none" placeholder="พิมพ์ข้อความที่ต้องการแจ้งให้ผู้ใช้ทราบ..."></textarea>
+          <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">${t("admin.swal_broadcast_body_label")}</label>
+          <textarea id="swal-b-desc" rows="4" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium resize-none"></textarea>
         </div>
       </div>
     `,
     showCancelButton: true,
-    confirmButtonText: '📨 ส่งประกาศเลย',
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t("admin.swal_broadcast_send"),
+    cancelButtonText: t("admin.cancel"),
     reverseButtons: true,
     buttonsStyling: false,
     customClass: {
@@ -157,50 +159,55 @@ const handleBroadcast = () => {
       cancelButton:
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-2xl px-6 py-3.5 font-bold hover:bg-gray-200 transition-all flex-1 whitespace-nowrap cursor-pointer",
     },
-  }).then(async (result) => {
+  })
+  ).then(async (result) => {
     if (!result.isConfirmed) return;
     const titleEl = document.getElementById("swal-b-title") as HTMLInputElement | null;
     const descEl = document.getElementById("swal-b-desc") as HTMLTextAreaElement | null;
     const title = titleEl?.value?.trim() || "";
     const body = descEl?.value?.trim() || "";
     if (!title || !body) {
-      Swal.fire({
-        icon: "warning",
-        title: "กรุณากรอกข้อมูลให้ครบ",
-        customClass: { popup: "rounded-3xl" },
-      });
+      Swal.fire(
+        withSwalTheme({
+          icon: "warning",
+          title: t("admin.swal_broadcast_required"),
+        })
+      );
       return;
     }
     try {
       const res = await api.post("/api/admin/broadcast", { title, body, link: "/home" });
       const count = res.data?.recipientCount ?? 0;
-      Swal.fire({
-        icon: "success",
-        title: "ส่งแจ้งเตือนเรียบร้อย",
-        text: `ส่งถึงผู้ใช้ ${count} คน — แสดงที่กระดิ่งแจ้งเตือน`,
-        showConfirmButton: false,
-        timer: 2000,
-        customClass: { popup: "rounded-3xl" },
-      });
+      Swal.fire(
+        withSwalTheme({
+          icon: "success",
+          title: t("admin.swal_broadcast_ok"),
+          text: t("admin.swal_broadcast_ok_text", { n: count }),
+          showConfirmButton: false,
+          timer: 2000,
+        })
+      );
     } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "ส่งไม่สำเร็จ",
-        text: err?.message || "ไม่สามารถส่งประกาศได้",
-        customClass: { popup: "rounded-3xl" },
-      });
+      Swal.fire(
+        withSwalTheme({
+          icon: "error",
+          title: t("admin.swal_broadcast_fail"),
+          text: err?.message || t("admin.swal_broadcast_fail"),
+        })
+      );
     }
   });
 };
 
-const deleteBanner = (id, title) => {
-  Swal.fire({
-    title: "ลบแบนเนอร์?",
-    text: `คุณต้องการลบแบนเนอร์ "${title}" ใช่หรือไม่?`,
+const deleteBanner = (id: number, title: string) => {
+  Swal.fire(
+    withSwalTheme({
+    title: t("admin.swal_delete_banner"),
+    text: t("admin.swal_delete_banner_text", { title }),
     icon: "warning",
     showCancelButton: true,
-    confirmButtonText: "ลบทิ้ง",
-    cancelButtonText: "ยกเลิก",
+    confirmButtonText: t("admin.delete"),
+    cancelButtonText: t("admin.cancel"),
     reverseButtons: true,
     buttonsStyling: false,
     customClass: {
@@ -211,30 +218,34 @@ const deleteBanner = (id, title) => {
       cancelButton:
         "bg-gray-100 text-gray-700 border border-gray-200 rounded-xl px-4 py-3 font-bold hover:bg-gray-200 transition-all flex-1 cursor-pointer",
     },
-  }).then(async (result) => {
+  })
+  ).then(async (result) => {
     if (!result.isConfirmed) return;
     try {
       await api.delete(`/api/admin/banners/${id}`);
       banners.value = banners.value.filter((b) => b.id !== id);
       saveLog("ลบแบนเนอร์", `ลบแบนเนอร์หัวข้อ: ${title}`);
-      Swal.fire({
-        icon: "success",
-        title: "ลบเรียบร้อย",
-        showConfirmButton: false,
-        timer: 1500,
-      });
+      Swal.fire(
+        withSwalTheme({
+          icon: "success",
+          title: t("admin.deleted"),
+          showConfirmButton: false,
+          timer: 1500,
+        })
+      );
     } catch (err: any) {
-      Swal.fire({
-        icon: "error",
-        title: "ลบไม่สำเร็จ",
-        text: err?.message || "ไม่สามารถลบแบนเนอร์ได้",
-        customClass: { popup: "rounded-3xl" },
-      });
+      Swal.fire(
+        withSwalTheme({
+          icon: "error",
+          title: t("admin.swal_delete_fail"),
+          text: err?.message || t("admin.swal_delete_fail"),
+        })
+      );
     }
   });
 };
 
-const toggleBannerStatus = async (banner) => {
+const toggleBannerStatus = async (banner: Banner) => {
   const nextActive = !banner.isActive;
   try {
     await api.put(`/api/admin/banners/${banner.id}/status`, {
@@ -246,12 +257,13 @@ const toggleBannerStatus = async (banner) => {
       `เปลี่ยนสถานะแบนเนอร์ "${banner.title}" เป็น ${nextActive ? "เปิดใช้งาน" : "ปิดใช้งาน"}`,
     );
   } catch (err: any) {
-    Swal.fire({
-      icon: "error",
-      title: "อัปเดตไม่สำเร็จ",
-      text: err?.message || "ไม่สามารถเปลี่ยนสถานะแบนเนอร์ได้",
-      customClass: { popup: "rounded-3xl" },
-    });
+    Swal.fire(
+      withSwalTheme({
+        icon: "error",
+        title: t("admin.swal_status_fail"),
+        text: err?.message || t("admin.swal_status_fail"),
+      })
+    );
   }
 };
 
@@ -259,40 +271,39 @@ const toggleBannerStatus = async (banner) => {
 
 <template>
   <div class="space-y-6 animate-fade-up">
-    <!-- Header ภาพรวม -->
     <div class="ui-card ui-admin-header p-6">
       <div>
-        <!-- ✨ เปลี่ยนหัวข้อเป็น การประกาศและโปรโมชั่น -->
         <h2
           class="text-2xl font-extrabold text-gray-900 flex items-center gap-3"
         >
-          <font-awesome-icon icon="bullhorn" class="text-mfu-red" />           การประกาศ
+          <font-awesome-icon icon="bullhorn" class="text-mfu-red" />
+          {{ $t("admin.banners_title") }}
         </h2>
         <p class="text-sm text-gray-500 mt-1 font-medium">
-          ควบคุมแบนเนอร์หน้าแรก และส่งการแจ้งเตือน (Broadcast)
+          {{ $t("admin.banners_subtitle") }}
         </p>
       </div>
       <button
         @click="handleBroadcast"
         class="w-full sm:w-auto px-6 py-3 bg-blue-50 text-blue-600 border border-blue-200 font-bold rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer"
       >
-        <font-awesome-icon icon="paper-plane" /> ส่งประกาศ (Broadcast)
+        <font-awesome-icon icon="paper-plane" /> {{ $t("admin.broadcast") }}
       </button>
     </div>
 
-    <!-- โซน 1: แบนเนอร์ -->
     <div
       class="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-card"
     >
       <div class="flex justify-between items-center mb-6">
         <h3 class="text-lg font-bold text-gray-900">
-          <font-awesome-icon icon="images" class="text-gray-400 mr-2" /> ภาพแบนเนอร์ (Banners)
+          <font-awesome-icon icon="images" class="text-gray-400 mr-2" />
+          {{ $t("admin.banners_section") }}
         </h3>
         <button
           @click="handleAddBanner"
           class="text-xs font-bold bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-black transition-colors cursor-pointer"
         >
-          <font-awesome-icon icon="plus" class="mr-1" /> อัปโหลด
+          <font-awesome-icon icon="plus" class="mr-1" /> {{ $t("admin.upload") }}
         </button>
       </div>
 
@@ -300,8 +311,8 @@ const toggleBannerStatus = async (banner) => {
         v-if="banners.length === 0"
         class="rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-6 py-12 text-center"
       >
-        <p class="text-sm font-semibold text-gray-500">ยังไม่มีแบนเนอร์</p>
-        <p class="text-xs text-gray-400 mt-1">กด “อัปโหลด” เพื่อเพิ่มภาพที่แสดงบนหน้าแรก</p>
+        <p class="text-sm font-semibold text-gray-500">{{ $t("admin.empty_banners") }}</p>
+        <p class="text-xs text-gray-400 mt-1">{{ $t("admin.empty_banners_hint") }}</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -323,12 +334,12 @@ const toggleBannerStatus = async (banner) => {
               <span
                 v-if="banner.isActive"
                 class="bg-green-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase"
-                >แสดงผลอยู่</span
+                >{{ $t("admin.banner_visible") }}</span
               >
               <span
                 v-else
                 class="bg-gray-500 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase"
-                >ซ่อน</span
+                >{{ $t("admin.banner_hidden") }}</span
               >
             </div>
           </div>
@@ -349,7 +360,7 @@ const toggleBannerStatus = async (banner) => {
                 <font-awesome-icon
                   :icon="banner.isActive ? 'eye-slash' : 'eye'"
                 />
-                {{ banner.isActive ? "ซ่อน" : "แสดงผล" }}
+                {{ banner.isActive ? $t("admin.hide") : $t("admin.show") }}
               </button>
               <button
                 @click="deleteBanner(banner.id, banner.title)"
