@@ -2,6 +2,10 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-03 — Per-owner test case indexes]
+- เติมรายการ TC ตามคนใน `docs/testing/test-cases/kom.md` · `cee.md` · `jay.md` · `part.md` (จาก evidence ใน tracker)
+- อัปเดต `test-cases/README.md` ให้ลิงก์ดัชนีผู้รับผิดชอบ
+
 ## [2026-11-03 — Chapter 4 title → Experiment and Result]
 - `CHAPTER_4_AND_5.md`: หัว Chapter 4 จาก `RESULTS` → `EXPERIMENT AND RESULT`
 - อัปเดตอ้างอิงใน `THESIS_CHAPTERS_CHECKLIST.md` และ `docs/README.md`

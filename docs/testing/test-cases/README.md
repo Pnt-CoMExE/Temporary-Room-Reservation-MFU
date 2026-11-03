@@ -49,4 +49,13 @@ Auth → Home/Rooms → Booking → User Dashboard → Payment
      → Content → Users/Logs → i18n → Edge/Email
 ```
 
-> ไฟล์เก่า `kom.md` / `cee.md` / `part.md` / `jay.md` เป็น redirect มาที่นี่
+### แยกตามผู้รับผิดชอบ (หลักฐานเดิม)
+
+| คน | ไฟล์ | โฟลเดอร์หลักฐาน |
+|----|------|-----------------|
+| คอม (CoM) | [`kom.md`](./kom.md) | `evidence/CoM/` |
+| ซี (CCC) | [`cee.md`](./cee.md) | `evidence/CCC/` |
+| เจ (JJ) | [`jay.md`](./jay.md) | `evidence/JJ/` |
+| พาร์ท (Parttime) | [`part.md`](./part.md) | `evidence/Parttime/` |
+
+> รายละเอียดขั้นตอนยังอยู่ไฟล์โฟลว์ `01-…`–`12-…` · ไฟล์ตามคนด้านบน = ดัชนีเคส + ลิงก์หลักฐานของแต่ละคน
