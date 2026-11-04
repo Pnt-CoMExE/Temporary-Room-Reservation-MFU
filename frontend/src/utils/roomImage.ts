@@ -3,8 +3,8 @@ export const DEFAULT_ROOM_IMAGE = "/images/rooms/room-01.svg";
 
 /** Category default photos (user-provided). */
 export const ROOM_TYPE_IMAGES: Record<string, string> = {
-  "ห้องประชุม": "/images/rooms/meeting.png",
-  "ห้องสัมมนา": "/images/rooms/seminar.png",
+  "ห้องประชุม": "/images/rooms/meeting.jpg",
+  "ห้องสัมมนา": "/images/rooms/seminar.jpg",
   "ห้องบรรยาย": "/images/rooms/lecture.jpg",
 };
 
@@ -45,7 +45,7 @@ export function roomImageByType(roomType?: string | null): string | null {
   if (t.includes("บรรยาย") || lower.includes("lecture")) {
     return ROOM_TYPE_IMAGES["ห้องบรรยาย"];
   }
-  if (t.includes("ประชุม") || lower.includes("meeting") || lower.includes("conference")) {
+  if (t.includes("ประชุม") || lower.includes("meeting") || lower.includes("conference") || lower.includes("boardroom")) {
     return ROOM_TYPE_IMAGES["ห้องประชุม"];
   }
   return null;
@@ -53,7 +53,7 @@ export function roomImageByType(roomType?: string | null): string | null {
 
 /**
  * Resolve a room image URL for display.
- * Keeps uploads and absolute URLs; uses category photo by `roomType` when no real image;
+ * Keeps uploads and absolute URLs; uses category photo by `roomType` or `seed` when no real image;
  * otherwise picks a deterministic SVG variant from `seed`.
  */
 export function resolveRoomImage(
@@ -69,10 +69,12 @@ export function resolveRoomImage(
   ) {
     return value;
   }
+
+  // Real photos under /images/rooms/ (not the generic SVG illustration room-*.svg)
   if (
     value.startsWith("/images/rooms/") &&
-    (value.endsWith(".svg") ||
-      value.endsWith(".png") ||
+    !value.includes("room-") &&
+    (value.endsWith(".png") ||
       value.endsWith(".jpg") ||
       value.endsWith(".jpeg") ||
       value.endsWith(".webp"))
@@ -80,8 +82,16 @@ export function resolveRoomImage(
     return value;
   }
 
-  const byType = roomImageByType(roomType);
+  // Prefer category photo (meeting / seminar / lecture) if matched by type or seed (name)
+  const byType =
+    roomImageByType(roomType) ||
+    roomImageByType(seed != null ? String(seed) : "");
   if (byType) return byType;
+
+  // Otherwise keep the specific SVG illustration if provided
+  if (value.startsWith("/images/rooms/") && value.endsWith(".svg")) {
+    return value;
+  }
 
   return roomImageVariant(seed ?? value ?? "room");
 }
