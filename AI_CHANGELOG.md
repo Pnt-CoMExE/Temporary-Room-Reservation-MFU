@@ -2,33 +2,6 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
-## [2026-11-04 — แคป U-25 ยกเลิก pending]
-- ผู้ใช้จอง pending ให้ (Gmail `frewgametv@gmail.com`) · ยกเลิก BK-20261104-5DWG (E3A-201) แล้วแคปทับ `TC-U-25.png`
-- แคปใหม่ UI ครบ **28/28** ของซี
-- อัปเดต `docs/testing/evidence/CCC/README.md` · `cee.md`
-
-## [2026-11-04 — ตั้ง 1073 เป็น Internal + แคป U-01]
-- ใส่ `6631501073@lamduan.mfu.ac.th` กลับใน `DEV_INTERNAL_EMAILS` แล้วตั้ง `users.user_type` เป็น internal
-- ล็อกอินใหม่ → โปรไฟล์ขึ้น **บุคลากรภายใน (Internal)** · แคปทับ `TC-U-01.png`
-- เหลือรูปเดิมแค่ U-25 (ไม่มีจอง pending)
-- อัปเดต `docs/testing/evidence/CCC/README.md` · `cee.md`
-
-## [2026-11-04 — ตั้ง 1073 เป็น External + แคป U-02/U-03]
-- ถอด `6631501073@lamduan.mfu.ac.th` ออกจาก `DEV_INTERNAL_EMAILS` (เหลือแค่ 1071) แล้วตั้ง `users.user_type` เป็น external
-- ล็อกอินใหม่ → โปรไฟล์ขึ้น **บุคคลทั่วไป (External)** · แคปทับ `TC-U-02.png`
-- แคปทับ `TC-U-03.png` จาก Gmail `frewgametv@gmail.com` (บุคคลทั่วไป External)
-- **ไม่ใส่เมล 1073 กลับ** ใน `DEV_INTERNAL_EMAILS` ตามที่ผู้ใช้สั่ง — บัญชีนี้เป็น external ตามโดเมน lamduan
-- ค้างรูปเดิม: U-01 (ต้องบัญชี internal จริง) · U-25 (ไม่มีจอง pending)
-- อัปเดต `docs/testing/evidence/CCC/README.md` · `cee.md`
-
-## [2026-11-04 — CCC recapture หลักฐาน UI ใหม่]
-- แคปใหม่ทับ `docs/testing/evidence/CCC/` ตามเคสใน `cee.md` หลัง UX/UI เปลี่ยน — **ทำเฉพาะของซี ไม่แตะ Jay/Parttime/CoM**
-- ทับแล้ว 24 ไฟล์: U-05, U-07–11, U-13–14, U-17, U-20–22, U-26–28, I-01–07, E-01, E-04 (ต่อมาทับ U-02/U-03 รวม 26)
-- ค้างรูปเดิมตอนนั้น 4 ไฟล์: U-01/U-02/U-03 · U-25 — หลังตั้ง external แล้วเหลือ U-01/U-25
-- U-26 แคปสถานะ Reviewed ของ BK-20261012-K9S3 ที่มีอยู่ (ส่งรีวิวใหม่ไม่ได้)
-- U-28 แก้เบอร์แล้วรีโหลดค่ายังอยู่ แล้วคืนค่า 0818831902
-- อัปเดต `docs/testing/evidence/CCC/README.md`
-
 ## [2026-11-03 — Per-owner test case indexes]
 - เติมรายการ TC ตามคนใน `docs/testing/test-cases/kom.md` · `cee.md` · `jay.md` · `part.md` (จาก evidence ใน tracker)
 - อัปเดต `test-cases/README.md` ให้ลิงก์ดัชนีผู้รับผิดชอบ

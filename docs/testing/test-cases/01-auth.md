@@ -16,8 +16,8 @@
 
 | TC# | ชื่อเคส | หน้า | ขั้นตอน | คาดหวัง | ผล | หลักฐาน | หมายเหตุ |
 |-----|---------|------|---------|---------|----|---------|----------|
-| TC-AUTH-01 | Login บุคลากรภายใน (internal) | `/` | Sign in with Google → บัญชี internal | เข้าได้ · Role=internal · ไป `/home` | ✅ | `evidence/CCC/TC-U-01.png` | UAT: `6631501073@lamduan.mfu.ac.th` ผ่าน `DEV_INTERNAL_EMAILS` |
-| TC-AUTH-02 | Login `@lamduan.mfu.ac.th` | `/` | Sign in → เมล lamduan | Role=external · ไป `/home` | ✅ | `evidence/CCC/TC-U-02.png` | แคปตอนถอดเมล 1073 ออกจาก `DEV_INTERNAL_EMAILS` ชั่วคราว |
+| TC-AUTH-01 | Login บุคลากรภายใน (internal) | `/` | Sign in with Google → บัญชี internal | เข้าได้ · Role=internal · ไป `/home` | ✅ | `evidence/CCC/TC-U-01.png` | UAT ใช้ `DEV_INTERNAL_EMAILS` ได้ถ้าไม่มี `@mfu.ac.th` |
+| TC-AUTH-02 | Login `@lamduan.mfu.ac.th` | `/` | Sign in → เมล lamduan | Role=external · ไป `/home` | ✅ | `evidence/CCC/TC-U-02.png` | ถอดเมลออกจาก `DEV_INTERNAL_EMAILS` ชั่วคราวถ้าเคยบังคับ internal |
 | TC-AUTH-03 | Login โดเมนอื่น (เช่น Gmail) | `/` | Sign in → `@gmail.com` | Role=external · ไป `/home` | ✅ | `evidence/CCC/TC-U-03.png` |  |
 
 ## Session / Logout / Guard
