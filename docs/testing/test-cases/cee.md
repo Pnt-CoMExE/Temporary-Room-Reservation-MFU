@@ -3,7 +3,7 @@
 **หลักฐาน:** [`../evidence/CCC/`](../evidence/CCC/) · README: [`../evidence/CCC/README.md`](../evidence/CCC/README.md)  
 **ตารางรวม:** [`../TEST_CASE_TRACKER.md`](../TEST_CASE_TRACKER.md) · แผนที่รหัส: [`_id-map.md`](./_id-map.md)
 
-อัปเดต: 2026-11-03 · แยกตามผู้รับผิดชอบจากโฟลเดอร์ evidence ใน tracker
+อัปเดต: 2026-11-04 · แคปใหม่ทับ UI ใน `evidence/CCC/` ครบ 28/28
 
 | TC (flow) | ชื่อเคส | ผล | หลักฐาน |
 |-----------|---------|----|---------|
