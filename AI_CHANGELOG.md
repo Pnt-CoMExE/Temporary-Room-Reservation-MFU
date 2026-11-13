@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-14 — Docker parity with local npm]
+- Clone local `room_booking_db` → Docker `mfu_reservation` (96 rooms / 58 bookings / …)
+- Sync `backend/uploads` → volume (195 files)
+- `.env.production` + compose: Stripe / SMTP 465 / DEV_* ตรง UAT local (`STRIPE_SECRET_KEY` ผ่าน compose)
+
 ## [2026-11-13 — Final report: email EN/TH + thread]
 - `CHAPTER_4_AND_5.md`: Table 4.1 Notifications · Table 4.3 Mail · §5.2 UAT เมล
 - `THESIS_CHAPTERS_CHECKLIST.md`: SMTP · เมล+PDF · สิ่งที่ทำได้ / ข้อจำกัด UAT
