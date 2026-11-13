@@ -224,7 +224,7 @@ router.put(
       (async () => {
         try {
           const detailRes = await query(
-            `SELECT b.booking_no, b.user_id, b.booking_date, b.time_slot,
+            `SELECT b.booking_no, b.user_id, b.booking_date, b.time_slot, b.email_thread_id,
                     u.email, r.name as room_name
              FROM bookings b
              JOIN users u ON b.user_id = u.id
@@ -233,8 +233,15 @@ router.put(
             [id]
           );
           if (detailRes.rows.length > 0) {
-            const { booking_no, user_id, email, room_name, booking_date, time_slot } =
-              detailRes.rows[0];
+            const {
+              booking_no,
+              user_id,
+              email,
+              room_name,
+              booking_date,
+              time_slot,
+              email_thread_id,
+            } = detailRes.rows[0];
             await sendBookingStatusEmail(
               email,
               booking_no,
@@ -242,7 +249,8 @@ router.put(
               status,
               remarks,
               booking_date,
-              String(time_slot || "")
+              String(time_slot || ""),
+              email_thread_id || undefined
             );
             await createNotification({
               userId: Number(user_id),

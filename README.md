@@ -125,7 +125,7 @@ With SMTP, users receive real inbox messages (booking submitted, approve/reject,
 
 ```env
 SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
+SMTP_PORT=465
 SMTP_USER=your.gmail@gmail.com
 SMTP_PASS=xxxx xxxx xxxx xxxx
 EMAIL_FROM="MFU Space Reservation <your.gmail@gmail.com>"
@@ -138,10 +138,12 @@ EMAIL_FROM="MFU Space Reservation <your.gmail@gmail.com>"
 | Variable | Required for real mail? | Notes |
 |----------|-------------------------|--------|
 | `SMTP_HOST` | Yes | e.g. `smtp.gmail.com` |
-| `SMTP_PORT` | Yes | `587` (STARTTLS) typical |
+| `SMTP_PORT` | Yes | Prefer **`465` (SSL)** on campus networks that block STARTTLS `:587` · `587` also works off-campus |
 | `SMTP_USER` | Yes | Full mailbox address |
 | `SMTP_PASS` | Yes | Gmail **App Password** (spaces OK) |
 | `EMAIL_FROM` | Recommended | Display name + address; often same as `SMTP_USER` for Gmail |
+
+**Mail body (product behavior):** English section first, Thai below · same booking number threads in Gmail (`Re:` + `In-Reply-To`) · submitted heading green / disapproval red.
 
 #### University / production SMTP
 

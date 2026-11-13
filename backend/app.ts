@@ -186,6 +186,12 @@ query(
     END IF;
     IF NOT EXISTS (
       SELECT 1 FROM information_schema.columns
+      WHERE table_name = 'bookings' AND column_name = 'email_thread_id'
+    ) THEN
+      ALTER TABLE bookings ADD COLUMN email_thread_id TEXT;
+    END IF;
+    IF NOT EXISTS (
+      SELECT 1 FROM information_schema.columns
       WHERE table_name = 'users' AND column_name = 'is_active'
     ) THEN
       ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;

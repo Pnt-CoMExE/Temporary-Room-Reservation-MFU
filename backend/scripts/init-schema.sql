@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS bookings (
   promo_code VARCHAR(50),
   payment_slip_url TEXT,
   payment_status VARCHAR(50) DEFAULT 'unpaid',
+  email_thread_id TEXT,
   remarks TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()

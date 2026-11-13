@@ -3,7 +3,7 @@
 **หลักฐาน:** [`../evidence/Parttime/`](../evidence/Parttime/) · README: [`../evidence/Parttime/README.md`](../evidence/Parttime/README.md)  
 **ตารางรวม:** [`../TEST_CASE_TRACKER.md`](../TEST_CASE_TRACKER.md) · แผนที่รหัส: [`_id-map.md`](./_id-map.md)
 
-อัปเดต: 2026-11-03 · แยกตามผู้รับผิดชอบจากโฟลเดอร์ evidence ใน tracker
+อัปเดต: 2026-11-13 · แยกตามผู้รับผิดชอบจากโฟลเดอร์ evidence ใน tracker · EMAIL ตรวจ EN/TH + เธรด (ดู CoM ด้วย)
 
 | TC (flow) | ชื่อเคส | ผล | หลักฐาน |
 |-----------|---------|----|---------|
@@ -16,8 +16,9 @@
 | TC-ADM-ROOM-02 | เปิด/ปิดห้อง | ✅ | `evidence/Parttime/TC-A-12-admin.png` + `TC-A-12-user.png` |
 | TC-ADM-USER-03 | Promote เป็น admin | ✅ | `evidence/Parttime/TC-U-02b.png` |
 | TC-ADM-USER-04 | เปลี่ยน Role / Demote | ✅ | `evidence/Parttime/TC-A-21.png` |
-| TC-EMAIL-01 | อีเมลยืนยันหลังจอง | ✅ | `evidence/Parttime/TC-E-07.png` |
-| TC-EMAIL-02 | อีเมลแจ้งผลอนุมัติ/ปฏิเสธ | ✅ | `evidence/Parttime/TC-E-08.png` |
+| TC-EMAIL-01 | อีเมลยืนยันหลังจอง | ✅ | `evidence/Parttime/TC-E-07.png` · bilingual/เธรด: `evidence/CoM/TC-EMAIL-thread-04b-gmail-open.png` |
+| TC-EMAIL-02 | อีเมลแจ้งผลอนุมัติ/ปฏิเสธ | ✅ | `evidence/Parttime/TC-E-08.png` · เธรด: `evidence/CoM/TC-EMAIL-thread-04-gmail.png` / `04c-gmail-deny.png` |
 
 **รวม 11 เคส** ใน tracker ปัจจุบัน  
-(เคส mock PromptPay/สลิปเก่าถูกตัดออกจาก suite แล้ว — ดู README ของ Parttime)
+(เคส mock PromptPay/สลิปเก่าถูกตัดออกจาก suite แล้ว — ดู README ของ Parttime)  
+เกณฑ์เมลล่าสุด: EN บน / TH ล่าง · Gmail 1 conversation ต่อรหัสจอง — ดู [`12-edge-email.md`](./12-edge-email.md)

@@ -1,0 +1,10 @@
+﻿bookingNo=BK-20261113-DEC1
+date=2026-11-13T16:45:00Z
+result=Gmail me 2 (one conversation) + bilingual EN/TH
+shots=
+- TC-EMAIL-thread-01-submitted.png
+- TC-EMAIL-thread-02-deny.png
+- TC-EMAIL-thread-03-admin-list.png
+- TC-EMAIL-thread-04-gmail.png (search: 1 thread)
+- TC-EMAIL-thread-04b-gmail-open.png (submit EN+TH green)
+- TC-EMAIL-thread-04c-gmail-deny.png (disapprove EN+TH red)

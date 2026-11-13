@@ -1,8 +1,8 @@
 # Evidence — ซี (CCC)
 
-อัปเดต: 2026-10-12 · เคสใน `docs/testing/test-cases/cee.md`  
+อัปเดต: 2026-11-13 · recapture Playwright (`e2e/ccc-evidence-recapture.spec.ts`) · เคสใน `docs/testing/test-cases/cee.md`  
 สภาพแวดล้อม: Dev `http://localhost:5173` + backend `:3000`  
-บัญชีที่ใช้: `6631501073@lamduan.mfu.ac.th` (internal)
+บัญชีเทส: `injectSession` (E2E) · บัญชีจริงเดิม `6631501073@lamduan.mfu.ac.th`
 
 ## แผนที่รูป → TC
 

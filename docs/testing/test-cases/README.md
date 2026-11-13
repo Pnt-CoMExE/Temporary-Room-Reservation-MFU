@@ -6,16 +6,33 @@
 |--------|------|
 | ตารางรวม + สภาพแวดล้อม | [`../TEST_CASE_TRACKER.md`](../TEST_CASE_TRACKER.md) |
 | แผนที่รหัสใหม่ ↔ เดิม (หลักฐาน) | [`_id-map.md`](./_id-map.md) |
-| Setup SMTP (GitHub README) | [`../../../README.md#34-smtp-email-notifications-recommended-for-uat`](../../../README.md#34-smtp-email-notifications-recommended-for-uat) |
+| **Setup SMTP (GitHub README §3.4)** | [`../../../README.md#34-smtp-email-notifications-recommended-for-uat`](../../../README.md#34-smtp-email-notifications-recommended-for-uat) |
 
-**อัปเดต:** 2026-11-03 · รวม **80** เคส (ผ่านครบ)  
+**อัปเดต:** 2026-11-13 · รวม **80** เคส (ผ่านครบ)  
 **Payment (05):** 4 เคส — Stripe + เมล/PDF ใบอนุญาตอังกฤษ (TC-PAY-03/04) · ไม่ใช้ mock ใน product path  
-**Email (12):** ตรวจวัน/ช่วงเวลาในเมล · เมลหลังจ่ายดูที่โฟลว์ 05
+**Email (12):** วัน+slot อ่านได้ · **EN บน / TH ล่าง** · Gmail รวมเธรดรหัสจองเดียวกัน · เมลหลังจ่ายดูที่โฟลว์ 05
+
+## SMTP สำหรับรันเคสเมล (UAT)
+
+คู่มือเต็ม + ตัวแปร `.env` อยู่ที่ **GitHub root README §3.4** (ลิงก์ด้านบน) — อย่าคัดลอก App Password ลงเอกสารนี้
+
+สรุปสั้นสำหรับทีมทดสอบ:
+
+1. เปิด 2-Step Verification → สร้าง [Gmail App Password](https://myaccount.google.com/apppasswords)  
+2. ใส่ใน `backend/.env`: `SMTP_HOST` · `SMTP_PORT` · `SMTP_USER` · `SMTP_PASS` · `EMAIL_FROM`  
+3. รีสตาร์ท backend แล้วจอง/อนุมัติ/ปฏิเสธ → เปิด inbox ผู้จอง (และ Spam)
+
+| หมายเหตุ UAT | รายละเอียด |
+|--------------|------------|
+| พอร์ตบนเครือข่าย มฟล. | ถ้า `:587` (STARTTLS) ถูกตัด → ใช้ **`SMTP_PORT=465`** (SSL) |
+| เนื้อเมล | English ด้านบน · ภาษาไทยด้านล่าง · หัวยืนยันจองสีเขียว · ปฏิเสธสีแดง |
+| Gmail conversation | รหัสจองเดียวกันรวม 1 เธรด (`Re:` + `In-Reply-To`) — หลักฐานตัวอย่าง: [`../evidence/CoM/`](../evidence/CoM/) (`TC-EMAIL-thread-*.png`) |
+| ไม่ตั้ง SMTP | ระบบยังสร้างเมลแล้วพิมพ์ใน backend console |
 
 ## เฟส A — ผู้ใช้
 
 | # | โฟลว์ | ไฟล์ | เคส |
-|---|--------|------|------|
+|---|--------|------|-----|
 | 01 | Auth — เข้าสู่ระบบ / สิทธิ์ | [`01-auth.md`](./01-auth.md) | 9 |
 | 02 | Home / Rooms — ค้นหาห้อง | [`02-home-rooms.md`](./02-home-rooms.md) | 6 |
 | 03 | Booking — ส่งคำขอจอง | [`03-booking.md`](./03-booking.md) | 10 |
@@ -25,7 +42,7 @@
 ## เฟส B — แอดมิน
 
 | # | โฟลว์ | ไฟล์ | เคส |
-|---|--------|------|------|
+|---|--------|------|-----|
 | 06 | Admin Dashboard | [`06-admin-dashboard.md`](./06-admin-dashboard.md) | 2 |
 | 07 | Admin Bookings — พิจารณาคำขอ | [`07-admin-bookings.md`](./07-admin-bookings.md) | 9 |
 | 08 | Admin Rooms / Add-ons | [`08-admin-rooms-addons.md`](./08-admin-rooms-addons.md) | 7 |
@@ -35,9 +52,9 @@
 ## เฟส C — ข้ามระบบ
 
 | # | โฟลว์ | ไฟล์ | เคส |
-|---|--------|------|------|
+|---|--------|------|-----|
 | 11 | i18n — ภาษาไทย / อังกฤษ | [`11-i18n.md`](./11-i18n.md) | 7 |
-| 12 | Edge / Email / Responsive (วัน+slot ในเมล) | [`12-edge-email.md`](./12-edge-email.md) | 4 |
+| 12 | Edge / Email / Responsive (วัน+slot · EN/TH · เธรด) | [`12-edge-email.md`](./12-edge-email.md) | 4 |
 
 **รวมทั้งหมด: 80 เคส** (ผ่านครบ)
 

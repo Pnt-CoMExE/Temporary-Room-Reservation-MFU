@@ -16,7 +16,7 @@ export async function sendPaidPermitEmailForBooking(bookingId: number): Promise<
   try {
     const bookingRes = await query(
       `SELECT id, booking_no, user_id, room_id, organization_type, booking_date, time_slot,
-              room_price, addons_price, total_price, status, payment_status
+              room_price, addons_price, total_price, status, payment_status, email_thread_id
        FROM bookings WHERE id = $1`,
       [bookingId]
     );
@@ -62,7 +62,8 @@ export async function sendPaidPermitEmailForBooking(bookingId: number): Promise<
       room.name || "พื้นที่จอง",
       pdfBuffer,
       booking.booking_date,
-      String(booking.time_slot || "")
+      String(booking.time_slot || ""),
+      booking.email_thread_id || undefined
     );
 
     await createNotification({

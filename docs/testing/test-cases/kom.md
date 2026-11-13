@@ -3,7 +3,7 @@
 **หลักฐาน:** [`../evidence/CoM/`](../evidence/CoM/) · README: [`../evidence/CoM/README.md`](../evidence/CoM/README.md)  
 **ตารางรวม:** [`../TEST_CASE_TRACKER.md`](../TEST_CASE_TRACKER.md) · แผนที่รหัส: [`_id-map.md`](./_id-map.md)
 
-อัปเดต: 2026-11-03 · แยกตามผู้รับผิดชอบจากโฟลเดอร์ evidence ใน tracker
+อัปเดต: 2026-11-13 · แยกตามผู้รับผิดชอบจากโฟลเดอร์ evidence ใน tracker · เพิ่มหลักฐาน Gmail thread / bilingual
 
 | TC (flow) | ชื่อเคส | ผล | หลักฐาน |
 |-----------|---------|----|---------|
@@ -29,5 +29,6 @@
 | TC-ADM-ROOM-05 | จำนวนห้องสมเหตุสมผล | ✅ | `evidence/CoM/TC-A-25.png` |
 | TC-ADM-ROOM-06 | ราคาครึ่ง/เต็มวันถูกต้อง | ✅ | `evidence/CoM/TC-A-26.png` |
 | TC-ADM-ADDON-01 | แก้ราคา Add-on | ✅ | `evidence/CoM/TC-A-27.png` |
+| TC-EMAIL-01/02 (เสริม) | Gmail เธรด + bilingual EN/TH | ✅ | `evidence/CoM/TC-EMAIL-thread-01…04c.png` · `BK-20261113-DEC1` |
 
-**รวมประมาณ 22 เคส** (รวม PAY-03 ที่หลักฐานคู่กับ PAY-04)
+**รวมประมาณ 22 เคส** (รวม PAY-03 ที่หลักฐานคู่กับ PAY-04) · แถว EMAIL เสริม = หลักฐานเธรด/สองภาษา (เคสหลักยังอยู่ Parttime)

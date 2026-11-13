@@ -60,6 +60,7 @@ Based on the ER diagram and Data Dictionary from the Temporary Rental Space Mana
 - `approved_at` (timestamp): Time of approval.
 - `memo_document_url` (text): URL/path to the attached PDF memorandum document.
 - `promo_code` (varchar 50): Applied promotion discount code.
+- `email_thread_id` (text): SMTP `Message-ID` of the first booking email — used as `In-Reply-To` / `References` so Gmail threads later status/payment mail under the same booking.
 - `remarks` (text): Additional remarks.
 - `created_at` (timestamp): Record creation time.
 - `updated_at` (timestamp): Record update time.

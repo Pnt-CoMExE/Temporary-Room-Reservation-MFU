@@ -419,10 +419,11 @@ const openConfirm = (id, type) => {
             showCancelButton: true,
             confirmButtonText: t("admin.confirm_denial"),
             cancelButtonText: t("admin.cancel"),
-            confirmButtonColor: "#ba0b2f",
+            buttonsStyling: false,
             customClass: {
               popup: "rounded-3xl",
-              confirmButton: "rounded-xl px-6 py-3 font-bold",
+              confirmButton: statusActionBtn.reject,
+              cancelButton: statusActionBtn.cancel,
             },
             preConfirm: (remark) => {
               if (!remark) {

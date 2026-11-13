@@ -51,8 +51,8 @@ Payment path ปัจจุบัน = **Stripe** (`docs/payment/STRIPE.md`)
 | ไฟล์ | คำอธิบาย |
 |------|----------|
 | [`testing/TEST_CASE_TRACKER.md`](./testing/TEST_CASE_TRACKER.md) | **เอกสารหลัก** — ตาราง Test Case ทั้งหมด (**80/80 ผ่าน**) |
-| [`testing/test-cases/`](./testing/test-cases/) | จัดตามโฟลว์ (`01-auth` … `12-edge-email`) + รหัส TC · Payment มี TC-PAY-03/04 · Email ตรวจวัน/slot |
-| [Root README §3.4 SMTP](../README.md#34-smtp-email-notifications-recommended-for-uat) | Setup Gmail App Password / MFU SMTP สำหรับ UAT เมลจริง |
+| [`testing/test-cases/`](./testing/test-cases/) | โฟลว์ `01`…`12` · รวม 80 · SMTP สั้นใน [`test-cases/README.md`](./testing/test-cases/README.md) · Email EN/TH + เธรด |
+| [Root README §3.4 SMTP](../README.md#34-smtp-email-notifications-recommended-for-uat) | คู่มือเต็ม Gmail App Password / พอร์ต 465 · MFU SMTP สำหรับ UAT เมลจริง |
 | [`testing/evidence/`](./testing/evidence/) | Screenshot หลักฐาน |
 | [`testing/TESTING_PLAN.md`](./testing/TESTING_PLAN.md) | แผน Unit / Integration / E2E |
 | [`testing/QA_AUTOMATION_GUIDE.md`](./testing/QA_AUTOMATION_GUIDE.md) | Playwright E2E |

@@ -164,13 +164,19 @@ router.post(
           const roomRes = await query("SELECT name FROM rooms WHERE id = $1", [roomId]);
           const userEmail = userRes.rows[0]?.email || "user@mfu.ac.th";
           const roomName = roomRes.rows[0]?.name || "ห้องประชุม";
-          await sendBookingSubmittedEmail(
+          const mail = await sendBookingSubmittedEmail(
             userEmail,
             bookingNo,
             roomName,
             String(bookingDate),
             String(timeSlot || "")
           );
+          if (mail.messageId) {
+            await query(
+              "UPDATE bookings SET email_thread_id = $1, updated_at = NOW() WHERE id = $2",
+              [mail.messageId, bookingId]
+            );
+          }
           await createNotification({
             userId: Number(userId),
             type: "booking_status",

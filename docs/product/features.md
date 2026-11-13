@@ -19,7 +19,7 @@ Here are several proposed features to elevate the Temporary Rental Space Managem
 - **LINE Notify Integration:** In addition to email notifications, send instant alerts to the Admin's LINE group when a new booking needs approval, and send LINE reminders to users 24 hours before their event.
 
 ## 4. Recently Implemented Advanced Features
-- **Automated Email Notifications:** Confirmation and status emails (approved / disapproved with remarks); after Stripe payment, English Space Permit PDF by email (TC-PAY-03/04).
+- **Automated Email Notifications:** Confirmation and status emails (approved / disapproved with remarks) — **English on top, Thai below**; Gmail groups the same booking into one conversation; after Stripe payment, English Space Permit PDF by email (TC-EMAIL-01/02 · TC-PAY-03/04).
 - **Stripe checkout (acceptance path):** Primary online payment is Stripe test/live via `PAYMENT_PROVIDER=stripe`. Booking returns to paid status with a stored transaction id. See `docs/payment/STRIPE.md`.
 - **Optional PromptPay / slip path:** Code for PromptPay QR + slip upload remains for an alternate provider setting; it is **not** the documented UAT acceptance path (80-case suite uses Stripe).
 - **Mock payment removed from product UI:** `POST /api/payment/mock/simulate` returns **HTTP 410** — do not document mock sandbox as an active UAT UI.

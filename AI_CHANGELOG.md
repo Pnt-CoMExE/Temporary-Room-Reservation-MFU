@@ -2,6 +2,35 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-13 — Final report: email EN/TH + thread]
+- `CHAPTER_4_AND_5.md`: Table 4.1 Notifications · Table 4.3 Mail · §5.2 UAT เมล
+- `THESIS_CHAPTERS_CHECKLIST.md`: SMTP · เมล+PDF · สิ่งที่ทำได้ / ข้อจำกัด UAT
+
+## [2026-11-13 — Docs: SMTP + bilingual/thread email]
+- `test-cases/README.md`: วันที่ 2026-11-13 · บล็อก SMTP (ลิงก์ GitHub §3.4 + tip พอร์ต 465 / EN-TH / เธรด)
+- `12-edge-email.md` · `kom.md` · `part.md` · root `README.md` §3.4 · `features.md`
+
+## [2026-11-13 — Bilingual booking emails EN+TH]
+- `email.service.ts`: เมลยืนยัน / แจ้งผล / ชำระเงิน — English ด้านบน · ไทยด้านล่าง
+
+## [2026-11-13 — Booking-submitted email heading green]
+- `email.service.ts`: หัว「ส่งคำขอจองห้องเรียบร้อยแล้ว」เป็นเขียว `#16a34a` แยกจากแดงของปฏิเสธ
+
+## [2026-11-13 — Gmail thread same booking emails]
+- คอลัมน์ `bookings.email_thread_id` (migrate ใน `app.ts` + `init-schema.sql`)
+- เมลยืนยันจองเก็บ Message-ID · เมลอนุมัติ/ปฏิเสธ/ชำระเงินใส่ `In-Reply-To`/`References` ให้ Gmail รวมเธรด
+- รัน `e2e/com-email-thread.spec.ts` → `evidence/CoM/TC-EMAIL-thread-01…03.png` · booking `BK-20261113-TYLG`
+- Harden Gmail: subject คงที่ `… BK-xxx — คำขอจอง` · follow-up เป็น `Re: …` · Message-ID คงที่ `<bk-xxx-root@mfu-space-reservation.local>`
+
+## [2026-11-13 — Recapture all owner evidence]
+- Playwright overwrite หลักฐานตามโฟลเดอร์: `evidence/CoM` · `CCC` · `JJ` · `Parttime`
+- สเปกใหม่: `e2e/ccc|jj|part-evidence-recapture.spec.ts` + helper `e2e/helpers/evidence.ts`
+- AUTH-09: `coverage_authz_a.test.ts` 11/11 · อัปเดต `evidence/CoM/README.md`
+- ค้างมือ: Stripe checkout จริง · inbox Gmail (EMAIL-01/02, PAY-03/04) · Google login จริง
+
+## [2026-11-11 — Deny confirm button red]
+- `AdminBookings.vue`: ปุ่ม「ยืนยันการปฏิเสธ」ใช้ `statusActionBtn.reject` (พื้นแดง MFU) แทน class ที่ไม่มีสี
+
 ## [2026-11-03 — Per-owner test case indexes]
 - เติมรายการ TC ตามคนใน `docs/testing/test-cases/kom.md` · `cee.md` · `jay.md` · `part.md` (จาก evidence ใน tracker)
 - อัปเดต `test-cases/README.md` ให้ลิงก์ดัชนีผู้รับผิดชอบ

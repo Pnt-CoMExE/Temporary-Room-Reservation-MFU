@@ -1,6 +1,8 @@
 # Evidence — คอม (CoM)
 
-อัปเดต: 2026-10-30 · **เก็บเฉพาะไฟล์รูป + README นี้** · ชื่อไฟล์ยังเป็นรหัสเก่า · ดูแผนที่ใหม่ใน [`../../test-cases/_id-map.md`](../../test-cases/_id-map.md)
+อัปเดต: 2026-11-13 · recapture ด้วย Playwright (`e2e/com-evidence-recapture.spec.ts`) · ชื่อไฟล์ยังเป็นรหัสเก่า · ดูแผนที่ใหม่ใน [`../../test-cases/_id-map.md`](../../test-cases/_id-map.md)
+
+**Email thread (2026-11-13):** `BK-20261113-DEC1` · Gmail 1 conversation (`me 2`) · bilingual EN/TH · UI `01…03` · Gmail `04` / `04b` (submit) / `04c` (deny)
 
 Booking หลัก: `BK-20261007-N1YS` · เรท external ฿4,800 · Stripe test
 
@@ -37,5 +39,5 @@ Booking หลัก: `BK-20261007-N1YS` · เรท external ฿4,800 · Strip
 **TC-Z-01 API (ไม่ auth)**  
 `/api/user/profile` · `/api/admin/bookings` · `/api/admin/users` → **401**
 
-**TC-Z-02**  
-`cd backend && npm test` → 15 files / **204 tests** passed
+**TC-Z-02 / TC-AUTH-09**  
+`cd backend && npm test -- --run src/__tests__/coverage_authz_a.test.ts` → **11/11** passed (2026-11-13) · full suite: `npm test`
