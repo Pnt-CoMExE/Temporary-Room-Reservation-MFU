@@ -3,9 +3,11 @@
  * Run: npx playwright test e2e/jj-evidence-recapture.spec.ts --workers=1
  */
 import { test, expect, injectSession } from "./fixtures/auth";
-import { snapEvidence } from "./helpers/evidence";
+import { snapEvidence, EVIDENCE_VIEWPORT } from "./helpers/evidence";
 
 const OWN = "JJ" as const;
+
+test.use({ viewport: EVIDENCE_VIEWPORT });
 
 async function snap(page: import("@playwright/test").Page, file: string) {
   await snapEvidence(page, OWN, file);
@@ -135,6 +137,7 @@ test("TC-EDGE-02 responsive mobile", async ({ page, context }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/home");
   await page.waitForTimeout(1000);
-  await snap(page, "TC-E-06.png");
-  await snap(page, "TC-E-06(1).png");
+  // Keep phone viewport (do not force 1920×1080)
+  await snapEvidence(page, OWN, "TC-E-06.png", { preserveViewport: true });
+  await snapEvidence(page, OWN, "TC-E-06(1).png", { preserveViewport: true });
 });

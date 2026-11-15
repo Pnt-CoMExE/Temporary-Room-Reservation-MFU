@@ -2,6 +2,36 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-14 — Shorten Figure 4.x body refs in final project.docx]
+- ข้อความอ้าง Figure 4.1–4.15 → รูปแบบสั้น “could be demonstrated in Figure …”
+- คง caption ใต้รูป (เช่น Figure 4.1 Signed-in user…)
+
+## [2026-11-14 — Replace Ch4 figures in final project.docx]
+- ทับ Figure 4.1–4.15 ด้วย evidence ล่าสุด (ส่วนใหญ่ 1920×1080)
+- backup: `final project.backup-before-replace-ch4-figs.docx`
+
+## [2026-11-14 — Fix i18n @mfu.ac.th crash on AdminUsers]
+- `th.ts` / `en.ts`: escape `@` เป็น `{'@'}` (vue-i18n literal interpolation — `'@'` ไม่พอใน v11)
+
+## [2026-11-14 — Evidence recapture 1920×1080]
+- `e2e/helpers/evidence.ts`: viewport 1920×1080 (viewport shot ไม่เต็มหน้า โดยค่าเริ่ม)
+- รัน overwrite: `com|ccc|jj|part-evidence-recapture.spec.ts` · TC-EDGE-02 คงมือถือ 390×844
+- AUTH-09: `coverage_authz_a.test.ts` 11/11
+
+## [2026-11-14 — Final project.docx Ch4 figures]
+- แทรก Figure 4.1–4.15 จาก `docs/testing/evidence/` เข้า `final project.docx`
+- backup: `final project.backup-before-ch4-figures.docx`
+
+## [2026-11-14 — Final project.docx consistency]
+- TOC: Ch4 Experiment and Result · Ch5 Conclusion and Discussion · แก้สะกด CONCLUTION
+- §3.7 role: `@mfu.ac.th` internal · `@lamduan…`/อื่น = external · admin = promote
+- บท 1–3 / 3.7.2 / ตารางเปรียบเทียบ: acceptance = Stripe · PromptPay = optional
+- backup: `final project.backup-before-consistency-patch.docx`
+
+## [2026-11-14 — Final project.docx email passages]
+- `docs/final project/final project.docx`: Table 4.1 Notifications · Table 4.3 Mail · §5.2 UAT (EN/TH + thread + port 465)
+- backup: `final project.backup-before-email-patch.docx`
+
 ## [2026-11-14 — Docker parity with local npm]
 - Clone local `room_booking_db` → Docker `mfu_reservation` (96 rooms / 58 bookings / …)
 - Sync `backend/uploads` → volume (195 files)

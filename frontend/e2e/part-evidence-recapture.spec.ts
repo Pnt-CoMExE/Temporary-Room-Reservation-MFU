@@ -13,9 +13,11 @@ import {
   MEMO_PDF,
 } from "./helpers/booking";
 import { bookingDateKey } from "./helpers/dates";
-import { snapEvidence } from "./helpers/evidence";
+import { snapEvidence, EVIDENCE_VIEWPORT } from "./helpers/evidence";
 
 const OWN = "Parttime" as const;
+
+test.use({ viewport: EVIDENCE_VIEWPORT });
 
 async function snap(page: import("@playwright/test").Page, file: string) {
   await snapEvidence(page, OWN, file);

@@ -1,5 +1,5 @@
 ### พาร์ท (Parttime) — Admin จอง/เอกสาร, Promote Admin
-**อัปเดต:** 2026-11-13 · recapture Playwright (`e2e/part-evidence-recapture.spec.ts`) · EMAIL inbox จริงยังต้องถ่ายมือถ้าต้องการหลักฐาน Gmail  
+**อัปเดต:** 2026-11-14 · recapture Playwright **1920×1080** (`e2e/part-evidence-recapture.spec.ts`) · EMAIL inbox จริงยังต้องถ่ายมือถ้าต้องการหลักฐาน Gmail  
 **สรุปความก้าวหน้า:** 12 / 12 เคสที่ยังอยู่ใน tracker (เคส PromptPay/สลิปถูกตัดออก 2026-10-30)
 
 | TC# | ชื่อเคส | Owner | สถานะ | หลักฐาน | หมายเหตุ |

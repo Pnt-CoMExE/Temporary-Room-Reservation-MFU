@@ -1,6 +1,6 @@
 # Evidence — ซี (CCC)
 
-อัปเดต: 2026-11-13 · recapture Playwright (`e2e/ccc-evidence-recapture.spec.ts`) · เคสใน `docs/testing/test-cases/cee.md`  
+อัปเดต: 2026-11-14 · recapture Playwright **1920×1080** (`e2e/ccc-evidence-recapture.spec.ts`) · เคสใน `docs/testing/test-cases/cee.md`  
 สภาพแวดล้อม: Dev `http://localhost:5173` + backend `:3000`  
 บัญชีเทส: `injectSession` (E2E) · บัญชีจริงเดิม `6631501073@lamduan.mfu.ac.th`
 
@@ -12,7 +12,7 @@
 | TC-U-02 | `TC-U-02.png` | ✅ | โปรไฟล์ลำดวนเห็นบุคคลทั่วไป (External) |
 | TC-U-03 | `TC-U-03.png` | ✅ | โปรไฟล์ Gmail เห็นบุคคลทั่วไป (External) |
 | TC-U-05 | `TC-U-05.png` | ✅ | เปิด `/home` โดยไม่ล็อกอิน → กลับหน้า Login |
-| TC-U-07 | `TC-U-07.png` | ✅ | รายการ 104 ห้อง การ์ดมีรูปและราคา |
+| TC-U-07 | `TC-U-07.png` | ✅ | รายการห้อง (หลัง import Excel ≈ 96) การ์ดมีรูปและราคา |
 | TC-U-08 | `TC-U-08.png` | ✅ | กรองห้องประชุม เหลือ 58 ห้อง |
 | TC-U-09 | `TC-U-09.png` | ✅ | ค้น «ห้องประชุม» พบ 48 ห้อง |
 | TC-U-10 | `TC-U-10.png` | ✅ | ค้น Meeting Room ได้ 48 ห้อง เท่ากับค้นห้องประชุม |

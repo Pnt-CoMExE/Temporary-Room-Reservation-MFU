@@ -12,10 +12,12 @@ import {
   APPROVAL_PDF,
 } from "./helpers/booking";
 import { bookingDateKey } from "./helpers/dates";
-import { evidenceDir, snapEvidence } from "./helpers/evidence";
+import { evidenceDir, snapEvidence, EVIDENCE_VIEWPORT } from "./helpers/evidence";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const OWN = "CoM" as const;
+
+test.use({ viewport: EVIDENCE_VIEWPORT });
 const ROOM_XLSX = path.resolve(here, "../../data/room-pricing-rates.xlsx");
 const BAD_XLSX = path.resolve(here, "../../data/TC-A-24-bad-import.xlsx");
 const BIG_PDF = path.join(here, "fixtures", "big-15mb.pdf");

@@ -1,6 +1,6 @@
 # Evidence — คอม (CoM)
 
-อัปเดต: 2026-11-13 · recapture ด้วย Playwright (`e2e/com-evidence-recapture.spec.ts`) · ชื่อไฟล์ยังเป็นรหัสเก่า · ดูแผนที่ใหม่ใน [`../../test-cases/_id-map.md`](../../test-cases/_id-map.md)
+อัปเดต: 2026-11-14 · recapture Playwright 1920×1080 (`e2e/com-evidence-recapture.spec.ts`) · ชื่อไฟล์ยังเป็นรหัสเก่า · ดูแผนที่ใหม่ใน [`../../test-cases/_id-map.md`](../../test-cases/_id-map.md)
 
 **Email thread (2026-11-13):** `BK-20261113-DEC1` · Gmail 1 conversation (`me 2`) · bilingual EN/TH · UI `01…03` · Gmail `04` / `04b` (submit) / `04c` (deny)
 
@@ -24,7 +24,7 @@ Booking หลัก: `BK-20261007-N1YS` · เรท external ฿4,800 · Strip
 | TC-P-R4-01 | `TC-P-R4-01.png`, `TC-P-R4-01-checkout.png` | Checkout + สถานะชำระเงินแล้ว |
 | TC-P-R4-02 | `TC-P-R4-02.png` | การ์ดจองโชว์ Tx ID `pi_3UNxD6PR1axRnRPb0cs9FxXS` |
 | TC-Z-01 | `TC-Z-01.png` | ผู้ใช้ที่ล็อกอินแล้วและไม่ใช่แอดมิน → `/home` |
-| TC-Z-02 | *(ไม่มี UI)* | `npm test` → **204/204** ผ่าน (2026-10-07) |
+| TC-Z-02 | *(ไม่มี UI)* | `npm test` AuthZ → **11/11** ผ่าน (2026-11-14 · `coverage_authz_a.test.ts`) |
 
 รูปเสริม: `TC-admin-profile-avatar.png`, `TC-admin-bookings.png`
 
