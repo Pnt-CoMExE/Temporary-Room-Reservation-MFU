@@ -9,7 +9,7 @@
 - [ ] `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` ตั้งค่าแล้ว
 - [ ] `GOOGLE_CALLBACK_URL` ตรงกับ URL ที่ลงทะเบียนใน Google Console
 - [ ] `FRONTEND_URL` ตั้งค่าถูกต้อง
-- [ ] `PAYMENT_PROVIDER` ตั้งตามนโยบาย (ปัจจุบัน: `mock_sandbox` สำหรับ UAT)
+- [ ] `PAYMENT_PROVIDER=stripe` + `STRIPE_SECRET_KEY` (test สำหรับ UAT / live สำหรับ production — ดู `docs/payment/STRIPE.md`)
 - [ ] `SMTP_*` ตั้งค่าเมื่อได้เมลเซิร์ฟเวอร์จาก มฟล. (ถ้ายังไม่มี → อีเมล log ที่ console)
 - [ ] `DEV_ADMIN_EMAILS` ตั้งสำหรับผู้ทดสอบ Admin (ถ้าจำเป็น)
 
@@ -31,7 +31,7 @@
 - [ ] `docker compose -f docker-compose.prod.yml up -d --build` สำเร็จ
 - [ ] Health check API ตอบ 200
 - [ ] Login ด้วย Google OAuth สำเร็จ
-- [ ] Flow จอง → อนุมัติ → ชำระเงิน (mock) → ยืนยัน ครบ
+- [ ] Flow จอง → อนุมัติ → ชำระเงิน (Stripe) → อีเมล + PDF permit ครบ
 
 ## หลัง Go-Live
 

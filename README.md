@@ -243,6 +243,9 @@ docker compose -f docker-compose.prod.yml -f docker-compose.local.yml --env-file
 |---------|-----|
 | Web (Nginx) | http://localhost:8080 |
 | API via proxy | http://localhost:8080/api |
+| Backend direct (local override) | http://localhost:3001 |
+
+Local override maps backend **host `:3001` → container `:3000`** so it can run beside `npm run dev` on `:3000`.
 
 Import rooms into the Docker DB (local compose often uses port `5433`):
 

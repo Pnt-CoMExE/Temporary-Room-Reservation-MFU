@@ -2,6 +2,21 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-15 — Fix QA findings F1–F6]
+- F1: `admin-approve.spec.ts` — chip filter · `ยืนยันอนุมัติ` · assert text `รอชำระเงิน` · ดึง `bookingNo` จาก API 201
+- F2: `CITS_RUNBOOK` + `GO_LIVE_CHECKLIST` → Stripe (ไม่ใช่ mock_sandbox)
+- F3: `docker-compose.local.yml` backend host `:3001` (คู่กับ npm `:3000`)
+- F4: ลบ `version:` จาก `docker-compose.prod.yml`
+- F5: เอกสาร strip `transaction_timeout` ใน CITS_RUNBOOK + BACKUP_RESTORE
+- F6: `redisClient.ts` — lazyConnect + retry (เลิก false “ไม่พบ Redis” จาก double-connect)
+
+## [2026-11-15 — Sync dev←master + full QA (report-only)]
+- Fast-forward `dev`/`origin/dev` → `7dbb6ab` (= `master`)
+- Gates: BE/FE typecheck · BE tests 218/218 · FE build OK
+- Local npm smoke: 96 rooms · Stripe · e2e smoke+booking 6/6
+- Docker local compose up --build · DB clone parity 96 rooms / 64 bookings / 8 users · uploads 208
+- Docker e2e: 6/7 (admin-approve stale selector `ใช้ตัวกรอง`) — findings reported, fixes pending approve
+
 ## [2026-11-14 — Shorten Figure 4.x body refs in final project.docx]
 - ข้อความอ้าง Figure 4.1–4.15 → รูปแบบสั้น “could be demonstrated in Figure …”
 - คง caption ใต้รูป (เช่น Figure 4.1 Signed-in user…)

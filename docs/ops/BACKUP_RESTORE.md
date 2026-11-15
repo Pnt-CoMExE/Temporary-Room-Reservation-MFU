@@ -40,6 +40,19 @@ gunzip -c backup.sql.gz | docker compose -f docker-compose.prod.yml exec -T post
   psql -U mfu_admin -d mfu_reservation
 ```
 
+## Clone จาก Postgres บนเครื่อง → Docker (PG version mismatch)
+
+`pg_dump` จาก Postgres 17+ อาจใส่ `SET transaction_timeout = …` ซึ่ง **PostgreSQL 16** ใน Docker ปฏิเสธ
+
+ก่อน restore ให้ตัดพารามิเตอร์นั้นออก (หรือ dump ด้วย client/server คู่กัน):
+
+```powershell
+(Get-Content dump.sql) | Where-Object { $_ -notmatch 'transaction_timeout' } | Set-Content dump_clean.sql
+psql -h localhost -p 5433 -U mfu_admin -d mfu_reservation -v ON_ERROR_STOP=1 -f dump_clean.sql
+```
+
+ดูเพิ่มใน [`CITS_RUNBOOK.md`](./CITS_RUNBOOK.md) § Local Docker
+
 ## แนะนำ
 
 - สำรองก่อน deploy ทุกครั้ง

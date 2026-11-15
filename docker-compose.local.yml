@@ -9,7 +9,8 @@ services:
 
   backend:
     ports:
-      - "3000:3000"
+      # Host 3001 so local `npm run dev` can keep :3000; API via nginx is still :8080/api
+      - "3001:3000"
 
   frontend:
     ports:

@@ -9,17 +9,23 @@ import Redis from "ioredis";
 const REDIS_URL = process.env.REDIS_URL;
 const IS_TEST = process.env.NODE_ENV === "test" || process.env.VITEST === "true";
 
-// ถ้าไม่มี REDIS_URL หรือเป็น test environment → ใช้ disconnected client
-// เพื่อไม่ให้ vitest/jest hang เพราะ open connection
+function isRedisReady(): boolean {
+  // Cast: after await connect(), TS narrows status away from "ready"
+  return (redisClient.status as string) === "ready";
+}
+
+// Always lazyConnect so we never double-connect (auto + connect() → false "ไม่พบ Redis")
 const redisClient = new Redis(REDIS_URL || "redis://localhost:6379", {
   maxRetriesPerRequest: IS_TEST ? 0 : 3,
   enableOfflineQueue: !IS_TEST,
-  lazyConnect: IS_TEST || !REDIS_URL,
+  lazyConnect: true,
   retryStrategy(times) {
-    if (IS_TEST || times > 3) {
-      return null; // หยุด retry ใน test หรือหลัง 3 ครั้ง
+    // Docker: Redis may still be starting; allow more attempts than bare local
+    const max = REDIS_URL ? 10 : 3;
+    if (IS_TEST || times > max) {
+      return null;
     }
-    return Math.min(times * 200, 1000);
+    return Math.min(times * 200, 2000);
   },
 });
 
@@ -28,20 +34,64 @@ redisClient.on("connect", () => {
 });
 
 redisClient.on("error", (err) => {
-  // Log เป็น warning เท่านั้น ไม่ crash app
-  if (!IS_TEST) console.warn("⚠️ Redis error:", err.message);
+  // Suppress transient boot noise; final failure is logged in connectRedis()
+  if (!IS_TEST && (redisClient.status as string) === "end") {
+    console.warn("⚠️ Redis error:", err.message);
+  }
 });
 
-// เชื่อมต่อเฉพาะตอนที่มี REDIS_URL และไม่ใช่ test environment
-if (REDIS_URL && !IS_TEST) {
-  redisClient.connect().catch(() => {
-    console.warn("⚠️ ไม่พบ Redis server — ระบบจะรันต่อโดยไม่ใช้ Redis (dev mode)");
-  });
-} else if (!IS_TEST && !REDIS_URL) {
-  // Dev mode without Redis — try localhost
-  redisClient.connect().catch(() => {
-    console.warn("⚠️ ไม่พบ Redis server — ระบบจะรันต่อโดยไม่ใช้ Redis (dev mode)");
-  });
+async function connectRedis(): Promise<void> {
+  if (IS_TEST) return;
+
+  const maxAttempts = REDIS_URL ? 10 : 1;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      if (isRedisReady()) return;
+
+      const status = redisClient.status;
+      if (status === "wait" || status === "end") {
+        await redisClient.connect();
+      }
+
+      if (isRedisReady()) return;
+
+      // Still connecting — wait for ready / end
+      await new Promise<void>((resolve, reject) => {
+        if (isRedisReady()) {
+          resolve();
+          return;
+        }
+        const timer = setTimeout(() => reject(new Error("redis ready timeout")), 2500);
+        const onReady = () => {
+          clearTimeout(timer);
+          cleanup();
+          resolve();
+        };
+        const onEnd = () => {
+          clearTimeout(timer);
+          cleanup();
+          reject(new Error("redis ended"));
+        };
+        const cleanup = () => {
+          redisClient.off("ready", onReady);
+          redisClient.off("end", onEnd);
+        };
+        redisClient.once("ready", onReady);
+        redisClient.once("end", onEnd);
+      });
+      return;
+    } catch {
+      if (attempt === maxAttempts) {
+        console.warn(
+          "⚠️ ไม่พบ Redis server — ระบบจะรันต่อโดยไม่ใช้ Redis (dev mode)"
+        );
+        return;
+      }
+      await new Promise((r) => setTimeout(r, Math.min(attempt * 300, 2000)));
+    }
+  }
 }
+
+void connectRedis();
 
 export default redisClient;
