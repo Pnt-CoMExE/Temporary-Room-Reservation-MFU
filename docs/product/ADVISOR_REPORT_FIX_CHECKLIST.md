@@ -1,12 +1,10 @@
 # Checklist แก้เล่มรายงาน — ข้อติอาจารย์ (19 พ.ย. 2026)
 
 **แหล่ง:** คลิปสอบ/คอมเมนต์ `2026-11-19 15-06-53.mp4`  
-**ไฟล์เล่ม:** [`../final project/final project.docx`](../final%20project/final%20project.docx)  
-**ขอบเขต:** แก้ในเล่ม Word — **ไม่เกี่ยวกับ** สไลด์ Canva / สคริปต์เดโม
+**ไฟล์เล่ม:** เก็บนอก git (`docs/final project/` ถูกลบจาก repo แล้ว 2026-11-26)  
+**ขอบเขต:** checklist สำหรับแก้เล่ม Word — **ไม่เกี่ยวกับ** สไลด์ Canva / สคริปต์เดโม
 
-**สถานะ 2026-11-23:** ใส่ใน `final project.docx` แล้ว (สำรอง `final project.backup-before-advisor-fixes.docx`)  
-สคริปต์ที่ใช้: [`../final project/_apply_advisor_fixes.py`](../final%20project/_apply_advisor_fixes.py)  
-ยังต้อง: เปิด Word ตรวจ layout แล้ว **Export PDF ใหม่** ทับ `final project.pdf`
+**สถานะ:** งานแก้เล่มทำในเครื่องแล้ว · ไฟล์ `.docx` / `.pdf` ไม่ติดตามใน repo
 
 ---
 
