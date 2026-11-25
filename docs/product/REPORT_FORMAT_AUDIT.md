@@ -1,8 +1,8 @@
 # Report Format Audit — English Senior Project
 
-**ไฟล์ที่ตรวจ:** [`../final project/final project.docx`](../final%20project/final%20project.docx)  
+**ไฟล์ที่ตรวจ:** `final project.docx` (เก็บนอก repo ตั้งแต่ 2026-11-26)  
 **วันที่ตรวจ:** 2026-11-24  
-**อัปเดตใน docx:** 2026-11-24 (สำรอง `final project.backup-before-format-remaining.docx`)  
+**อัปเดตใน docx:** 2026-11-24  
 **เกณฑ์:** รูปแบบเล่มโครงงานภาษาอังกฤษมาตรฐาน (หัวข้อ–เนื้อหา–รูป–คำบรรยาย–อ้างอิง)  
 **ขอบเขต:** ฟอร์แมต + ความสอดคล้องการนำเสนอ ไม่ได้ตรวจเนื้อหาทดสอบบทที่ 4 ใหม่ทั้งก้อน
 

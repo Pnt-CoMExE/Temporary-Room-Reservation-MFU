@@ -2,6 +2,11 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-26 — Drop final project / meetings / proposals from repo]
+
+- Remove `docs/final project/`, `docs/meetings/`, `docs/proposals/` for CITS-ready slim tree
+- Update `docs/README.md`, `RULES.md`, product audit checklists (เล่มเก็บนอก git)
+
 ## [2026-11-26 — Commit/push all branches + CITS docs refresh]
 
 - Sync Final Present features to `dev`/`master`/`ForCCC`/`ForJJ`/`ForParttime`
