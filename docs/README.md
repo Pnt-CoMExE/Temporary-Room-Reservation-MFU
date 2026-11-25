@@ -80,7 +80,7 @@ Payment path ปัจจุบัน = **Stripe** (`docs/payment/STRIPE.md`)
 
 | รายการ | เหตุผล |
 |--------|--------|
-| `docs/final project/` · `docs/meetings/` · `docs/proposals/` | ตัดออกจาก repo (2026-11-26) — เล่ม/สคริปต์/proposal เก็บนอก git สำหรับส่ง CITS |
+| `docs/final project/` · `docs/meetings/` · `docs/proposals/` | **ยังมีบนเครื่อง** แต่ใส่ `.gitignore` แล้ว (2026-11-26) — ไม่ push ขึ้น GitHub เพื่อให้ repo เบาสำหรับ CITS |
 | `payment_gateway.md` | ตัดแล้ว — ทีมเลือก **Stripe** ไม่เก็บคู่มือ Opn/SCB/KBank/KTB |
 | `UAT_TEST_SCENARIOS.md` | รวมเข้า `testing/TEST_CASE_TRACKER.md` แล้ว |
 | `testing/UAT_DOCKER_CHECKLIST.md` | stub — อิง `TEST_CASE_TRACKER.md` แทน (รายการค้างเก่าไม่ใช้) |

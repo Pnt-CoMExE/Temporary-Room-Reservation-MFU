@@ -149,6 +149,7 @@ UAT bootstrap               → DEV_ADMIN_EMAILS / DEV_INTERNAL_EMAILS ใน .e
 | Payment | `docs/payment/STRIPE.md` | Stripe (gateway ที่ทีมเลือก) |
 | Testing | `docs/testing/` | Test Case Tracker, UAT, E2E, evidence |
 | Ops | `docs/ops/` | CITS, go-live, backup, security |
+| Local-only (gitignored) | `docs/final project/`, `docs/meetings/`, `docs/proposals/` | เล่ม/สคริปต์/proposal เก็บบนเครื่อง — ไม่ push |
 
 ### โฟลเดอร์ `data/`
 

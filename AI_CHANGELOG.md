@@ -2,10 +2,14 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-26 — Restore local docs folders + gitignore]
+
+- Misread intent: folders were deleted from disk; restored from `53fc5df` to worktree
+- Keep `docs/final project/`, `docs/meetings/`, `docs/proposals/` local-only via `.gitignore` (not on GitHub)
+
 ## [2026-11-26 — Drop final project / meetings / proposals from repo]
 
-- Remove `docs/final project/`, `docs/meetings/`, `docs/proposals/` for CITS-ready slim tree
-- Update `docs/README.md`, `RULES.md`, product audit checklists (เล่มเก็บนอก git)
+- Removed those paths from git tracking for CITS-ready slim tree (should have been gitignore-only)
 
 ## [2026-11-26 — Commit/push all branches + CITS docs refresh]
 
