@@ -26,6 +26,8 @@ const users = ref<UserItem[]>([]);
 const loading = ref(true);
 const searchQuery = ref("");
 const filterRole = ref("all");
+/** Google avatar URLs often 403 without referrerpolicy=no-referrer; track load failures for initials fallback */
+const brokenAvatars = ref<Record<number, boolean>>({});
 
 const fetchUsers = async () => {
   loading.value = true;
@@ -67,7 +69,6 @@ const roleCounts = computed(() => {
     all: users.value.length,
     admin: 0,
     internal: 0,
-    co_op: 0,
     external: 0,
   };
   users.value.forEach((u) => {
@@ -223,7 +224,7 @@ const setAdminRole = async (user: UserItem) => {
         </div>
         <div class="flex gap-1.5 flex-wrap">
           <button
-            v-for="role in ['all', 'admin', 'internal', 'co_op', 'external']"
+            v-for="role in ['all', 'admin', 'internal', 'external']"
             :key="role"
             @click="filterRole = role"
             :class="filterRole === role ? 'ui-chip-active' : 'ui-chip-idle'"
@@ -236,9 +237,7 @@ const setAdminRole = async (user: UserItem) => {
                   ? $t("admin.filter_admin")
                   : role === "internal"
                     ? $t("admin.filter_internal")
-                    : role === "co_op"
-                      ? $t("admin.filter_coop")
-                      : $t("admin.filter_external")
+                    : $t("admin.filter_external")
             }}
             <span class="ml-1 opacity-80">({{ roleCounts[role] || 0 }})</span>
           </button>
@@ -266,17 +265,15 @@ const setAdminRole = async (user: UserItem) => {
 
     <div v-else class="ui-table-card">
       <div class="ui-table-wrap max-h-[70vh] rounded-none border-0 shadow-none">
-        <table class="w-full text-left border-collapse min-w-[800px]">
+        <table class="w-full text-left border-collapse min-w-[640px]">
           <thead>
             <tr
               class="text-[10px] sm:text-xs font-bold text-gray-500 uppercase tracking-wider border-b border-gray-200"
             >
-              <th class="px-4 py-4">{{ $t("admin.col_user") }}</th>
-              <th class="px-4 py-4">{{ $t("admin.col_email") }}</th>
-              <th class="px-4 py-4 text-center">{{ $t("admin.col_type") }}</th>
-              <th class="px-4 py-4 text-center border-l border-gray-100">{{ $t("admin.col_booking_stats") }}</th>
-              <th class="px-4 py-4 text-center border-l border-gray-100">{{ $t("admin.col_account_status") }}</th>
-              <th class="px-4 py-4 text-center border-l border-gray-100">{{ $t("admin.col_actions") }}</th>
+              <th class="px-3 py-3">{{ $t("admin.col_user") }}</th>
+              <th class="px-3 py-3 text-center">{{ $t("admin.col_type") }}</th>
+              <th class="px-3 py-3 text-center">{{ $t("admin.col_booking_stats") }}</th>
+              <th class="px-3 py-3 text-center">{{ $t("admin.col_actions") }}</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100">
@@ -287,46 +284,46 @@ const setAdminRole = async (user: UserItem) => {
               :class="[
                 idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50',
                 'hover:bg-amber-50/80',
-                !user.is_active ? 'opacity-70' : '',
+                !user.is_active ? 'opacity-55' : '',
               ]"
             >
-              <td class="px-4 py-3.5">
-                <div class="flex items-center gap-3">
+              <td class="px-3 py-3">
+                <div class="flex items-center gap-3 min-w-0">
                   <img
-                    v-if="user.profile_picture"
+                    v-if="user.profile_picture && !brokenAvatars[user.id]"
                     :src="user.profile_picture"
-                    class="w-10 h-10 rounded-full object-cover border-2 border-white shadow-sm"
+                    referrerpolicy="no-referrer"
+                    class="w-9 h-9 rounded-full object-cover border-2 border-white shadow-sm shrink-0"
+                    @error="brokenAvatars[user.id] = true"
                   />
                   <div
                     v-else
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-mfu-red to-mfu-red-dark flex items-center justify-center text-white font-black text-sm"
+                    class="w-9 h-9 rounded-full bg-gradient-to-br from-mfu-red to-mfu-red-dark flex items-center justify-center text-white font-black text-xs shrink-0"
                   >
                     {{ user.firstname.charAt(0) }}{{ user.lastname.charAt(0) }}
                   </div>
-                  <div>
-                    <p class="font-bold text-gray-900 text-sm">
+                  <div class="min-w-0">
+                    <p class="font-bold text-gray-900 text-sm truncate">
                       {{ user.firstname }} {{ user.lastname }}
                     </p>
-                    <p class="text-[11px] text-gray-400 font-medium">
+                    <p class="text-[11px] text-gray-500 font-medium truncate">{{ user.email }}</p>
+                    <p class="text-[10px] text-gray-400 font-medium">
                       {{ $t("admin.joined", { date: formatDate(user.created_at) }) }}
                     </p>
                   </div>
                 </div>
               </td>
-              <td class="px-4 py-3.5">
-                <span class="text-sm text-gray-600 font-medium">{{ user.email }}</span>
-              </td>
-              <td class="px-4 py-3.5 text-center">
+              <td class="px-3 py-3 text-center">
                 <span
                   :class="roleBadgeClass[user.user_type] || 'bg-gray-100 text-gray-600 border-gray-200'"
-                  class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-black border"
+                  class="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-black border"
                 >
                   {{ roleLabel(user.user_type) }}
                 </span>
               </td>
-              <td class="px-4 py-3.5 text-center border-l border-gray-100">
+              <td class="px-3 py-3 text-center">
                 <div class="flex flex-col items-center gap-0.5">
-                  <span class="text-base font-black text-gray-900">{{
+                  <span class="text-sm font-black text-gray-900">{{
                     user.total_bookings
                   }}</span>
                   <span class="text-[10px] text-gray-500 font-bold">{{
@@ -337,35 +334,28 @@ const setAdminRole = async (user: UserItem) => {
                   }}</span>
                 </div>
               </td>
-              <td class="px-4 py-3.5 text-center border-l border-gray-100">
-                <span
-                  class="inline-flex px-2.5 py-1 rounded-lg text-[11px] font-black border"
-                  :class="
-                    user.is_active
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-slate-100 text-slate-500 border-slate-200'
-                  "
-                >
-                  {{ user.is_active ? $t("admin.active") : $t("admin.inactive") }}
-                </span>
-              </td>
-              <td class="px-4 py-3.5 text-center border-l border-gray-100">
+              <td class="px-3 py-3 text-center">
                 <div class="flex flex-col gap-1.5 items-center">
                   <button
+                    type="button"
                     @click="toggleActive(user)"
-                    class="px-3 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap border"
+                    class="inline-flex items-center justify-center p-1 rounded-lg transition-transform hover:scale-105 cursor-pointer"
                     :class="
                       user.is_active
-                        ? 'bg-white text-rose-700 border-rose-200 hover:bg-rose-50'
-                        : 'bg-emerald-600 text-white border-emerald-600 hover:bg-emerald-700'
+                        ? 'text-emerald-500'
+                        : 'text-gray-300'
                     "
+                    :title="$t(user.is_active ? 'admin.active' : 'admin.inactive')"
                   >
-                    {{ user.is_active ? $t("admin.disable") : $t("admin.enable") }}
+                    <font-awesome-icon
+                      :icon="user.is_active ? 'toggle-on' : 'toggle-off'"
+                      class="text-3xl"
+                    />
                   </button>
                   <button
                     v-if="user.user_type === 'admin' || canPromoteToAdmin(user.email)"
                     @click="setAdminRole(user)"
-                    class="px-3 py-1.5 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
+                    class="px-2.5 py-1 bg-gray-50 text-gray-600 text-[10px] font-bold rounded-lg hover:bg-gray-100 transition-all cursor-pointer border border-gray-200"
                   >
                     {{
                       user.user_type === "admin"
@@ -375,7 +365,7 @@ const setAdminRole = async (user: UserItem) => {
                   </button>
                   <span
                     v-else
-                    class="px-2 py-1 text-[10px] font-semibold text-gray-400"
+                    class="px-2 py-0.5 text-[10px] font-semibold text-gray-400"
                     :title="$t('admin.not_mfu_email_title')"
                   >
                     {{ $t("admin.not_mfu_email") }}

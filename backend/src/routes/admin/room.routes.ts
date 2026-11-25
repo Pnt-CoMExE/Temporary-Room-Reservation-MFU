@@ -13,6 +13,17 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+/** Canonical room Excel — download template + replaced on each successful import */
+const ROOM_PRICING_TEMPLATE = path.resolve(
+  __dirname,
+  "..",
+  "..",
+  "..",
+  "..",
+  "data",
+  "room-pricing-rates.xlsx"
+);
+
 const storage = multer.diskStorage({
   destination: (_req: any, _file: any, cb: any) => cb(null, uploadsDir),
   filename: (_req: any, file: any, cb: any) => {
@@ -134,6 +145,34 @@ router.post(
   }
 );
 
+// GET /api/admin/rooms/import-template — latest saved room-pricing Excel
+router.get(
+  "/import-template",
+  verifyToken,
+  verifyAdmin,
+  async (_req: any, res: Response) => {
+    try {
+      if (!fs.existsSync(ROOM_PRICING_TEMPLATE)) {
+        return res.status(404).json({
+          message: "ไม่พบไฟล์เทมเพลต data/room-pricing-rates.xlsx",
+        });
+      }
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      res.setHeader(
+        "Content-Disposition",
+        'attachment; filename="room-pricing-rates.xlsx"'
+      );
+      fs.createReadStream(ROOM_PRICING_TEMPLATE).pipe(res);
+    } catch (err) {
+      console.error("[admin/rooms/import-template] Error:", err);
+      res.status(500).json({ message: "ดาวน์โหลดเทมเพลตไม่สำเร็จ" });
+    }
+  }
+);
+
 // POST /api/admin/rooms/import — import rooms from Excel
 router.post(
   "/import",
@@ -147,10 +186,18 @@ router.post(
 
     try {
       const result = await importRoomsFromExcelFileDetailed(req.file.path);
+
+      // Keep data/room-pricing-rates.xlsx as the latest import (download template)
+      const dataDir = path.dirname(ROOM_PRICING_TEMPLATE);
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true });
+      }
+      fs.copyFileSync(req.file.path, ROOM_PRICING_TEMPLATE);
+
       res.json({
         message:
           result.pruned > 0
-            ? `นำเข้าข้อมูลสำเร็จ ${result.imported} รายการ และลบห้องที่ไม่ได้อยู่ในไฟล์ ${result.pruned} รายการ`
+            ? `นำเข้าข้อมูลสำเร็จ ${result.imported} รายการ และปิดการให้บริการห้องที่ไม่ได้อยู่ในไฟล์ ${result.pruned} รายการ (ประวัติการจองยังอยู่)`
             : `นำเข้าข้อมูลสำเร็จทั้งหมด ${result.imported} รายการ (จากทุก Sheet)`,
         count: result.imported,
         pruned: result.pruned,

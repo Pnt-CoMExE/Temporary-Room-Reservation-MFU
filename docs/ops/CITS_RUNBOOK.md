@@ -87,9 +87,23 @@ psql -h localhost -p 5433 -U mfu_admin -d mfu_reservation -v ON_ERROR_STOP=1 -f 
 
 รายละเอียด backup/restore ทั่วไป: [`BACKUP_RESTORE.md`](./BACKUP_RESTORE.md)
 
+## ฟีเจอร์สำคัญที่ CITS / ส่วนทรัพย์สินควรรู้ (อัปเดต 2026-11-26)
+
+| หัวข้อ | รายละเอียด |
+|--------|------------|
+| **อนุมัติ + เรท** | แอดมินเลือกเรท internal / co-op / external ครั้งเดียวตอนอนุมัติ |
+| **ยกเว้นค่าธรรมเนียม** | ตัวเลือกล่างสุดในรายการเรท → สถานะ `approved_waived` · ยอด 0 · อีเมลแจ้ง · **ไม่** ผ่าน Stripe |
+| **ราคา snapshot** | `bookings.room_price` / `addons_price` / `total_price` ไม่ถูกทับเมื่อแก้ราคาห้องหรือ Import Excel |
+| **Import ห้อง** | Excel ตามรูปแบบ `data/room-pricing-rates.xlsx` · สำเร็จแล้วระบบเขียนทับไฟล์นี้ · ปุ่มดาวน์โหลดเทมเพลต = ไฟล์ล่าสุด · ห้องที่หายจากไฟล์จะถูก **ปิด** (`is_active=false`) ไม่ลบประวัติจอง |
+| **Export รายงาน** | Admin Dashboard → **Export Excel** ตาม filter วันที่ (`GET /api/admin/stats/export.xlsx`) |
+| **Cron สถานะ** | `approved_paid` **และ** `approved_waived` เลยวันใช้งาน → `completed` |
+
+เอกสาร product ที่เกี่ยวข้อง: [`../product/FINAL_PRESENT_FEEDBACK_CHECKLIST.md`](../product/FINAL_PRESENT_FEEDBACK_CHECKLIST.md)
+
 ## หมายเหตุ
 
 - **Payment (UAT / acceptance):** `PAYMENT_PROVIDER=stripe` + `STRIPE_SECRET_KEY=sk_test_…` — ดู [`../payment/STRIPE.md`](../payment/STRIPE.md). `mock_sandbox` / PromptPay ยังมีในโค้ดแต่ไม่ใช่เส้นทางหลัก
 - **Payment (production):** Stripe live (`sk_live_` + HTTPS + webhook) ตาม `STRIPE.md`
 - **Email:** ตั้ง `SMTP_*` เมื่อได้เมลเซิร์ฟเวอร์จาก มฟล. (UAT มักใช้พอร์ต **465**)
 - **Admin UAT / bootstrap:** ตั้ง `DEV_ADMIN_EMAILS` แล้ว login — จากนั้น promote คนอื่นใน Admin Users (ไม่ใช้ auto-admin จากโดเมน). **ปิด** `DEV_*` / `RATE_LIMIT_DISABLED` บนเซิร์ฟจริง
+- **Branch ส่งมอบหลัก:** `master` (mirror กับ `dev` หลัง sync). Evidence แยกทีม: `ForCCC` / `ForJJ` / `ForParttime`

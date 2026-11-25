@@ -4,7 +4,7 @@
  * Rules:
  * 1) approved_pending_payment + booking_date < today → ยกเลิกแล้ว (หมดเวลาชำระ)
  * 2) pending + booking_date < today → ยกเลิกแล้ว (ไม่ได้อนุมัติทันวันใช้งาน)
- * 3) approved_paid + เลยวัน/เวลาใช้งานแล้ว → completed (สำเร็จแล้ว)
+ * 3) approved_paid / approved_waived + เลยวัน/เวลาใช้งานแล้ว → completed (สำเร็จแล้ว)
  *
  * Usage:
  *   cd backend && npx tsx scripts/auto-update-booking-status.ts
@@ -33,12 +33,12 @@ async function run() {
      RETURNING id, booking_no`
   );
 
-  // ชำระเงินแล้ว + เลยวัน/เวลาใช้งาน → สำเร็จแล้ว
+  // ชำระเงินแล้ว / ยกเว้นค่าธรรมเนียม + เลยวัน/เวลาใช้งาน → สำเร็จแล้ว
   const completed = await query(
     `UPDATE bookings
      SET status = 'completed',
          updated_at = NOW()
-     WHERE status = 'approved_paid'
+     WHERE status IN ('approved_paid', 'approved_waived')
        AND (
          booking_date::date < CURRENT_DATE
          OR (
