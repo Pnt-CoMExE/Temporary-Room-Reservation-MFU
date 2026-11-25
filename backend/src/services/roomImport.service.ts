@@ -224,20 +224,21 @@ export async function importRoomsToDatabase(
       );
     }
 
-    // Prune rooms not present in this upload (Excel = source of truth)
+    // Rooms missing from this upload: deactivate only — never delete bookings
+    // (G4: historical bookings keep room_price / total_price snapshots)
     const stale = await client.query(
       `SELECT id FROM rooms
-       WHERE NOT (name = ANY($1::text[]))`,
+       WHERE NOT (name = ANY($1::text[]))
+         AND COALESCE(is_active, TRUE) = TRUE`,
       [keepNames]
     );
     const staleIds = stale.rows.map((r: { id: number }) => r.id);
     let pruned = 0;
     if (staleIds.length > 0) {
-      // bookings.room_id has no ON DELETE CASCADE — clear dependents first
-      await client.query(`DELETE FROM bookings WHERE room_id = ANY($1::int[])`, [
-        staleIds,
-      ]);
-      await client.query(`DELETE FROM rooms WHERE id = ANY($1::int[])`, [staleIds]);
+      await client.query(
+        `UPDATE rooms SET is_active = FALSE WHERE id = ANY($1::int[])`,
+        [staleIds]
+      );
       pruned = staleIds.length;
     }
 

@@ -33,6 +33,10 @@
 | [`product/schema.md`](./product/schema.md) | โครง DB |
 | [`product/THESIS_CHAPTERS_CHECKLIST.md`](./product/THESIS_CHAPTERS_CHECKLIST.md) | Checklist บท 3–5 (สอบ) |
 | [`product/CHAPTER_4_AND_5.md`](./product/CHAPTER_4_AND_5.md) | ร่างภาษาอังกฤษ Chapter 4 Experiment and Result และ Chapter 5 Conclusion and Discussion สำหรับวางในเล่ม |
+| [`product/ADVISOR_REPORT_FIX_CHECKLIST.md`](./product/ADVISOR_REPORT_FIX_CHECKLIST.md) | Checklist แก้เล่มตามข้อติอาจารย์ 19 พ.ย. 2026 (References, Figure 3.1, อธิบายรูป Ch.3) |
+| [`product/FINAL_PRESENT_FEEDBACK_CHECKLIST.md`](./product/FINAL_PRESENT_FEEDBACK_CHECKLIST.md) | Checklist ข้อติ Final Present (อ.แพท / อ.ต้อง / อ.โก) — เล่ม + ฟีเจอร์ + UX |
+| [`product/REPORT_FORMAT_AUDIT.md`](./product/REPORT_FORMAT_AUDIT.md) | ตรวจฟอร์แมตเล่มภาษาอังกฤษทั้งฉบับ (จัดย่อหน้า, เลขหัวข้อ, ภาษานำรูป, GitHub) |
+| [`product/REPORT_PDF_AUDIT.md`](./product/REPORT_PDF_AUDIT.md) | ตรวจ `final project.pdf` ละเอียด (เลขหน้า, สารบัญ, รูป 4.1–4.15, จุดค้างแก้) |
 
 ---
 

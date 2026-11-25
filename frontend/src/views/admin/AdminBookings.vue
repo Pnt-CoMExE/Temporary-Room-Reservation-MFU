@@ -548,10 +548,18 @@ const openApproveConfirm = (id: string) => {
 
         <div>
           <p class="text-sm font-extrabold text-gray-800 mb-2">${t("admin.select_rate")} <span class="text-xs font-medium text-gray-400">(${t("admin.according_to_approval")})</span></p>
-          <div class="grid grid-cols-1 gap-2">
+          <div class="grid grid-cols-1 gap-2" id="approve-rate-cards">
             ${rateCard("internal", t("admin.org_internal"), priceInternal, currentOrg === "internal")}
             ${rateCard("co_op", t("admin.org_coop"), priceCoop, currentOrg === "co_op")}
             ${rateCard("external", t("admin.org_external"), priceExternal, currentOrg === "external")}
+            <label class="flex items-start gap-3 p-3 rounded-2xl border cursor-pointer transition-colors has-[:checked]:border-indigo-400 has-[:checked]:bg-indigo-50/70 border-gray-200 bg-white hover:border-gray-300">
+              <input type="radio" name="org-rate" value="waive" class="mt-1 accent-indigo-600" />
+              <span class="min-w-0 flex-1">
+                <span class="block text-sm font-extrabold text-gray-900">${t("admin.fee_waive")}</span>
+                <span class="block text-xs text-gray-500 mt-0.5">${t("admin.fee_waive_hint")}</span>
+                <span class="block text-sm font-black text-indigo-700 mt-1 tabular-nums">${t("admin.estimated_total", { amount: "0" })}</span>
+              </span>
+            </label>
           </div>
           <p class="text-[11px] text-amber-800 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 mt-2 font-medium">
             ${t("admin.rate_once_hint")}
@@ -585,7 +593,7 @@ const openApproveConfirm = (id: string) => {
       title: "w-full p-0 mb-3",
       htmlContainer: "m-0 overflow-visible",
       confirmButton:
-        "rounded-xl px-6 py-3 font-bold bg-emerald-600 hover:bg-emerald-700 cursor-pointer",
+        "rounded-xl px-6 py-3 font-bold bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer",
       cancelButton:
         "rounded-xl px-6 py-3 font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer",
       actions: "gap-2 mt-4",
@@ -614,7 +622,10 @@ const openApproveConfirm = (id: string) => {
         Swal.showValidationMessage(t("admin.rate_required"));
         return false;
       }
-      return selected;
+      if (selected === "waive") {
+        return { org: currentOrg, feeMode: "waive" };
+      }
+      return { org: selected, feeMode: "charge" };
     },
   })).then((result) => {
     if (approvalPreviewUrl.startsWith("blob:")) {
@@ -625,9 +636,11 @@ const openApproveConfirm = (id: string) => {
       }
     }
     if (!result.isConfirmed || !result.value) return;
-    const org = String(result.value);
+    const { org, feeMode } = result.value as { org: string; feeMode: string };
+    const nextStatus =
+      feeMode === "waive" ? "approved_waived" : "approved_pending_payment";
     // Backend บันทึก activity log เดียว (สถานะ + เรท) — ไม่ยิง saveLog ซ้ำจาก frontend
-    updateBookingStatus(id, "approved_pending_payment", "", org);
+    updateBookingStatus(id, nextStatus, "", org);
   });
 };
 
@@ -962,7 +975,7 @@ const viewBookingHistory = async (booking: BookingItem) => {
                   <div v-else class="flex flex-col items-center gap-2">
                     <BookingStatusBadge :status="booking.status" size="md" />
 
-                    <template v-if="isBookingStatus(booking.status, 'approved_paid') || isBookingStatus(booking.status, 'completed')">
+                    <template v-if="isBookingStatus(booking.status, 'approved_paid') || isBookingStatus(booking.status, 'approved_waived') || isBookingStatus(booking.status, 'completed')">
                       <button
                         v-if="booking.hasFeedback"
                         type="button"

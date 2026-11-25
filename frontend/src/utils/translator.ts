@@ -277,6 +277,7 @@ export function translateStatus(status: string | undefined | null, locale: strin
     "pending": "Pending Approval",
     "approved_pending_payment": "Awaiting Payment",
     "approved_paid": "Payment completed",
+    "approved_waived": "Fee waived",
     "completed": "Completed",
     "disapproved": "Disapproved",
   };

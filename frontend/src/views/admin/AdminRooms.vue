@@ -58,6 +58,29 @@ const fetchRooms = async () => {
 
 onMounted(() => fetchRooms());
 
+const downloadImportTemplate = async () => {
+  try {
+    const res = await api.get("/api/admin/rooms/import-template", {
+      responseType: "blob",
+    });
+    const url = URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "room-pricing-rates.xlsx";
+    a.click();
+    URL.revokeObjectURL(url);
+    saveLog("ดาวน์โหลดเทมเพลต Import ห้อง", "room-pricing-rates.xlsx");
+  } catch (err: any) {
+    Swal.fire(
+      withSwalTheme({
+        icon: "error",
+        title: t("admin.error"),
+        text: err?.response?.data?.message || t("admin.swal_template_fail"),
+      })
+    );
+  }
+};
+
 // ==========================================
 // ➕ ฟังก์ชันเพิ่มห้องใหม่ (Import Excel)
 // ==========================================
@@ -337,12 +360,21 @@ const handleEditRoom = (room: RoomItem) => {
           {{ $t("admin.rooms_subtitle") }}
         </p>
       </div>
-      <button
-        @click="handleAddNewRoom"
-        class="ui-btn-primary w-full sm:w-auto"
-      >
-        <font-awesome-icon icon="file-import" /> {{ $t("admin.import_rooms") }}
-      </button>
+      <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <a
+          href="/api/admin/rooms/import-template"
+          class="ui-btn-secondary w-full sm:w-auto inline-flex items-center justify-center gap-2"
+          @click.prevent="downloadImportTemplate"
+        >
+          <font-awesome-icon icon="file-download" /> {{ $t("admin.download_import_template") }}
+        </a>
+        <button
+          @click="handleAddNewRoom"
+          class="ui-btn-primary w-full sm:w-auto"
+        >
+          <font-awesome-icon icon="file-import" /> {{ $t("admin.import_rooms") }}
+        </button>
+      </div>
     </div>
 
     <!-- Table -->

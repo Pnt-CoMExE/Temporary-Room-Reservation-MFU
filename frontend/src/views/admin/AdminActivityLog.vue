@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import api from "@/services/api";
 
 interface LogItem {
@@ -10,8 +10,10 @@ interface LogItem {
   details: string;
 }
 
-// ข้อมูล Log จาก Database
 const logs = ref<LogItem[]>([]);
+const searchQuery = ref("");
+const page = ref(1);
+const pageSize = 20;
 
 onMounted(async () => {
   try {
@@ -31,36 +33,73 @@ onMounted(async () => {
       })(),
       adminName: log.admin_name,
       action: log.action,
-      details: log.details
+      details: log.details,
     }));
   } catch (err) {
     console.error("Error fetching logs:", err);
   }
 });
 
+const filteredLogs = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase();
+  if (!q) return logs.value;
+  return logs.value.filter(
+    (log) =>
+      log.action.toLowerCase().includes(q) ||
+      String(log.details || "")
+        .toLowerCase()
+        .includes(q) ||
+      String(log.adminName || "")
+        .toLowerCase()
+        .includes(q) ||
+      log.timestamp.toLowerCase().includes(q)
+  );
+});
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredLogs.value.length / pageSize))
+);
+
+const pagedLogs = computed(() => {
+  const start = (page.value - 1) * pageSize;
+  return filteredLogs.value.slice(start, start + pageSize);
+});
+
+const onSearch = () => {
+  page.value = 1;
+};
+
+const goPage = (p: number) => {
+  page.value = Math.min(totalPages.value, Math.max(1, p));
+};
+
 const getIcon = (action: string) => {
+  if (action.includes("ยกเว้น") || action.includes("waive"))
+    return { icon: ["fas", "gift"], color: "text-indigo-500", bg: "bg-indigo-50" };
   if (action.includes("อนุมัติ"))
-    return { icon: ['fas', 'check-circle'], color: 'text-green-500', bg: 'bg-green-50' };
+    return { icon: ["fas", "check-circle"], color: "text-green-500", bg: "bg-green-50" };
   if (action.includes("ปฏิเสธ"))
-    return { icon: ['fas', 'times-circle'], color: 'text-red-500', bg: 'bg-red-50' };
-  if (action.includes("ชำระเงิน")) return { icon: ['fas', 'coins'], color: 'text-blue-500', bg: 'bg-blue-50' };
+    return { icon: ["fas", "times-circle"], color: "text-red-500", bg: "bg-red-50" };
+  if (action.includes("ชำระเงิน"))
+    return { icon: ["fas", "wallet"], color: "text-blue-500", bg: "bg-blue-50" };
+  if (action.includes("Import") || action.includes("นำเข้า"))
+    return { icon: ["fas", "file-import"], color: "text-purple-500", bg: "bg-purple-50" };
   if (
     action.includes("เอกสาร") ||
     action.includes("โหลด") ||
     action.includes("แนบ") ||
-    action.includes("Import") ||
     action.includes("Export") ||
     action.includes("ส่งออก")
   )
-    return { icon: ['fas', 'file-alt'], color: 'text-purple-500', bg: 'bg-purple-50' };
-  if (action.includes("ห้อง") || action.includes("พื้นที่") || action.includes("บริการ"))    return { icon: ['fas', 'building'], color: 'text-orange-500', bg: 'bg-orange-50' };
-  return { icon: ['fas', 'info-circle'], color: 'text-gray-500', bg: 'bg-gray-50' };
+    return { icon: ["fas", "file-download"], color: "text-purple-500", bg: "bg-purple-50" };
+  if (action.includes("ห้อง") || action.includes("พื้นที่") || action.includes("บริการ"))
+    return { icon: ["fas", "building"], color: "text-orange-500", bg: "bg-orange-50" };
+  return { icon: ["fas", "info-circle"], color: "text-gray-500", bg: "bg-gray-50" };
 };
 </script>
 
 <template>
   <div class="space-y-6 animate-fade-up">
-    <!-- Header -->
     <div class="ui-card ui-admin-header p-6">
       <div>
         <h2
@@ -75,13 +114,35 @@ const getIcon = (action: string) => {
       </div>
     </div>
 
-    <!-- รายการ Activity Log -->
-    <!-- ✨ เพิ่ม max-h-[65vh] และ overflow-y-auto พร้อม custom-scrollbar เพื่อให้เลื่อนได้ -->
+    <div class="bg-white p-4 rounded-2xl shadow-card border border-gray-200">
+      <div class="relative">
+        <FontAwesomeIcon
+          :icon="['fas', 'search']"
+          class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+        />
+        <input
+          v-model="searchQuery"
+          type="search"
+          :placeholder="$t('admin.logs_search_placeholder')"
+          class="ui-input pl-10"
+          @input="onSearch"
+        />
+      </div>
+      <p class="text-xs text-gray-400 font-medium mt-2">
+        {{
+          $t("admin.logs_result_count", {
+            shown: pagedLogs.length,
+            total: filteredLogs.length,
+          })
+        }}
+      </p>
+    </div>
+
     <div
       class="bg-white rounded-3xl shadow-card border border-gray-200 p-6 max-h-[65vh] overflow-y-auto custom-scrollbar"
     >
       <div
-        v-if="logs.length === 0"
+        v-if="filteredLogs.length === 0"
         class="text-center py-12 text-gray-400 font-bold"
       >
         <div
@@ -94,7 +155,7 @@ const getIcon = (action: string) => {
 
       <div v-else class="space-y-4">
         <div
-          v-for="log in logs"
+          v-for="log in pagedLogs"
           :key="log.id"
           class="flex items-start gap-4 p-4 rounded-2xl hover:bg-gray-50 border border-transparent hover:border-gray-100 transition-colors"
         >
@@ -104,7 +165,7 @@ const getIcon = (action: string) => {
             <FontAwesomeIcon :icon="getIcon(log.action).icon" :class="getIcon(log.action).color" />
           </div>
 
-          <div class="flex-1">
+          <div class="flex-1 min-w-0">
             <div
               class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 mb-1"
             >
@@ -117,7 +178,7 @@ const getIcon = (action: string) => {
                 <FontAwesomeIcon :icon="['far', 'clock']" class="mr-1" /> {{ log.timestamp }}
               </span>
             </div>
-            <p class="text-sm text-gray-600 font-medium">{{ log.details }}</p>
+            <p class="text-sm text-gray-600 font-medium break-words">{{ log.details }}</p>
 
             <p
               class="text-[11px] text-gray-500 font-bold mt-2 uppercase tracking-widest flex items-center gap-1.5"
@@ -130,11 +191,35 @@ const getIcon = (action: string) => {
         </div>
       </div>
     </div>
+
+    <div
+      v-if="filteredLogs.length > pageSize"
+      class="flex items-center justify-center gap-2"
+    >
+      <button
+        type="button"
+        class="ui-chip ui-chip-idle cursor-pointer disabled:opacity-40"
+        :disabled="page <= 1"
+        @click="goPage(page - 1)"
+      >
+        {{ $t("admin.logs_prev") }}
+      </button>
+      <span class="text-sm font-bold text-gray-600 px-2">
+        {{ $t("admin.logs_page", { page, total: totalPages }) }}
+      </span>
+      <button
+        type="button"
+        class="ui-chip ui-chip-idle cursor-pointer disabled:opacity-40"
+        :disabled="page >= totalPages"
+        @click="goPage(page + 1)"
+      >
+        {{ $t("admin.logs_next") }}
+      </button>
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* ✨ ตกแต่ง Scrollbar ให้ดูเล็กและสวยงามเข้ากับ UI */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
