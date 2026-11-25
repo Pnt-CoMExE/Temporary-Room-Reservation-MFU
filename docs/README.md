@@ -16,7 +16,6 @@
 | **ผลิตภัณฑ์ / ขอบเขต** | [`product/`](./product/) | requirements, ฟีเจอร์, แผน sprint, schema |
 | **ชำระเงิน** | [`payment/`](./payment/) | **Stripe เท่านั้น** (ตัดสินใจแล้ว) |
 | **ทดสอบ** | [`testing/`](./testing/) | Test Case, แผนเทส, UAT, E2E, หลักฐาน |
-| **ประชุม / Demo** | [`meetings/`](./meetings/) | Recording 3–5, สคริปต์นำเสนอ, demo security |
 | **ปฏิบัติการ / Deploy** | [`ops/`](./ops/) | CITS, go-live, backup, security checklist |
 
 กฎ AI / ทีม: [`../RULES.md`](../RULES.md) · Changelog: [`../AI_CHANGELOG.md`](../AI_CHANGELOG.md)
@@ -36,7 +35,7 @@
 | [`product/ADVISOR_REPORT_FIX_CHECKLIST.md`](./product/ADVISOR_REPORT_FIX_CHECKLIST.md) | Checklist แก้เล่มตามข้อติอาจารย์ 19 พ.ย. 2026 (References, Figure 3.1, อธิบายรูป Ch.3) |
 | [`product/FINAL_PRESENT_FEEDBACK_CHECKLIST.md`](./product/FINAL_PRESENT_FEEDBACK_CHECKLIST.md) | Checklist ข้อติ Final Present (อ.แพท / อ.ต้อง / อ.โก) — เล่ม + ฟีเจอร์ + UX |
 | [`product/REPORT_FORMAT_AUDIT.md`](./product/REPORT_FORMAT_AUDIT.md) | ตรวจฟอร์แมตเล่มภาษาอังกฤษทั้งฉบับ (จัดย่อหน้า, เลขหัวข้อ, ภาษานำรูป, GitHub) |
-| [`product/REPORT_PDF_AUDIT.md`](./product/REPORT_PDF_AUDIT.md) | ตรวจ `final project.pdf` ละเอียด (เลขหน้า, สารบัญ, รูป 4.1–4.15, จุดค้างแก้) |
+| [`product/REPORT_PDF_AUDIT.md`](./product/REPORT_PDF_AUDIT.md) | บันทึกตรวจ PDF เล่ม (เลขหน้า, สารบัญ, รูป) — ไฟล์เล่มเก็บนอก repo |
 
 ---
 
@@ -65,20 +64,7 @@ Payment path ปัจจุบัน = **Stripe** (`docs/payment/STRIPE.md`)
 
 ---
 
-## 4) Meetings — ประชุม / Demo
-
-| ไฟล์ | คำอธิบาย |
-|------|----------|
-| [`meetings/RECORDING5_ACTION_PLAN.md`](./meetings/RECORDING5_ACTION_PLAN.md) | แผน Recording 5 (UI / Promo / Excel TC / เอกสารสอบ) |
-| [`meetings/RECORDING4_ACTION_PLAN.md`](./meetings/RECORDING4_ACTION_PLAN.md) | แผน Recording 4 (Test Case / Coop / Stripe) |
-| [`meetings/RECORDING3_ACTION_PLAN.md`](./meetings/RECORDING3_ACTION_PLAN.md) | แผน Recording 3 |
-| [`meetings/PRESENTATION_SCRIPT_POST_FRIDAY.md`](./meetings/PRESENTATION_SCRIPT_POST_FRIDAY.md) | สคริปต์นำเสนอ 4 คน |
-| [`meetings/FRIDAY_DEMO_PREP.md`](./meetings/FRIDAY_DEMO_PREP.md) | เตรียม Demo |
-| [`meetings/DEMO_SECURITY.md`](./meetings/DEMO_SECURITY.md) | อธิบาย AuthN / AuthZ |
-
----
-
-## 5) Ops — Deploy / Security
+## 4) Ops — Deploy / Security
 
 | ไฟล์ | คำอธิบาย |
 |------|----------|
@@ -94,6 +80,7 @@ Payment path ปัจจุบัน = **Stripe** (`docs/payment/STRIPE.md`)
 
 | รายการ | เหตุผล |
 |--------|--------|
+| `docs/final project/` · `docs/meetings/` · `docs/proposals/` | ตัดออกจาก repo (2026-11-26) — เล่ม/สคริปต์/proposal เก็บนอก git สำหรับส่ง CITS |
 | `payment_gateway.md` | ตัดแล้ว — ทีมเลือก **Stripe** ไม่เก็บคู่มือ Opn/SCB/KBank/KTB |
 | `UAT_TEST_SCENARIOS.md` | รวมเข้า `testing/TEST_CASE_TRACKER.md` แล้ว |
 | `testing/UAT_DOCKER_CHECKLIST.md` | stub — อิง `TEST_CASE_TRACKER.md` แทน (รายการค้างเก่าไม่ใช้) |
