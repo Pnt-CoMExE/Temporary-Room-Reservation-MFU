@@ -30,6 +30,11 @@ backend/uploads/
 backend/backups/
 uploads/
 
+# ─── Large / local-only docs (keep on disk, do not push) ───
+docs/final project/
+docs/meetings/
+docs/proposals/
+
 # ─── OS files ─────────────────────────────
 .DS_Store
 Thumbs.db
