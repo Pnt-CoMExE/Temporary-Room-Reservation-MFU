@@ -447,12 +447,13 @@ describe("validateBookingStatus", () => {
   it("ผ่านเมื่อ status เป็นค่าที่ถูกต้อง", async () => {
     expect(await test({ id: "1" }, { status: "approved" })).toBe(200);
     expect(await test({ id: "1" }, { status: "approved_paid" })).toBe(200);
+    expect(await test({ id: "1" }, { status: "approved_waived" })).toBe(200);
+    expect(await test({ id: "1" }, { status: "cancelled" })).toBe(200);
     expect(await test({ id: "1" }, { status: "disapproved" })).toBe(200);
     expect(await test({ id: "1" }, { status: "pending" })).toBe(200);
   });
 
   it("ไม่ผ่านเมื่อ status ไม่ถูกต้อง", async () => {
-    expect(await test({ id: "1" }, { status: "cancelled" })).toBe(400);
     expect(await test({ id: "1" }, { status: "unknown" })).toBe(400);
   });
 

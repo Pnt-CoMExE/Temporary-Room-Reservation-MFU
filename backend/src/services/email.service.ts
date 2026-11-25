@@ -32,6 +32,7 @@ const APPROVED_STATUSES = new Set([
   "approved",
   "approved_pending_payment",
   "approved_paid",
+  "approved_waived",
   "pending_verification",
   "completed",
 ]);
@@ -88,6 +89,14 @@ function statusLabelForEmail(status: string): {
     return {
       textTh: "อนุมัติแล้ว — ชำระเงินแล้ว",
       textEn: "Approved — paid",
+      color: "#16a34a",
+      approved: true,
+    };
+  }
+  if (s === "approved_waived") {
+    return {
+      textTh: "อนุมัติแล้ว — ยกเว้นค่าธรรมเนียม",
+      textEn: "Approved — fee waived",
       color: "#16a34a",
       approved: true,
     };
@@ -279,14 +288,18 @@ export async function sendBookingStatusEmail(
   }
 
   const nextStepEn = approved
-    ? status === "approved_pending_payment" || status === "approved"
-      ? `<p>You can sign in to your dashboard to pay the service fee.</p>`
-      : ""
+    ? status === "approved_waived"
+      ? `<p>The service fee for this booking has been waived. No payment is required. You can sign in to your dashboard to view the booking details.</p>`
+      : status === "approved_pending_payment" || status === "approved"
+        ? `<p>You can sign in to your dashboard to pay the service fee.</p>`
+        : ""
     : `<p>If you have questions, please contact MFU Property Management.</p>`;
   const nextStepTh = approved
-    ? status === "approved_pending_payment" || status === "approved"
-      ? `<p>คุณสามารถเข้าสู่ระบบที่แดชบอร์ดเพื่อชำระเงินค่าบริการได้</p>`
-      : ""
+    ? status === "approved_waived"
+      ? `<p>คำขอนี้ได้รับการยกเว้นค่าธรรมเนียม ไม่ต้องชำระเงิน คุณสามารถเข้าสู่ระบบที่แดชบอร์ดเพื่อดูรายละเอียดการจองได้</p>`
+      : status === "approved_pending_payment" || status === "approved"
+        ? `<p>คุณสามารถเข้าสู่ระบบที่แดชบอร์ดเพื่อชำระเงินค่าบริการได้</p>`
+        : ""
     : `<p>หากมีข้อสงสัย กรุณาติดต่อเจ้าหน้าที่บริหารจัดการทรัพย์สิน มฟล.</p>`;
 
   const html = emailShell(`

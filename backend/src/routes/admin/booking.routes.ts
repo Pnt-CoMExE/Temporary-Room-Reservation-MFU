@@ -13,9 +13,11 @@ const STATUS_LABEL_TH: Record<string, string> = {
   pending: "รออนุมัติ",
   approved_pending_payment: "รอชำระเงิน",
   approved_paid: "ชำระเงินแล้ว",
+  approved_waived: "อนุมัติแล้ว — ยกเว้นค่าธรรมเนียม",
   completed: "สำเร็จแล้ว",
   disapproved: "ไม่อนุมัติ",
   ยกเลิกแล้ว: "ยกเลิกแล้ว",
+  cancelled: "ยกเลิกแล้ว",
   approved: "อนุมัติแล้ว",
 };
 
@@ -142,7 +144,10 @@ router.put(
       const previous = prevRes.rows[0];
       const previousStatus = String(previous.status || "");
       const isApproveStatus =
-        status === "approved_pending_payment" || status === "approved";
+        status === "approved_pending_payment" ||
+        status === "approved" ||
+        status === "approved_waived";
+      const isWaive = status === "approved_waived";
 
       // อนุมัติต้องมีใบอนุมัติ (อัปโหลดรอบนี้ หรือมีในระบบแล้ว)
       if (isApproveStatus) {
@@ -176,6 +181,7 @@ router.put(
       let nextOrg = previous.organization_type;
       let nextRoomPrice = Number(previous.room_price || 0);
       let nextTotal = Number(previous.total_price || 0);
+      let nextAddons = Number(previous.addons_price || 0);
 
       if (organizationType && isApproveStatus) {
         const pricingRes = await query(
@@ -193,12 +199,19 @@ router.put(
         const oldRoomPrice = Number(previous.room_price || 0);
         const oldOrg = String(previous.organization_type || "");
         nextOrg = organizationType;
-        nextRoomPrice = newRoomPrice;
-        nextTotal = Number(previous.total_price || 0) - oldRoomPrice + newRoomPrice;
-        if (nextTotal < 0) nextTotal = newRoomPrice + Number(previous.addons_price || 0);
-
-        if (oldOrg !== organizationType || oldRoomPrice !== newRoomPrice) {
-          rateLog = ` | เรท: ${oldOrg || "-"}→${organizationType} | ราคาห้อง: ${oldRoomPrice}→${newRoomPrice} | รวม: ${previous.total_price}→${nextTotal}`;
+        if (isWaive) {
+          // Snapshot org type for audit; amounts cleared — no Stripe
+          nextRoomPrice = 0;
+          nextAddons = 0;
+          nextTotal = 0;
+          rateLog = ` | เรทอ้างอิง: ${organizationType} (ลิสต์ ${newRoomPrice}) | ยกเว้นค่าธรรมเนียม → รวม 0`;
+        } else {
+          nextRoomPrice = newRoomPrice;
+          nextTotal = Number(previous.total_price || 0) - oldRoomPrice + newRoomPrice;
+          if (nextTotal < 0) nextTotal = newRoomPrice + Number(previous.addons_price || 0);
+          if (oldOrg !== organizationType || oldRoomPrice !== newRoomPrice) {
+            rateLog = ` | เรท: ${oldOrg || "-"}→${organizationType} | ราคาห้อง: ${oldRoomPrice}→${newRoomPrice} | รวม: ${previous.total_price}→${nextTotal}`;
+          }
         }
       }
 
@@ -206,17 +219,36 @@ router.put(
         await query(
           `UPDATE bookings SET status = $1, remarks = $2, approved_by = $3,
            approved_at = NOW(), approval_document_url = $4,
-           organization_type = $5, room_price = $6, total_price = $7
-           WHERE id = $8`,
-          [status, remarks, resolvedAdminId, documentUrl, nextOrg, nextRoomPrice, nextTotal, id]
+           organization_type = $5, room_price = $6, addons_price = $7, total_price = $8
+           WHERE id = $9`,
+          [
+            status,
+            remarks,
+            resolvedAdminId,
+            documentUrl,
+            nextOrg,
+            nextRoomPrice,
+            nextAddons,
+            nextTotal,
+            id,
+          ]
         );
       } else {
         await query(
           `UPDATE bookings SET status = $1, remarks = $2, approved_by = $3,
            approved_at = NOW(),
-           organization_type = $4, room_price = $5, total_price = $6
-           WHERE id = $7`,
-          [status, remarks, resolvedAdminId, nextOrg, nextRoomPrice, nextTotal, id]
+           organization_type = $4, room_price = $5, addons_price = $6, total_price = $7
+           WHERE id = $8`,
+          [
+            status,
+            remarks,
+            resolvedAdminId,
+            nextOrg,
+            nextRoomPrice,
+            nextAddons,
+            nextTotal,
+            id,
+          ]
         );
       }
 

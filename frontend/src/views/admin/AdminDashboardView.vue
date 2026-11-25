@@ -214,6 +214,37 @@ const setFilterMode = async (mode: typeof filterMode.value) => {
   if (filterReady.value) await fetchAdminData();
 };
 
+const exportReportExcel = async () => {
+  try {
+    const range = resolveFilterRange();
+    const params: Record<string, string> = {};
+    if (range.scopeAll) params.scope = "all";
+    else if (range.from && range.to) {
+      params.from = range.from;
+      params.to = range.to;
+    }
+    const res = await api.get("/api/admin/stats/export.xlsx", {
+      params,
+      responseType: "blob",
+    });
+    const url = URL.createObjectURL(res.data);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `mfu-booking-report-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error("Export failed:", err);
+    Swal.fire(
+      withSwalTheme({
+        icon: "error",
+        title: t("admin.error"),
+        text: t("admin.export_excel_fail"),
+      })
+    );
+  }
+};
+
 watch([filterMonth, yearFrom, yearTo, filterFrom, filterTo], async () => {
   if (!filterReady.value) return;
   if (
@@ -344,11 +375,21 @@ const fetchAdminData = async () => {
       revenueChartGranularity.value = "month";
     }
 
+    // Utilization: share of active bookings (exclude cancelled/rejected) in current filter
+    const activeBookings = bookings.value.filter((b: BookingInfo) => {
+      const s = String(b.status || "");
+      return (
+        s !== "disapproved" &&
+        s !== "ยกเลิกแล้ว" &&
+        s !== "cancelled" &&
+        s !== "canceled"
+      );
+    });
     const roomCounts: Record<string, number> = {};
-    bookings.value.forEach((b: BookingInfo) => {
+    activeBookings.forEach((b: BookingInfo) => {
       roomCounts[b.roomName] = (roomCounts[b.roomName] || 0) + 1;
     });
-    const totalInFilter = bookings.value.length || 1;
+    const totalInFilter = activeBookings.length || 1;
     const colors = ["bg-green-500", "bg-blue-500", "bg-yellow-500", "bg-orange-500", "bg-purple-500"];
     const sortedRooms = Object.entries(roomCounts)
       .sort((a: [string, number], b: [string, number]) => b[1] - a[1])
@@ -362,9 +403,10 @@ const fetchAdminData = async () => {
     popularRooms.value = sortedRooms.length > 0 ? sortedRooms : [];
 
     const typeCounts = { external: 0, internal: 0, co_op: 0 };
-    bookings.value.forEach((b: BookingInfo) => {
-      if (b.organization_type === 'internal') typeCounts.internal++;
-      else if (b.organization_type === 'co_op') typeCounts.co_op++;
+    activeBookings.forEach((b: BookingInfo) => {
+      const org = String((b as any).organizationType || (b as any).organization_type || "");
+      if (org === "internal") typeCounts.internal++;
+      else if (org === "co_op" || org === "co_organizer" || org === "coop") typeCounts.co_op++;
       else typeCounts.external++;
     });
     doughnutChartData.value.datasets[0].data = [typeCounts.external, typeCounts.internal, typeCounts.co_op];
@@ -652,7 +694,7 @@ const confirmLogout = () => {
             <div
               class="bg-white rounded-2xl p-4 shadow-card border border-gray-200 space-y-3"
             >
-              <div class="flex flex-wrap gap-2">
+              <div class="flex flex-wrap gap-2 items-center">
                 <button
                   type="button"
                   @click="setFilterMode('latest')"
@@ -683,6 +725,14 @@ const confirmLogout = () => {
                   class="px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer"
                   :class="filterMode === 'range' ? 'ui-chip-active' : 'ui-chip-idle'"
                 >{{ $t("admin.filter_range") }}</button>
+                <button
+                  type="button"
+                  @click="exportReportExcel"
+                  class="ml-auto px-3 py-1.5 rounded-lg text-xs font-black cursor-pointer bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1.5"
+                >
+                  <font-awesome-icon icon="file-download" />
+                  {{ $t("admin.export_excel") }}
+                </button>
               </div>
               <div class="flex flex-col lg:flex-row gap-3 lg:items-end">
                 <div v-if="filterMode === 'month'" class="flex flex-col gap-1">

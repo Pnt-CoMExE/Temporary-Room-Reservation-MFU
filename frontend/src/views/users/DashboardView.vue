@@ -715,15 +715,15 @@ const formatDate = (dateString: string) =>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
-      <div class="flex flex-col md:flex-row gap-8">
+      <div class="flex flex-col md:flex-row gap-6 md:gap-8 min-w-0">
         <!-- Sidebar Menu -->
-        <div class="w-full md:w-1/3 lg:w-1/4">
+        <div class="w-full md:w-1/3 lg:w-1/4 min-w-0">
           <div
-            class="bg-white rounded-3xl shadow-card-lg border border-gray-200 p-6 sticky top-24"
+            class="bg-white rounded-3xl shadow-card-lg border border-gray-200 p-4 sm:p-6 md:sticky md:top-24"
           >
-            <div class="relative w-32 h-32 mx-auto mb-6">
+            <div class="relative w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-4 sm:mb-6">
               <div
-                class="w-full h-full bg-gray-50 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-gray-300 text-5xl overflow-hidden"
+                class="w-full h-full bg-gray-50 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-gray-300 text-4xl sm:text-5xl overflow-hidden"
               >
                 <img
                   v-if="userProfile.profileImage"
@@ -734,11 +734,11 @@ const formatDate = (dateString: string) =>
                 <font-awesome-icon v-else icon="user" />
               </div>
             </div>
-            <div class="text-center mb-8">
-              <h3 class="text-xl font-bold text-gray-900 mb-1">
+            <div class="text-center mb-6 sm:mb-8 min-w-0 px-1">
+              <h3 class="text-lg sm:text-xl font-bold text-gray-900 mb-1 truncate">
                 {{ userProfile.fullName }}
               </h3>
-              <p class="text-sm text-gray-500 font-medium">
+              <p class="text-xs sm:text-sm text-gray-500 font-medium break-all">
                 {{ userProfile.email }}
               </p>
             </div>
@@ -779,7 +779,7 @@ const formatDate = (dateString: string) =>
         </div>
 
         <!-- Content Area -->
-        <div class="w-full md:w-2/3 lg:w-3/4">
+        <div class="w-full md:w-2/3 lg:w-3/4 min-w-0">
           <!-- Tab 1: Bookings -->
           <div v-if="activeTab === 'bookings'" class="space-y-6">
             <div
@@ -824,6 +824,7 @@ const formatDate = (dateString: string) =>
                   <option value="pending">{{ $t('dashboard.status_pending') }}</option>
                   <option value="approved_pending_payment">{{ $t('dashboard.status_awaiting_payment') }}</option>
                   <option value="approved_paid">{{ $t('dashboard.status_paid') }}</option>
+                  <option value="approved_waived">{{ $t('dashboard.status_waived') }}</option>
                   <option value="completed">{{ $t('dashboard.status_completed') }}</option>
                   <option value="disapproved">{{ $t('dashboard.status_disapproved') }}</option>
                   <option value="cancelled">{{ $t('dashboard.status_cancelled') }}</option>
@@ -1215,16 +1216,16 @@ const formatDate = (dateString: string) =>
           <!-- Tab 2: Profile -->
           <div
             v-if="activeTab === 'profile'"
-            class="bg-white rounded-3xl shadow-card-lg border border-gray-200 p-8 md:p-10 animate-fade-up"
+            class="bg-white rounded-3xl shadow-card-lg border border-gray-200 p-4 sm:p-8 md:p-10 animate-fade-up min-w-0 overflow-x-hidden"
           >
             <h2
-              class="text-2xl font-extrabold text-gray-900 mb-8 flex items-center gap-3 border-b border-gray-100 pb-4"
+              class="text-xl sm:text-2xl font-extrabold text-gray-900 mb-6 sm:mb-8 flex items-center gap-3 border-b border-gray-100 pb-4"
             >
-              <font-awesome-icon icon="user-edit" class="text-mfu-red" /> {{ $t('dashboard.profile_tab') }}
+              <font-awesome-icon icon="user-edit" class="text-mfu-red shrink-0" /> {{ $t('dashboard.profile_tab') }}
             </h2>
-            <form @submit.prevent="saveProfile" class="space-y-8">
+            <form @submit.prevent="saveProfile" class="space-y-6 sm:space-y-8">
               <div
-                class="bg-red-50/50 p-6 rounded-2xl border border-red-100 relative overflow-hidden"
+                class="bg-red-50/50 p-4 sm:p-6 rounded-2xl border border-red-100 relative overflow-hidden"
               >
                 <div
                   class="absolute left-0 top-0 bottom-0 w-1.5 bg-mfu-red"
@@ -1241,7 +1242,7 @@ const formatDate = (dateString: string) =>
                       >{{ $t('dashboard.account_email') }}</label
                     >
                     <p
-                      class="text-gray-700 font-semibold bg-white px-4 py-3 rounded-xl border border-gray-200 opacity-70 cursor-not-allowed"
+                      class="text-gray-700 font-semibold bg-white px-3 sm:px-4 py-3 rounded-xl border border-gray-200 opacity-70 cursor-not-allowed break-all text-sm"
                     >
                       {{ userProfile.email }}
                     </p>
@@ -1302,10 +1303,10 @@ const formatDate = (dateString: string) =>
                 </div>
               </div>
 
-              <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+              <div class="mt-6 sm:mt-8 pt-6 border-t border-gray-100 flex justify-stretch sm:justify-end">
                 <button
                   type="submit"
-                  class="ui-btn-primary shadow-red-200 transform hover:-translate-y-0.5"
+                  class="ui-btn-primary w-full sm:w-auto shadow-red-200 transform hover:-translate-y-0.5"
                 >
                   {{ $t('dashboard.save_profile') }} <font-awesome-icon icon="save" />
                 </button>
