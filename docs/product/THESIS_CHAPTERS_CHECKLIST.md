@@ -44,4 +44,9 @@
 
 ---
 
-อัปเดต 2026-11-13 · อย่าใส่ secret จริงในไฟล์นี้
+## หลังสอบ 19 พ.ย. 2026 — แก้เล่มตามอาจารย์
+
+รายการแก้ทีละจุด (ชื่อ Figure 3.1, คำอธิบายรูป Ch.3, citation/References, Data Dictionary, format Ch.5):  
+[`ADVISOR_REPORT_FIX_CHECKLIST.md`](./ADVISOR_REPORT_FIX_CHECKLIST.md)
+
+อัปเดต 2026-11-23 · อย่าใส่ secret จริงในไฟล์นี้

@@ -109,10 +109,12 @@ export const validateBookingStatus = [
     .isIn([
       "approved",
       "approved_paid",
+      "approved_waived",
       "approved_pending_payment",
       "completed",
       "disapproved",
       "pending",
+      "cancelled",
       "ยกเลิกแล้ว",
     ])
     .withMessage("สถานะไม่ถูกต้อง"),

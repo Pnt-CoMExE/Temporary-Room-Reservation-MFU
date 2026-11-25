@@ -7,6 +7,7 @@ export type BookingStatusKey =
   | "pending"
   | "approved_pending_payment"
   | "approved_paid"
+  | "approved_waived"
   | "completed"
   | "disapproved"
   | "cancelled"
@@ -36,6 +37,12 @@ export function normalizeBookingStatus(
   if (s === "approved_pending_payment" || s === "รอชำระเงิน")
     return "approved_pending_payment";
   if (s === "completed" || s === "สำเร็จแล้ว") return "completed";
+  if (
+    s === "approved_waived" ||
+    s === "ยกเว้นค่าธรรมเนียม" ||
+    s === "อนุมัติแล้ว — ยกเว้นค่าธรรมเนียม"
+  )
+    return "approved_waived";
   if (
     s === "approved_paid" ||
     s === "approved" ||
@@ -70,6 +77,8 @@ export function getBookingStatusLabel(
       return en ? "Awaiting payment" : "รอชำระเงิน";
     case "approved_paid":
       return en ? "Payment completed" : "ชำระเงินแล้ว";
+    case "approved_waived":
+      return en ? "Fee waived" : "ยกเว้นค่าธรรมเนียม";
     case "completed":
       return en ? "Completed" : "สำเร็จแล้ว";
     case "disapproved":
@@ -89,6 +98,7 @@ export function humanizeStatusInText(
   if (!text) return "";
   return String(text)
     .replace(/approved_pending_payment/g, getBookingStatusLabel("approved_pending_payment", locale))
+    .replace(/approved_waived/g, getBookingStatusLabel("approved_waived", locale))
     .replace(/approved_paid/g, getBookingStatusLabel("approved_paid", locale))
     .replace(/\bcompleted\b/g, getBookingStatusLabel("completed", locale))
     .replace(/\bpending\b/g, getBookingStatusLabel("pending", locale))
@@ -114,6 +124,8 @@ export function getBookingStatusBadgeClass(
       return "bg-sky-100 text-sky-900 border-sky-300 shadow-sm whitespace-nowrap tracking-wide";
     case "approved_paid":
       return "bg-emerald-50 text-emerald-800 border-emerald-200";
+    case "approved_waived":
+      return "bg-indigo-50 text-indigo-800 border-indigo-200";
     case "completed":
       return "bg-teal-50 text-teal-800 border-teal-200";
     case "disapproved":
@@ -136,6 +148,8 @@ export function getBookingStatusIcon(
       return "qrcode";
     case "approved_paid":
       return "check-circle";
+    case "approved_waived":
+      return "gift";
     case "completed":
       return "check-double";
     case "disapproved":
@@ -147,10 +161,10 @@ export function getBookingStatusIcon(
   }
 }
 
-/** User may leave a review after payment or after cron marks completed */
+/** User may leave a review after payment, waive, or after cron marks completed */
 export function canLeaveReview(status: string | null | undefined): boolean {
   const key = normalizeBookingStatus(status);
-  return key === "approved_paid" || key === "completed";
+  return key === "approved_paid" || key === "approved_waived" || key === "completed";
 }
 
 export function getReviewedBadgeClass(): string {

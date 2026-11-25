@@ -16,7 +16,8 @@
 ## ข้อมูล
 
 - [ ] รัน `npm run seed:production` (หรือ import ข้อมูลห้องจริงจาก Excel)
-- [ ] ตรวจสอบอัตราค่าบริการตรงกับ `data/room-pricing-rates.xlsx`
+- [ ] ตรวจสอบอัตราค่าบริการตรงกับ `data/room-pricing-rates.xlsx` (ดาวน์โหลดเทมเพลตจาก Admin Rooms = ไฟล์นี้)
+- [ ] หลัง Import ตรวจว่าห้องที่ไม่อยู่ในไฟล์ถูกปิดบริการ (ไม่ลบ booking เก่า)
 - [ ] ไม่มีข้อมูล demo bookings ใน production
 
 ## ทดสอบ
@@ -25,6 +26,9 @@
 - [ ] `npm run typecheck` ผ่าน (backend + frontend)
 - [ ] `npm run build` ผ่าน (frontend)
 - [ ] UAT Sign-Off ลงนามแล้ว (`docs/testing/UAT_SIGNOFF.md`)
+- [ ] Flow อนุมัติแบบ **คิดเงิน** → Stripe → อีเมล + PDF permit
+- [ ] Flow อนุมัติแบบ **ยกเว้นค่าธรรมเนียม** → `approved_waived` · ยอด 0 · อีเมล · ไม่ Stripe
+- [ ] Admin Dashboard: filter วันที่ sync สถิติ/utilization + **Export Excel** ได้
 
 ## Docker / Deploy
 
@@ -32,10 +36,12 @@
 - [ ] Health check API ตอบ 200
 - [ ] Login ด้วย Google OAuth สำเร็จ
 - [ ] Flow จอง → อนุมัติ → ชำระเงิน (Stripe) → อีเมล + PDF permit ครบ
+- [ ] อ่าน [`CITS_RUNBOOK.md`](./CITS_RUNBOOK.md) ครบ (waive / import template / export)
 
 ## หลัง Go-Live
 
 - [ ] ตั้ง cron backup (`backend/scripts/backup.sh`)
-- [ ] ตั้ง cron สถานะจอง (`cd backend && npm run jobs:booking-status` รายวัน)
-- [ ] มอบหมายผู้ดูแลระบบ (promote ในหน้า Admin Users หรือตั้ง `DEV_ADMIN_EMAILS` สำหรับ bootstrap)
+- [ ] ตั้ง cron สถานะจอง (`cd backend && npm run jobs:booking-status` รายวัน) — รวม `approved_waived` → `completed`
+- [ ] มอบหมายผู้ดูแลระบบ (promote ในหน้า Admin Users; **ถอด** `DEV_ADMIN_EMAILS` บนเซิร์ฟจริง)
 - [ ] แจ้งช่องทาง support ให้ผู้ใช้
+- [ ] ส่งมอบ `data/room-pricing-rates.xlsx` ล่าสุด + บัญชี admin ให้ส่วนทรัพย์สิน

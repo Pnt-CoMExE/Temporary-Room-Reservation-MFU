@@ -2,6 +2,74 @@
 
 This file tracks the actions, modifications, and updates performed by the AI Assistant on this project.
 
+## [2026-11-26 — Commit/push all branches + CITS docs refresh]
+
+- Sync Final Present features to `dev`/`master`/`ForCCC`/`ForJJ`/`ForParttime`
+- Refresh `CITS_RUNBOOK` + `GO_LIVE_CHECKLIST` (waive, Excel export, template path)
+- Report PDF + product checklists; drop obsolete draft/proposal/presentation binaries
+
+## [2026-11-26 — Room template from data/ + waive under external]
+
+- Download template = `data/room-pricing-rates.xlsx`; successful import overwrites that file so download is always latest
+- Approve dialog: move waive radio under external rate (same list), remove top fee-mode pair
+
+## [2026-11-26 — Final Present feedback: waive A + UX + Excel + report]
+
+- **G1 waive:** admin approve radio charge/waive → `approved_waived`, amounts 0, email, no Stripe; cron + badges + i18n
+- **G2–G6 / P3 / T1:** activity log search+pagination; Users switch+compact; rooms Excel template; Profile mobile; dashboard utilization sync + Excel export
+- **G4:** room import no longer deletes bookings/rooms on prune — deactivates stale rooms; snapshot guard tests
+- **Docs:** `final project.docx` citations `(n)`→`[n]`, insert real Data Dictionary tables 3.1–3.9, Ch5 fee-waiver note; update `CHAPTER_4_AND_5.md` + checklist
+
+## [2026-11-24 — Full PDF audit of final project.pdf]
+- เพิ่ม `docs/product/REPORT_PDF_AUDIT.md` — แมปเลขหน้า 54 หน้าไฟล์ / พิมพ์ถึง 45 · สารบัญตรงบทหลัก · Fig 4.1+4.15 มีใน PDF แล้ว
+- จุดค้าง: `From validation` · LOF หัวซ้ำ · REFERENCES ไม่ใน CONTENTS · GitHub ที่ §1.7 มี `.git`/ตัดบรรทัด · Fig 4.1 เมล lamduan แต่ป้าย Internal
+- อัปเดต `docs/README.md`
+
+## [2026-11-24 — References: drop Opn link, add GitHub]
+- ลบ citation Opn `(7)` ที่ลิงก์เสีย — เส้นทางรับคือ Stripe; คงข้อความว่าเคย review Opn/PromptPay โดยไม่อ้าง URL
+- เลขใหม่ Peerspace `(7)` · Skedda `(8)` · เพิ่ม GitHub เป็น `(9)` ใน REFERENCES
+- §1.7 ยังมีลิงก์ repo อยู่แล้ว
+
+## [2026-11-24 — Apply remaining report format fixes in docx]
+- สำรอง `final project.backup-before-format-remaining.docx`
+- ย่อ lead-in Fig 3.2–3.38 · เปลี่ยน Ch.4 เป็น `Figure 4.x shows…` · Keywords · `1.5 Plan` · GitHub ใน §1.7 · โน้ต collaborative · Justify ย่อหน้า Center ที่เป็นเนื้อหา
+- สคริปต์: `docs/final project/_apply_format_remaining.py`
+- อัปเดต `REPORT_FORMAT_AUDIT.md` checklist
+
+## [2026-11-24 — English report format audit]
+- เพิ่ม `docs/product/REPORT_FORMAT_AUDIT.md` — จุดที่ไม่ตรงฟอร์แมตมาตรฐานทั้งเล่ม
+- จุดต้องแก้หลัก: ย่อหน้า Center, เลขหัวข้อบทที่ 1 ขาดช่วง, ภาษานำรูป Ch.4, ไม่มี GitHub, Fig 3.1 vs collaborative actor
+- อัปเดต `docs/README.md`
+
+## [2026-11-23 — Apply advisor fixes into final project.docx]
+- สำรอง `final project.backup-before-advisor-fixes.docx`
+- ใส่ในเล่ม: เปลี่ยนชื่อ Fig 3.1 · อธิบายรูป Ch.3 · โน้ต design vs result · citation (1)–(9) + REFERENCES · ขยายรูป Data Dictionary · จัดหัวข้อ Ch.5 / 5.3.1–5.3.6
+- สคริปต์: `docs/final project/_apply_advisor_fixes.py`
+- อัปเดต checklist เป็นทำแล้วใน docx — ยังต้อง Export PDF ใหม่ด้วยมือ
+
+## [2026-11-23 — Advisor report fix checklist from 19 Nov recording]
+- ถอดเสียงคลิปสอบ `2026-11-19` → ข้อติโฟกัสเล่มรายงาน (ไม่ใช่สไลด์)
+- เพิ่ม `docs/product/ADVISOR_REPORT_FIX_CHECKLIST.md` — รายการแก้ + ข้อความวางในเล่ม
+- จุดหลัก: References หาย · Figure 3.1 ชื่อ Existing · อธิบายรูป Ch.3 · แยก UI Ch.3/4 · Data Dictionary · format Ch.5
+- อัปเดต `THESIS_CHAPTERS_CHECKLIST.md` + `docs/README.md`
+
+## [2026-11-26 — Final Present feedback checklist]
+- `docs/product/FINAL_PRESENT_FEEDBACK_CHECKLIST.md`: สรุปข้อติ อ.แพท / อ.ต้อง / อ.โก + ลำดับงาน
+- อัปเดต `docs/README.md` ลิงก์ checklist
+
+## [2026-11-25 — Fix missing icons on AdminActivityLog]
+- `getIcon`: `file-alt`/`coins` ไม่ได้ register → ใช้ `file-download` / `file-import` / `wallet`
+
+## [2026-11-25 — Remove Co-op filter chip on AdminUsers]
+- `AdminUsers.vue`: เอาปุ่มกรอง `Co-op` ออก (คงเรทร่วมจัดใน booking/admin อื่น)
+
+## [2026-11-25 — Fix AdminUsers Google avatar broken images]
+- `AdminUsers.vue`: `referrerpolicy="no-referrer"` + `@error` → initials (เหมือน Navbar / AdminDashboard)
+
+## [2026-11-25 — Remove fake seed demo users from local DB]
+- ลบ 5 บัญชี seed ที่ไม่มีจริง: `admin.demo@mfu.ac.th` · `wichai.staff@mfu.ac.th` · `suda.staff@mfu.ac.th` · `piya.student@lamduan.mfu.ac.th` · `john.external@company.com`
+- หมายเหตุ: `npm run seed:demo` จะสร้างใหม่ได้ถ้าไม่แก้สคริปต์
+
 ## [2026-11-15 — Fix QA findings F1–F6]
 - F1: `admin-approve.spec.ts` — chip filter · `ยืนยันอนุมัติ` · assert text `รอชำระเงิน` · ดึง `bookingNo` จาก API 201
 - F2: `CITS_RUNBOOK` + `GO_LIVE_CHECKLIST` → Stripe (ไม่ใช่ mock_sandbox)
